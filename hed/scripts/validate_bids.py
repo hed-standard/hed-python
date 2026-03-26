@@ -196,6 +196,15 @@ def format_final_report(issue_list):
 
 
 def main(arg_list=None):
+    """Entry point: parse arguments, validate the BIDS dataset, and print a summary report.
+
+    Parameters:
+        arg_list (list[str] or None): Argument list for testing; uses sys.argv if None.
+
+    Returns:
+        int: 0 if no issues found, 1 if validation issues are present.
+
+    """
     # Create the argument parser
     parser = get_parser()
 
@@ -231,6 +240,16 @@ def main(arg_list=None):
 
 
 def validate_dataset(args):
+    """Run HED validation on the BIDS dataset described by args and return the issue list.
+
+    Parameters:
+        args (argparse.Namespace): Parsed CLI arguments including data_path, suffixes, and
+            check_for_warnings.
+
+    Returns:
+        list[dict]: Validation issue dictionaries (empty list if no issues).
+
+    """
     logger = logging.getLogger("validate_bids")
     logger.info(f"Data directory: {args.data_path}")
     logger.info(f"HEDTools version: {__version__}")

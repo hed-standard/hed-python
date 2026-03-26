@@ -1,3 +1,5 @@
+"""CLI script to validate and convert HED schema files across formats (XML, MediaWiki, TSV, JSON)."""
+
 from hed.scripts.schema_script_util import sort_base_schemas, validate_all_schemas, add_extension
 from hed.schema.schema_io import load_dataframes, save_dataframes
 from hed.schema.schema_io.hed_id_util import update_dataframes_from_schema
@@ -76,6 +78,15 @@ def convert_and_update(filenames, set_ids):
 
 
 def main(arg_list=None):
+    """Entry point: parse arguments and convert/validate the named schema files.
+
+    Parameters:
+        arg_list (list[str] or None): Argument list for testing; uses sys.argv if None.
+
+    Returns:
+        int: 0 on success, non-zero if validation fails.
+
+    """
     parser = argparse.ArgumentParser(description="Update other schema formats based on the changed one.")
     parser.add_argument("filenames", nargs="*", help="List of files to process")
     parser.add_argument("--set-ids", action="store_true", help="Add missing HED ids")

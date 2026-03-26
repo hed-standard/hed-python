@@ -63,6 +63,12 @@ class HedTagCount:
         return {"tag": self.tag, "events": self.events, "files": list(self.files)}
 
     def get_empty(self):
+        """Return a copy of this entry with counts reset to zero.
+
+        Returns:
+            HedTagCount: A new instance with the same tag name but zeroed event/file counts.
+
+        """
         empty = copy.copy(self)
         empty.events = 0
         empty.files = {}

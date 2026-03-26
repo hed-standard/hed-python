@@ -1,3 +1,5 @@
+"""BIDS utility functions for schema loading, sidecar merging, and inheritance chain resolution."""
+
 import os
 import json
 from hed.tools.util.io_util import get_full_extension
@@ -5,6 +7,15 @@ import hed.schema.hed_schema_io as hed_schema_io
 
 
 def get_schema_from_description(root_path):
+    """Load the HED schema version declared in the BIDS dataset_description.json.
+
+    Parameters:
+        root_path (str): Root path of the BIDS dataset.
+
+    Returns:
+        HedSchema or None: The loaded schema, or None if loading fails.
+
+    """
     try:
         description_path = os.path.abspath(os.path.join(root_path, "dataset_description.json"))
         with open(description_path, "r") as fp:
@@ -109,6 +120,16 @@ def update_entity(name_dict, entity):
 
 
 def get_merged_sidecar(root_path, tsv_file):
+    """Return a merged sidecar dict following BIDS inheritance rules for a given TSV file.
+
+    Parameters:
+        root_path (str): Root path of the BIDS dataset.
+        tsv_file (str): Path to the TSV file whose inherited sidecars should be merged.
+
+    Returns:
+        dict: Merged sidecar dictionary. Keys from closer (more specific) sidecar files take precedence.
+
+    """
     sidecar_files = list(walk_back(root_path, tsv_file))
     merged_sidecar = {}
     # Process from closest to most distant - first file wins for each key
@@ -123,6 +144,19 @@ def get_merged_sidecar(root_path, tsv_file):
 
 
 def walk_back(root_path, file_path):
+    """Yield inherited sidecar file paths from the directory of file_path back toward root_path.
+
+    Traverses parent directories from the file's location up to root_path, yielding any sidecar
+    JSON files that apply to the given TSV according to BIDS inheritance rules.
+
+    Parameters:
+        root_path (str): Root path of the BIDS dataset.
+        file_path (str): Path to the data file whose applicable sidecars should be found.
+
+    Yields:
+        str: Absolute paths of applicable sidecar JSON files, from nearest to farthest.
+
+    """
     file_path = os.path.abspath(file_path)
     source_dir = os.path.dirname(file_path)
     root_path = os.path.abspath(root_path)  # Normalize root_path for cross-platform support
@@ -154,6 +188,16 @@ def walk_back(root_path, file_path):
 
 
 def get_candidates(source_dir, tsv_file_dict):
+    """Return sidecar JSON files in source_dir that are applicable to tsv_file_dict.
+
+    Parameters:
+        source_dir (str): Directory to search for candidate sidecar files.
+        tsv_file_dict (dict): Parsed BIDS filename dict for the target TSV file.
+
+    Returns:
+        list[str]: Absolute paths to matching sidecar JSON files.
+
+    """
     candidates = []
     for file in os.listdir(source_dir):
         this_path = os.path.realpath(os.path.join(source_dir, file))
@@ -168,6 +212,19 @@ def get_candidates(source_dir, tsv_file_dict):
 
 
 def matches_criteria(json_file_dict, tsv_file_dict):
+    """Return True if a candidate sidecar JSON file applies to the given TSV file.
+
+    A sidecar applies when its extension is ``.json``, its suffix matches the TSV, and all
+    BIDS entities in the JSON filename have equal values in the TSV filename.
+
+    Parameters:
+        json_file_dict (dict): Parsed BIDS filename dict for the candidate JSON file.
+        tsv_file_dict (dict): Parsed BIDS filename dict for the target TSV file.
+
+    Returns:
+        bool: True if the sidecar is applicable.
+
+    """
     extension_is_valid = json_file_dict["ext"].lower() == ".json"
     suffix_is_valid = (json_file_dict["suffix"] == tsv_file_dict["suffix"]) or not tsv_file_dict["suffix"]
     json_entities = json_file_dict["entities"]

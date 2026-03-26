@@ -1,3 +1,5 @@
+"""Utility checker that detects duplicate tags and groups within a HED annotation."""
+
 from typing import Union
 
 from hed.errors.error_reporter import ErrorHandler
@@ -6,6 +8,8 @@ from hed.errors.error_types import ValidationErrors
 
 
 class DuplicateChecker:
+    """Detects duplicate tags and groups within a HED annotation."""
+
     def __init__(self):
         """Checker for duplications in HED groups.
 

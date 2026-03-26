@@ -102,6 +102,15 @@ class TagValidator:
         return validation_issues
 
     def check_tag_is_deprecated(self, original_tag) -> list[dict]:
+        """Return a validation issue if the tag carries the DeprecatedFrom attribute.
+
+        Parameters:
+            original_tag (HedTag): The tag to check.
+
+        Returns:
+            list[dict]: A singleton list with a deprecation issue, or an empty list.
+
+        """
         validation_issues = []
         if original_tag.has_attribute(HedKey.DeprecatedFrom):
             validation_issues += ErrorHandler.format_error(ValidationErrors.ELEMENT_DEPRECATED, tag=original_tag)
