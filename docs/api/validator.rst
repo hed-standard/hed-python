@@ -115,15 +115,3 @@ TagValidator
    :members:
    :undoc-members:
    :show-inheritance:
-
-
-Validation utilities
---------------------
-
-ReservedChecker
-~~~~~~~~~~~~~~~
-
-.. autoclass:: hed.validator.reserved_checker.ReservedChecker
-   :members:
-   :undoc-members:
-   :show-inheritance:

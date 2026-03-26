@@ -218,14 +218,17 @@ class CharRexValidator(CharValidator):
         return bad_indices
 
     def is_valid_value(self, in_string, cname):
-        """Return a regex match object (or False) if in_string is a valid whole-word value for class cname.
+        """Check whether in_string is a valid whole-word value for class cname.
 
         Parameters:
             in_string (str): The string to validate.
             cname (str): The value class name to look up the word-level regex for.
 
         Returns:
-            re.Match or bool: A match object if valid, False otherwise; True if no regex is defined for cname.
+            True | re.Match | False:
+                - ``True`` if no word-level regex is defined for *cname* (class imposes no constraint).
+                - A ``re.Match`` object if *in_string* matches the word-level regex (valid value).
+                - ``False`` if *in_string* does not match the word-level regex (invalid value).
 
         """
         # Retrieve the allowed character classes for the given class_name

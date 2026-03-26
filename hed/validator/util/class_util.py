@@ -150,8 +150,9 @@ class UnitValueValidator:
         """Build validation issues from per-class character error and validity dicts.
 
         Parameters:
-            error_dict (dict): Mapping of class name to list of (index, char) problem tuples.
-            class_valid (bool): Whether each class passed format validation.
+            error_dict (dict): Mapping of class name to list of (char, index) problem tuples.
+            class_valid (dict): Mapping of class name to a validity result (``True``, ``re.Match``, or ``False``)
+                indicating whether the full value passed word-level format validation for that class.
             report_as (HedTag): The tag object used as context in error reporting.
 
         Returns:
@@ -180,7 +181,7 @@ class UnitValueValidator:
 
         Parameters:
             class_name (str): The value class name that detected the errors.
-            errors (list[tuple[int, str]]): Index/character pairs of invalid characters.
+            errors (list[tuple[str, int]]): Character/index pairs of invalid characters.
             report_as (HedTag): The tag object used as context in error reporting.
 
         Returns:
@@ -290,7 +291,10 @@ def is_date_time_value_class(date_time_string) -> bool:
 
 
 def is_name_value_class(name_str) -> bool:
-    """Return True if name_str is a valid HED name-value (word characters and hyphens only).
+    """Return True if name_str is a valid HED name-value.
+
+    Allowed characters are ASCII word characters (letters, digits, underscore),
+    hyphens, and Unicode code points U+0080 through U+FFFF.
 
     Parameters:
         name_str (str): The string to validate.
