@@ -143,6 +143,15 @@ class SchemaLoaderWiki(SchemaLoader):
 
     @staticmethod
     def parse_star_string(s):
+        """Parse a ``* key=value, key=value`` attribute string into a dictionary.
+
+        Parameters:
+            s (str): Raw star-prefixed attribute line from the MediaWiki source.
+
+        Returns:
+            dict: Mapping of attribute name to value string.
+
+        """
         s = s.lstrip("* ").strip()  # remove leading '* ' and any surrounding whitespace
         pairs = s.split(",") if s else []
         result = {}

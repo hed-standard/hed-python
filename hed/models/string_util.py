@@ -84,6 +84,23 @@ def split_def_tags(hed_string, def_names, remove_group=False):
 
 
 def cleanup_empties(string_in: str) -> str:
+    """Remove empty parentheses, redundant parentheses, and stray commas from a HED string.
+
+    Applies the following cleanup steps repeatedly until stable:
+
+    1. Remove empty parentheses ``()``.
+    2. Remove parentheses whose contents are only commas and whitespace.
+    3. Strip leading and trailing commas from the whole string.
+    4. Collapse consecutive inner commas.
+    5. Remove trailing commas inside parentheses.
+
+    Parameters:
+        string_in (str): The HED string to clean up.
+
+    Returns:
+        str: The cleaned-up string.
+
+    """
     leading_comma_regex = re.compile(r"^\s*,+")
     trailing_comma_regex = re.compile(r",\s*$")
     inner_comma_regex = re.compile(r",\s*,+")
@@ -100,14 +117,9 @@ def cleanup_empties(string_in: str) -> str:
         # Step 1: Remove empty parentheses
         result = empty_parens_regex.sub("", result)
 
-        # Step 2: Remove redundant parentheses containing only commas/spaces
-        def replace_redundant_parens(match):
-            group1 = match.group(1)
-            if re.fullmatch(r"[,\s()]*", group1):
-                return ""
-            return f"({group1.strip().lstrip(',').rstrip(',')})"
-
-        result = redundant_parens_regex.sub(replace_redundant_parens, result)
+        # Step 2: Remove parentheses containing only commas/whitespace.
+        # The regex only captures [,\s]* so the replacement is always "".
+        result = redundant_parens_regex.sub("", result)
 
         # Step 3: Remove leading and trailing commas
         result = leading_comma_regex.sub("", result)

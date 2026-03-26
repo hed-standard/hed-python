@@ -1,3 +1,5 @@
+"""Ordered collections of schema entries representing a single section of the HED vocabulary."""
+
 from typing import Union
 
 from hed.schema.hed_schema_entry import HedSchemaEntry, UnitClassEntry, UnitEntry, HedTagEntry
@@ -73,10 +75,22 @@ class HedSchemaSection:
 
     @property
     def section_key(self):
+        """Returns the HedSectionKey identifying this section.
+
+        Returns:
+            HedSectionKey: The key for this schema section.
+
+        """
         return self._section_key
 
     @property
     def duplicate_names(self):
+        """Returns a dict of entries that share the same name within this section.
+
+        Returns:
+            dict: Mapping of lowercased name to a list of conflicting HedSchemaEntry objects.
+
+        """
         return self._duplicate_names
 
     def _create_tag_entry(self, name):
@@ -274,6 +288,15 @@ class HedSchemaTagSection(HedSchemaSection):
         return new_entry
 
     def get(self, key):
+        """Return the tag entry for the given long-form key, or None if not found.
+
+        Parameters:
+            key (str): Long-form tag string to look up.
+
+        Returns:
+            HedTagEntry or None: The matching entry, or None if absent.
+
+        """
         if not self.case_sensitive:
             key = key.casefold()
         return self.long_form_tags.get(key)

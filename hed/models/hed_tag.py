@@ -229,6 +229,12 @@ class HedTag:
 
     @extension.setter
     def extension(self, x):
+        """Set the extension or value of this tag.
+
+        Parameters:
+            x (str): The new extension value (without a leading slash).
+
+        """
         self._extension_value = f"/{x}"
 
     @property
@@ -622,6 +628,14 @@ class HedTag:
                 self._tag = self.tag.replace("#", placeholder_value)
 
     def get_normalized_str(self):
+        """Return a case-folded, canonical string used for hashing and equality comparison.
+
+        Uses the schema short tag name when available; falls back to the raw tag text.
+
+        Returns:
+            str: Lowercase canonical form of the tag including any extension or value.
+
+        """
         if self._schema_entry:
             return self._namespace + self._schema_entry.short_tag_name.casefold() + self._extension_value.casefold()
         else:

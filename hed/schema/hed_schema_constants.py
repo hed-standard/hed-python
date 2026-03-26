@@ -1,3 +1,5 @@
+"""Enumeration constants and string literals used throughout HED schema loading and validation."""
+
 from enum import Enum
 
 
@@ -80,6 +82,8 @@ class HedKey:
 
 
 class HedKeyOld:
+    """Fully deprecated schema attribute key constants retained for backwards compatibility."""
+
     # Fully Deprecated properties
     BoolProperty = "boolProperty"
     UnitClassProperty = "unitClassProperty"

@@ -1,3 +1,5 @@
+"""Abstract base class for loading HED schema files into HedSchema objects."""
+
 import copy
 
 from hed.schema.schema_io import schema_util
@@ -251,6 +253,15 @@ class SchemaLoader(ABC):
                 self._schema.extras[key] = self.fix_extra(key)
 
     def fix_extra(self, key):
+        """Normalize an extras dataframe by ensuring required columns are present and in canonical order.
+
+        Parameters:
+            key (str): The extras dict key identifying which extra dataframe to fix.
+
+        Returns:
+            pd.DataFrame: The normalized dataframe with required columns added and sorted.
+
+        """
         df = self._schema.extras[key]
         priority_cols = df_constants.extras_column_dict[key]
         col_to_add = [col for col in priority_cols if col not in df.columns]

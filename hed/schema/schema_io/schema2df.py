@@ -22,6 +22,8 @@ section_key_to_df = {
 
 
 class Schema2DF(Schema2Base):
+    """Converts a HedSchema to a set of pandas DataFrames, one per schema section."""
+
     def __init__(self):
         """Constructor for schema to dataframe converter"""
         super().__init__()

@@ -1,3 +1,5 @@
+"""String constants and section identifiers for the MediaWiki HED schema format."""
+
 from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema.schema_io import df_constants
 
@@ -39,6 +41,8 @@ wiki_section_headers = {
 
 # these must always be in order under the current spec.
 class HedWikiSection:
+    """Integer section-ID constants that identify the ordered sections of a MediaWiki HED schema file."""
+
     HeaderLine = 2
     Prologue = 3
     Schema = 4

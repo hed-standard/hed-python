@@ -1,3 +1,5 @@
+"""Utilities for loading, merging, and normalizing HED schema DataFrames."""
+
 import csv
 import os
 

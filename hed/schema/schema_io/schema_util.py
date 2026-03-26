@@ -126,6 +126,18 @@ def format_error(
     warning_message="Schema term is empty or the line is malformed",
     error_code=HedExceptions.GENERIC_ERROR,
 ):
+    """Format a schema loading problem into a standard error dictionary.
+
+    Parameters:
+        row_number (int): Line or row number where the problem was found.
+        row (str): The raw line or row content.
+        warning_message (str): Human-readable description of the problem.
+        error_code (str): HedExceptions error code to assign.
+
+    Returns:
+        list[dict]: A one-element list containing the error dictionary.
+
+    """
     error = {
         "code": error_code,
         ErrorContext.ROW: row_number,

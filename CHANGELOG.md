@@ -1,22 +1,141 @@
-# Unreleased
+# Release 1.0.0 March 26, 2026
 
-## Enhancements
+This is a major release with breaking changes. It removes several subsystems that are no longer part of the core `hedtools` package, completes the schema library-extras support across all schema formats, and cleans up the public API.
 
-### Prerelease schemas are now always included in version lookups
+## Breaking changes
 
-Previously, loading a schema whose version existed only in the prerelease cache required passing `check_prerelease=True` through every layer of the loading API. This flag has been **removed** from all public functions (`load_schema_version`, `load_schema`, `from_string`, `from_dataframes`), all schema loader classes, and all internal helpers. Prerelease schemas are now found automatically whenever they are present in the cache.
+### Removed remodeling tools
 
-**Changes:**
+The entire `hed/tools/remodeling/` subsystem (dispatcher, operations, backup manager, and CLI entry points `run_remodel` / `run_remodel_backup` / `run_remodel_restore`) has been removed (issue #1180). Remodeling functionality is now maintained as a separate repository: [table-remodeler](https://github.com/hed-standard/table-remodeler):
 
-- Removed the `check_prerelease` parameter from `load_schema_version()`, `load_schema()`, `from_string()`, and `from_dataframes()` in `hed_schema_io.py`.
-- Removed the parameter from `SchemaLoader` (base class) and all subclasses (`SchemaLoaderXML`, `SchemaLoaderWiki`, `SchemaLoaderJSON`, `SchemaLoaderDF`).
-- `get_hed_version_path()` in `hed_cache.py` now always searches both regular and prerelease directories (regular first).
-- `get_hed_versions()` in `hed_cache.py` retains the default `check_prerelease=False` (no public API change). Internal callers that need prerelease inclusion (`get_hed_version_path`, error messages) now pass `check_prerelease=True` explicitly.
-- Default schema version is now resolved dynamically from the cache (highest released version) instead of being hardcoded, so new schema releases no longer require a code change.
-- `get_hed_version_path()` now automatically downloads schemas from GitHub when a requested version is not found in the local cache (default cache directory only).
-- `_load_schema_version_sub()` now raises `BAD_PARAMETERS` (was `FILE_NOT_FOUND`) when no version is specified and the cache is empty, since the problem is a missing argument rather than a missing file.
-- `check_schema_loading.py` simplified — removed `_is_prerelease_partner()` helper.
-- `run_loading_check()` now raises `ValueError` immediately for mutually exclusive flag combinations (`prerelease_only` + `exclude_prereleases`, or `library_filter` + `standard_only`), consistent with the existing CLI-level validation.
+### Removed visualization code
+
+`hed/tools/visualization/` (`TagWordCloud`, `word_cloud_util`) and the `wordcloud` dependency have been removed. Visualization is maintained in the separate `hedvis` package in repository [hed-vis](https://github.com/hed-standard/hed-vis)
+
+### Removed ontology utilities
+
+`ontology_util.py` and the associated `create_ontology.py` script have been removed (issue #1177) and are now in the [hed-ontology](https://github.com/hed-standard/hed-ontology) HED ID management is now handled by the new `hed/schema/schema_io/hed_id_util.py` module.
+
+### Removed `sequence_map.py`
+
+`hed/tools/analysis/sequence_map.py` has been moved to the `hedvis` package in the [hed-vis](https://github.com/hed-standard/hed-vis) and is no longer part of `hedtools`.
+
+### Removed `HedLogger`
+
+The `HedLogger` logging class has been removed from `hed/errors/`. Use Python's standard `logging` module instead.
+
+### Removed `check_prerelease` parameter from schema loading API
+
+The `check_prerelease` flag has been removed from all public schema-loading functions (`load_schema_version()`, `load_schema()`, `from_string()`, `from_dataframes()`) and all `SchemaLoader` subclasses. Prerelease schemas are now found automatically whenever they are present in the local cache — no flag is needed.
+
+### `check_warnings` renamed to `check_for_warnings`
+
+`ErrorReporter.check_warnings()` has been renamed to `check_for_warnings()` for API consistency.
+
+### Removed `versionner` dependency
+
+Version management has migrated fully to `setuptools-scm`. The `versionner` tool and its configuration have been removed (issue #1181). `hed/_version.py` continues to be auto-generated — do not edit it manually.
+
+## Schema enhancements
+
+### Library schema extras (`inLibrary`) fully supported across all formats
+
+Extra (non-standard) sections in library schemas, marked with `inLibrary`, now round-trip correctly through all three schema file formats:
+
+- **XML**: `inLibrary` attribute written and read for all extra node types.
+- **JSON/DataFrame**: `in_library` column propagated through all extra section tables.
+- **MediaWiki**: `inLibrary` tags serialized and parsed in extra sections.
+
+Comprehensive roundtrip test suites have been added for each format.
+
+### Consistent `inLibrary` / `in_library` naming
+
+A naming inconsistency between the XML attribute name (`inLibrary`) and the internal DataFrame column name (`in_library`) has been resolved. All internal representations now use `in_library`; serialization to XML uses `inLibrary` as required by the schema specification.
+
+### Prerelease schemas found automatically
+
+When a requested version is present only in the prerelease cache, it is now loaded without any additional flags. The previous `check_prerelease=True` requirement has been eliminated throughout the stack.
+
+### Prerelease library schemas can use their prerelease standard partner
+
+A prerelease library schema that has `withStandard` set may now load against its matching prerelease standard partner instead of requiring a released standard schema.
+
+### Auto-download missing schemas from GitHub
+
+`get_hed_version_path()` now automatically fetches a schema from GitHub when the requested version is absent from the default local cache directory.
+
+### Default schema version resolved dynamically
+
+The default schema version is derived at runtime from the highest released version in the cache rather than being hardcoded in the source. New schema releases no longer require a code change.
+
+### Consistent line-ending handling
+
+CRLF/LF differences in schema files are now normalized on read and write, preventing spurious diffs and test failures on Windows.
+
+### Fixed empty schema DataFrame sections
+
+Writing a schema to DataFrame format no longer fails when a section (e.g., unit modifiers) is empty.
+
+### Fixed loading of early TSV-format schemas
+
+Schemas stored in older TSV formats that predate the current DataFrame layout now load correctly.
+
+### Removed unverified `omn:` columns from TSV format
+
+Columns prefixed with `omn:` that were written but never populated have been removed from the TSV/DataFrame schema format.
+
+### Schema error vs warning strategy revised
+
+The `ErrorReporter` now distinguishes schema-level errors from warnings more precisely. `check_for_warnings()` (formerly `check_warnings()`) returns only genuine warning-level issues; schema structural errors are always reported as errors regardless of warning-filter settings.
+
+### Schema compliance tests check only latest versions
+
+Spec-test compliance checking has been refactored to validate only the latest released version of each schema, reducing test time and avoiding failures from already-superseded versions.
+
+## Bug fixes
+
+- Fixed a race condition in schema-version auto-detection when multiple processes access the cache simultaneously.
+- Fixed duplicate HED ID detection — `check_duplicate_hed_ids()` now correctly tracks already-seen IDs across all schema sections.
+- Verified all built-in error messages are unique (no two distinct error codes share the same message text).
+- Normalized error message punctuation: sentence-ending periods are followed by one space (was inconsistently one or two).
+- Fixed extension capitalization check in schema attribute validation.
+- Removed stray debug `print` statements from the schema loading path.
+
+## CI/CD and developer tooling
+
+### Migrated GitHub Actions to `uv`
+
+All CI workflows now use the `astral-sh/setup-uv` action and `uv` for environment creation and package installation. `pip`-based setup has been removed. The `black` formatter has been eliminated; `ruff format` handles all code formatting.
+
+### Updated GitHub Actions versions
+
+- `actions/checkout`: v4 → **v6**
+- `astral-sh/setup-uv`: v5 → **v7**
+- Added `cache-dependency-glob` to all `setup-uv` steps for correct cache invalidation.
+
+### Replaced `codespell` with `typos`
+
+Spell checking in CI now uses [`typos`](https://github.com/crate-ci/typos). Configuration has been consolidated into `pyproject.toml`; the separate `.codespellrc` file has been removed. The `tests/` directory and generated/binary file types are excluded from spell checking.
+
+### Added Claude Code Review and PR Assistant workflows
+
+Two new GitHub Actions workflows provide automated AI code review on pull requests:
+
+- `claude_code_review.yaml` — posts inline review comments via the `gh` CLI.
+- `claude_pr_assistant.yaml` — responds to `/review` commands in PR comments.
+
+Bot-authored PRs are excluded from automated review to prevent feedback loops.
+
+### Added project context files for AI assistants
+
+- `.github/copilot-instructions.md` — VS Code Copilot context (now tracked in the repository).
+- `CLAUDE.md` and `.rules/` — Claude Code project context and coding rules.
+
+### Consolidated tool configuration
+
+- Ruff options updated; submodule directories excluded from linting.
+- `lychee.toml` updated to use plain URL format (replaced `{meta}` tags removed in newer lychee releases).
+- `pyproject.toml` is now the single source of truth for spell-check word lists.
 
 # Release 0.9.0 January 22, 2026
 
