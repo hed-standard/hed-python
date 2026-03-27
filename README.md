@@ -47,9 +47,6 @@ pip install git+https://github.com/hed-standard/hed-python/@main
 
 ### Development installation
 
-```{index} development installation, editable install, optional dependencies
-```
-
 For development work or to access optional features, install from the cloned repository:
 
 ```bash

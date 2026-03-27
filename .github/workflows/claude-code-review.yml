@@ -24,6 +24,8 @@ jobs:
       issues: read
       id-token: write
       actions: read
+    env:
+      CLAUDE_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
     steps:
       - name: Checkout repository
@@ -37,7 +39,7 @@ jobs:
 
       - name: Run Claude Code Review
         id: claude-review
-        if: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}
+        if: env.CLAUDE_TOKEN != ''
         continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
