@@ -1,4 +1,4 @@
-# Release 1.0.0 March 26, 2026
+# Release 1.0.0 March 27, 2026
 
 This is a major release with breaking changes. It removes several subsystems that are no longer part of the core `hedtools` package, completes the schema library-extras support across all schema formats, and cleans up the public API.
 
