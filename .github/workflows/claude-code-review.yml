@@ -67,3 +67,12 @@ jobs:
 
           claude_args: |
             --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Read,Glob,Grep"
+
+      - name: Notify if Claude review failed
+        if: steps.claude-review.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --body "**Claude code review could not run.** The request to the Claude API failed (possible causes: billing limit reached, token expired, or service unavailable). Review this PR manually."
