@@ -1,6 +1,7 @@
 """A group of BIDS files with specified suffix name."""
 
 import os
+import re
 import logging
 import pandas as pd
 
@@ -79,6 +80,26 @@ class BidsFileGroup:
         info = TabularSummary(value_cols=value_cols, skip_cols=skip_cols)
         info.update(list(self.datafile_dict.keys()))
         return info
+
+    def get_task_names(self):
+        """Return a sorted list of unique task names found in the file group's TSV and JSON filenames.
+
+        Returns:
+            list:  Sorted list of unique task name strings (the ``xxxx`` portion of ``task-xxxx`` entities).
+
+        Notes:
+            - Parses both ``sidecar_dict`` and ``datafile_dict`` file paths.
+            - The BIDS ``task-`` entity is matched case-insensitively.
+
+        """
+        task_pattern = re.compile(r"(?:^|_)task-([^_.-]+)", re.IGNORECASE)
+        task_names = set()
+        for file_path in list(self.sidecar_dict) + list(self.datafile_dict):
+            basename = os.path.basename(file_path)
+            match = task_pattern.search(basename)
+            if match:
+                task_names.add(match.group(1))
+        return sorted(task_names)
 
     def validate(self, hed_schema, extra_def_dicts=None, check_for_warnings=False):
         """Validate the sidecars and datafiles and return a list of issues.

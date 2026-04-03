@@ -25,6 +25,9 @@ Examples:
     # Exclude specific columns from the template
     hed_extract_bids_sidecar /path/to/dataset --skip-columns onset duration response_time
 
+    # Filter to only files containing 'sub-01' in their name
+    hed_extract_bids_sidecar /path/to/dataset --filter sub-01
+
     # Save logs to file and suppress console output
     hed_extract_bids_sidecar /path/to/dataset --log-file extraction.log --log-quiet
 """
@@ -33,8 +36,10 @@ import argparse
 import json
 import logging
 import sys
+from pathlib import Path
 from hed import __version__
 from hed.tools import BidsDataset
+from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.scripts.script_utils import setup_logging
 
 
@@ -74,6 +79,13 @@ def get_parser():
         default=["sourcedata", "derivatives", "code", "stimuli"],
         dest="exclude_dirs",
         help="Directory names (relative to data_path) to exclude in search for files to process (default: sourcedata derivatives code stimuli)",
+    )
+    file_group.add_argument(
+        "-fl",
+        "--filter",
+        dest="filename_filter",
+        default=None,
+        help="Optional string to filter filenames; only files containing this string in their name will be processed",
     )
 
     # Column processing options
@@ -151,6 +163,7 @@ def extract_template(args):
     logger.info(f"HED tools version: {__version__}")
     logger.debug(f"Exclude directories: {args.exclude_dirs}")
     logger.debug(f"File suffix: {args.suffix}")
+    logger.debug(f"Filename filter: {args.filename_filter}")
     logger.debug(f"Value columns: {args.value_columns}")
     logger.debug(f"Skip columns: {args.skip_columns}")
 
@@ -177,9 +190,19 @@ def extract_template(args):
 
         logger.debug(f"Skip columns: {skip_cols}")
 
-        # Create TabularSummary using the summarize method of BidsFileGroup
+        # Build the file list, applying filename filter if specified
+        file_list = list(file_group.datafile_dict.keys())
+        if args.filename_filter:
+            original_count = len(file_list)
+            file_list = [f for f in file_list if args.filename_filter in Path(f).name]
+            logger.info(
+                f"Filename filter '{args.filename_filter}' reduced files from {original_count} to {len(file_list)}"
+            )
+
+        # Create TabularSummary from the (possibly filtered) file list
         logger.info("Creating tabular summary...")
-        summary = file_group.summarize(value_cols=args.value_columns, skip_cols=skip_cols)
+        summary = TabularSummary(value_cols=args.value_columns, skip_cols=skip_cols)
+        summary.update(file_list)
 
         logger.info(f"Processed {summary.total_files} files")
         logger.info(f"Total events: {summary.total_events}")

@@ -62,7 +62,7 @@ def delete_columns(df, column_list):
     """
 
     delete_cols = list(set(column_list).intersection(set(df)))
-    df.drop(columns=delete_cols, axis=1, inplace=True)
+    df.drop(columns=delete_cols, inplace=True)
 
 
 def delete_rows_by_column(df, value, column_list=None):

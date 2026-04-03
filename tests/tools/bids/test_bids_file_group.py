@@ -71,6 +71,32 @@ class Test(unittest.TestCase):
             "get_summary info has two less entries if two columns are skipped",
         )
 
+    def test_get_task_names(self):
+        events = BidsFileGroup(self.root_path, self.file_paths, "events")
+        task_names = events.get_task_names()
+        self.assertIsInstance(task_names, list, "get_task_names should return a list")
+        self.assertEqual(task_names, ["FacePerception"], "get_task_names should return the unique task names")
+
+    def test_get_task_names_empty(self):
+        empty = BidsFileGroup(self.root_path, [], "events")
+        self.assertEqual(empty.get_task_names(), [], "get_task_names should return empty list when no files")
+
+    def test_get_task_names_no_task_entity(self):
+        # participants files have no task- entity
+        participants_files = io_util.get_file_list(
+            self.root_path, extensions=[".tsv", ".json"], exclude_dirs=self.exclude_dirs, name_suffix=["participants"]
+        )
+        participants = BidsFileGroup(self.root_path, participants_files, "participants")
+        self.assertEqual(
+            participants.get_task_names(),
+            [],
+            "get_task_names should return empty list when no task entity in filenames",
+        )
+
+    def test_get_task_names_sorted(self):
+        task_names = BidsFileGroup(self.root_path, self.file_paths, "events").get_task_names()
+        self.assertEqual(task_names, sorted(task_names), "get_task_names should return a sorted list")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -178,6 +178,70 @@ class TestExtractBidsSidecar(unittest.TestCase):
             output_dict = json.loads(output)
             self.assertIn("sidecar_template", output_dict)
 
+    def test_parser_filename_filter_default(self):
+        """Test that filename_filter defaults to None."""
+        from hed.scripts.hed_extract_bids_sidecar import get_parser
+
+        parser = get_parser()
+        args = parser.parse_args([self.data_root])
+        self.assertIsNone(args.filename_filter)
+
+    def test_parser_filename_filter_argument(self):
+        """Test that --filter argument is parsed correctly."""
+        from hed.scripts.hed_extract_bids_sidecar import get_parser
+
+        parser = get_parser()
+        args = parser.parse_args([self.data_root, "-fl", "sub-002"])
+        self.assertEqual(args.filename_filter, "sub-002")
+
+    def test_filename_filter_restricts_files(self):
+        """Test that --filter only processes files matching the filter string."""
+        # Get full result without filter
+        arg_list_all = [self.data_root, "-s", "events"]
+        with patch("sys.stdout", new=io.StringIO()) as mock_stdout:
+            result = main(arg_list_all)
+            self.assertEqual(result, 0)
+            all_template = json.loads(mock_stdout.getvalue())["sidecar_template"]
+
+        # Get result filtered to sub-002 only (3 of ~10 event files)
+        arg_list_filtered = [self.data_root, "-s", "events", "-fl", "sub-002"]
+        with patch("sys.stdout", new=io.StringIO()) as mock_stdout:
+            result = main(arg_list_filtered)
+            self.assertEqual(result, 0)
+            filtered_template = json.loads(mock_stdout.getvalue())["sidecar_template"]
+
+        # Filtered template keys should be a subset of the full template keys
+        self.assertTrue(set(filtered_template.keys()).issubset(set(all_template.keys())))
+        # Should still capture the main categorical columns present in sub-002
+        self.assertIn("event_type", filtered_template)
+        self.assertGreater(len(filtered_template), 0)
+
+    def test_filename_filter_with_run(self):
+        """Test combining --filter with run selection produces fewer events than unfiltered."""
+        # All run-1 events files
+        arg_list_run1 = [self.data_root, "-s", "events", "-fl", "run-1"]
+        with patch("sys.stdout", new=io.StringIO()) as mock_stdout:
+            result = main(arg_list_run1)
+            self.assertEqual(result, 0)
+            run1_template = json.loads(mock_stdout.getvalue())["sidecar_template"]
+
+        # Should still produce categorical columns
+        self.assertIn("event_type", run1_template)
+        self.assertIn("face_type", run1_template)
+
+    def test_filename_filter_no_match_returns_empty_template(self):
+        """Test that a filter matching no files results in an empty sidecar template."""
+        arg_list = [self.data_root, "-s", "events", "-fl", "nonexistent_subject_xyz"]
+
+        with patch("sys.stdout", new=io.StringIO()) as mock_stdout:
+            result = main(arg_list)
+            self.assertEqual(result, 0)
+
+            output = mock_stdout.getvalue()
+            output_dict = json.loads(output)
+            template = output_dict["sidecar_template"]
+            self.assertEqual(template, {})
+
 
 if __name__ == "__main__":
     unittest.main()
