@@ -564,5 +564,41 @@ class Test(unittest.TestCase):
         self.assertNotIn("event_type", dict1.overflow_columns)
 
 
+class TestSkipColsDeduplication(unittest.TestCase):
+    def test_duplicate_skip_cols_are_stored_once(self):
+        tab = TabularSummary(skip_cols=["onset", "onset", "duration"])
+        self.assertEqual(tab.skip_cols, ["onset", "duration"])
+
+    def test_duplicate_skip_cols_order_preserved(self):
+        tab = TabularSummary(skip_cols=["duration", "onset", "duration", "sample", "onset"])
+        self.assertEqual(tab.skip_cols, ["duration", "onset", "sample"])
+
+    def test_unique_skip_cols_unchanged(self):
+        tab = TabularSummary(skip_cols=["onset", "duration", "sample"])
+        self.assertEqual(tab.skip_cols, ["onset", "duration", "sample"])
+
+    def test_empty_skip_cols(self):
+        tab = TabularSummary(skip_cols=[])
+        self.assertEqual(tab.skip_cols, [])
+
+    def test_none_skip_cols(self):
+        tab = TabularSummary(skip_cols=None)
+        self.assertEqual(tab.skip_cols, [])
+
+    def test_duplicate_skip_cols_still_skip_correctly(self):
+        # Deduplication must not change which columns are skipped during update
+        curation_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/other_tests")
+        stern_map_path = os.path.join(curation_base_dir, "sternberg_map.tsv")
+        stern_df = get_new_dataframe(stern_map_path)
+
+        tab_dedup = TabularSummary(skip_cols=["event_type"])
+        tab_duped = TabularSummary(skip_cols=["event_type", "event_type"])
+        tab_dedup.update(stern_df)
+        tab_duped.update(stern_df)
+
+        self.assertEqual(tab_dedup.categorical_info.keys(), tab_duped.categorical_info.keys())
+        self.assertNotIn("event_type", tab_duped.categorical_info)
+
+
 if __name__ == "__main__":
     unittest.main()

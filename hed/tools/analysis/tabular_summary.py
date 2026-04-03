@@ -37,7 +37,7 @@ class TabularSummary:
             for value in value_cols:
                 self.value_info[value] = [0, 0]
         if skip_cols:
-            self.skip_cols = skip_cols.copy()
+            self.skip_cols = list(dict.fromkeys(skip_cols))
         else:
             self.skip_cols = []
         self.total_files = 0

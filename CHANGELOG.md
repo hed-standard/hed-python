@@ -25,6 +25,10 @@ hedpy extract bids-sidecar /path/to/dataset --filter sub-01
 
 `BidsFileGroup` now exposes a `get_task_names()` method that returns a sorted list of unique task names (the `xxxx` portion of `task-xxxx` BIDS entities) found across all sidecar and data files in the group.
 
+### `TabularSummary` deduplicates `skip_cols`
+
+`TabularSummary.__init__` now deduplicates the `skip_cols` list using `dict.fromkeys`, preserving order. Passing the same column name more than once no longer produces duplicate entries in `skip_cols` or in the `"Skip columns"` field of the summary metadata output. Functional behaviour (which columns are skipped) is unchanged.
+
 ## Documentation
 
 - Removed `{index}` placeholder annotations from `README.md` and `examples/README.md`.
