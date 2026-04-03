@@ -48,7 +48,7 @@ def shrink_defs(df, hed_schema, columns=None):
 
         for column in columns:
             mask = df[column].str.contains("Def-expand/", case=False)
-            df[column][mask] = df[column][mask].apply(partial(_shrink_defs, hed_schema=hed_schema))
+            df.loc[mask, column] = df[column][mask].apply(partial(_shrink_defs, hed_schema=hed_schema))
 
 
 def expand_defs(df, hed_schema, def_dict, columns=None):
@@ -307,11 +307,11 @@ def _filter_by_index_list(original_data, indexed_dict):
     else:
         raise TypeError("Input must be a pandas Series or DataFrame")
 
-    new_series = pd.Series([""] * len(data_series), dtype=str)
+    new_series = pd.Series([""] * len(data_series), dtype=data_series.dtype)
     for _onset, indices in indexed_dict.items():
         if indices:
             first_index = indices[0]
-            new_series[first_index] = ",".join([str(data_series[i]) for i in indices])
+            new_series.iloc[first_index] = ",".join([str(data_series.iloc[i]) for i in indices])
 
     if isinstance(original_data, pd.Series):
         return new_series

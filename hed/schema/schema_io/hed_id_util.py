@@ -155,6 +155,8 @@ def _verify_hedid_matches(section, df, unused_tag_ids):
         if label.endswith("-#"):
             label = label.replace("-#", "/#")
         df_id = row[constants.hed_id]
+        if not isinstance(df_id, str):
+            df_id = ""
         entry = section.get(label)
         if not entry:
             # Neither side has a hedID, so nothing to do.
@@ -209,10 +211,14 @@ def assign_hed_ids_section(df, unused_tag_ids):
     unused_tag_ids -= get_all_ids(df)
     sorted_unused_ids = sorted(unused_tag_ids, reverse=True)
 
+    # If the hedId column is float (all-NaN case), cast to object so strings can be assigned
+    if pd.api.types.is_float_dtype(df[constants.hed_id]):
+        df[constants.hed_id] = df[constants.hed_id].astype(object)
+
     for _row_number, row in df.iterrows():
         hed_id = row[constants.hed_id]
         # we already verified existing ones
-        if hed_id:
+        if isinstance(hed_id, str) and hed_id:
             continue
         df.at[_row_number, constants.hed_id] = f"HED_{sorted_unused_ids.pop():07d}"
 

@@ -99,10 +99,10 @@ class SchemaLoaderDF(SchemaLoader):
         for _row_number, row in file_data[constants.STRUCT_KEY].iterrows():
             cls = row[constants.subclass_of]
             description = row[constants.dcdescription]
-            if cls == "HedPrologue" and description:
+            if cls == "HedPrologue" and isinstance(description, str) and description:
                 prologue = description.replace("\\n", "\n")
                 continue
-            elif cls == "HedEpilogue" and description:
+            elif cls == "HedEpilogue" and isinstance(description, str) and description:
                 epilogue = description.replace("\\n", "\n")
 
         return prologue, epilogue
@@ -237,13 +237,13 @@ class SchemaLoaderDF(SchemaLoader):
         node_attributes = self._get_tag_attributes(row_number, row)
 
         hed_id = row[constants.hed_id]
-        if hed_id:
+        if isinstance(hed_id, str) and hed_id:
             node_attributes[HedKey.HedID] = hed_id
 
         description = row[constants.dcdescription]
         tag_entry = self._schema._create_tag_entry(element_name, key_class)
 
-        if description:
+        if isinstance(description, str) and description:
             tag_entry.description = description.strip()
 
         for attribute_name, attribute_value in node_attributes.items():

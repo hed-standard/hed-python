@@ -849,6 +849,9 @@ Examples:
     # Exclude specific columns from the template
     hedpy extract bids-sidecar /path/to/dataset -sc onset -sc duration -sc response_time
 
+    # Filter to only files containing 'sub-01' in their name
+    hedpy extract bids-sidecar /path/to/dataset --filter sub-01
+
     # Save logs to file and suppress console output
     hedpy extract bids-sidecar /path/to/dataset --log-file extraction.log --log-quiet
 """,
@@ -872,6 +875,14 @@ Examples:
     show_default="sourcedata derivatives code stimuli",
     metavar=METAVAR_NAME,
     help="Directory names (relative to root) to exclude (e.g., -x sourcedata -x derivatives)",
+)
+@optgroup.option(
+    "-fl",
+    "--filter",
+    "filename_filter",
+    default=None,
+    metavar=METAVAR_STRING,
+    help="Filter string for filenames; only files containing this string in their name will be processed",
 )
 # Column processing options
 @optgroup.group("Column processing options")
@@ -933,6 +944,7 @@ def extract_bids_sidecar_cmd(
     ctx,
     data_path,
     suffix,
+    filename_filter,
     value_columns,
     skip_columns,
     log_level,
@@ -949,6 +961,8 @@ def extract_bids_sidecar_cmd(
     from hed.scripts.hed_extract_bids_sidecar import main as extract_main
 
     args = [data_path, "-s", suffix]
+    if filename_filter:
+        args.extend(["-fl", filename_filter])
     if value_columns:
         args.append("-vc")
         args.extend(value_columns)

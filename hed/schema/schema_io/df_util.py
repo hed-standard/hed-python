@@ -123,12 +123,12 @@ def _merge_dataframes(df1, df2, key_column):
         if col not in df1.columns and col != key_column:
             df1 = df1.merge(df2[[key_column, col]], on=key_column, how="left")
 
-    # Fill missing values with '' for object columns, 0 for numeric columns
+    # Fill missing values with '' for non-numeric columns, 0 for numeric columns
     for col in df1.columns:
-        if df1[col].dtype == "object":
-            df1[col] = df1[col].fillna("")
-        else:
+        if pd.api.types.is_numeric_dtype(df1[col]):
             df1[col] = df1[col].fillna(0)
+        else:
+            df1[col] = df1[col].fillna("")
 
     return df1
 
@@ -309,6 +309,9 @@ def get_attributes_from_row(row):
     elif constants.attributes in row.index:
         attr_string = row[constants.attributes]
     else:
+        attr_string = ""
+
+    if not isinstance(attr_string, str):
         attr_string = ""
 
     if constants.subclass_of in row.index and row[constants.subclass_of] == "HedHeader":

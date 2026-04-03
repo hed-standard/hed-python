@@ -1,3 +1,39 @@
+# Unreleased
+
+## New features
+
+### Pandas 3.0 compatibility
+
+All pandas 3.0 breaking changes have been addressed, and the pandas version constraint in `pyproject.toml` has been updated from `<3.0.0` to `<4.0.0`:
+
+- **Copy-on-Write (CoW)**: Chained `df[col][mask] = ...` assignments in `df_util.py` replaced with `df.loc[mask, col] = ...` to prevent silent no-ops and the new `ChainedAssignmentError`.
+- **`drop()` API**: Removed redundant `axis=1` argument when `columns=` is already specified in `data_util.py` (the two arguments conflict in pandas 3.0).
+- **NaN handling in schema loading**: `df2schema.py`, `df_util.py`, and `hed_id_util.py` now check `isinstance(value, str)` before calling string methods such as `.strip()` and `.startswith()`, preventing `AttributeError` when empty cells are `float` NaN rather than `""`.
+- **StringDtype in `_merge_dataframes`**: Fillna logic updated in `schema_io/df_util.py` to use `pd.api.types.is_numeric_dtype()` instead of `dtype == "object"`, correctly handling pandas 3.0 `StringDtype` columns.
+- **Float64 column FutureWarning**: `assign_hed_ids_section` in `hed_id_util.py` now casts all-NaN hedId columns from `float64` to `object` before assigning string values, eliminating a pandas deprecation warning.
+- Added `tests/test_pandas3_compat.py` with 27 targeted tests covering all of the above fixes.
+
+### Filename filter for `extract bids-sidecar`
+
+`hedpy extract bids-sidecar` and the underlying `hed_extract_bids_sidecar` script now accept a `--filter` / `-fl` option. Only files whose name contains the filter string are included in the sidecar extraction. Example:
+
+```bash
+hedpy extract bids-sidecar /path/to/dataset --filter sub-01
+```
+
+### `BidsFileGroup.get_task_names()`
+
+`BidsFileGroup` now exposes a `get_task_names()` method that returns a sorted list of unique task names (the `xxxx` portion of `task-xxxx` BIDS entities) found across all sidecar and data files in the group.
+
+## Documentation
+
+- Removed `{index}` placeholder annotations from `README.md` and `examples/README.md`.
+
+## CI/CD
+
+- Bumped `actions/configure-pages` from 5 to 6.
+- Updated `spec_tests/hed-tests` submodule.
+
 # Release 1.0.0 March 27, 2026
 
 This is a major release with breaking changes. It removes several subsystems that are no longer part of the core `hedtools` package, completes the schema library-extras support across all schema formats, and cleans up the public API.
