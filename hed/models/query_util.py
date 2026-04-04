@@ -72,6 +72,18 @@ class SearchResult:
 
         return all(child is child2 for child, child2 in zip(self.children, other.children, strict=False))
 
+    def __eq__(self, other):
+        if not isinstance(other, SearchResult):
+            return NotImplemented
+        return (
+            self.group is other.group
+            and len(self.children) == len(other.children)
+            and all(c is c2 for c, c2 in zip(self.children, other.children, strict=False))
+        )
+
+    def __hash__(self):
+        return hash((id(self.group), tuple(id(c) for c in self.children)))
+
     # Backward compatibility alias
     has_same_tags = has_same_children
 

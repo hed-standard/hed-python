@@ -137,7 +137,7 @@ class QueryHandler:
         next_token = self._next_token_is([Token.LogicalNegation])
         if next_token == Token.LogicalNegation:
             interior = self._handle_grouping_op()
-            if "?" in str(interior):
+            if self._expr_has_wildcard(interior):
                 raise HedQueryError(
                     "Cannot negate wildcards, or expressions that contain wildcards."
                     "Use {required_expression : optional_expression}."
@@ -146,6 +146,19 @@ class QueryHandler:
             return expr
         else:
             return self._handle_grouping_op()
+
+    @staticmethod
+    def _expr_has_wildcard(expr):
+        """Return True if the expression tree contains any wildcard node."""
+        if expr is None:
+            return False
+        if isinstance(expr, ExpressionWildcardNew):
+            return True
+        if QueryHandler._expr_has_wildcard(expr.left):
+            return True
+        if QueryHandler._expr_has_wildcard(expr.right):
+            return True
+        return False
 
     def _handle_grouping_op(self):
         next_token = self._next_token_is([Token.LogicalGroup, Token.DescendantGroup, Token.ExactMatch])

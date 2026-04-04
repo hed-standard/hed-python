@@ -120,6 +120,7 @@ class ExpressionAnd(Expression):
             list: Groups in both lists narrowed down to results where none of the children overlap.
         """
         return_list = []
+        seen = set()
         for group in groups1:
             for other_group in groups2:
                 if group.group is other_group.group:
@@ -128,16 +129,9 @@ class ExpressionAnd(Expression):
                         continue
                     # Merge the two groups' children into one new result, now that we've verified they're unique
                     merged_result = group.merge_and_result(other_group)
-
-                    dont_add = False
-                    # This is trash and slow
-                    for finalized_value in return_list:
-                        if merged_result.has_same_children(finalized_value):
-                            dont_add = True
-                            break
-                    if dont_add:
-                        continue
-                    return_list.append(merged_result)
+                    if merged_result not in seen:
+                        seen.add(merged_result)
+                        return_list.append(merged_result)
 
         return return_list
 
@@ -190,9 +184,7 @@ class ExpressionWildcardNew(Expression):
                 for child in group.groups():
                     groups_found.append((child, group))
 
-        # Wildcards are only found in containing groups. I believe this is correct.
-        # todo: Is this code still needed for this kind of wildcard?  We already are registering every group, just not
-        # every group at every level.
+        # Wildcards are only found in containing groups — not propagated to every parent level.
         all_found_groups = [SearchResult(group, tag) for tag, group in groups_found]
         return all_found_groups
 
@@ -217,16 +209,9 @@ class ExpressionOr(Expression):
         groups1 = self.left.handle_expr(hed_group, exact=exact)
         # Don't early out as we need to gather all groups in case children appear more than once etc
         groups2 = self.right.handle_expr(hed_group, exact=exact)
-        # todo: optimize this eventually
-        # Filter out duplicates
-        duplicates = []
-        for group in groups1:
-            for other_group in groups2:
-                if group.has_same_children(other_group):
-                    duplicates.append(group)
-
-        groups1 = [group for group in groups1 if not any(other_group is group for other_group in duplicates)]
-
+        # Filter out results from groups1 that are already represented in groups2
+        groups2_set = set(groups2)
+        groups1 = [g for g in groups1 if g not in groups2_set]
         return groups1 + groups2
 
     def __str__(self):
@@ -258,16 +243,9 @@ class ExpressionNegation(Expression):
 
         """
         found_groups = self.right.handle_expr(hed_group, exact=exact)
-
-        # Todo: this may need more thought with respects to wildcards and negation
-        # negated_groups = [group for group in hed_group.get_all_groups() if group not in groups]
-        # This simpler version works on python >= 3.10
-        # negated_groups = [SearchResult(group, []) for group in hed_group.get_all_groups() if group not in groups]
-        # Python 3.7/8 compatible version.
+        found_group_ids = {id(found_group.group) for found_group in found_groups}
         negated_groups = [
-            SearchResult(group, [])
-            for group in hed_group.get_all_groups()
-            if not any(group is found_group.group for found_group in found_groups)
+            SearchResult(group, []) for group in hed_group.get_all_groups() if id(group) not in found_group_ids
         ]
 
         return negated_groups
