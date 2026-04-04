@@ -10,8 +10,11 @@ For example, when searching for "Red" in "(Red, Blue, Green)":
 - children = [Red] (only the matched tag)
 """
 
+import os
 import unittest
 from hed.models.query_util import SearchResult
+from hed.models.hed_string import HedString
+from hed import schema
 from unittest.mock import Mock
 
 
@@ -280,6 +283,79 @@ class TestSearchResultHashEquality(unittest.TestCase):
 
         result = ExpressionAnd.merge_and_groups([r1a, r1b], [r2])
         self.assertEqual(len(result), 2, "two distinct merged results should both be returned")
+
+
+class TestSearchResultGroupIdentitySemantics(unittest.TestCase):
+    """Tests that merge_and_result and has_same_children use object identity
+    (is/is not) for group comparison, consistent with __eq__ and __hash__.
+
+    The key invariant: two distinct HedGroup objects that happen to have equal
+    content must be treated as *different* groups throughout the API.
+
+    Uses two HedString objects parsed from identical content with a real schema:
+    HedGroup.__eq__ is content-based, so hs_a == hs_b is True while hs_a is not hs_b
+    is also True — exactly the condition a buggy content-equality check would miss.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        base_data_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/"))
+        hed_xml_file = os.path.join(base_data_dir, "schema_tests/HED8.0.0t.xml")
+        cls.hed_schema = schema.load_schema(hed_xml_file)
+
+    def setUp(self):
+        # Two HedStrings with identical content parsed independently.
+        # HedGroup.__eq__ compares children structurally, so hs_a == hs_b,
+        # but they are distinct objects: hs_a is not hs_b.
+        hs_a = HedString("Red, Blue", self.hed_schema)
+        hs_b = HedString("Red, Blue", self.hed_schema)
+        self.group_a = hs_a
+        self.group_b = hs_b
+        # Use a real tag from group_a as the matched child
+        self.child = list(hs_a.get_all_tags())[0]
+
+    def test_merge_and_result_raises_for_content_equal_but_distinct_groups(self):
+        """merge_and_result must raise ValueError when groups are distinct objects
+        even if those objects compare as content-equal.
+        """
+        r1 = SearchResult(self.group_a, [self.child])
+        r2 = SearchResult(self.group_b, [self.child])
+
+        # group_a == group_b is True (content equality), so a buggy == check
+        # would NOT raise.  The correct identity check (is not) MUST raise.
+        with self.assertRaises(ValueError):
+            r1.merge_and_result(r2)
+
+    def test_has_same_children_false_for_content_equal_but_distinct_groups(self):
+        """has_same_children must return False when groups are distinct objects
+        even if those objects compare as content-equal.
+        """
+        r1 = SearchResult(self.group_a, [self.child])
+        r2 = SearchResult(self.group_b, [self.child])
+
+        # A buggy content-equality check would return True; identity check must return False.
+        self.assertFalse(r1.has_same_children(r2))
+
+    def test_eq_false_for_content_equal_but_distinct_groups(self):
+        """__eq__ must return False when groups are distinct objects
+        even if those objects compare as content-equal.
+        """
+        r1 = SearchResult(self.group_a, [self.child])
+        r2 = SearchResult(self.group_b, [self.child])
+
+        self.assertNotEqual(r1, r2)
+
+    def test_same_group_object_all_apis_agree(self):
+        """When both results share the exact same group object, all three
+        APIs must consistently treat them as same-group.
+        """
+        r1 = SearchResult(self.group_a, [self.child])
+        r2 = SearchResult(self.group_a, [self.child])
+
+        self.assertTrue(r1.has_same_children(r2))
+        self.assertEqual(r1, r2)
+        merged = r1.merge_and_result(r2)  # must not raise
+        self.assertIs(merged.group, self.group_a)
 
 
 if __name__ == "__main__":

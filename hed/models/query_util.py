@@ -51,7 +51,7 @@ class SearchResult:
             new_children.append(child)
         new_children.sort(key=str)
 
-        if self.group != other.group:
+        if self.group is not other.group:
             raise ValueError("Internal error")
         return SearchResult(self.group, new_children)
 
@@ -64,7 +64,7 @@ class SearchResult:
         Returns:
             bool: True if both results have the same group and identical children.
         """
-        if self.group != other.group:
+        if self.group is not other.group:
             return False
 
         if len(self.children) != len(other.children):
