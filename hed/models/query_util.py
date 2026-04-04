@@ -51,7 +51,7 @@ class SearchResult:
             new_children.append(child)
         new_children.sort(key=str)
 
-        if self.group != other.group:
+        if self.group is not other.group:
             raise ValueError("Internal error")
         return SearchResult(self.group, new_children)
 
@@ -64,13 +64,25 @@ class SearchResult:
         Returns:
             bool: True if both results have the same group and identical children.
         """
-        if self.group != other.group:
+        if self.group is not other.group:
             return False
 
         if len(self.children) != len(other.children):
             return False
 
         return all(child is child2 for child, child2 in zip(self.children, other.children, strict=False))
+
+    def __eq__(self, other):
+        if not isinstance(other, SearchResult):
+            return NotImplemented
+        return (
+            self.group is other.group
+            and len(self.children) == len(other.children)
+            and all(c is c2 for c, c2 in zip(self.children, other.children, strict=False))
+        )
+
+    def __hash__(self):
+        return hash((id(self.group), tuple(id(c) for c in self.children)))
 
     # Backward compatibility alias
     has_same_tags = has_same_children

@@ -434,7 +434,12 @@ class HedGroup:
 
     def find_tags(self, search_tags, recursive=False, include_groups=2) -> list:
         """Find the base tags and their containing groups.
-        This searches by short_base_tag, ignoring any ancestors or extensions/values.
+
+        Comparison property: ``short_base_tag`` (schema short name without any extension or value).
+        Rationale: callers pass bare tag names such as ``"Event"`` or ``"Def"`` and must
+        match regardless of any extension or value the tag carries in the source string.
+        Using ``short_base_tag`` strips the extension/value so ``"Def/MyDef"`` is found
+        by searching for ``"Def"``.
 
         Parameters:
             search_tags (container):  A container of short_base_tags to locate.
@@ -462,11 +467,16 @@ class HedGroup:
         return found_tags
 
     def find_wildcard_tags(self, search_tags, recursive=False, include_groups=2) -> list:
-        """Find the tags and their containing groups.
+        """Find tags whose short form starts with a given prefix (implicit trailing wildcard).
 
-            This searches tag.short_tag.casefold(), with an implicit wildcard on the end.
-
-            e.g. "Eve" will find Event, but not Sensory-event.
+        Comparison property: ``short_tag`` (schema short name *including* any extension or value).
+        Rationale: the query is a prefix such as ``"Def/"`` or ``"Eve"``; the match must cover
+        the extension/value as well so that ``"Def/MyDef"`` is found by ``"Def/"`` but not by
+        an unrelated tag that merely shares the same base.  ``short_tag`` is used (not
+        ``short_base_tag``) so that value-bearing tags like ``"Duration/3 s"`` can be matched
+        by a prefix query such as ``"Duration/"``.
+        Note: prefix matching is anchored to the start of ``short_tag`` only, so ``"Eve"``
+        finds ``"Event"`` but not ``"Sensory-event"``.
 
         Parameters:
             search_tags (container): A container of the starts of short tags to search.
@@ -499,15 +509,27 @@ class HedGroup:
         return found_tags
 
     def find_exact_tags(self, exact_tags, recursive=False, include_groups=1) -> list:
-        """Find the given tags. This will only find complete matches, any extension or value must also match.
+        """Find tags that match exactly, including any extension or value.
+
+        Comparison property: ``HedTag.__eq__`` which compares ``short_tag.casefold()``
+        (falling back to ``org_tag.casefold()`` for unrecognised tags).
+        Rationale: callers pass a slash-path string such as ``"def/mydef"`` and need an
+        exact full-path match — the extension/value is part of the identity (``"Def/Foo"``
+        must not match ``"Def/Bar"``).  Because ``HedTag.__str__`` returns ``short_tag`` when
+        the tag is schema-identified, a tag written in long form in the source HED string
+        (e.g. ``"Event/Sensory-event"``) will still be found by a short-form query
+        (``"Sensory-event"``); the schema normalises them to the same ``short_tag``.
+        Unrecognised tags fall back to a case-insensitive comparison of the original text.
 
         Parameters:
-            exact_tags (list of HedTag): A container of tags to locate.
+            exact_tags (list of str or HedTag): Tags to locate; each is compared via
+                ``HedTag.__eq__``, which accepts both ``str`` and ``HedTag`` operands.
             recursive (bool): If true, also check subgroups.
-            include_groups (bool): 0, 1 or 2.
+            include_groups (0, 1 or 2):
                 If 0: Return only tags
                 If 1: Return only groups
                 If 2 or any other value: Return both
+
         Returns:
             list: A list of tuples. The contents depend on the values of the include_group.
         """
@@ -564,12 +586,21 @@ class HedGroup:
         return def_tags
 
     def find_tags_with_term(self, term, recursive=False, include_groups=2) -> list:
-        """Find any tags that contain the given term.
+        """Find tags whose schema ancestry includes the given term.
 
-            Note: This can only find identified tags.
+        Comparison property: ``tag_terms`` — a tuple of all path components in the tag's
+        long-form schema path, all casefolded (e.g. ``("event", "sensory-event")`` for the
+        ``Sensory-event`` tag).
+        Rationale: this implements HED's *ancestor search* — a bare query term such as
+        ``"Event"`` must match not only the ``Event`` tag itself but also every descendant
+        (``Sensory-event``, ``Agent-action``, etc.) because those descendants inherit the
+        ``Event`` parent.  ``tag_terms`` encodes the full ancestry, so membership testing
+        (``term in tag.tag_terms``) handles all descendants in O(k) time where k is the
+        schema depth.  This requires a schema-identified tag; unidentified tags have an
+        empty ``tag_terms`` tuple and will not be found.
 
         Parameters:
-            term (str): A single term to search for.
+            term (str): A single term to search for (compared case-insensitively).
             recursive (bool): If true, recursively check subgroups.
             include_groups (0, 1 or 2): Controls return values
                 If 0: Return only tags.
@@ -579,6 +610,7 @@ class HedGroup:
         Returns:
             list: A list of tuples. The contents depend on the values of the include_group.
         """
+        # Note: unidentified tags (tag_terms == ()) are silently skipped.
         found_tags = []
         if recursive:
             tags = self.get_all_tags()

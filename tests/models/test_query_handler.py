@@ -747,3 +747,130 @@ class TestParser(unittest.TestCase):
         self.assertNotEqual(Expression.MATCH_TERM, Expression.MATCH_EXACT)
         self.assertNotEqual(Expression.MATCH_EXACT, Expression.MATCH_WILDCARD)
         self.assertNotEqual(Expression.MATCH_TERM, Expression.MATCH_WILDCARD)
+
+    def test_ancestor_term_search(self):
+        """Bare term uses MATCH_TERM, which searches tag_terms (long-form path components).
+
+        'Event' (no slash, no asterisk) matches any tag whose schema ancestry includes 'event',
+        including the tag 'Event' itself and 'Sensory-event' whose long-form path is
+        'Event/Sensory-event'.
+        """
+        test_strings = {
+            "Event": True,
+            "Sensory-event": True,  # 'event' is an ancestor component via tag_terms
+            "Clear-throat": False,  # under Action hierarchy, not Event
+        }
+        self.base_test("Event", test_strings)
+
+    def test_term_search_case_insensitive(self):
+        """MATCH_TERM searches are case-insensitive via casefold()."""
+        test_strings = {
+            "Event": True,
+            "Sensory-event": True,
+            "Clear-throat": False,
+        }
+        self.base_test("event", test_strings)
+        self.base_test("EVENT", test_strings)
+
+    def test_wildcard_matches_short_tag_prefix(self):
+        """MATCH_WILDCARD (asterisk) prefix-matches on short_tag, not on the long-form path.
+
+        'Sensory*' matches 'Sensory-event' (short_tag starts with 'sensory').
+        'Event*' matches 'Event' but NOT 'Sensory-event' because short_tag='Sensory-event'
+        does not start with 'event'.
+        """
+        test_strings = {
+            "Sensory-event": True,
+            "Event": False,  # short_tag 'Event' does not start with 'sensory'
+        }
+        self.base_test("Sensory*", test_strings)
+
+        test_strings = {
+            "Event": True,
+            "Sensory-event": False,  # short_tag 'Sensory-event' does not start with 'event'
+        }
+        self.base_test("Event*", test_strings)
+
+    def test_slash_path_query_uses_short_tag_comparison(self):
+        """A slash-path query uses MATCH_EXACT, comparing the query string against short_tag.
+
+        'Event/Sensory-event' does NOT match the stored tag 'Sensory-event' because
+        MATCH_EXACT compares the full query path 'event/sensory-event' against
+        short_tag.casefold() = 'sensory-event'.
+
+        Value-extension tags (e.g. 'Def/Name') are an exception: their short_tag already
+        includes the slash and value, so 'Def/Name' does match.
+        """
+        test_strings = {
+            "Sensory-event": False,  # short_tag is 'Sensory-event', not 'Event/Sensory-event'
+            "Event": False,
+        }
+        self.base_test("Event/Sensory-event", test_strings)
+
+    # --- Negation wildcard check (Phase C) ---
+
+    def test_negation_wildcard_raises(self):
+        """A wildcard token anywhere inside a negation must raise HedQueryError.
+
+        The check uses an expression-tree walk (_expr_has_wildcard) rather than
+        a string search on str(interior), so it handles wildcards at any nesting
+        depth inside the negation.
+        """
+        invalid_queries = [
+            "~?",  # bare wildcard negated
+            "~??",  # tag-only wildcard negated
+            "~???",  # group wildcard negated
+            "~(A, ?)",  # wildcard inside a logical group that is negated
+            "~(A, ??)",  # tag wildcard inside negated group
+            "~(A && ?)",  # wildcard as right operand of AND inside negation
+            "~[A, ?]",  # wildcard inside a descendant group that is negated
+        ]
+        for query in invalid_queries:
+            with self.subTest(query=query):
+                with self.assertRaises(HedQueryError):
+                    QueryHandler(query)
+
+    def test_negation_no_wildcard_valid(self):
+        """Negation without wildcards must parse without error."""
+        valid_queries = [
+            "~A",
+            "~(A)",
+            "~(A && B)",
+            "~(A || B)",
+            "~[A]",
+            "~[A, B]",
+        ]
+        for query in valid_queries:
+            with self.subTest(query=query):
+                qh = QueryHandler(query)
+                self.assertIsNotNone(qh.tree)
+
+    # --- OR dedup (Phase A) ---
+
+    def test_or_no_duplicate_results(self):
+        """A || A must not return the same SearchResult more than once.
+
+        With the set-based dedup introduced in Phase A, results present in both
+        sides of an OR are filtered before the lists are concatenated.
+        """
+        expression = QueryHandler("Event || Event")
+        hed_string = HedString("Event", self.hed_schema)
+        results = expression.search(hed_string)
+        for i, r1 in enumerate(results):
+            for j, r2 in enumerate(results):
+                if i != j:
+                    self.assertFalse(
+                        r1 == r2,
+                        f"Duplicate SearchResult at positions {i} and {j}: {r1}",
+                    )
+
+    def test_or_dedup_count(self):
+        """A || A should return the same number of results as A alone."""
+        hed_string = HedString("Event", self.hed_schema)
+        single_results = QueryHandler("Event").search(hed_string)
+        or_results = QueryHandler("Event || Event").search(hed_string)
+        self.assertEqual(
+            len(single_results),
+            len(or_results),
+            "Event || Event should match the same number of groups as Event alone",
+        )
