@@ -27,6 +27,7 @@ in various formats:
    :maxdepth: 2
 
    User guide <user_guide>
+   Search implementations <search_implementation>
    API <api/index>
 
 * :ref:`genindex`

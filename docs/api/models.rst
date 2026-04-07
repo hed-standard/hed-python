@@ -177,6 +177,51 @@ search_hed_objs
 
 .. autofunction:: hed.models.query_service.search_hed_objs
 
+String-based search
+-------------------
+
+Search functions that operate on raw HED strings without requiring pre-parsed ``HedString`` objects
+or a loaded schema. See also :doc:`/search_implementation` for a full comparison of all three
+search implementations.
+
+StringQueryHandler
+~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: hed.models.string_search.StringQueryHandler
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+StringNode
+~~~~~~~~~~
+
+.. autoclass:: hed.models.string_search.StringNode
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+parse_hed_string
+~~~~~~~~~~~~~~~~
+
+.. autofunction:: hed.models.string_search.parse_hed_string
+
+search_series
+~~~~~~~~~~~~~
+
+.. autofunction:: hed.models.string_search.search_series
+
+Schema lookup utilities
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Pre-generate and persist a tag-ancestor lookup dictionary from a :class:`~hed.schema.HedSchema`
+for use with :class:`~hed.models.string_search.StringQueryHandler`.
+
+.. autofunction:: hed.models.schema_lookup.generate_schema_lookup
+
+.. autofunction:: hed.models.schema_lookup.save_schema_lookup
+
+.. autofunction:: hed.models.schema_lookup.load_schema_lookup
+
 DataFrame utilities
 -------------------
 
