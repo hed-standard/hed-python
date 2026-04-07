@@ -1,19 +1,25 @@
 ---
 html_meta:
-  description: Comparison of the three HED string search implementations in hedtools - basic_search, QueryHandler, and StringQueryHandler
-  keywords: HED search, string search, query handler, basic search, performance, hedtools, pattern matching
+  description: HED search details — implementation comparison and performance benchmarks for basic_search, QueryHandler, and StringQueryHandler in hedtools
+  keywords: HED search, string search, query handler, basic search, performance, benchmarks, hedtools, pattern matching
 ---
 
 ```{index} search, string search, query, QueryHandler, StringQueryHandler, basic_search
 ```
 
-# HED search implementations
+# HED search details
 
-HEDtools provides three distinct mechanisms for searching HED-annotated data. They share a common goal — "does this HED string match this query?" — but differ substantially in their inputs, capabilities, schema requirements, and performance characteristics. Choosing the right implementation depends on whether you need schema-aware ancestor matching, full group-structural queries, or raw throughput on unannotated strings.
+HEDtools provides three distinct mechanisms for searching HED-annotated data. This page covers their design and query languages ({ref}`implementations <hed-search-implementations>`) and measured performance characteristics ({ref}`performance <hed-search-performance>`).
 
-## Overview of the three implementations
+(hed-search-implementations)=
 
-### `basic_search` — regex-based flat matching
+## HED search implementations
+
+The three implementations share a common goal — "does this HED string match this query?" — but differ substantially in their inputs, capabilities, schema requirements, and performance characteristics. Choosing the right implementation depends on whether you need schema-aware ancestor matching, full group-structural queries, or raw throughput on unannotated strings.
+
+### Overview of the three implementations
+
+#### `basic_search` — regex-based flat matching
 
 Located in {mod}`hed.models.basic_search`, the `find_matching()` function operates directly on a `pd.Series` of raw HED strings using compiled regular expressions. It requires no schema and no parsing step, making it the fastest option for bulk row filtering.
 
@@ -29,7 +35,7 @@ Key characteristics:
 
 Use `basic_search` when you are working with a large series of raw strings, don't need ancestor matching, and want maximum throughput. See {func}`hed.models.basic_search.find_matching`.
 
-### `QueryHandler` — schema-backed object search
+#### `QueryHandler` — schema-backed object search
 
 Located in {mod}`hed.models.query_handler`, `QueryHandler` is the full-featured search engine. It compiles a query string into an expression tree once, then evaluates that tree against `HedString` objects that have already been parsed against a loaded `HedSchema`.
 
@@ -44,7 +50,7 @@ Key characteristics:
 
 Use `QueryHandler` when you need schema-aware ancestor matching, or when you want object references (e.g., to retrieve the matched group for further processing). See {class}`hed.models.query_handler.QueryHandler`.
 
-### `StringQueryHandler` — tree-based schema-optional search
+#### `StringQueryHandler` — tree-based schema-optional search
 
 Located in {mod}`hed.models.string_search`, `StringQueryHandler` is a new middle-ground implementation that inherits from `QueryHandler` and reuses the full expression-tree compiler, but operates on raw strings rather than pre-parsed `HedString` objects.
 
@@ -62,7 +68,7 @@ Key characteristics:
 
 Use `StringQueryHandler` when you have raw strings (not `HedString` objects), need the full `QueryHandler` query syntax, and either don't have a schema available or want faster processing at the cost of losing full schema-aware ancestor matching. See {class}`hed.models.string_search.StringQueryHandler`.
 
-### Generating a schema lookup
+#### Generating a schema lookup
 
 If you want `StringQueryHandler` to resolve ancestors for short-form strings (e.g. query `Event` matching `Sensory-event`) without a full schema parse per row, you can pre-generate a lookup dictionary from a `HedSchema`:
 
@@ -82,9 +88,9 @@ See {func}`hed.models.schema_lookup.generate_schema_lookup`.
 
 ______________________________________________________________________
 
-## Comparison tables
+### Comparison tables
 
-### Core characteristics
+#### Core characteristics
 
 | Property              | `basic_search`             | `QueryHandler`                                     | `StringQueryHandler`                            |
 | --------------------- | -------------------------- | -------------------------------------------------- | ----------------------------------------------- |
@@ -96,7 +102,7 @@ ______________________________________________________________________
 | **Parse cost**        | Regex compilation once     | Full `HedString` + schema parse per string         | Lightweight tree parse per string               |
 | **Unrecognised tags** | Matched literally          | Silent match failure (`tag_terms = ()`)            | Matched literally                               |
 
-### Query syntax
+#### Query syntax
 
 | Feature                      | `basic_search` query syntax                         | `QueryHandler` / `StringQueryHandler` query syntax |
 | ---------------------------- | --------------------------------------------------- | -------------------------------------------------- |
@@ -109,7 +115,7 @@ ______________________________________________________________________
 | **Quoted exact match**       | No                                                  | `"A"` — exact match, no ancestor search            |
 | **Implicit default**         | If no `(` or `@`: all terms become "anywhere"       | No implicit conversion — must be explicit          |
 
-### Group / structural operators
+#### Group / structural operators
 
 | Feature                           | `basic_search`                            | `QueryHandler`                               | `StringQueryHandler`   |
 | --------------------------------- | ----------------------------------------- | -------------------------------------------- | ---------------------- |
@@ -123,7 +129,7 @@ ______________________________________________________________________
 | **Any group child `???`**         | No                                        | `???` — any parenthesised group child        | Same                   |
 | **Nested query operators**        | No                                        | Yes — full recursive composition             | Same                   |
 
-### Ancestor / cross-form search
+#### Ancestor / cross-form search
 
 | Scenario                                                | `basic_search`                                    | `QueryHandler`                          | `StringQueryHandler`                                             |
 | ------------------------------------------------------- | ------------------------------------------------- | --------------------------------------- | ---------------------------------------------------------------- |
@@ -133,7 +139,7 @@ ______________________________________________________________________
 | Schema-free ancestor search                             | `convert_query()` + long-form series (workaround) | N/A — schema always required            | ✅ works natively for long-form strings                          |
 | Tag `Def/Name` matched by query `Def`                   | ❌ literal prefix mismatch                        | ✅ `short_base_tag = "Def"`             | ✅ `tag_terms` contains `"def"`                                  |
 
-### Critical semantic traps
+#### Critical semantic traps
 
 These differences are silent — no error, just wrong answers if you mix up query strings across implementations:
 
@@ -146,12 +152,142 @@ These differences are silent — no error, just wrong answers if you mix up quer
 
 ______________________________________________________________________
 
-## Performance
+(hed-search-performance)=
 
-*Performance benchmarks will be added here.*
+## HED search performance
 
-Preliminary guidance:
+Benchmarks were run using HED 8.4.0 with `timeit` on both synthetic strings and real BIDS event data. All times are medians in milliseconds. Relative ratios between engines are more meaningful than absolute values, which depend on hardware.
 
-- For large-scale row filtering on raw strings where schema awareness is not needed, `basic_search` is likely fastest due to vectorised regex on the full series with no per-row parsing.
-- `StringQueryHandler` trades some throughput for full query-language support and optional ancestor matching; parse cost per row is a lightweight recursive split.
-- `QueryHandler` has the highest per-string cost because it requires a pre-parsed `HedString` (including schema tag resolution), but provides the richest result objects.
+### Key findings
+
+- **Series throughput:** `basic_search` is roughly 14–20× faster than a `QueryHandler` row-by-row loop at 5 000 rows because it leverages vectorised pandas `str.contains` regex matching.
+- **Single-string speed:** `StringQueryHandler` (no lookup) is ~40 % faster than `QueryHandler` per string because it avoids schema-based `HedString` construction.
+- **Schema-lookup overhead:** Enabling `schema_lookup` in `StringQueryHandler` has negligible overhead for most queries; cost appears only when ancestor matching is actually invoked.
+- **Nesting depth:** At depth 20, `QueryHandler` is ~6× slower than on a flat string; `StringQueryHandler` shows similar scaling.
+- **Operation coverage:** `basic_search` supports 7 of 18 tested operation types. The remaining 11 (OR, exact groups, logical groups, `?`/`??`/`???` wildcards, quoted terms) require `QueryHandler` or `StringQueryHandler`.
+
+### Series throughput
+
+Whole-series search over a `pd.Series` of HED strings. `basic_search` uses vectorised regex; `search_series` uses `StringQueryHandler.search()` per row; `QueryHandler_loop` constructs a `HedString` per row then searches. Query: `single_bare_term`.
+
+|  Rows | QueryHandler_loop (ms) | basic_search (ms) | search_series (ms) |
+| ----: | ---------------------: | ----------------: | -----------------: |
+|    10 |                   0.34 |              0.20 |               0.30 |
+|   100 |                   3.43 |              0.40 |               2.41 |
+|   500 |                   16.7 |              2.25 |               13.1 |
+| 1 000 |                   29.8 |              1.91 |               19.5 |
+| 5 000 |                    164 |              11.7 |                114 |
+
+All three engines scale linearly with row count. `basic_search` is 14–20× faster than `QueryHandler_loop`; `search_series` is roughly 1.4× faster than `QueryHandler_loop`.
+
+### Single-string timing
+
+Per-string median search time (ms) across string sizes. Tag counts: tiny = 1, small = 5, medium = 10, large = 25, xlarge = 50, xxlarge = 100. Query: `single_bare_term`.
+
+| String size        | QueryHandler (ms) | SQH_no_lookup (ms) | basic_search (ms) |
+| ------------------ | ----------------: | -----------------: | ----------------: |
+| tiny (1 tag)       |             0.012 |              0.007 |             0.131 |
+| small (5 tags)     |             0.020 |              0.014 |             0.197 |
+| medium (10 tags)   |             0.041 |              0.021 |             0.123 |
+| large (25 tags)    |             0.132 |              0.102 |             0.157 |
+| xlarge (50 tags)   |             0.176 |              0.113 |             0.131 |
+| xxlarge (100 tags) |             0.329 |              0.248 |             0.154 |
+
+`basic_search` regex overhead dominates on small strings; `QueryHandler` and `StringQueryHandler` dominate on large strings. The crossover occurs around 25–50 tags.
+
+### Operation coverage and cost
+
+Per-operation timing on a 10-tag string. `basic_search` returns no results (not an error) for unsupported constructs, so queries using those operations will silently produce incorrect results.
+
+| Operation                      | QueryHandler (ms) | SQH (ms) | basic_search  |
+| ------------------------------ | ----------------: | -------: | ------------- |
+| `bare_term`                    |             0.061 |    0.037 | 0.278 ms      |
+| `and_2`                        |             0.063 |    0.041 | 0.321 ms      |
+| `and_3`                        |             0.067 |    0.045 | 0.355 ms      |
+| `negation`                     |             0.083 |    0.043 | 0.160 ms      |
+| `wildcard_prefix` (`*` suffix) |             0.046 |    0.037 | 0.204 ms      |
+| `nested_group_[]`              |             0.057 |    0.039 | 0.634 ms      |
+| `deep_and_chain`               |             0.117 |    0.059 | 0.515 ms      |
+| `or`                           |             0.058 |    0.037 | — unsupported |
+| `exact_group_{}`               |             0.052 |    0.030 | — unsupported |
+| `exact_optional_{:}`           |             0.071 |    0.043 | — unsupported |
+| `exact_quoted`                 |             0.062 |    0.030 | — unsupported |
+| `wildcard_?`                   |             0.086 |    0.047 | — unsupported |
+| `wildcard_??`                  |             0.068 |    0.041 | — unsupported |
+| `wildcard_???`                 |             0.074 |    0.041 | — unsupported |
+| `descendant_nested`            |             0.138 |    0.086 | — unsupported |
+| `double_negation`              |             0.057 |    0.035 | — unsupported |
+| `complex_onset_def`            |             0.113 |    0.068 | — unsupported |
+| `nested_or_and`                |             0.080 |    0.057 | — unsupported |
+
+`StringQueryHandler` supports all 18 operation types.
+
+### Nesting depth
+
+Parenthesisation depth from 0 (flat) to 20. Deeper nesting increases the tree walk for `QueryHandler` and `StringQueryHandler`. `basic_search` shows no consistent depth trend because its cost depends on delimiter count, not recursion depth.
+
+| Depth | QueryHandler (ms) | SQH_no_lookup (ms) | basic_search (ms) |
+| ----: | ----------------: | -----------------: | ----------------: |
+|     0 |             0.026 |              0.017 |             0.125 |
+|     1 |             0.022 |              0.013 |             0.256 |
+|     5 |             0.058 |              0.039 |             0.274 |
+|    10 |             0.102 |              0.058 |             0.256 |
+|    20 |             0.155 |              0.108 |             0.234 |
+
+At depth 20, `QueryHandler` is ~6× slower than at depth 0; `SQH` is ~6× slower.
+
+### Repeated tags
+
+Repeating a target tag N times in the string. `basic_search`'s `verify_search_delimiters` uses `itertools.product` over delimiter positions; repeated instances multiply the internal search space. Tree-based engines are linear in the number of candidates and are not affected.
+
+| Occurrences | QueryHandler (ms) | SQH_no_lookup (ms) | basic_search (ms) |
+| ----------: | ----------------: | -----------------: | ----------------: |
+|           0 |             0.034 |              0.022 |             0.544 |
+|           5 |             0.151 |              0.084 |             0.791 |
+|          10 |             0.093 |              0.073 |             0.940 |
+|          20 |             0.182 |              0.138 |             0.668 |
+|          40 |             0.200 |              0.195 |             0.654 |
+
+### Compile vs. search
+
+Query compilation is a one-time cost; subsequent searches against different strings reuse the compiled expression. Reusing a compiled handler across many strings amortises compilation cost to near zero.
+
+| Phase   | QueryHandler (ms) | StringQueryHandler (ms) |
+| ------- | ----------------: | ----------------------: |
+| Compile |             0.004 |                   0.005 |
+| Search  |             0.053 |                   0.036 |
+
+### Real BIDS data
+
+Search over 200 rows of the `eeg_ds003645s_hed` BIDS test dataset.
+
+| Query                  | QueryHandler_loop (ms) | basic_search (ms) | search_series (ms) |
+| ---------------------- | ---------------------: | ----------------: | -----------------: |
+| `single_bare_term`     |                    9.0 |               2.5 |                6.5 |
+| `single_wildcard`      |                    8.2 |               0.6 |                4.9 |
+| `negation`             |                    8.0 |               0.9 |                6.8 |
+| `two_term_and`         |                    8.8 |               1.2 |                4.9 |
+| `three_term_and`       |                    8.5 |               1.9 |                5.1 |
+| `group_nesting`        |                    7.9 |               0.3 |                7.8 |
+| `two_term_or`          |                    7.9 |                 — |                6.8 |
+| `exact_group`          |                    9.3 |                 — |                6.6 |
+| `exact_group_optional` |                   11.7 |                 — |                5.8 |
+| `single_exact_term`    |                    8.1 |                 — |                5.5 |
+| `wildcard_child`       |                   12.6 |                 — |                8.9 |
+| `complex_composite`    |                   14.2 |                 — |                9.5 |
+
+### Choosing an implementation
+
+**Use `basic_search`** when you need the fastest possible series-level filter, your queries can be expressed with simple terms, AND, negation, or descendant wildcards (`*`), and schema-aware ancestor matching is not required. Ideal for quick event file filtering when query simplicity is acceptable.
+
+**Use `StringQueryHandler`** (via `search_series()`) when you need the full query language (OR, exact groups, logical groups, `?`/`??`/`???` wildcards) and are working with raw strings from tabular files or sidecars. This is the best general-purpose choice — it is ~40 % faster than a `QueryHandler` loop per string and close to `basic_search` on large strings.
+
+**Use `QueryHandler`** when you already have parsed `HedString` objects (for example from a validation pipeline), or when you need results as structured `HedString`/`HedTag` objects rather than boolean matches. The additional overhead relative to `StringQueryHandler` comes from `HedString` construction, not from search expression evaluation, so reusing pre-parsed objects avoids the cost entirely.
+
+### Benchmark methodology
+
+- **Timing:** `timeit` — 20 iterations (single-string), 5 iterations (series), 10 iterations (sweeps). Median reported.
+- **Schema:** HED 8.4.0, loaded once and reused.
+- **Synthetic data:** Strings built from real schema tags with controlled tag count, nesting depth, group count, and tag repetition.
+- **`schema_lookup`:** Generated via `generate_schema_lookup(schema)` — a dict mapping each short tag to its ancestor tuple, enabling ancestor-based matching in `StringQueryHandler` without a full schema load per string.
+- **Hardware note:** Absolute timings depend on hardware; relative ratios between engines are the meaningful comparison.
