@@ -124,7 +124,7 @@ Each query was applied to a single HED string of varying complexity. Times are m
 | xxlarge_100tag / two_term_or | 0.415 | 0.269 | 0.296 | — |
 | xxlarge_100tag / wildcard_child | 0.851 | 0.240 | 0.763 | — |
 
-![Query × Engine heatmap](../figures/benchmark_20260407_103440_query_heatmap.png)
+![Query × Engine heatmap](../figures/benchmark_20260407_103440/benchmark_query_heatmap.png)
 
 ## Series performance
 
@@ -199,7 +199,7 @@ Whole-series search: each engine processes all rows of a `pd.Series` for a given
 | homo_5000 / two_term_and | 166.851 | 20.332 | 107.772 | 115.292 |
 | homo_5000 / two_term_or | 191.891 | — | 123.276 | 128.751 |
 
-![Series scaling](../figures/benchmark_20260407_103440_series_scaling.png)
+![Series scaling](../figures/benchmark_20260407_103440/benchmark_series_scaling.png)
 
 ## Factor sweeps
 
@@ -214,7 +214,7 @@ Decomposition of one-time query compilation cost vs per-string search cost. Comp
 | compile | 0.004 | 0.005 |
 | search | 0.053 | 0.036 |
 
-![compile_vs_search](../figures/benchmark_20260407_103440_sweep_compile_vs_search.png)
+![compile_vs_search](../figures/benchmark_20260407_103440/benchmark_sweep_compile_vs_search.png)
 
 ### Deep Nest Bare Term
 
@@ -227,7 +227,7 @@ Deep nesting sweep for *bare term* queries at depths 1–20. Shows how nesting i
 | 10 | 0.087 | 0.059 | 0.057 | 0.209 |
 | 20 | 0.141 | 0.154 | 0.151 | 0.212 |
 
-![deep_nest_bare_term](../figures/benchmark_20260407_103440_sweep_deep_nest_bare_term.png)
+![deep_nest_bare_term](../figures/benchmark_20260407_103440/benchmark_sweep_deep_nest_bare_term.png)
 
 ### Deep Nest Exact Group
 
@@ -240,7 +240,7 @@ Deep nesting sweep for *exact group* queries at depths 1–20. Shows how nesting
 | 10 | 0.105 | 0.072 | 0.075 |
 | 20 | 0.209 | 0.146 | 0.123 |
 
-![deep_nest_exact_group](../figures/benchmark_20260407_103440_sweep_deep_nest_exact_group.png)
+![deep_nest_exact_group](../figures/benchmark_20260407_103440/benchmark_sweep_deep_nest_exact_group.png)
 
 ### Deep Nest Group Match
 
@@ -253,7 +253,7 @@ Deep nesting sweep for *group match* queries at depths 1–20. Shows how nesting
 | 10 | 0.181 | 0.063 | 0.206 | 0.536 |
 | 20 | 0.324 | 0.118 | 0.406 | 0.658 |
 
-![deep_nest_group_match](../figures/benchmark_20260407_103440_sweep_deep_nest_group_match.png)
+![deep_nest_group_match](../figures/benchmark_20260407_103440/benchmark_sweep_deep_nest_group_match.png)
 
 ### Deep Nest Negation
 
@@ -266,7 +266,7 @@ Deep nesting sweep for *negation* queries at depths 1–20. Shows how nesting in
 | 10 | 0.101 | 0.072 | 0.067 | 0.121 |
 | 20 | 0.177 | 0.129 | 0.129 | 0.112 |
 
-![deep_nest_negation](../figures/benchmark_20260407_103440_sweep_deep_nest_negation.png)
+![deep_nest_negation](../figures/benchmark_20260407_103440/benchmark_sweep_deep_nest_negation.png)
 
 ### Deep Nest Two And
 
@@ -279,7 +279,7 @@ Deep nesting sweep for *two and* queries at depths 1–20. Shows how nesting int
 | 10 | 0.205 | 0.070 | 0.181 | 0.274 |
 | 20 | 0.320 | 0.109 | 0.407 | 0.355 |
 
-![deep_nest_two_and](../figures/benchmark_20260407_103440_sweep_deep_nest_two_and.png)
+![deep_nest_two_and](../figures/benchmark_20260407_103440/benchmark_sweep_deep_nest_two_and.png)
 
 ### Group Count
 
@@ -293,7 +293,7 @@ Number of parenthesised groups (1 to 20). More groups mean more children at the 
 | 10 | 0.080 | 0.053 | 0.054 | 0.135 |
 | 20 | 0.140 | 0.085 | 0.086 | 0.136 |
 
-![group_count](../figures/benchmark_20260407_103440_sweep_group_count.png)
+![group_count](../figures/benchmark_20260407_103440/benchmark_sweep_group_count.png)
 
 ### Nesting Depth
 
@@ -310,7 +310,7 @@ Parenthesisation depth from 0 (flat) to 20. Deeper nesting increases the tree wa
 | 15 | 0.124 | 0.087 | 0.085 | 0.245 |
 | 20 | 0.155 | 0.108 | 0.114 | 0.234 |
 
-![nesting_depth](../figures/benchmark_20260407_103440_sweep_nesting_depth.png)
+![nesting_depth](../figures/benchmark_20260407_103440/benchmark_sweep_nesting_depth.png)
 
 ### Per Operation
 
@@ -337,7 +337,7 @@ Individual operation types tested in isolation. Shows which operations are expen
 | wildcard_??? | 0.074 | 0.041 | 0.124 | — |
 | wildcard_prefix | 0.046 | 0.037 | 0.044 | 0.204 |
 
-![per_operation](../figures/benchmark_20260407_103440_sweep_per_operation.png)
+![per_operation](../figures/benchmark_20260407_103440/benchmark_sweep_per_operation.png)
 
 ### Query Complexity
 
@@ -354,7 +354,7 @@ Query expression complexity from a bare term to a multi-clause composite. More c
 | 7_exact | 0.120 | 0.078 | 0.069 | — |
 | 8_complex | 0.106 | 0.078 | 0.067 | — |
 
-![query_complexity](../figures/benchmark_20260407_103440_sweep_query_complexity.png)
+![query_complexity](../figures/benchmark_20260407_103440/benchmark_sweep_query_complexity.png)
 
 ### Repeated Tags
 
@@ -369,7 +369,7 @@ Repetitions of a target tag (0 to 40). basic_search's `verify_search_delimiters`
 | 20 | 0.182 | 0.138 | 0.137 | 0.668 |
 | 40 | 0.200 | 0.195 | 0.198 | 0.654 |
 
-![repeated_tags](../figures/benchmark_20260407_103440_sweep_repeated_tags.png)
+![repeated_tags](../figures/benchmark_20260407_103440/benchmark_sweep_repeated_tags.png)
 
 ### Schema Lookup
 
@@ -380,7 +380,7 @@ StringQueryHandler with vs without the `schema_lookup` dictionary. The lookup en
 | no_lookup | 0.030 |
 | with_lookup | 0.029 |
 
-![schema_lookup](../figures/benchmark_20260407_103440_sweep_schema_lookup.png)
+![schema_lookup](../figures/benchmark_20260407_103440/benchmark_sweep_schema_lookup.png)
 
 ### Series Size
 
@@ -394,7 +394,7 @@ Number of rows in the Series (10 to 5000). basic_search scales sub-linearly than
 | 1000 | 29.799 | 1.912 | 19.530 | 19.069 |
 | 5000 | 163.936 | 11.653 | 123.791 | 114.813 |
 
-![series_size](../figures/benchmark_20260407_103440_sweep_series_size.png)
+![series_size](../figures/benchmark_20260407_103440/benchmark_sweep_series_size.png)
 
 ### String Form
 
@@ -405,7 +405,7 @@ Short-form vs long-form HED strings. Long-form strings have fully expanded paths
 | long | 0.074 | 0.063 | 0.059 | 0.121 |
 | short | 0.044 | 0.029 | 0.029 | 0.124 |
 
-![string_form](../figures/benchmark_20260407_103440_sweep_string_form.png)
+![string_form](../figures/benchmark_20260407_103440/benchmark_sweep_string_form.png)
 
 ### Tag Count
 
@@ -420,7 +420,7 @@ Number of tags in the HED string (1 to 100). basic_search time is dominated by r
 | 50 | 0.149 | 0.160 | 0.183 | 0.184 |
 | 100 | 0.287 | 0.167 | 0.164 | 0.271 |
 
-![tag_count](../figures/benchmark_20260407_103440_sweep_tag_count.png)
+![tag_count](../figures/benchmark_20260407_103440/benchmark_sweep_tag_count.png)
 
 ## Real BIDS data
 
@@ -441,7 +441,7 @@ Search over 200 rows of real BIDS event data (`eeg_ds003645s_hed` test dataset, 
 | two_term_or | 7.914 | — | 6.774 |
 | wildcard_child | 12.590 | — | 8.899 |
 
-![Real BIDS data](../figures/benchmark_20260407_103440_real_data.png)
+![Real BIDS data](../figures/benchmark_20260407_103440/benchmark_real_data.png)
 
 ## Recommendations
 

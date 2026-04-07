@@ -2,7 +2,7 @@
 
 Reads the latest JSON results file and produces:
   - Console summary tables
-  - Matplotlib figures saved to benchmarks/figures/
+  - Matplotlib figures saved to benchmarks/figures/{stem}/
   - A Markdown report in benchmarks/results/
 
 Usage::
@@ -25,8 +25,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 RESULTS_DIR = Path(__file__).parent / "results"
-FIGURES_DIR = Path(__file__).parent / "figures"
-FIGURES_DIR.mkdir(exist_ok=True)
+_FIGURES_BASE = Path(__file__).parent / "figures"
+_FIGURES_BASE.mkdir(exist_ok=True)
 
 # Consistent colours per engine
 ENGINE_COLORS = {
@@ -171,9 +171,9 @@ def plot_factor_sweep(data, stem):
         ax.legend(fontsize=8)
         ax.grid(True, alpha=0.3)
         fig.tight_layout()
-        fig.savefig(FIGURES_DIR / f"{stem}_sweep_{factor}.png", dpi=150)
+        fig.savefig(_figures_dir(stem) / f"benchmark_sweep_{factor}.png", dpi=150)
         plt.close(fig)
-        print(f"  Saved figures/{stem}_sweep_{factor}.png")
+        print(f"  Saved figures/{stem}/benchmark_sweep_{factor}.png")
 
 
 def plot_series_scaling(data, stem):
@@ -212,9 +212,9 @@ def plot_series_scaling(data, stem):
     ax.grid(True, alpha=0.3)
 
     fig.tight_layout()
-    fig.savefig(FIGURES_DIR / f"{stem}_series_scaling.png", dpi=150)
+    fig.savefig(_figures_dir(stem) / "benchmark_series_scaling.png", dpi=150)
     plt.close(fig)
-    print(f"  Saved figures/{stem}_series_scaling.png")
+    print(f"  Saved figures/{stem}/benchmark_series_scaling.png")
 
 
 def plot_compile_vs_search(data, stem):
@@ -248,9 +248,9 @@ def plot_compile_vs_search(data, stem):
     ax.legend()
     ax.grid(True, alpha=0.3, axis="y")
     fig.tight_layout()
-    fig.savefig(FIGURES_DIR / f"{stem}_compile_vs_search.png", dpi=150)
+    fig.savefig(_figures_dir(stem) / "benchmark_compile_vs_search.png", dpi=150)
     plt.close(fig)
-    print(f"  Saved figures/{stem}_compile_vs_search.png")
+    print(f"  Saved figures/{stem}/benchmark_compile_vs_search.png")
 
 
 def plot_query_complexity_heatmap(data, stem):
@@ -291,9 +291,9 @@ def plot_query_complexity_heatmap(data, stem):
                 )
 
     fig.tight_layout()
-    fig.savefig(FIGURES_DIR / f"{stem}_query_heatmap.png", dpi=150)
+    fig.savefig(_figures_dir(stem) / "benchmark_query_heatmap.png", dpi=150)
     plt.close(fig)
-    print(f"  Saved figures/{stem}_query_heatmap.png")
+    print(f"  Saved figures/{stem}/benchmark_query_heatmap.png")
 
 
 def plot_real_data(data, stem):
@@ -314,9 +314,9 @@ def plot_real_data(data, stem):
     ax.grid(True, alpha=0.3, axis="y")
     plt.xticks(rotation=45, ha="right")
     fig.tight_layout()
-    fig.savefig(FIGURES_DIR / f"{stem}_real_data.png", dpi=150)
+    fig.savefig(_figures_dir(stem) / "benchmark_real_data.png", dpi=150)
     plt.close(fig)
-    print(f"  Saved figures/{stem}_real_data.png")
+    print(f"  Saved figures/{stem}/benchmark_real_data.png")
 
 
 # ======================================================================
@@ -358,6 +358,13 @@ def _engine_summary_table(data):
         '| Quoted exact match | — | `"Exact-tag"` | same as QH |\n'
         "| Implementation | Regex on text | Recursive tree on parsed nodes | Recursive tree on StringNode |\n"
     )
+
+
+def _figures_dir(stem: str) -> Path:
+    """Return (and create) the per-run figures subdirectory."""
+    d = _FIGURES_BASE / stem
+    d.mkdir(parents=True, exist_ok=True)
+    return d
 
 
 def generate_markdown_report(data, stem):
@@ -469,10 +476,10 @@ def generate_markdown_report(data, stem):
 
     # Deep nesting
     if sweeps:
-        nd = swdf[swdf["factor"] == "nesting_depth"]
-        if not nd.empty:
+        nest_df = swdf[swdf["factor"] == "nesting_depth"]
+        if not nest_df.empty:
             for eng in ["QueryHandler", "SQH_with_lookup"]:
-                edf = nd[nd["engine"] == eng].sort_values("level")
+                edf = nest_df[nest_df["engine"] == eng].sort_values("level")
                 if len(edf) >= 2:
                     t0 = edf.iloc[0]["time"]
                     t_last = edf.iloc[-1]["time"]
@@ -520,7 +527,7 @@ def generate_markdown_report(data, stem):
         )
         table(_pivot_to_md(pivot))
 
-        img("Query × Engine heatmap", f"../figures/{stem}_query_heatmap.png")
+        img("Query × Engine heatmap", f"../figures/{stem}/benchmark_query_heatmap.png")
 
     # ------------------------------------------------------------------
     # Series results
@@ -542,7 +549,7 @@ def generate_markdown_report(data, stem):
         )
         table(_pivot_to_md(pivot))
 
-        img("Series scaling", f"../figures/{stem}_series_scaling.png")
+        img("Series scaling", f"../figures/{stem}/benchmark_series_scaling.png")
 
     # ------------------------------------------------------------------
     # Factor sweeps
@@ -619,7 +626,7 @@ def generate_markdown_report(data, stem):
         pivot = sub.pivot_table(index="level", columns="engine", values="time", aggfunc="first") * 1000
         table(_pivot_to_md(pivot))
 
-        img(factor, f"../figures/{stem}_sweep_{factor}.png")
+        img(factor, f"../figures/{stem}/benchmark_sweep_{factor}.png")
 
     # ------------------------------------------------------------------
     # Real data
@@ -636,7 +643,7 @@ def generate_markdown_report(data, stem):
         rdf = pd.DataFrame(real_recs)
         pivot = rdf.pivot_table(index="query_label", columns="engine", values="total_time", aggfunc="first") * 1000
         table(_pivot_to_md(pivot))
-        img("Real BIDS data", f"../figures/{stem}_real_data.png")
+        img("Real BIDS data", f"../figures/{stem}/benchmark_real_data.png")
 
     # ------------------------------------------------------------------
     # Recommendations
