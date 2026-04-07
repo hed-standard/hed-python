@@ -37,8 +37,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from hed.schema.hed_schema_constants import HedSectionKey
-
 
 def generate_schema_lookup(schema):
     """Build a schema lookup table mapping short tag names to their ``tag_terms``.
@@ -69,7 +67,7 @@ def generate_schema_lookup(schema):
     # Handle HedSchemaGroup by iterating component schemas
     schemas = _iter_schemas(schema)
     for sch in schemas:
-        tags_section = sch._sections.get(HedSectionKey.Tags)
+        tags_section = sch.tags
         if tags_section is None:
             continue
         for name, entry in tags_section.items():
@@ -98,13 +96,9 @@ def _iter_schemas(schema):
     Yields:
         HedSchema: Individual schema objects.
     """
-    # HedSchemaGroup has a 'schemas' dict or list attribute
-    if hasattr(schema, "schemas"):
-        schemas_attr = schema.schemas
-        if isinstance(schemas_attr, dict):
-            yield from schemas_attr.values()
-        else:
-            yield from schemas_attr
+    # HedSchemaGroup stores member schemas in _schemas (a dict keyed by namespace)
+    if hasattr(schema, "_schemas"):
+        yield from schema._schemas.values()
     else:
         yield schema
 

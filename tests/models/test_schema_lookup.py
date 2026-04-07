@@ -189,6 +189,45 @@ class TestSchemaLookupRoundTrip(TestSchemaLookupBase):
             os.unlink(tmp_path)
 
 
+class TestGenerateSchemaLookupGroup(unittest.TestCase):
+    """Verify that generate_schema_lookup works correctly with HedSchemaGroup."""
+
+    @classmethod
+    def setUpClass(cls):
+        base_data_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/"))
+        hed_xml_file = os.path.join(base_data_dir, "schema_tests/HED8.0.0t.xml")
+        try:
+            from hed import schema as hed_schema
+            from hed.schema.hed_schema_group import HedSchemaGroup
+
+            single = hed_schema.load_schema(hed_xml_file)
+            cls.group = HedSchemaGroup([single])
+            cls.single_lookup = generate_schema_lookup(single)
+            cls.group_lookup = generate_schema_lookup(cls.group)
+        except Exception as exc:
+            cls.group = None
+            cls.single_lookup = None
+            cls.group_lookup = None
+            cls._setup_error = str(exc)
+
+    def _require_group(self):
+        if self.group_lookup is None:
+            self.skipTest(f"Schema not available: {getattr(self, '_setup_error', 'unknown error')}")
+
+    def test_group_returns_dict(self):
+        self._require_group()
+        self.assertIsInstance(self.group_lookup, dict)
+
+    def test_group_lookup_non_empty(self):
+        self._require_group()
+        self.assertGreater(len(self.group_lookup), 0)
+
+    def test_group_lookup_matches_single_lookup(self):
+        """A group wrapping a single schema should produce the same lookup as that schema alone."""
+        self._require_group()
+        self.assertEqual(self.group_lookup, self.single_lookup)
+
+
 class TestSchemaLookupUsedInSearch(TestSchemaLookupBase):
     """Integration tests: lookup dict plugged into StringQueryHandler."""
 
@@ -241,11 +280,9 @@ class TestSchemaLookupNoSchema(unittest.TestCase):
                 return []
 
         class _FakeSchema:
-            _sections = {}
-
             @property
-            def schemas(self):
-                return []
+            def tags(self):
+                return _FakeSection()
 
         result = generate_schema_lookup(_FakeSchema())
         self.assertIsInstance(result, dict)

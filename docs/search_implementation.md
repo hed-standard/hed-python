@@ -53,18 +53,18 @@ It parses each raw HED string into a lightweight {class}`~hed.models.string_sear
 Key characteristics:
 
 - Input is a raw string (or a `pd.Series` via {func}`~hed.models.string_search.search_series`).
-- Schema is **optional**: pass a `schema_lookup` dict (see {mod}`hed.models.schema_lookup`) to enable ancestor matching for long-form strings; omit it for purely literal matching.
+- Schema is **optional**: pass a `schema_lookup` dict (see {mod}`hed.models.schema_lookup`) to enable ancestor matching for short-form strings (e.g. `Event` matching `Sensory-event`); omit it for purely literal matching.
 - Output is a list (truthy/falsy) — row-filtering only, no object references.
 - Supports the same full query syntax as `QueryHandler` (`&&`, `||`, `~`, `@`, `{}`, etc.).
 - `@A` carries the same semantics as `QueryHandler` — A must **not** be present.
-- Without a schema lookup, `Event` does **not** match `Sensory-event` (short-form strings). With a schema lookup, ancestor matching works for long-form strings (`Event/Sensory-event`).
+- Long-form strings (`Event/Sensory-event`) support ancestor matching via slash-splitting even without a lookup. Short-form strings (`Sensory-event`) require a `schema_lookup` for ancestor matching; without one, matching is purely literal.
 - Parse cost is a lightweight recursive split — much cheaper than a full HedString + schema parse.
 
 Use `StringQueryHandler` when you have raw strings (not `HedString` objects), need the full `QueryHandler` query syntax, and either don't have a schema available or want faster processing at the cost of losing full schema-aware ancestor matching. See {class}`hed.models.string_search.StringQueryHandler`.
 
 ### Generating a schema lookup
 
-If you want `StringQueryHandler` to resolve ancestors for long-form strings without a full schema parse per row, you can pre-generate a lookup dictionary from a `HedSchema`:
+If you want `StringQueryHandler` to resolve ancestors for short-form strings (e.g. query `Event` matching `Sensory-event`) without a full schema parse per row, you can pre-generate a lookup dictionary from a `HedSchema`:
 
 ```python
 from hed import load_schema_version
