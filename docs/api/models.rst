@@ -181,7 +181,7 @@ String-based search
 -------------------
 
 Search functions that operate on raw HED strings without requiring pre-parsed ``HedString`` objects
-or a loaded schema. See also :doc:`/search_implementation` for a full comparison of all three
+or a loaded schema. See also :doc:`/search_details` for a full comparison of all three
 search implementations.
 
 StringQueryHandler

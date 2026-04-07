@@ -1,5 +1,9 @@
 
 
+# Benchmark generated output
+benchmarks/results/
+benchmarks/figures/
+
 #################
 ## Eclipse
 #################
