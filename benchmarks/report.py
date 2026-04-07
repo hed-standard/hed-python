@@ -20,8 +20,8 @@ from pathlib import Path
 
 import matplotlib
 
-matplotlib.use("Agg")  # non-interactive backend
-import matplotlib.pyplot as plt
+matplotlib.use("Agg")  # must be set before importing pyplot
+import matplotlib.pyplot as plt  # noqa: E402
 import pandas as pd
 
 RESULTS_DIR = Path(__file__).parent / "results"
@@ -340,15 +340,15 @@ def _pivot_to_md(pivot_ms, float_fmt=".3f"):
 
 
 def _engine_summary_table(data):
-    """Build a comparison table of the four search engines."""
+    """Build a comparison table of the three search engines."""
     return (
         "| Feature | basic_search | QueryHandler | StringQueryHandler |\n"
         "| --- | --- | --- | --- |\n"
         "| Input type | `pd.Series[str]` | `HedString` objects | Raw strings (`str`) |\n"
         "| Schema required | No | Yes | Optional (via `schema_lookup`) |\n"
         "| Series-native | Yes (`find_matching`) | No (manual loop) | Yes (`search_series`) |\n"
-        "| Boolean AND | `@word1 @word2` | `term1 and term2` | same as QH |\n"
-        "| Boolean OR | — | `term1 or term2` | same as QH |\n"
+        "| Boolean AND | `word1, word2` | `term1 && term2` | same as QH |\n"
+        "| Boolean OR | — | `term1 || term2` | same as QH |\n"
         "| Negation | `~word` | `~term` | same as QH |\n"
         "| Exact group `{}` | — | `{term1, term2}` | same as QH |\n"
         "| Optional exact `{:}` | — | `{term1, term2:}` | same as QH |\n"
@@ -422,18 +422,39 @@ def generate_markdown_report(data, stem):
     h2("Key findings")
     findings = []
 
-    # Series speed
+    # Series speed — use series_size sweep so query and config are consistent;
+    # report ratio at the largest row count tested.
     series_recs = data.get("series", [])
-    if series_recs:
+    _sweep_recs = data.get("factor_sweeps", [])
+    if _sweep_recs:
+        swdf_series = pd.DataFrame(_sweep_recs)
+        ss = swdf_series[swdf_series["factor"] == "series_size"]
+        if not ss.empty:
+            max_level = ss["level"].max()
+            at_max = ss[ss["level"] == max_level]
+            bs_row = at_max[at_max["engine"] == "basic_search"]["time"]
+            qh_row = at_max[at_max["engine"] == "QueryHandler_loop"]["time"]
+            if not bs_row.empty and not qh_row.empty and bs_row.values[0] > 0:
+                ratio = qh_row.values[0] / bs_row.values[0]
+                findings.append(
+                    f"**Series throughput:** `basic_search` is ~{ratio:.0f}× faster than "
+                    f"`QueryHandler` in a row-by-row loop at {max_level:,} rows, "
+                    f"because it leverages vectorised pandas `str.contains` regex matching."
+                )
+    elif series_recs:
         sdf = pd.DataFrame(series_recs)
-        biggest = sdf.groupby("engine")["total_time"].median()
-        bs_med = biggest.get("basic_search")
-        qh_med = biggest.get("QueryHandler_loop")
-        if bs_med is not None and qh_med is not None and qh_med > 0:
-            ratio = qh_med / bs_med
+        # Group by engine + n_rows, then take the median across queries at each row count;
+        # report the ratio at the largest row count to avoid mixing incomparable workloads.
+        per_nrows = sdf.groupby(["engine", "n_rows"])["total_time"].median().reset_index()
+        max_nrows = per_nrows["n_rows"].max()
+        at_max = per_nrows[per_nrows["n_rows"] == max_nrows]
+        bs_row = at_max[at_max["engine"] == "basic_search"]["total_time"]
+        qh_row = at_max[at_max["engine"] == "QueryHandler_loop"]["total_time"]
+        if not bs_row.empty and not qh_row.empty and bs_row.values[0] > 0:
+            ratio = qh_row.values[0] / bs_row.values[0]
             findings.append(
                 f"**Series throughput:** `basic_search` is ~{ratio:.0f}× faster than "
-                f"`QueryHandler` in a row-by-row loop across all tested series sizes, "
+                f"`QueryHandler` in a row-by-row loop at {max_nrows:,} rows, "
                 f"because it leverages vectorised pandas `str.contains` regex matching."
             )
 

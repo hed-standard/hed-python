@@ -160,10 +160,10 @@ Benchmarks were run using HED 8.4.0 with `timeit` on both synthetic strings and 
 
 ### Key findings
 
-- **Series throughput:** `basic_search` is roughly 14–20× faster than a `QueryHandler` row-by-row loop at 5 000 rows because it leverages vectorised pandas `str.contains` regex matching.
-- **Single-string speed:** `StringQueryHandler` (no lookup) is ~40 % faster than `QueryHandler` per string because it avoids schema-based `HedString` construction.
+- **Series throughput:** `basic_search` is ~16× faster than a `QueryHandler` row-by-row loop at 5 000 rows because it leverages vectorised pandas `str.contains` regex matching.
+- **Single-string speed:** `StringQueryHandler` (no lookup) is ~39% faster than `QueryHandler` per string because it avoids schema-based `HedString` construction.
 - **Schema-lookup overhead:** Enabling `schema_lookup` in `StringQueryHandler` has negligible overhead for most queries; cost appears only when ancestor matching is actually invoked.
-- **Nesting depth:** At depth 20, `QueryHandler` is ~6× slower than on a flat string; `StringQueryHandler` shows similar scaling.
+- **Nesting depth:** At depth 20, `QueryHandler` is ~8× slower than on a flat string; `StringQueryHandler` shows similar scaling (~8×).
 - **Operation coverage:** `basic_search` supports 7 of 18 tested operation types. The remaining 11 (OR, exact groups, logical groups, `?`/`??`/`???` wildcards, quoted terms) require `QueryHandler` or `StringQueryHandler`.
 
 ### Series throughput
@@ -180,7 +180,7 @@ Whole-series search over a `pd.Series` of HED strings. `basic_search` uses vecto
 
 All three engines scale linearly with row count. `basic_search` is 14–20× faster than `QueryHandler_loop`; `search_series` is roughly 1.4× faster than `QueryHandler_loop`.
 
-![Series search time vs row count](_static/images/search_perf_series_size.png)
+![Series search time vs row count](_static/images/benchmark_sweep_series_size.png)
 
 ### Single-string timing
 
@@ -197,7 +197,7 @@ Per-string median search time (ms) across string sizes. Tag counts: tiny = 1, sm
 
 `basic_search` regex overhead dominates on small strings; `QueryHandler` and `StringQueryHandler` dominate on large strings. The crossover occurs around 25–50 tags.
 
-![Median search time per query × engine (ms)](_static/images/search_perf_query_heatmap.png)
+![Median search time per query × engine (ms)](_static/images/benchmark_query_heatmap.png)
 
 ### Operation coverage and cost
 
@@ -226,7 +226,7 @@ Per-operation timing on a 10-tag string. `basic_search` returns no results (not 
 
 `StringQueryHandler` supports all 18 operation types.
 
-![Per-operation timing across all three engines](_static/images/search_perf_per_operation.png)
+![Per-operation timing across all three engines](_static/images/benchmark_sweep_per_operation.png)
 
 ### Nesting depth
 
@@ -238,14 +238,14 @@ Parenthesisation depth from 0 (flat) to 20. Deeper nesting increases the tree wa
 |     1 |             0.022 |              0.013 |             0.256 |
 |     2 |             0.028 |              0.019 |             0.218 |
 |     3 |             0.034 |              0.023 |             0.215 |
-|     5 |             0.058 |              0.039 |             0.274 |
-|    10 |             0.102 |              0.058 |             0.256 |
-|    15 |             0.124 |              0.087 |             0.245 |
-|    20 |             0.155 |              0.108 |             0.234 |
+|     5 |             0.110 |              0.076 |             0.531 |
+|    10 |             0.094 |              0.060 |             0.385 |
+|    15 |             0.116 |              0.082 |             0.226 |
+|    20 |             0.409 |              0.140 |             0.200 |
 
-At depth 20, `QueryHandler` is ~6× slower than at depth 0; `SQH` is ~6× slower.
+At depth 20, `QueryHandler` is ~8× slower than at depth 0; `SQH` is ~8× slower.
 
-![Nesting depth sweep](_static/images/search_perf_nesting_depth.png)
+![Nesting depth sweep](_static/images/benchmark_sweep_nesting_depth.png)
 
 #### Deep nesting by query type
 
@@ -260,7 +260,7 @@ The nesting cost depends on query type. For group-structural queries (`group_mat
 |    10 |        0.087 |         0.059 |        0.209 |
 |    20 |        0.141 |         0.154 |        0.212 |
 
-![Deep nesting — bare term](_static/images/search_perf_deep_nest_bare_term.png)
+![Deep nesting — bare term](_static/images/benchmark_sweep_deep_nest_bare_term.png)
 
 **Exact group `{}`:**
 
@@ -271,7 +271,7 @@ The nesting cost depends on query type. For group-structural queries (`group_mat
 |    10 |        0.105 |         0.072 |
 |    20 |        0.209 |         0.146 |
 
-![Deep nesting — exact group](_static/images/search_perf_deep_nest_exact_group.png)
+![Deep nesting — exact group](_static/images/benchmark_sweep_deep_nest_exact_group.png)
 
 **Group match `[]`:**
 
@@ -282,7 +282,7 @@ The nesting cost depends on query type. For group-structural queries (`group_mat
 |    10 |        0.181 |         0.063 |        0.536 |
 |    20 |        0.324 |         0.118 |        0.658 |
 
-![Deep nesting — group match](_static/images/search_perf_deep_nest_group_match.png)
+![Deep nesting — group match](_static/images/benchmark_sweep_deep_nest_group_match.png)
 
 `QueryHandler` at depth 10 is 5.7× its depth-1 cost; `StringQueryHandler` is only 3.2×.
 
@@ -295,7 +295,7 @@ The nesting cost depends on query type. For group-structural queries (`group_mat
 |    10 |        0.101 |         0.072 |        0.121 |
 |    20 |        0.177 |         0.129 |        0.112 |
 
-![Deep nesting — negation](_static/images/search_perf_deep_nest_negation.png)
+![Deep nesting — negation](_static/images/benchmark_sweep_deep_nest_negation.png)
 
 **Two-term AND:**
 
@@ -306,7 +306,7 @@ The nesting cost depends on query type. For group-structural queries (`group_mat
 |    10 |        0.205 |         0.070 |        0.274 |
 |    20 |        0.320 |         0.109 |        0.355 |
 
-![Deep nesting — two-term AND](_static/images/search_perf_deep_nest_two_and.png)
+![Deep nesting — two-term AND](_static/images/benchmark_sweep_deep_nest_two_and.png)
 
 ### Repeated tags
 
@@ -320,7 +320,7 @@ Repeating a target tag N times in the string. `basic_search`'s `verify_search_de
 |          20 |             0.182 |              0.138 |             0.668 |
 |          40 |             0.200 |              0.195 |             0.654 |
 
-![Repeated target tag sweep](_static/images/search_perf_repeated_tags.png)
+![Repeated target tag sweep](_static/images/benchmark_sweep_repeated_tags.png)
 
 ### Compile vs. search
 
@@ -331,7 +331,7 @@ Query compilation is a one-time cost; subsequent searches against different stri
 | Compile |             0.004 |                   0.005 |
 | Search  |             0.053 |                   0.036 |
 
-![Compile vs. search cost breakdown](_static/images/search_perf_compile_vs_search.png)
+![Compile vs. search cost breakdown](_static/images/benchmark_compile_vs_search.png)
 
 ### Real BIDS data
 
@@ -352,7 +352,7 @@ Search over 200 rows of the `eeg_ds003645s_hed` BIDS test dataset.
 | `wildcard_child`       |                   12.6 |                 — |                8.9 |
 | `complex_composite`    |                   14.2 |                 — |                9.5 |
 
-![Real BIDS data — 200-row search times](_static/images/search_perf_real_data.png)
+![Real BIDS data — 200-row search times](_static/images/benchmark_real_data.png)
 
 ### Tag count
 
@@ -367,7 +367,7 @@ Number of tags in the HED string (1 to 100). `basic_search` time is dominated by
 |   50 |             0.149 |              0.160 |             0.184 |
 |  100 |             0.287 |              0.167 |             0.271 |
 
-![Tag count sweep](_static/images/search_perf_tag_count.png)
+![Tag count sweep](_static/images/benchmark_sweep_tag_count.png)
 
 The tree-based crossover with `basic_search` occurs around 25–50 tags, where traversal cost meets the regex setup cost.
 
@@ -380,7 +380,7 @@ Short-form vs long-form HED strings. Long-form strings use fully expanded paths 
 | short |             0.044 |              0.029 |             0.124 |
 | long  |             0.074 |              0.063 |             0.121 |
 
-![String form sweep](_static/images/search_perf_string_form.png)
+![String form sweep](_static/images/benchmark_sweep_string_form.png)
 
 `QueryHandler` is 1.7× slower on long-form strings; `StringQueryHandler` is 2.2× slower.
 
@@ -393,7 +393,7 @@ Short-form vs long-form HED strings. Long-form strings use fully expanded paths 
 | no_lookup   |                   0.030 |
 | with_lookup |                   0.029 |
 
-![Schema lookup overhead](_static/images/search_perf_schema_lookup.png)
+![Schema lookup overhead](_static/images/benchmark_sweep_schema_lookup.png)
 
 ### Group count and query complexity
 
@@ -409,7 +409,7 @@ More top-level parenthesised groups increase the number of children the tree mus
 |     10 |             0.080 |              0.053 |             0.135 |
 |     20 |             0.140 |              0.085 |             0.136 |
 
-![Group count sweep](_static/images/search_perf_group_count.png)
+![Group count sweep](_static/images/benchmark_sweep_group_count.png)
 
 **Query complexity** (1-clause bare term → 8-clause composite):
 
@@ -424,7 +424,7 @@ More top-level parenthesised groups increase the number of children the tree mus
 | 7 — exact group `{}`  |             0.120 |              0.078 | —            |
 | 8 — complex composite |             0.106 |              0.078 | —            |
 
-![Query complexity sweep](_static/images/search_perf_query_complexity.png)
+![Query complexity sweep](_static/images/benchmark_sweep_query_complexity.png)
 
 ### Choosing an implementation
 

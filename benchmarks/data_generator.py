@@ -3,7 +3,7 @@
 Usage::
 
     from data_generator import DataGenerator
-    gen = DataGenerator()  # loads schema 8.3.0
+    gen = DataGenerator()  # loads schema 8.4.0
     s = gen.make_string(n_tags=10, n_groups=2, depth=1)
     series = gen.make_series(n_rows=1000, n_tags=10, n_groups=2, depth=1)
     real = gen.load_real_data(tile_to=5000)
@@ -25,7 +25,7 @@ from hed.models.df_util import convert_to_form
 class DataGenerator:
     """Build synthetic and real HED data for benchmarking."""
 
-    def __init__(self, schema_version="8.3.0", seed=42):
+    def __init__(self, schema_version="8.4.0", seed=42):
         self.schema = load_schema_version(schema_version)
         self.lookup = generate_schema_lookup(self.schema)
         self._rng = random.Random(seed)
