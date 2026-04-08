@@ -214,7 +214,7 @@ Basic search scales sub-linearly because vectorized regex amortises overhead acr
 
 Per-string median search time (ms) across string sizes. Tag counts: tiny = 1, small = 5, medium = 10, large = 25, xlarge = 50, xxlarge = 100. Larger strings also contain nested groups (e.g. large = 5 groups at depth 2). The table below is filtered to the `bare_term` query (`Event` / `@Event`) to isolate parse and tree-walk cost from query complexity; see the query heatmap image below for all 12 queries.
 
-(Example 10-tag string: `Gentalia, Move, Computed-feature, Age, Aroused, 3D-shape, Little-toe, To-right-of, Brain-region, DarkSeaGreen`)
+(Example 10-tag string: `Human-agent, Move, Computed-feature, Age, Aroused, 3D-shape, Little-toe, To-right-of, Brain-region, DarkSeaGreen`)
 
 | String size        | Object search (ms) | String search (ms) | Basic search (ms) |
 | ------------------ | -----------------: | -----------------: | ----------------: |
@@ -400,7 +400,7 @@ Search over 200 rows of the `eeg_ds003645s_hed` BIDS test dataset.
 
 Number of tags in the HED string (1 to 100), query `Event`. Basic search time is dominated by regex compilation overhead and stays roughly constant; tree-based engines scale linearly with the number of nodes to traverse.
 
-(Example 10-tag string: `Gentalia, Move, Computed-feature, Age, Aroused, 3D-shape, Little-toe, To-right-of, Brain-region, DarkSeaGreen`)
+(Example 10-tag string: `Human-agent, Move, Computed-feature, Age, Aroused, 3D-shape, Little-toe, To-right-of, Brain-region, DarkSeaGreen`)
 
 | Tags | Object search (ms) | String search (ms) | Basic search (ms) |
 | ---: | -----------------: | -----------------: | ----------------: |
@@ -468,7 +468,7 @@ More top-level parenthesised groups increase the number of children the tree mus
 
 ![Group count sweep](_static/images/benchmark_sweep_group_count.png)
 
-**Query complexity** (1-clause bare term → 8-clause composite. Example string: `Gentalia, Move, Computed-feature, Age, Aroused, 3D-shape, Little-toe, To-right-of, Brain-region, DarkSeaGreen, (FireBrick, (Flex, Move-body)), (Categorical-value, (Eyelid, Comatose)), (Robotic-agent, (Catamenial, Background-subtask)), (Keyboard, (Cough, River)), (ForestGreen, (Green-color, Locked-in))`):
+**Query complexity** (1-clause bare term → 8-clause composite. Example string: `Human-agent, Move, Computed-feature, Age, Aroused, 3D-shape, Little-toe, To-right-of, Brain-region, DarkSeaGreen, (FireBrick, (Flex, Move-body)), (Categorical-value, (Eyelid, Comatose)), (Robotic-agent, (Catamenial, Background-subtask)), (Keyboard, (Cough, River)), (ForestGreen, (Green-color, Locked-in))`):
 
 | Complexity            | Object search (ms) | String search (ms) | Basic search |
 | --------------------- | -----------------: | -----------------: | ------------ |

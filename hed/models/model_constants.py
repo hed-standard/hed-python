@@ -8,6 +8,11 @@ class TopTagReturnType(IntEnum):
 
     Pass one of these constants as the ``include_groups`` argument to control
     whether the method returns anchor tags, containing groups, or (tag, group) pairs.
+
+    Attributes:
+        TAGS: Return only the anchor :class:`~hed.models.HedTag` objects.
+        GROUPS: Return only the :class:`~hed.models.HedGroup` objects that contain each anchor tag.
+        BOTH: Return ``(tag, group)`` tuples pairing each anchor tag with its containing group.
     """
 
     TAGS = 0

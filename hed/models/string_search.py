@@ -418,5 +418,5 @@ def string_search(strings, query, schema_lookup=None):
     """
     handler = StringQueryHandler(query)
     return [
-        bool(handler.search(s, schema_lookup=schema_lookup)) if s and isinstance(s, str) else False for s in strings
+        bool(handler.search(s, schema_lookup=schema_lookup)) if isinstance(s, str) and s else False for s in strings
     ]

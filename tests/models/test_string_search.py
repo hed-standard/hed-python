@@ -1079,6 +1079,15 @@ class TestStringSearch(unittest.TestCase):
         self.assertFalse(mask[2])
         self.assertFalse(mask[3])
 
+    def test_pandas_na_row(self):
+        import pandas as pd
+
+        data = ["A, B", pd.NA, "B, C"]
+        mask = string_search(data, "A")
+        self.assertTrue(mask[0])
+        self.assertFalse(mask[1])
+        self.assertFalse(mask[2])
+
     def test_empty_string_row(self):
         data = ["A", "", "B"]
         mask = string_search(data, "A")
