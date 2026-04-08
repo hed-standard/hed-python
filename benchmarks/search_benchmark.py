@@ -27,7 +27,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from hed import HedString, QueryHandler  # noqa: E402
 from hed.models.basic_search import find_matching  # noqa: E402
-from hed.models.string_search import StringQueryHandler, search_series  # noqa: E402
+from hed.models.string_search import StringQueryHandler, string_search  # noqa: E402
 
 from data_generator import DataGenerator  # noqa: E402
 
@@ -143,7 +143,7 @@ class SingleStringBenchmark:
         med, _ = time_it(lambda: find_matching(series, query), self.n_runs)
         matches = int(find_matching(series, query).sum())
         return {
-            "engine": "basic_search",
+            "engine": "Basic search",
             "query_label": q_label,
             "config_label": cfg_label,
             "query": query,
@@ -166,7 +166,7 @@ class SingleStringBenchmark:
         search_med, _ = time_it(do_search, self.n_runs)
         result = do_search()
         return {
-            "engine": "QueryHandler",
+            "engine": "Object search",
             "query_label": q_label,
             "config_label": cfg_label,
             "query": query,
@@ -181,8 +181,9 @@ class SingleStringBenchmark:
         sqh = StringQueryHandler(query)
         search_med, _ = time_it(lambda: sqh.search(raw, schema_lookup=schema_lookup), self.n_runs)
         result = sqh.search(raw, schema_lookup=schema_lookup)
+        label = "String search" if suffix == "no_lookup" else "String search (lookup)"
         return {
-            "engine": f"StringQueryHandler_{suffix}",
+            "engine": label,
             "query_label": q_label,
             "config_label": cfg_label,
             "query": query,
@@ -235,15 +236,15 @@ class SeriesBenchmark:
                     rec = self._bench_basic_series(series, bs_query, label, q_label, n_rows)
                     records.append(rec)
 
-                # --- search_series (StringQueryHandler) no lookup ---
+                # --- String search (StringQueryHandler) no lookup ---
                 rec = self._bench_search_series(series, qh_query, label, q_label, n_rows, None, "no_lookup")
                 records.append(rec)
 
-                # --- search_series (StringQueryHandler) with lookup ---
+                # --- String search (StringQueryHandler) with lookup ---
                 rec = self._bench_search_series(series, qh_query, label, q_label, n_rows, self.lookup, "with_lookup")
                 records.append(rec)
 
-                # --- QueryHandler loop ---
+                # --- Object search (QueryHandler loop) ---
                 rec = self._bench_qh_loop(series, qh_query, label, q_label, n_rows)
                 records.append(rec)
 
@@ -253,7 +254,7 @@ class SeriesBenchmark:
         med, _ = time_it(lambda: find_matching(series, query), self.n_runs)
         matches = int(find_matching(series, query).sum())
         return {
-            "engine": "basic_search",
+            "engine": "Basic search",
             "query_label": q_label,
             "config_label": cfg_label,
             "n_rows": n_rows,
@@ -263,10 +264,12 @@ class SeriesBenchmark:
         }
 
     def _bench_search_series(self, series, query, cfg_label, q_label, n_rows, lookup, suffix):
-        med, _ = time_it(lambda: search_series(series, query, schema_lookup=lookup), self.n_runs)
-        matches = int(search_series(series, query, schema_lookup=lookup).sum())
+        strings = series.tolist()
+        med, _ = time_it(lambda: string_search(strings, query, schema_lookup=lookup), self.n_runs)
+        matches = sum(string_search(strings, query, schema_lookup=lookup))
+        label = "String search" if suffix == "no_lookup" else "String search (lookup)"
         return {
-            "engine": f"search_series_{suffix}",
+            "engine": label,
             "query_label": q_label,
             "config_label": cfg_label,
             "n_rows": n_rows,
@@ -294,7 +297,7 @@ class SeriesBenchmark:
                 if qh.search(hs):
                     count += 1
         return {
-            "engine": "QueryHandler_loop",
+            "engine": "Object search",
             "query_label": q_label,
             "config_label": cfg_label,
             "n_rows": n_rows,
@@ -402,16 +405,35 @@ class FactorSweep:
         return records
 
     def sweep_schema_lookup(self):
-        """Compare StringQueryHandler with vs without schema_lookup."""
-        raw = self.gen.make_string(n_tags=15, n_groups=3, depth=1)
-        query = "Event"
-        sqh = StringQueryHandler(query)
+        """Compare StringQueryHandler with vs without schema_lookup across query types.
+
+        Uses a fixed short-form string containing known descendants of Event and Action so
+        the behavioural difference (which strings match) is deterministic.
+        """
+        # Fixed short-form string with known Event and Action descendants.
+        # Sensory-event, Agent-action, Data-feature are Event descendants;
+        # Communicate, Clap-hands are Action descendants.
+        raw = (
+            "Sensory-event, Agent-action, Data-feature, Communicate, Clap-hands, "
+            "Communicate-gesturally, Blue, High, (Red, Move), (Experiment-control, Frown)"
+        )
+        queries = [
+            ("Ancestor: Event", "Event"),
+            ("Ancestor: Action", "Action"),
+            ("Exact: Sensory-event", "Sensory-event"),
+            ("Compound: Event && Action", "Event && Action"),
+        ]
         records = []
-        for with_lookup in [False, True]:
-            lk = self.lookup if with_lookup else None
-            label = "with_lookup" if with_lookup else "no_lookup"
-            med, _ = time_it(lambda lk=lk: sqh.search(raw, schema_lookup=lk), self.n_runs)
-            records.append({"factor": "schema_lookup", "level": label, "engine": "StringQueryHandler", "time": med})
+        for q_label, query in queries:
+            sqh = StringQueryHandler(query)
+            for with_lookup in [False, True]:
+                lk = self.lookup if with_lookup else None
+                mode = "With lookup" if with_lookup else "No lookup"
+                med, _ = time_it(lambda lk=lk, _sqh=sqh: _sqh.search(raw, schema_lookup=lk), self.n_runs)
+                matches = len(sqh.search(raw, schema_lookup=lk))
+                records.append(
+                    {"factor": "schema_lookup", "level": q_label, "engine": mode, "time": med, "matches": matches}
+                )
         return records
 
     def sweep_string_form(self):
@@ -440,18 +462,18 @@ class FactorSweep:
             qh.search(hs)
 
         search_med, _ = time_it(qh_search, self.n_runs)
-        records.append({"factor": "compile_vs_search", "level": "compile", "engine": "QueryHandler", "time": comp})
-        records.append({"factor": "compile_vs_search", "level": "search", "engine": "QueryHandler", "time": search_med})
+        records.append({"factor": "compile_vs_search", "level": "compile", "engine": "Object search", "time": comp})
+        records.append(
+            {"factor": "compile_vs_search", "level": "search", "engine": "Object search", "time": search_med}
+        )
 
         # StringQueryHandler
         comp2, _ = time_it(lambda: StringQueryHandler(query), self.n_runs)
         sqh = StringQueryHandler(query)
         search_med2, _ = time_it(lambda: sqh.search(raw, schema_lookup=self.lookup), self.n_runs)
+        records.append({"factor": "compile_vs_search", "level": "compile", "engine": "String search", "time": comp2})
         records.append(
-            {"factor": "compile_vs_search", "level": "compile", "engine": "StringQueryHandler", "time": comp2}
-        )
-        records.append(
-            {"factor": "compile_vs_search", "level": "search", "engine": "StringQueryHandler", "time": search_med2}
+            {"factor": "compile_vs_search", "level": "search", "engine": "String search", "time": search_med2}
         )
 
         return records
@@ -534,7 +556,7 @@ class FactorSweep:
         # basic_search
         if bs_query is not None:
             med, _ = time_it(lambda: find_matching(series1, bs_query), self.n_runs)
-            yield "basic_search", med
+            yield "Basic search", med
 
         # QueryHandler
         qh = QueryHandler(qh_query)
@@ -544,31 +566,32 @@ class FactorSweep:
             qh.search(hs)
 
         med, _ = time_it(qh_search, self.n_runs)
-        yield "QueryHandler", med
+        yield "Object search", med
 
         # StringQueryHandler no lookup
         sqh = StringQueryHandler(qh_query)
         med, _ = time_it(lambda: sqh.search(raw, schema_lookup=None), self.n_runs)
-        yield "SQH_no_lookup", med
+        yield "String search", med
 
         # StringQueryHandler with lookup
         med, _ = time_it(lambda: sqh.search(raw, schema_lookup=self.lookup), self.n_runs)
-        yield "SQH_with_lookup", med
+        yield "String search (lookup)", med
 
     def _bench_series_engines(self, series, qh_query, bs_query, n_rows):
         """Yield (engine_name, median_time) for series-level engines."""
         # basic_search
         if bs_query is not None:
-            med, _ = time_it(lambda: find_matching(series, bs_query), max(3, self.n_runs // 2))
-            yield "basic_search", med
+            med, _ = time_it(lambda: find_matching(series, bs_query), self.n_runs)
+            yield "Basic search", med
 
-        # search_series no lookup
-        med, _ = time_it(lambda: search_series(series, qh_query, schema_lookup=None), max(3, self.n_runs // 2))
-        yield "search_series_no_lookup", med
+        # String search no lookup
+        strings = series.tolist()
+        med, _ = time_it(lambda: string_search(strings, qh_query, schema_lookup=None), self.n_runs)
+        yield "String search", med
 
-        # search_series with lookup
-        med, _ = time_it(lambda: search_series(series, qh_query, schema_lookup=self.lookup), max(3, self.n_runs // 2))
-        yield "search_series_with_lookup", med
+        # String search with lookup
+        med, _ = time_it(lambda: string_search(strings, qh_query, schema_lookup=self.lookup), self.n_runs)
+        yield "String search (lookup)", med
 
         # QueryHandler loop
         qh = QueryHandler(qh_query)
@@ -580,8 +603,8 @@ class FactorSweep:
                     hs = HedString(s, schema)
                     qh.search(hs)
 
-        med, _ = time_it(qh_loop, max(3, self.n_runs // 2))
-        yield "QueryHandler_loop", med
+        med, _ = time_it(qh_loop, self.n_runs)
+        yield "Object search", med
 
 
 # ======================================================================
@@ -595,7 +618,7 @@ def run_full_benchmark(quick=False):
     gen = DataGenerator()
 
     n_single = 10 if quick else 20
-    n_series = 3 if quick else 5
+    n_series = 3 if quick else 10
     n_sweep = 5 if quick else 10
 
     # ------------------------------------------------------------------
@@ -675,7 +698,7 @@ def run_full_benchmark(quick=False):
             med, _ = time_it(lambda bs_query=bs_query: find_matching(real_series, bs_query), n_series)
             real_results.append(
                 {
-                    "engine": "basic_search",
+                    "engine": "Basic search",
                     "query_label": q_label,
                     "total_time": med,
                     "per_row": med / real_n,
@@ -683,12 +706,14 @@ def run_full_benchmark(quick=False):
                 }
             )
 
+        real_strings = real_series.tolist()
         med, _ = time_it(
-            lambda qh_query=qh_query: search_series(real_series, qh_query, schema_lookup=gen.lookup), n_series
+            lambda qh_query=qh_query, _rs=real_strings: string_search(_rs, qh_query, schema_lookup=gen.lookup),
+            n_series,
         )
         real_results.append(
             {
-                "engine": "search_series",
+                "engine": "String search",
                 "query_label": q_label,
                 "total_time": med,
                 "per_row": med / real_n,
@@ -708,7 +733,7 @@ def run_full_benchmark(quick=False):
         med, _ = time_it(qh_loop, n_series)
         real_results.append(
             {
-                "engine": "QueryHandler_loop",
+                "engine": "Object search",
                 "query_label": q_label,
                 "total_time": med,
                 "per_row": med / real_n,

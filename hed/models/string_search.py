@@ -38,8 +38,6 @@ from __future__ import annotations
 
 from collections import deque
 
-import pandas as pd
-
 from hed.models.query_handler import QueryHandler
 from hed.models.hed_string import HedString
 
@@ -391,31 +389,34 @@ class StringQueryHandler(QueryHandler):
 
 
 # ---------------------------------------------------------------------------
-# Convenience: pandas Series search
+# Convenience: list search
 # ---------------------------------------------------------------------------
 
 
-def search_series(series, query, schema_lookup=None):
-    """Search a pandas Series of HED strings using a query expression.
+def string_search(strings, query, schema_lookup=None):
+    """Search a list of HED strings using a query expression.
 
-    Compiles the query once and applies it to every row, returning a Boolean
-    mask.  Rows containing ``NaN`` or empty strings evaluate to ``False``.
+    Compiles the query once and applies it to every element, returning a
+    list of booleans.  ``None``, ``float('nan')``, and empty strings
+    evaluate to ``False``.
 
     Parameters:
-        series (pd.Series): A Series of raw HED strings.
+        strings (list[str]): A list of raw HED strings.
         query (str): A HED query expression (same syntax as
             :class:`~hed.models.QueryHandler`).
         schema_lookup (dict or None): Optional schema lookup dict for ancestor
             search; see :func:`~hed.models.schema_lookup.generate_schema_lookup`.
 
     Returns:
-        pd.Series: Boolean mask with the same index as *series*.
+        list[bool]: One boolean per input string.
 
     Example::
 
-        from hed.models.string_search import search_series
-        mask = search_series(events_df["HED"], "Sensory-event")
-        matching_rows = events_df[mask]
+        from hed.models.string_search import string_search
+        mask = string_search(events["HED"].tolist(), "Sensory-event")
+        matching_rows = [row for row, m in zip(events.itertuples(), mask) if m]
     """
     handler = StringQueryHandler(query)
-    return series.apply(lambda s: bool(handler.search(s, schema_lookup=schema_lookup)) if pd.notna(s) and s else False)
+    return [
+        bool(handler.search(s, schema_lookup=schema_lookup)) if isinstance(s, str) and s else False for s in strings
+    ]
