@@ -6,10 +6,8 @@ from enum import IntEnum
 class TopTagReturnType(IntEnum):
     """Return-type selector for :meth:`~hed.models.HedString.find_top_level_tags`.
 
-    Attributes:
-        TAGS: Return only the anchor :class:`~hed.models.HedTag` objects.
-        GROUPS: Return only the top-level :class:`~hed.models.HedGroup` objects.
-        BOTH: Return ``(tag, group)`` pairs (default).
+    Pass one of these constants as the ``include_groups`` argument to control
+    whether the method returns anchor tags, containing groups, or (tag, group) pairs.
     """
 
     TAGS = 0

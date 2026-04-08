@@ -205,10 +205,10 @@ parse_hed_string
 
 .. autofunction:: hed.models.string_search.parse_hed_string
 
-search_series
+string_search
 ~~~~~~~~~~~~~
 
-.. autofunction:: hed.models.string_search.search_series
+.. autofunction:: hed.models.string_search.string_search
 
 Schema lookup utilities
 ~~~~~~~~~~~~~~~~~~~~~~~

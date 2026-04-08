@@ -30,18 +30,36 @@ _FIGURES_BASE.mkdir(exist_ok=True)
 
 # Consistent colours per engine
 ENGINE_COLORS = {
-    "basic_search": "#1f77b4",
-    "QueryHandler": "#ff7f0e",
-    "QueryHandler_loop": "#ff7f0e",
-    "SQH_no_lookup": "#2ca02c",
-    "SQH_with_lookup": "#d62728",
-    "search_series_no_lookup": "#2ca02c",
-    "search_series_with_lookup": "#d62728",
-    "StringQueryHandler": "#9467bd",
-    "search_series": "#8c564b",
-    "StringQueryHandler_no_lookup": "#2ca02c",
-    "StringQueryHandler_with_lookup": "#d62728",
+    "Basic search": "#1f77b4",
+    "Object search": "#ff7f0e",
+    "String search": "#2ca02c",
+    "String search (lookup)": "#d62728",
 }
+
+# Map legacy engine labels (from older JSON files) to current display names
+_ENGINE_LABEL_MAP = {
+    "basic_search": "Basic search",
+    "QueryHandler": "Object search",
+    "QueryHandler_loop": "Object search",
+    "StringQueryHandler": "String search",
+    "StringQueryHandler_no_lookup": "String search",
+    "SQH_no_lookup": "String search",
+    "search_series": "String search",
+    "search_series_no_lookup": "String search",
+    "search_strings": "String search",
+    "StringQueryHandler_with_lookup": "String search (lookup)",
+    "SQH_with_lookup": "String search (lookup)",
+    "search_series_with_lookup": "String search (lookup)",
+}
+
+
+def _normalize_engine_labels(data):
+    """Remap legacy engine label strings to current display names in-place."""
+    for section in ("single_string", "series", "factor_sweeps", "real_data"):
+        for record in data.get(section, []):
+            if "engine" in record:
+                record["engine"] = _ENGINE_LABEL_MAP.get(record["engine"], record["engine"])
+    return data
 
 
 def load_results(path=None):
@@ -55,7 +73,9 @@ def load_results(path=None):
     else:
         path = Path(path)
     print(f"Loading results from {path}")
-    return json.loads(path.read_text(encoding="utf-8")), path.stem
+    data = json.loads(path.read_text(encoding="utf-8"))
+    _normalize_engine_labels(data)
+    return data, path.stem
 
 
 # ======================================================================
@@ -148,6 +168,42 @@ def _color(engine):
     return ENGINE_COLORS.get(engine, "#333333")
 
 
+_FACTOR_AXIS_LABELS = {
+    "tag_count": "Tag count",
+    "nesting_depth": "Nesting depth",
+    "repeated_tags": "Repeated tags",
+    "group_count": "Group count",
+    "series_size": "List size (rows)",
+    "query_complexity": "Query complexity",
+    "schema_lookup": "Schema lookup mode",
+    "string_form": "String form",
+    "compile_vs_search": "Phase",
+    "per_operation": "Operation",
+    "deep_nest_bare_term": "Nesting depth",
+    "deep_nest_two_and": "Nesting depth",
+    "deep_nest_group_match": "Nesting depth",
+    "deep_nest_exact_group": "Nesting depth",
+    "deep_nest_negation": "Nesting depth",
+}
+_FACTOR_TITLES = {
+    "tag_count": "Tag count sweep",
+    "nesting_depth": "Nesting depth sweep",
+    "repeated_tags": "Repeated tags sweep",
+    "group_count": "Group count sweep",
+    "series_size": "List size sweep",
+    "query_complexity": "Query complexity sweep",
+    "schema_lookup": "Schema lookup overhead",
+    "string_form": "String form sweep",
+    "compile_vs_search": "Compile vs. search cost",
+    "per_operation": "Per-operation sweep",
+    "deep_nest_bare_term": "Deep nesting: bare term",
+    "deep_nest_two_and": "Deep nesting: two-term AND",
+    "deep_nest_group_match": "Deep nesting: group match",
+    "deep_nest_exact_group": "Deep nesting: exact group",
+    "deep_nest_negation": "Deep nesting: negation",
+}
+
+
 def plot_factor_sweep(data, stem):
     """One figure per factor sweep with engines as separate lines."""
     records = data.get("factor_sweeps", [])
@@ -157,6 +213,8 @@ def plot_factor_sweep(data, stem):
 
     for factor in df["factor"].unique():
         sub = df[df["factor"] == factor].copy()
+        xlabel = _FACTOR_AXIS_LABELS.get(factor, factor)
+        title = _FACTOR_TITLES.get(factor, f"Factor sweep: {factor}")
 
         fig, ax = plt.subplots(figsize=(8, 5))
         for engine in sub["engine"].unique():
@@ -165,9 +223,9 @@ def plot_factor_sweep(data, stem):
             ax.set_xticks(range(len(edf)))
             ax.set_xticklabels(edf["level"].astype(str), rotation=45, ha="right")
 
-        ax.set_xlabel(factor)
+        ax.set_xlabel(xlabel)
         ax.set_ylabel("Time (ms)")
-        ax.set_title(f"Factor sweep: {factor}")
+        ax.set_title(title)
         ax.legend(fontsize=8)
         ax.grid(True, alpha=0.3)
         fig.tight_layout()
@@ -193,9 +251,9 @@ def plot_series_scaling(data, stem):
     for engine in sub["engine"].unique():
         edf = sub[sub["engine"] == engine].sort_values("level")
         ax.plot(edf["level"], edf["time"] * 1000, marker="o", label=engine, color=_color(engine))
-    ax.set_xlabel("Series size (rows)")
+    ax.set_xlabel("List size (rows)")
     ax.set_ylabel("Total time (ms)")
-    ax.set_title("Series search: total time")
+    ax.set_title("List search: total time")
     ax.legend(fontsize=8)
     ax.grid(True, alpha=0.3)
 
@@ -205,9 +263,9 @@ def plot_series_scaling(data, stem):
         edf = sub[sub["engine"] == engine].sort_values("level")
         if "per_row" in edf.columns:
             ax.plot(edf["level"], edf["per_row"] * 1000, marker="o", label=engine, color=_color(engine))
-    ax.set_xlabel("Series size (rows)")
+    ax.set_xlabel("List size (rows)")
     ax.set_ylabel("Per-row time (ms)")
-    ax.set_title("Series search: per-row amortized cost")
+    ax.set_title("List search: per-row amortized cost")
     ax.legend(fontsize=8)
     ax.grid(True, alpha=0.3)
 
@@ -251,6 +309,59 @@ def plot_compile_vs_search(data, stem):
     fig.savefig(_figures_dir(stem) / "benchmark_compile_vs_search.png", dpi=150)
     plt.close(fig)
     print(f"  Saved figures/{stem}/benchmark_compile_vs_search.png")
+
+
+def plot_schema_lookup(data, stem):
+    """Grouped bar chart comparing No lookup vs With lookup across query types."""
+    records = data.get("factor_sweeps", [])
+    if not records:
+        return
+    df = pd.DataFrame(records)
+    sub = df[df["factor"] == "schema_lookup"]
+    if sub.empty:
+        return
+
+    modes = ["No lookup", "With lookup"]
+    query_labels = list(sub["level"].unique())
+    x = range(len(query_labels))
+    width = 0.35
+    colors = {"No lookup": "#d62728", "With lookup": "#2ca02c"}
+
+    fig, ax = plt.subplots(figsize=(9, 5))
+    for i, mode in enumerate(modes):
+        vals = []
+        for ql in query_labels:
+            row = sub[(sub["engine"] == mode) & (sub["level"] == ql)]
+            vals.append(row["time"].values[0] * 1000 if len(row) else 0)
+        offset = (i - 0.5) * width
+        bars = ax.bar([xi + offset for xi in x], vals, width, label=mode, color=colors[mode], alpha=0.85)
+        # Annotate bars with match counts if available
+        if "matches" in sub.columns:
+            for bar, ql in zip(bars, query_labels, strict=False):
+                row = sub[(sub["engine"] == mode) & (sub["level"] == ql)]
+                if len(row) and "matches" in row.columns:
+                    m = int(row["matches"].values[0])
+                    label = f"{m} match{'es' if m != 1 else ''}" if m > 0 else "no match"
+                    ax.text(
+                        bar.get_x() + bar.get_width() / 2,
+                        bar.get_height() + 0.0005,
+                        label,
+                        ha="center",
+                        va="bottom",
+                        fontsize=7,
+                        rotation=45,
+                    )
+
+    ax.set_xticks(list(x))
+    ax.set_xticklabels(query_labels, rotation=20, ha="right")
+    ax.set_ylabel("Time (ms)")
+    ax.set_title("Schema lookup: timing and matching behaviour")
+    ax.legend()
+    ax.grid(True, alpha=0.3, axis="y")
+    fig.tight_layout()
+    fig.savefig(_figures_dir(stem) / "benchmark_schema_lookup.png", dpi=150)
+    plt.close(fig)
+    print(f"  Saved figures/{stem}/benchmark_schema_lookup.png")
 
 
 def plot_query_complexity_heatmap(data, stem):
@@ -342,20 +453,20 @@ def _pivot_to_md(pivot_ms, float_fmt=".3f"):
 def _engine_summary_table(data):
     """Build a comparison table of the three search engines."""
     return (
-        "| Feature | basic_search | QueryHandler | StringQueryHandler |\n"
+        "| Feature | Basic search | Object search | String search |\n"
         "| --- | --- | --- | --- |\n"
         "| Input type | `pd.Series[str]` | `HedString` objects | Raw strings (`str`) |\n"
         "| Schema required | No | Yes | Optional (via `schema_lookup`) |\n"
-        "| Series-native | Yes (`find_matching`) | No (manual loop) | Yes (`search_series`) |\n"
-        "| Boolean AND | `word1, word2` | `term1 && term2` | same as QH |\n"
-        "| Boolean OR | — | `term1 || term2` | same as QH |\n"
-        "| Negation | `~word` | `~term` | same as QH |\n"
-        "| Exact group `{}` | — | `{term1, term2}` | same as QH |\n"
-        "| Optional exact `{:}` | — | `{term1, term2:}` | same as QH |\n"
-        "| Logical group `[]` | — | `[term1, term2]` | same as QH |\n"
-        "| Wildcard `?/?? /???` | — | Yes | same as QH |\n"
-        "| Descendant wildcard | `*` suffix | `*` suffix | same as QH |\n"
-        '| Quoted exact match | — | `"Exact-tag"` | same as QH |\n'
+        "| Batch API | `find_matching(series, query)` | Manual loop | `string_search(strings, query)` |\n"
+        "| Boolean AND | `word1, word2` | `term1 && term2` | same as Object search |\n"
+        "| Boolean OR | — | `term1 || term2` | same as Object search |\n"
+        "| Negation | `~word` | `~term` | same as Object search |\n"
+        "| Exact group `{}` | — | `{term1, term2}` | same as Object search |\n"
+        "| Optional exact `{:}` | — | `{term1, term2:}` | same as Object search |\n"
+        "| Logical group `[]` | — | `[term1, term2]` | same as Object search |\n"
+        "| Wildcard `?/?? /???` | — | Yes | same as Object search |\n"
+        "| Descendant wildcard | `*` suffix | `*` suffix | same as Object search |\n"
+        '| Quoted exact match | — | `"Exact-tag"` | same as Object search |\n'
         "| Implementation | Regex on text | Recursive tree on parsed nodes | Recursive tree on StringNode |\n"
     )
 
@@ -407,14 +518,47 @@ def generate_markdown_report(data, stem):
         "that operates on parsed `HedString` objects. Requires a loaded HED schema. "
         "Supports AND, OR, negation, exact groups `{}`, optional exact `{:}`, logical groups `[]`, "
         "wildcard child `?`/`??`/`???`, descendant wildcards, and quoted exact matches.\n"
-        "3. **StringQueryHandler** (`hed.models.string_search.StringQueryHandler`) — lightweight "
+        "3. **String search** (`hed.models.string_search.StringQueryHandler`) — lightweight "
         "tree-based search that operates on raw strings via `StringNode` duck-typing. Schema is "
-        "optional (via `schema_lookup` dict for ancestor queries). Provides `search_series()` "
-        "convenience function for `pd.Series` input. Same query syntax as QueryHandler."
+        "optional (via `schema_lookup` dict for ancestor queries). Provides `string_search()` "
+        "convenience function for a plain `list[str]`. Same query syntax as Object search."
     )
 
     h3("Engine capability matrix")
     table(_engine_summary_table(data))
+
+    # ------------------------------------------------------------------
+    # Benchmark query suite
+    # ------------------------------------------------------------------
+    h2("Benchmark query suite")
+    p(
+        "All 18 operations below are used across the benchmarks. "
+        "The **single-string** and **series** benchmarks use the 12-query core set (✓); "
+        "the **per-operation sweep** uses all 18 on a fixed structured string; "
+        "**nesting-depth sweeps** use the 5-query subset marked †."
+    )
+    table(
+        "| Category | Label | Object search / String search query | Basic search query | Core | Depth |\n"
+        "| --- | --- | --- | --- | :---: | :---: |\n"
+        "| Simple | `bare_term` | `Event` | `@Event` | ✓ | † |\n"
+        '| Simple | `exact_quoted` | `"Event"` (quoted exact match) | — unsupported | ✓ | |\n'
+        "| Simple | `wildcard_prefix` | `Def/*` | `Def/*` | ✓ | |\n"
+        "| Boolean | `and_2` | `Event && Action` | `@Event, @Action` | ✓ | † |\n"
+        "| Boolean | `and_3` | `Event && Action && Agent` | `@Event, @Action, @Agent` | ✓ | |\n"
+        "| Boolean | `deep_and_chain` | `Event && Action && Agent && Item && Red` | `@Event, @Action, @Agent, @Item, @Red` | | |\n"
+        "| Boolean | `or` | `Event \\|\\| Action` | — unsupported | ✓ | |\n"
+        "| Boolean | `negation` | `~Event` | `~Event` | ✓ | † |\n"
+        "| Boolean | `double_negation` | `~(~Event)` | — unsupported | | |\n"
+        "| Boolean | `nested_or_and` | `(Event \\|\\| Sensory-event) && (Action \\|\\| Agent)` | — unsupported | | |\n"
+        "| Group structural | `group_nesting` | `[Event && Action]` | `(Event, Action)` | ✓ | † |\n"
+        "| Group structural | `exact_group` | `{Event && Action}` | — unsupported | ✓ | † |\n"
+        "| Group structural | `exact_group_optional` | `{Event && Action: Agent}` | — unsupported | ✓ | |\n"
+        "| Group structural | `wildcard_?` | `{Event, ?}` | — unsupported | ✓ | |\n"
+        "| Group structural | `wildcard_??` | `{Event, ??}` | — unsupported | | |\n"
+        "| Group structural | `wildcard_???` | `{Event, ???}` | — unsupported | | |\n"
+        "| Complex | `descendant_nested` | `[Def && Onset]` | — unsupported | | |\n"
+        "| Complex | `complex_composite` | `{(Onset \\|\\| Offset), (Def \\|\\| {Def-expand}): ???}` | — unsupported | ✓ | |\n"
+    )
 
     # ------------------------------------------------------------------
     # Key findings (populated from data)
@@ -432,13 +576,13 @@ def generate_markdown_report(data, stem):
         if not ss.empty:
             max_level = ss["level"].max()
             at_max = ss[ss["level"] == max_level]
-            bs_row = at_max[at_max["engine"] == "basic_search"]["time"]
-            qh_row = at_max[at_max["engine"] == "QueryHandler_loop"]["time"]
+            bs_row = at_max[at_max["engine"] == "Basic search"]["time"]
+            qh_row = at_max[at_max["engine"] == "Object search"]["time"]
             if not bs_row.empty and not qh_row.empty and bs_row.values[0] > 0:
                 ratio = qh_row.values[0] / bs_row.values[0]
                 findings.append(
-                    f"**Series throughput:** `basic_search` is ~{ratio:.0f}× faster than "
-                    f"`QueryHandler` in a row-by-row loop at {max_level:,} rows, "
+                    f"**Batch throughput:** Basic search is ~{ratio:.0f}× faster than "
+                    f"Object search in a row-by-row loop at {max_level:,} rows, "
                     f"because it leverages vectorised pandas `str.contains` regex matching."
                 )
     elif series_recs:
@@ -448,13 +592,13 @@ def generate_markdown_report(data, stem):
         per_nrows = sdf.groupby(["engine", "n_rows"])["total_time"].median().reset_index()
         max_nrows = per_nrows["n_rows"].max()
         at_max = per_nrows[per_nrows["n_rows"] == max_nrows]
-        bs_row = at_max[at_max["engine"] == "basic_search"]["total_time"]
-        qh_row = at_max[at_max["engine"] == "QueryHandler_loop"]["total_time"]
+        bs_row = at_max[at_max["engine"] == "Basic search"]["total_time"]
+        qh_row = at_max[at_max["engine"] == "Object search"]["total_time"]
         if not bs_row.empty and not qh_row.empty and bs_row.values[0] > 0:
             ratio = qh_row.values[0] / bs_row.values[0]
             findings.append(
-                f"**Series throughput:** `basic_search` is ~{ratio:.0f}× faster than "
-                f"`QueryHandler` in a row-by-row loop at {max_nrows:,} rows, "
+                f"**Batch throughput:** Basic search is ~{ratio:.0f}× faster than "
+                f"Object search in a row-by-row loop at {max_nrows:,} rows, "
                 f"because it leverages vectorised pandas `str.contains` regex matching."
             )
 
@@ -462,13 +606,13 @@ def generate_markdown_report(data, stem):
     single_recs = data.get("single_string", [])
     if single_recs:
         ssdf = pd.DataFrame(single_recs)
-        qh_avg = ssdf[ssdf["engine"] == "QueryHandler"]["total_time"].mean()
-        sqh_avg = ssdf[ssdf["engine"] == "StringQueryHandler_no_lookup"]["total_time"].mean()
+        qh_avg = ssdf[ssdf["engine"] == "Object search"]["total_time"].mean()
+        sqh_avg = ssdf[ssdf["engine"] == "String search"]["total_time"].mean()
         if qh_avg > 0 and sqh_avg > 0:
             pct = (1 - sqh_avg / qh_avg) * 100
             findings.append(
-                f"**Single-string speed:** `StringQueryHandler` (no lookup) is ~{pct:.0f}% "
-                f"faster than `QueryHandler` per string because it avoids schema-based "
+                f"**Single-string speed:** String search (no lookup) is ~{pct:.0f}% "
+                f"faster than Object search per string because it avoids schema-based "
                 f"`HedString` construction and uses lightweight string parsing."
             )
 
@@ -485,13 +629,13 @@ def generate_markdown_report(data, stem):
                 if abs(lu_pct) < 5:
                     findings.append(
                         "**Schema-lookup overhead:** Enabling `schema_lookup` in "
-                        "`StringQueryHandler` has negligible overhead for simple queries "
+                        "String search has negligible overhead for simple queries "
                         "(cost comes from queries that actually use ancestor matching)."
                     )
                 else:
                     findings.append(
                         f"**Schema-lookup overhead:** Enabling `schema_lookup` in "
-                        f"`StringQueryHandler` adds ~{lu_pct:.0f}% overhead for "
+                        f"String search adds ~{lu_pct:.0f}% overhead for "
                         f"ancestor-based queries."
                     )
 
@@ -499,7 +643,7 @@ def generate_markdown_report(data, stem):
     if sweeps:
         nest_df = swdf[swdf["factor"] == "nesting_depth"]
         if not nest_df.empty:
-            for eng in ["QueryHandler", "SQH_with_lookup"]:
+            for eng in ["Object search", "String search (lookup)"]:
                 edf = nest_df[nest_df["engine"] == eng].sort_values("level")
                 if len(edf) >= 2:
                     t0 = edf.iloc[0]["time"]
@@ -516,15 +660,15 @@ def generate_markdown_report(data, stem):
         po = swdf[swdf["factor"] == "per_operation"]
         if not po.empty:
             total = po["level"].nunique()
-            bs_supported = po[po["engine"] == "basic_search"]["level"].nunique()
+            bs_supported = po[po["engine"] == "Basic search"]["level"].nunique()
             unsupported = total - bs_supported
             if unsupported > 0:
                 findings.append(
-                    f"**Operation coverage:** `basic_search` supports "
+                    f"**Operation coverage:** Basic search supports "
                     f"{bs_supported} of {total} tested operations. "
                     f"The remaining {unsupported} operations (OR, exact groups, logical groups, "
-                    f"wildcards `?`/`??`/`???`, quoted terms) require `QueryHandler` or "
-                    f"`StringQueryHandler`."
+                    f"wildcards `?`/`??`/`???`, quoted terms) require Object search or "
+                    f"String search."
                 )
 
     for f in findings:
@@ -536,8 +680,8 @@ def generate_markdown_report(data, stem):
     if single_recs:
         h2("Single-string performance")
         p(
-            "Each query was applied to a single HED string of varying complexity. "
-            "Times are medians of repeated runs, in milliseconds."
+            "Each of the 12 core queries (see Benchmark query suite above) was applied to a "
+            "single HED string of varying complexity. Times are medians of repeated runs, in milliseconds."
         )
         ssdf = pd.DataFrame(single_recs)
         pivot = (
@@ -554,12 +698,12 @@ def generate_markdown_report(data, stem):
     # Series results
     # ------------------------------------------------------------------
     if series_recs:
-        h2("Series performance")
+        h2("Row-by-row search scaling")
         p(
-            "Whole-series search: each engine processes all rows of a `pd.Series` for a "
-            "given query. `basic_search` uses vectorised regex; `search_series` uses "
-            "`StringQueryHandler.search()` per row; `QueryHandler_loop` parses each row "
-            "into a `HedString` then searches. Times in milliseconds."
+            "Whole-list search: each engine processes all items in a list of strings for a "
+            "given query. Basic search uses vectorised regex on a `pd.Series`; String search uses "
+            "`StringQueryHandler.search()` per item on a plain list; Object search constructs a "
+            "`HedString` per row then searches. Times in milliseconds."
         )
         sdf = pd.DataFrame(series_recs)
         pivot = (
@@ -570,7 +714,7 @@ def generate_markdown_report(data, stem):
         )
         table(_pivot_to_md(pivot))
 
-        img("Series scaling", f"../figures/{stem}/benchmark_series_scaling.png")
+        img("List search scaling", f"../figures/{stem}/benchmark_series_scaling.png")
 
     # ------------------------------------------------------------------
     # Factor sweeps
@@ -580,17 +724,17 @@ def generate_markdown_report(data, stem):
 
     factor_descriptions = {
         "tag_count": (
-            "Number of tags in the HED string (1 to 100). basic_search time is dominated by "
+            "Number of tags in the HED string (1 to 100). Basic search time is dominated by "
             "regex compilation overhead and stays roughly constant; tree-based engines scale "
             "linearly with the number of nodes to traverse."
         ),
         "nesting_depth": (
             "Parenthesisation depth from 0 (flat) to 20. Deeper nesting increases the tree "
-            "walk for QueryHandler/StringQueryHandler. basic_search sees variable cost because "
+            "walk for Object search and String search. Basic search sees variable cost because "
             "deeper nesting means more delimiter positions for its cartesian-product verification."
         ),
         "repeated_tags": (
-            "Repetitions of a target tag (0 to 40). basic_search's `verify_search_delimiters` "
+            "Repetitions of a target tag (0 to 40). Basic search's `verify_search_delimiters` "
             "uses `itertools.product` over delimiter positions; repeated tags multiply the "
             "search space. Tree-based engines are unaffected."
         ),
@@ -599,17 +743,21 @@ def generate_markdown_report(data, stem):
             "top level for tree traversal."
         ),
         "series_size": (
-            "Number of rows in the Series (10 to 5000). basic_search scales sub-linearly "
-            "thanks to vectorised pandas regex. All other engines scale linearly (per-row cost "
-            "is fixed)."
+            "Number of strings in the list (10 to 5000). basic_search scales sub-linearly "
+            "thanks to vectorised pandas regex applied to a `pd.Series`. All other engines "
+            "scale linearly (fixed per-item cost)."
         ),
         "query_complexity": (
             "Query expression complexity from a bare term to a multi-clause composite. "
             "More clauses = more expression-tree nodes to evaluate per candidate."
         ),
         "schema_lookup": (
-            "StringQueryHandler with vs without the `schema_lookup` dictionary. The lookup "
-            "enables ancestor-based matching (e.g. `Event` matches `Sensory-event`) at a cost."
+            "The `schema_lookup` dict (produced by `generate_schema_lookup(schema)`) controls "
+            "whether string search resolves parent-class queries. Without it, bare terms match "
+            "only exact tag names — `Event` does **not** match `Sensory-event`. With it, every "
+            "tag carries its full ancestor path, so `Event` matches any descendant. "
+            "The table shows timing (ms) and match count on a fixed short-form string "
+            "containing known Event and Action descendants."
         ),
         "string_form": (
             "Short-form vs long-form HED strings. Long-form strings have fully expanded "
@@ -642,12 +790,30 @@ def generate_markdown_report(data, stem):
         if desc:
             p(desc)
 
-        # Inline table for this factor
         sub = pd.DataFrame([r for r in sweeps if r["factor"] == factor])
-        pivot = sub.pivot_table(index="level", columns="engine", values="time", aggfunc="first") * 1000
-        table(_pivot_to_md(pivot))
 
-        img(factor, f"../figures/{stem}/benchmark_sweep_{factor}.png")
+        if factor == "schema_lookup":
+            # Build an expanded table showing both time (ms) and match count side by side.
+            modes = ["No lookup", "With lookup"]
+            headers = ["Query"] + [f"{m}: time (ms)" for m in modes] + [f"{m}: matches" for m in modes]
+            lines = ["| " + " | ".join(headers) + " |", "| " + " | ".join(["---"] * len(headers)) + " |"]
+            for ql in sub["level"].unique():
+                row_cells = [ql]
+                for m in modes:
+                    r = sub[(sub["engine"] == m) & (sub["level"] == ql)]
+                    row_cells.append(f"{r['time'].values[0] * 1000:.3f}" if len(r) else "—")
+                for m in modes:
+                    r = sub[(sub["engine"] == m) & (sub["level"] == ql)]
+                    mc = int(r["matches"].values[0]) if len(r) and "matches" in r.columns else "—"
+                    row_cells.append(str(mc))
+                lines.append("| " + " | ".join(row_cells) + " |")
+            table("\n".join(lines))
+            img("Schema lookup: timing and matching behaviour", f"../figures/{stem}/benchmark_schema_lookup.png")
+        else:
+            # Inline table for this factor
+            pivot = sub.pivot_table(index="level", columns="engine", values="time", aggfunc="first") * 1000
+            table(_pivot_to_md(pivot))
+            img(factor, f"../figures/{stem}/benchmark_sweep_{factor}.png")
 
     # ------------------------------------------------------------------
     # Real data
@@ -671,19 +837,19 @@ def generate_markdown_report(data, stem):
     # ------------------------------------------------------------------
     h2("Recommendations")
     p(
-        "**Choose `basic_search` when:** You need the fastest possible series-level search, "
-        "your queries use only simple terms, AND, negation, or descendant wildcards (`*`), "
+        "**Choose Basic search when:** You need the fastest possible batch search over a "
+        "`pd.Series`, your queries use only simple terms, AND, negation, or descendant wildcards (`*`), "
         "and you don't need schema-aware matching. Ideal for filtering event files where "
         "speed matters and queries are simple."
     )
     p(
-        "**Choose `StringQueryHandler` when:** You need the full query language (OR, exact "
+        "**Choose String search when:** You need the full query language (OR, exact "
         "groups, logical groups, wildcards) but want to avoid the overhead of parsing every "
-        "HED string through the schema. `search_series()` is the best general-purpose "
+        "HED string through the schema. `string_search()` is the best general-purpose "
         "option when operating on raw strings from tabular files."
     )
     p(
-        "**Choose `QueryHandler` when:** You already have parsed `HedString` objects (e.g. "
+        "**Choose Object search when:** You already have parsed `HedString` objects (e.g. "
         "from validation pipelines), or you need exact schema-validated matching. The "
         "additional overhead comes from `HedString` construction, not the search itself."
     )
@@ -694,7 +860,7 @@ def generate_markdown_report(data, stem):
     h2("Methodology")
     p(
         f"- **Timing:** `timeit` with {20 if not data.get('quick') else 10} iterations "
-        f"(single-string), {5 if not data.get('quick') else 3} iterations (series), "
+        f"(single-string), {5 if not data.get('quick') else 3} iterations (list search), "
         f"{10 if not data.get('quick') else 5} iterations (sweeps). Median of all iterations reported.\n"
         f"- **Schema:** HED 8.4.0 loaded once and reused across all benchmarks.\n"
         f"- **Data generation:** Synthetic strings built from real schema tags with controlled "
@@ -730,6 +896,7 @@ def main(path=None):
     plot_factor_sweep(data, stem)
     plot_series_scaling(data, stem)
     plot_compile_vs_search(data, stem)
+    plot_schema_lookup(data, stem)
     plot_query_complexity_heatmap(data, stem)
     plot_real_data(data, stem)
 

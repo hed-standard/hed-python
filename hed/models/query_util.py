@@ -5,13 +5,15 @@ class SearchResult:
     """Holder for and manipulation of search results.
 
     Represents a query match result consisting of:
-    - group: The containing HedGroup where matches were found
+
+    - group: The containing HedGroup where matches were found.
     - children: The specific matched elements (tags/groups) within that group
-                (NOT all children of the group - only those that satisfied the query)
+      (NOT all children of the group — only those that satisfied the query).
 
     Example: When searching for "Red" in the HED string "(Red, Blue, Green)":
-        - group = the containing group (Red, Blue, Green)
-        - children = [Red] (only the matched tag)
+
+    - group = the containing group (Red, Blue, Green)
+    - children = [Red] (only the matched tag)
     """
 
     def __init__(self, group, children):

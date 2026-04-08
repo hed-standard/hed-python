@@ -1,4 +1,4 @@
-"""Tests for StringQueryHandler, parse_hed_string, and search_series.
+"""Tests for StringQueryHandler, parse_hed_string, and string_search.
 
 Most test cases are directly ported from test_query_handler.py, replacing
 HedString-based assertions with raw-string assertions.  Because StringNode
@@ -18,7 +18,7 @@ import unittest
 import pandas as pd
 
 from hed.errors.exceptions import HedQueryError
-from hed.models.string_search import StringNode, StringQueryHandler, parse_hed_string, search_series
+from hed.models.string_search import StringNode, StringQueryHandler, parse_hed_string, string_search
 from hed.models.schema_lookup import generate_schema_lookup
 
 
@@ -1061,57 +1061,57 @@ class TestSchemaLookupAncestorSearch(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
-# search_series convenience function
+# string_search convenience function
 # ---------------------------------------------------------------------------
 
 
-class TestSearchSeries(unittest.TestCase):
+class TestStringSearch(unittest.TestCase):
     def test_basic_mask(self):
-        data = pd.Series(["A, B", "A, C", "B, C", "D"])
-        mask = search_series(data, "A && B")
-        expected = pd.Series([True, False, False, False])
-        pd.testing.assert_series_equal(mask, expected)
+        data = ["A, B", "A, C", "B, C", "D"]
+        mask = string_search(data, "A && B")
+        self.assertEqual(mask, [True, False, False, False])
 
-    def test_nan_rows(self):
-        data = pd.Series(["A, B", None, float("nan"), "B, C"])
-        mask = search_series(data, "A")
-        self.assertTrue(mask.iloc[0])
-        self.assertFalse(mask.iloc[1])
-        self.assertFalse(mask.iloc[2])
-        self.assertFalse(mask.iloc[3])
+    def test_none_rows(self):
+        data = ["A, B", None, float("nan"), "B, C"]
+        mask = string_search(data, "A")
+        self.assertTrue(mask[0])
+        self.assertFalse(mask[1])
+        self.assertFalse(mask[2])
+        self.assertFalse(mask[3])
 
     def test_empty_string_row(self):
-        data = pd.Series(["A", "", "B"])
-        mask = search_series(data, "A")
-        self.assertTrue(mask.iloc[0])
-        self.assertFalse(mask.iloc[1])
-        self.assertFalse(mask.iloc[2])
+        data = ["A", "", "B"]
+        mask = string_search(data, "A")
+        self.assertTrue(mask[0])
+        self.assertFalse(mask[1])
+        self.assertFalse(mask[2])
 
-    def test_mask_index_preserved(self):
-        data = pd.Series(["A, B", "C, D"], index=[10, 20])
-        mask = search_series(data, "A")
-        self.assertEqual(list(mask.index), [10, 20])
+    def test_returns_list(self):
+        data = ["A, B", "C, D"]
+        mask = string_search(data, "A")
+        self.assertIsInstance(mask, list)
+        self.assertEqual(len(mask), 2)
 
     def test_query_compiled_once(self):
-        """search_series compiles the query once and applies it row by row."""
-        data = pd.Series(["A"] * 100 + ["B"] * 100)
-        mask = search_series(data, "A")
-        self.assertEqual(mask.sum(), 100)
+        """string_search compiles the query once and applies it row by row."""
+        data = ["A"] * 100 + ["B"] * 100
+        mask = string_search(data, "A")
+        self.assertEqual(sum(mask), 100)
 
-    def test_group_query_in_series(self):
-        data = pd.Series(["(A, B)", "A, B", "(A, C)"])
-        mask = search_series(data, "{A, B}")
-        self.assertTrue(mask.iloc[0])  # in same group
-        self.assertFalse(mask.iloc[1])  # not in a group
-        self.assertFalse(mask.iloc[2])  # B not present
+    def test_group_query_in_list(self):
+        data = ["(A, B)", "A, B", "(A, C)"]
+        mask = string_search(data, "{A, B}")
+        self.assertTrue(mask[0])  # in same group
+        self.assertFalse(mask[1])  # not in a group
+        self.assertFalse(mask[2])  # B not present
 
     def test_with_schema_lookup(self):
-        """search_series accepts an optional schema_lookup dict."""
+        """string_search accepts an optional schema_lookup dict."""
         lookup = {"sensory-event": ("event", "sensory-event")}
-        data = pd.Series(["Sensory-event", "Action"])
-        mask = search_series(data, "Event", schema_lookup=lookup)
-        self.assertTrue(mask.iloc[0])
-        self.assertFalse(mask.iloc[1])
+        data = ["Sensory-event", "Action"]
+        mask = string_search(data, "Event", schema_lookup=lookup)
+        self.assertTrue(mask[0])
+        self.assertFalse(mask[1])
 
 
 # ---------------------------------------------------------------------------
@@ -1155,11 +1155,11 @@ class TestBenchmarkBaseline(unittest.TestCase):
         for tag in ["A", "B", "C"]:
             with self.subTest(tag=tag):
                 bs_mask = find_matching(data, tag)
-                sq_mask = search_series(data, tag)
+                sq_mask = string_search(data.tolist(), tag)
                 for i in range(len(data)):
                     self.assertEqual(
                         bool(bs_mask.iloc[i]),
-                        bool(sq_mask.iloc[i]),
+                        bool(sq_mask[i]),
                         msg=f"tag={tag!r}, string={data.iloc[i]!r}",
                     )
 
