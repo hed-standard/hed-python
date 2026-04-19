@@ -160,6 +160,19 @@ jupyter notebook examples/
 
 See [`examples/README.md`](examples/README.md) for more details.
 
+## Experimental features
+
+**String-based search** (`hed.models.string_search` and `hed.models.schema_lookup`) is a middle-ground search facility that operates on raw HED strings without requiring pre-parsed `HedString` objects or a loaded schema. It supports the full `QueryHandler` query syntax (logical operators, grouping, wildcards) and optionally accepts a pre-generated schema lookup dictionary to enable ancestor-aware matching on short-form strings.
+
+> **This facility is still experimental.** Its API — including class names, function signatures, and module structure — may change in future releases without notice. These modules are **not** exported from the top-level `hed` package; import them directly:
+>
+> ```python
+> from hed.models.string_search import StringQueryHandler, string_search
+> from hed.models.schema_lookup import generate_schema_lookup
+> ```
+
+See the [search details documentation](https://www.hedtags.org/hed-python/search_details.html) for a full comparison of all three search implementations and performance benchmarks.
+
 ## Documentation
 
 📖 **Full Documentation:** [https://www.hedtags.org/hed-python](https://www.hedtags.org/hed-python)

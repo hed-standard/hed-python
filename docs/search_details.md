@@ -53,7 +53,14 @@ Use `QueryHandler` when you need schema-aware ancestor matching, or when you wan
 
 #### `StringQueryHandler` — tree-based schema-optional search
 
-Located in {mod}`hed.models.string_search`, `StringQueryHandler` is a new middle-ground implementation that inherits from `QueryHandler` and reuses the full expression-tree compiler, but operates on raw strings rather than pre-parsed `HedString` objects.
+```{warning}
+This facility is **experimental**. The API of `hed.models.string_search` and
+`hed.models.schema_lookup` may change in future releases without notice.
+These modules are **not** part of the stable public interface exported from
+the top-level `hed` package.  Import directly from the sub-modules.
+```
+
+Located in {mod}`hed.models.string_search`, `StringQueryHandler` is a middle-ground implementation that inherits from `QueryHandler` and reuses the full expression-tree compiler, but operates on raw strings rather than pre-parsed `HedString` objects.
 
 It parses each raw HED string into a lightweight {class}`~hed.models.string_search.StringNode` tree that duck-types the `HedGroup`/`HedTag` interfaces expected by the existing expression evaluators — so all `QueryHandler` query syntax works unchanged.
 
@@ -71,11 +78,16 @@ Use `StringQueryHandler` when you have raw strings (not `HedString` objects), ne
 
 #### Generating a schema lookup
 
+```{note}
+`hed.models.schema_lookup` is part of the experimental string-search facility.
+Its interface may change in future releases.
+```
+
 If you want `StringQueryHandler` to resolve ancestors for short-form strings (e.g. query `Event` matching `Sensory-event`) without a full schema parse per row, you can pre-generate a lookup dictionary from a `HedSchema`:
 
 ```python
 from hed import load_schema_version
-from hed import generate_schema_lookup, save_schema_lookup, load_schema_lookup
+from hed.models.schema_lookup import generate_schema_lookup, save_schema_lookup, load_schema_lookup
 
 schema = load_schema_version("8.4.0")
 lookup = generate_schema_lookup(schema)  # {short_name_casefold: tag_terms_tuple}
