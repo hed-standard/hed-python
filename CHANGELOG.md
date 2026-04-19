@@ -1,6 +1,53 @@
-# Unreleased
+# Release 1.1.0 April 19, 2026
 
 ## New features
+
+### Search engine performance improvements
+
+`ExpressionAnd`, `ExpressionOr`, and `ExpressionNegation` in `query_expressions.py` now use
+set-based deduplication instead of O(n²) list scanning, giving a significant speedup for
+queries that produce many intermediate results.
+Supporting this, `SearchResult` gains `__eq__` and `__hash__` methods so instances can be
+stored in sets and dicts.
+`QueryHandler._expr_has_wildcard()` replaces the fragile `"?" in str(interior)` string check
+with a proper recursive AST walk, eliminating false positives on queries whose string
+representations happen to contain a literal `?`.
+
+### `StringQueryHandler` and `schema_lookup` (internal / experimental)
+
+Two new internal modules support schema-free HED search:
+
+- `hed/models/string_search.py` — `StringQueryHandler` subclasses `QueryHandler` and accepts
+  a raw HED string instead of a parsed `HedString`, enabling query evaluation without loading
+  a schema. `StringNode` duck-types `HedGroup`/`HedTag` so that existing `Expression`
+  subclasses evaluate against it without modification.
+- `hed/models/schema_lookup.py` — `generate_schema_lookup(schema)` builds a compact
+  `{short_tag: tag_terms}` dict from a loaded schema that can be passed to
+  `StringQueryHandler.search()` to enable ancestor-aware matching on short-form strings.
+  `save_schema_lookup()` / `load_schema_lookup()` persist the table as JSON for offline use.
+
+These modules are not part of the public API and may change in future releases.
+
+### `HedGroup` find-method documentation clarified
+
+Docstrings for `find_tags`, `find_wildcard_tags`, `find_exact_tags`, and
+`find_tags_with_term` now document the exact comparison property each method uses
+(`short_base_tag`, `short_tag`, `HedTag.__eq__`, and `tag_terms` respectively) and
+explain the rationale for that choice.
+
+### Search benchmarks
+
+A new `benchmarks/` directory provides reproducible performance benchmarking tools:
+`search_benchmark.py` measures throughput across query types and string sizes,
+`data_generator.py` synthesizes realistic HED strings, and `report.py` generates
+Markdown and PNG reports. Pre-computed results are stored under `benchmarks/results/`
+and benchmark figures under `docs/_static/images/`.
+
+### Search documentation
+
+A new `docs/search_details.md` page covers all three HED search implementations
+(`basic_search`, `QueryHandler`, and `StringQueryHandler`): design trade-offs, query
+language reference, and measured performance characteristics with benchmark figures.
 
 ### Pandas 3.0 compatibility
 
@@ -36,7 +83,10 @@ hedpy extract bids-sidecar /path/to/dataset --filter sub-01
 ## CI/CD
 
 - Bumped `actions/configure-pages` from 5 to 6.
-- Updated `spec_tests/hed-tests` submodule.
+- Bumped `astral-sh/setup-uv` from v7 to v8.0.0.
+- Updated `anthropics/claude-code-action` to v1.0.97.
+- Pinned all GitHub Actions steps to full SHA hashes for supply-chain security.
+- Updated `spec_tests/hed-examples`, `spec_tests/hed-schemas`, and `spec_tests/hed-tests` submodules.
 
 # Release 1.0.0 March 27, 2026
 
