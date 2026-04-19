@@ -9,8 +9,6 @@ from hed.models.sidecar import Sidecar
 from hed.models.definition_dict import DefinitionDict
 from hed.models.query_handler import QueryHandler
 from hed.models.query_service import get_query_handlers, search_hed_objs
-from hed.models.string_search import StringQueryHandler, parse_hed_string, string_search
-from hed.models.schema_lookup import generate_schema_lookup, load_schema_lookup, save_schema_lookup
 
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_group import HedSchemaGroup

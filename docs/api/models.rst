@@ -177,8 +177,16 @@ search_hed_objs
 
 .. autofunction:: hed.models.query_service.search_hed_objs
 
-String-based search
--------------------
+String-based search (experimental)
+-----------------------------------
+
+.. warning::
+
+   This facility is **experimental**. Its API (classes, function signatures, and
+   behaviour) may change in future releases without notice.  Do **not** rely on
+   ``hed.models.string_search`` or ``hed.models.schema_lookup`` as a stable
+   public interface.  Import directly from those sub-modules rather than from
+   the top-level ``hed`` package.
 
 Search functions that operate on raw HED strings without requiring pre-parsed ``HedString`` objects
 or a loaded schema. See also :doc:`/search_details` for a full comparison of all three
