@@ -25,7 +25,7 @@ HED (Hierarchical Event Descriptors) is a framework for systematically describin
 
 For simple validation or transformation tasks, use the online tools at [https://hedtools.org/hed](https://hedtools.org/hed) - no installation needed!
 
-Browser-based validation (no data upload) is available at [https://www.hedtags.org/hed-javascript](https://www.hedtags.org/hed-javascript)
+Browser-based validation (no data upload) is available at [https://www.hedtags.org/hed-web](https://www.hedtags.org/hed-web)
 
 A development version of the online tools is available at: [https://hedtools.org/hed_dev](https://hedtools.org/hed_dev)
 
@@ -226,7 +226,7 @@ The HED ecosystem consists of several interconnected repositories:
 | Repository                                                             | Description                                      |
 | ---------------------------------------------------------------------- | ------------------------------------------------ |
 | [hed-python](https://github.com/hed-standard/hed-python)               | Python validation and analysis tools (this repo) |
-| [hed-web](https://github.com/hed-standard/hed-web)                     | Web interface and deployable Docker services     |
+| [hed-server](https://github.com/hed-standard/hed-server)               | Web interface and deployable Docker services     |
 | [hed-resources](https://github.com/hed-standard/hed-resources)         | Tutorials and other HED resources                |
 | [hed-specification](https://github.com/hed-standard/hed-specification) | Official HED specification documents             |
 | [hed-schemas](https://github.com/hed-standard/hed-schemas)             | Official HED schema repository                   |
@@ -234,6 +234,7 @@ The HED ecosystem consists of several interconnected repositories:
 | [hed-vis](https://github.com/hed-standard/hed-vis)                     | HED visualization tools (word clouds, etc.)      |
 | [ndx-hed](https://github.com/hed-standard/ndx-hed)                     | HED support for NWB                              |
 | [hed-javascript](https://github.com/hed-standard/hed-javascript)       | JavaScript HED validation tools                  |
+| [hed-web](https://github.com/hed-standard/hed-web)                     | Source for browser-based validation tools        |
 
 ## Contributing
 
