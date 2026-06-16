@@ -148,8 +148,7 @@ class KeyMap:
         # Add a column containing the mapped index for each row
         # Use explicit index/data to ensure pandas 3.0+ compatibility
         map_series = pd.Series(
-            data=list(self.map_dict.values()),
-            index=list(self.map_dict.keys())
+            data=list(self.map_dict.values()), index=list(self.map_dict.keys())
         )  # map_series is hash:row_index for each entry in the map_dict index
         key_values = key_series.map(map_series)  # key_values is df_row_number:map_dict_index
         # e.g. a key_value entry of 0:79 means row 0 maps to row 79 in the map_dict
