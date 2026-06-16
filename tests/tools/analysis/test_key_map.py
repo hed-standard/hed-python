@@ -163,6 +163,126 @@ class Test(unittest.TestCase):
         self.assertEqual(len(t_map.col_map.columns), 4, "update should produce correct number of columns")
         self.assertEqual(len(t_map.col_map), len(t_map.count_dict), "update should produce the correct number of rows")
 
+    def test_remap_numeric_keys_simple(self):
+        """Test remap with simple numeric keys (pandas 3.0 compatibility)."""
+        # Create a simple KeyMap with numeric keys
+        key_map = KeyMap(["col1"], ["result"])
+
+        # Create a mapping DataFrame with numeric keys
+        map_df = pd.DataFrame({"col1": [1, 2, 3], "result": ["one", "two", "three"]})
+        key_map.update(map_df)
+
+        # Create test data with numeric values
+        test_df = pd.DataFrame({"col1": [1, 2, 1, 3, 2]})
+
+        # This should not raise ValueError on pandas 3.0.3
+        df_result, missing = key_map.remap(test_df)
+
+        self.assertEqual(len(df_result), 5, "remap should preserve number of rows")
+        self.assertEqual(df_result.iloc[0]["result"], "one", "remap should map 1 to 'one'")
+        self.assertEqual(df_result.iloc[1]["result"], "two", "remap should map 2 to 'two'")
+        self.assertEqual(df_result.iloc[2]["result"], "one", "remap should map 1 to 'one'")
+        self.assertEqual(df_result.iloc[3]["result"], "three", "remap should map 3 to 'three'")
+        self.assertFalse(missing, "remap should not have missing keys")
+
+    def test_remap_numeric_keys_as_strings(self):
+        """Test remap with numeric keys stored as strings (common case)."""
+        key_map = KeyMap(["test_code"], ["test_label"])
+
+        # Create a mapping where numeric keys are stored as strings
+        map_df = pd.DataFrame({"test_code": ["1", "2", "3", "4"], "test_label": ["low", "medium", "high", "critical"]})
+        key_map.update(map_df)
+
+        # Create test data with numeric values as strings
+        test_df = pd.DataFrame({"test_code": ["1", "2", "3", "1", "4", "2"]})
+
+        df_result, missing = key_map.remap(test_df)
+
+        self.assertEqual(len(df_result), 6, "remap should preserve number of rows")
+        self.assertEqual(df_result.iloc[0]["test_label"], "low")
+        self.assertEqual(df_result.iloc[1]["test_label"], "medium")
+        self.assertEqual(df_result.iloc[2]["test_label"], "high")
+        self.assertEqual(df_result.iloc[4]["test_label"], "critical")
+        self.assertFalse(missing, "remap should not have missing keys")
+
+    def test_remap_numeric_keys_with_na(self):
+        """Test remap with numeric keys including n/a values."""
+        key_map = KeyMap(["value"], ["category"])
+
+        # Create mapping with numeric and string keys
+        map_df = pd.DataFrame({"value": ["1", "2", "3"], "category": ["cat_a", "cat_b", "cat_c"]})
+        key_map.update(map_df)
+
+        # Create test data with n/a values
+        test_df = pd.DataFrame({"value": ["1", "2", "n/a", "3", "n/a"]})
+
+        df_result, missing = key_map.remap(test_df)
+
+        self.assertEqual(len(df_result), 5, "remap should preserve number of rows")
+        self.assertEqual(df_result.iloc[0]["category"], "cat_a")
+        self.assertEqual(df_result.iloc[2]["category"], "n/a", "remap should map n/a to n/a")
+        self.assertEqual(df_result.iloc[3]["category"], "cat_c")
+        self.assertEqual(missing, [2, 4], "remap should report rows with unmapped n/a key")
+
+    def test_remap_multiple_numeric_keys_cascade(self):
+        """Test remap with multiple numeric keys cascading (the pandas 3.0.3 failing case)."""
+        # This is the exact scenario from issue #1329 that was failing
+        key_map = KeyMap(["test", "response_accuracy"], ["result"])
+
+        # Create mapping for multiple key combination
+        map_df = pd.DataFrame(
+            {
+                "test": ["1", "2"],
+                "response_accuracy": ["correct", "correct"],
+                "result": ["correct_left", "correct_right"],
+            }
+        )
+        key_map.update(map_df)
+
+        # Create test data matching the failure scenario
+        test_df = pd.DataFrame(
+            {
+                "test": ["1", "2", "n/a", "3", "4", "5"],
+                "response_accuracy": ["correct", "correct", "correct", "n/a", "correct", "correct"],
+            }
+        )
+
+        # This was the failing line: map_series = pd.Series(self.map_dict)
+        # Should work now with explicit index/data parameters
+        df_result, missing = key_map.remap(test_df)
+
+        self.assertEqual(len(df_result), 6, "remap should preserve number of rows")
+        self.assertEqual(df_result.iloc[0]["result"], "correct_left")
+        self.assertEqual(df_result.iloc[1]["result"], "correct_right")
+        # Rows with missing key combinations should get n/a
+        self.assertEqual(df_result.iloc[2]["result"], "n/a")
+        self.assertEqual(df_result.iloc[3]["result"], "n/a")
+        self.assertEqual(missing, [2, 3, 4, 5], "remap should report rows with unmapped key combinations")
+
+    def test_remap_large_numeric_key_dict(self):
+        """Test remap with a large dictionary of numeric keys to ensure Series construction works."""
+        key_map = KeyMap(["event_id"], ["event_name"])
+
+        # Create a large mapping with numeric event IDs
+        size = 100
+        map_data = {"event_id": [str(i) for i in range(size)], "event_name": [f"event_{i}" for i in range(size)]}
+        map_df = pd.DataFrame(map_data)
+        key_map.update(map_df)
+
+        # Create test data with random event IDs
+        test_data = {
+            "event_id": [str(i % 50) for i in range(200)]  # Use first 50 event IDs
+        }
+        test_df = pd.DataFrame(test_data)
+
+        df_result, _missing = key_map.remap(test_df)
+
+        self.assertEqual(len(df_result), 200, "remap should preserve number of rows")
+        # Verify some mappings
+        self.assertEqual(df_result.iloc[0]["event_name"], "event_0")
+        self.assertEqual(df_result.iloc[50]["event_name"], "event_0")  # 50 % 50 = 0
+        self.assertEqual(df_result.iloc[99]["event_name"], "event_49")  # 99 % 50 = 49
+
 
 if __name__ == "__main__":
     unittest.main()
