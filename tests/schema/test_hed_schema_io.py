@@ -61,14 +61,14 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(schemas3.name, "base:8.0.0")
 
     def test_load_schema_version_merged(self):
-        ver4 = ["testlib_2.0.0", "score_1.1.0"]
+        ver4 = ["testlib_2.0.0", "score_2.1.0"]
         schemas3 = load_schema_version(ver4)
         issues = schemas3.check_compliance()
         self.assertIsInstance(schemas3, HedSchema, "load_schema_version returns HedSchema version+namespace")
         self.assertTrue(schemas3.version_number, "load_schema_version has the right version with namespace")
         self.assertEqual(schemas3.schema_namespace, "", "load_schema_version has the right version with namespace")
-        self.assertEqual(schemas3.name, "testlib_2.0.0,score_1.1.0")
-        self.assertEqual(schemas3.version, "testlib_2.0.0,score_1.1.0")
+        self.assertEqual(schemas3.name, "testlib_2.0.0,score_2.1.0")
+        self.assertEqual(schemas3.version, "testlib_2.0.0,score_2.1.0")
         # Deprecated tag warnings + character issues from SCORE prologue/epilogue
         self.assertEqual(len(issues), 31)
 
@@ -116,10 +116,10 @@ class TestHedSchema(unittest.TestCase):
         testlib = load_schema_version("testlib_2.0.0")
 
         # Load 'score' by itself
-        score = load_schema_version("score_1.1.0")
+        score = load_schema_version("score_2.1.0")
 
         # Load both 'testlib' and 'score' together
-        schemas3 = load_schema_version(["testlib_2.0.0", "score_1.1.0"])
+        schemas3 = load_schema_version(["testlib_2.0.0", "score_2.1.0"])
 
         # Extract the tag names from each library
         testlib_tags = set(testlib.tags.all_names.keys())
@@ -267,7 +267,7 @@ class TestHedSchemaUnmerged(unittest.TestCase):
         self.assertEqual(schemas3._namespace, "base:", "load_schema_version has the right version with namespace")
 
     def test_load_schema_version_merged(self):
-        ver4 = ["testlib_2.0.0", "score_1.1.0"]
+        ver4 = ["testlib_2.0.0", "score_2.1.0"]
         schemas3 = load_schema_version(ver4)
         issues = schemas3.check_compliance()
         self.assertIsInstance(schemas3, HedSchema, "load_schema_version returns HedSchema version+namespace")
@@ -286,10 +286,10 @@ class TestHedSchemaUnmerged(unittest.TestCase):
         testlib = load_schema_version("testlib_2.0.0")
 
         # Load 'score' by itself
-        score = load_schema_version("score_1.1.0")
+        score = load_schema_version("score_2.1.0")
 
         # Load both 'testlib' and 'score' together
-        schemas3 = load_schema_version(["testlib_2.0.0", "score_1.1.0"])
+        schemas3 = load_schema_version(["testlib_2.0.0", "score_2.1.0"])
 
         # Extract the tag names from each library
         testlib_tags = set(testlib.tags.all_names.keys())
