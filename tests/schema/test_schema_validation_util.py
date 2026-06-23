@@ -101,10 +101,10 @@ class Test(unittest.TestCase):
         self.assertEqual(util.schema_version_for_library(schema2, ""), "8.3.0")
         self.assertEqual(util.schema_version_for_library(schema2, None), "8.3.0")
 
-        schema3 = load_schema_version(["testlib_2.0.0", "score_1.1.0"])
-        self.assertEqual(util.schema_version_for_library(schema3, ""), "8.2.0")
-        self.assertEqual(util.schema_version_for_library(schema3, None), "8.2.0")
-        self.assertEqual(util.schema_version_for_library(schema3, "score"), "1.1.0")
+        schema3 = load_schema_version(["testlib_2.0.0", "score_2.1.0"])
+        self.assertEqual(util.schema_version_for_library(schema3, ""), "8.4.0")
+        self.assertEqual(util.schema_version_for_library(schema3, None), "8.4.0")
+        self.assertEqual(util.schema_version_for_library(schema3, "score"), "2.1.0")
         self.assertEqual(util.schema_version_for_library(schema3, "testlib"), "2.0.0")
 
         self.assertEqual(util.schema_version_for_library(schema3, "badlib"), None)

@@ -32,14 +32,14 @@ class Test(unittest.TestCase):
         self.assertTrue(id_validator.library_data[""])
         self.assertTrue(id_validator._previous_schemas["testlib"])
         self.assertEqual(id_validator.library_data.get("testlib"), None)
-        self.assertEqual(id_validator._previous_schemas["testlib"].version_number, "2.1.0")
-        self.assertEqual(id_validator._previous_schemas[""].version_number, "8.1.0")
+        self.assertEqual(id_validator._previous_schemas["testlib"].version_number, "2.2.0")
+        self.assertEqual(id_validator._previous_schemas[""].version_number, "8.3.0")
 
     def test_get_previous_version(self):
         self.assertEqual(HedIDValidator._get_previous_version("8.3.0", ""), "8.2.0")
         self.assertEqual(HedIDValidator._get_previous_version("8.2.0", ""), "8.1.0")
         self.assertEqual(HedIDValidator._get_previous_version("8.0.0", ""), None)
-        self.assertEqual(HedIDValidator._get_previous_version("3.0.0", "testlib"), "testlib_2.1.0")
+        self.assertEqual(HedIDValidator._get_previous_version("3.0.0", "testlib"), "testlib_2.2.0")
 
     def test_verify_tag_id(self):
         event_entry = self.hed_schema84.tags["Event"]
