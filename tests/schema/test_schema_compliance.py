@@ -539,7 +539,7 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
         test_entry = test_schema[HedSectionKey.Tags]["Event"]
         test_entry.attributes["annotation"] = "dc:source Wikipedia is great"
         # print(f"Set annotation to: {test_entry.attributes['annotation']}")
-        test_schema.save_as_mediawiki('D:/test_schema_with_annotation.mediawiki')
+        test_schema.save_as_mediawiki("D:/test_schema_with_annotation.mediawiki")
         sv = SchemaValidator(test_schema, ErrorHandler())
         issues = sv.check_annotation_attribute_values()
         # print(f"Found issues: {get_printable_issue_string(issues)}")

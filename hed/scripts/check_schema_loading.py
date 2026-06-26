@@ -563,7 +563,11 @@ def parse_arguments(arg_list=None):
     parser.add_argument("--standard-only", action="store_true", help="Test only standard schemas")
     parser.add_argument("--exclude-prereleases", action="store_true", help="Exclude prerelease schemas (releases only)")
     parser.add_argument("--prerelease-only", action="store_true", help="Test only prerelease schemas")
-    parser.add_argument("--exclude-extras", action="store_true", help="Exclude extra schema directories (schemas_latest_json, schemas_xml_unmerged)")
+    parser.add_argument(
+        "--exclude-extras",
+        action="store_true",
+        help="Exclude extra schema directories (schemas_latest_json, schemas_xml_unmerged)",
+    )
     parser.add_argument("--verbose", action="store_true", help="Show detailed success messages")
 
     return parser.parse_args(arg_list)

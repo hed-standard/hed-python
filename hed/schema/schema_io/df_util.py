@@ -96,12 +96,9 @@ def merge_extras_dataframes(library_df, standard_df):
 
     # Use merge with indicator to find non-matching rows from standard_df
     merge_result = standard_df[compare_cols].merge(
-        library_df[compare_cols],
-        on=compare_cols,
-        how='left',
-        indicator=True
+        library_df[compare_cols], on=compare_cols, how="left", indicator=True
     )
-    non_matching_indices = merge_result[merge_result['_merge'] == 'left_only'].index
+    non_matching_indices = merge_result[merge_result["_merge"] == "left_only"].index
 
     if len(non_matching_indices) > 0:
         non_matching = standard_df.iloc[non_matching_indices].copy()

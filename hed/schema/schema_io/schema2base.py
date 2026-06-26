@@ -96,6 +96,7 @@ class Schema2Base:
                 # Load base schema so extras can be merged when outputting
                 try:
                     from hed.schema.hed_schema_io import load_schema_version
+
                     self._base_schema = load_schema_version(hed_schema.with_standard)
                 except Exception:
                     # If base schema cannot be loaded, continue without it
