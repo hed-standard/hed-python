@@ -100,9 +100,7 @@ def merge_extras_dataframes(library_df, standard_df):
     library_dedup = library_df[compare_cols].drop_duplicates().reset_index(drop=True)
 
     # Use merge with indicator to find unique combinations only in standard_df
-    merge_result = standard_dedup.merge(
-        library_dedup, on=compare_cols, how="left", indicator=True
-    )
+    merge_result = standard_dedup.merge(library_dedup, on=compare_cols, how="left", indicator=True)
     non_matching_dedup = merge_result[merge_result["_merge"] == "left_only"][compare_cols]
 
     if len(non_matching_dedup) > 0:

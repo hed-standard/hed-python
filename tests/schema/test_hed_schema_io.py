@@ -245,13 +245,12 @@ class TestHedSchemaUnmerged(unittest.TestCase):
 
         # Also copy testlib schemas from spec_tests/hed-schemas if available for testing library merging
         testlib_spec_path = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), 
-            "../../spec_tests/hed-schemas/library_schemas/testlib"
+            os.path.dirname(os.path.realpath(__file__)), "../../spec_tests/hed-schemas/library_schemas/testlib"
         )
         if os.path.exists(testlib_spec_path):
-            for root, dirs, files in os.walk(testlib_spec_path):
+            for root, _dirs, files in os.walk(testlib_spec_path):
                 for filename in files:
-                    if filename.endswith('.xml'):
+                    if filename.endswith(".xml"):
                         testlib_file = os.path.join(root, filename)
                         try:
                             loaded_schema = schema.load_schema(testlib_file)
