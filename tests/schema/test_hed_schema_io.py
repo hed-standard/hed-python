@@ -575,11 +575,13 @@ class TestHedSchemaMerging(unittest.TestCase):
         self.assertEqual(score_count, 854, "There should be 854 in library entries in the saved score schema")
 
     def test_save_merged_raises_when_base_schema_unavailable(self):
-        """Test that HedFileError is raised when a library schema references a non-existent base schema."""
+        """Test that HedFileError is raised when saving merged output with non-existent base schema."""
         # Create a temporary schema file with a non-existent withStandard version.
-        # This tests the real-data approach: using an actual schema file with a problematic with_standard,
-        # verifying that the exception is raised appropriately.
-        temp_schema_content = """HED version="1.1.0" library="score" withStandard="99.99.99" unmerged="True"
+        # The schema must be syntactically valid and marked as merged (no unmerged="True")
+        # to trigger the save_merged code path in schema2base.
+        # This validates the fail-fast behavior: when saving merged output, an exception is raised
+        # immediately if the base schema cannot be loaded, preventing silent production of partial output.
+        temp_schema_content = """HED version="1.1.0" library="score" withStandard="99.99.99"
 
 '''Prologue'''
 Test schema for exception handling.
@@ -590,17 +592,35 @@ Test schema for exception handling.
 * Test-subtag
 
 !# end schema
+
+'''Unit classes'''
+
+'''Unit modifiers'''
+
+'''Value classes'''
+
+'''Schema attributes'''
+
+'''Properties'''
+
+'''Epilogue'''
+
+!# end hed
 """
         temp_schema_file = get_temp_filename(".mediawiki")
         with open(temp_schema_file, "w") as f:
             f.write(temp_schema_content)
 
         try:
-            # Attempting to load a schema with a non-existent withStandard should raise HedFileError
-            # because the base schema version (99.99.99) doesn't exist.
-            # This validates that the fail-fast exception handling works correctly.
+            # Load the schema successfully (it's syntactically valid and marked as merged)
+            schema_obj = load_schema(temp_schema_file)
+
+            # Attempting to save the merged schema should raise HedFileError because the base schema
+            # version (99.99.99) doesn't exist. The fail-fast design in schema2base.__init__
+            # intentionally does NOT wrap the load_schema_version() call in try/except, ensuring
+            # this error is raised immediately rather than silently producing an incomplete output.
             with self.assertRaises(HedFileError):
-                load_schema(temp_schema_file)
+                schema_obj.get_as_mediawiki_string(save_merged=True)
         finally:
             # Clean up the temporary schema file
             if os.path.exists(temp_schema_file):
