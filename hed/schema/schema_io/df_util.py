@@ -88,18 +88,27 @@ def merge_extras_dataframes(library_df, standard_df):
 
     # For each row in standard_df, check if it appears in library_df (by content, not by in_library)
     # If it does, use the library version (which has in_library). If not, keep the standard version.
-    # Find rows in standard_df that are NOT in library_df
+    # Start with library_df
     merged = library_df.copy()
 
-    # Use merge with indicator to find non-matching rows from standard_df
-    merge_result = standard_df[compare_cols].merge(
-        library_df[compare_cols], on=compare_cols, how="left", indicator=True
-    )
-    non_matching_indices = merge_result[merge_result["_merge"] == "left_only"].index
+    # Deduplicate on compare_cols to avoid many-to-many join issues.
+    # When there are duplicate keys, merge() can produce more rows than either input,
+    # causing row indices to misalign. By deduplicating first on the key columns,
+    # we get unique combinations, find which are only in standard_df, then join back
+    # to standard_df to get the full rows.
+    standard_dedup = standard_df[compare_cols].drop_duplicates().reset_index(drop=True)
+    library_dedup = library_df[compare_cols].drop_duplicates().reset_index(drop=True)
 
-    if len(non_matching_indices) > 0:
-        non_matching = standard_df.iloc[non_matching_indices].copy()
-        merged = pd.concat([merged, non_matching], ignore_index=True)
+    # Use merge with indicator to find unique combinations only in standard_df
+    merge_result = standard_dedup.merge(
+        library_dedup, on=compare_cols, how="left", indicator=True
+    )
+    non_matching_dedup = merge_result[merge_result["_merge"] == "left_only"][compare_cols]
+
+    if len(non_matching_dedup) > 0:
+        # Join back to standard_df to get the full rows matching those unique combinations
+        to_add = standard_df.merge(non_matching_dedup, on=compare_cols, how="inner")
+        merged = pd.concat([merged, to_add], ignore_index=True)
 
     merged = merged.drop_duplicates().sort_values(by=compare_cols).reset_index(drop=True)
     return merged
