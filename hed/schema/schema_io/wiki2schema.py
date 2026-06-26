@@ -137,6 +137,10 @@ class SchemaLoaderWiki(SchemaLoader):
             stripped_key = extra_key.strip("'")
             stripped_key = WIKI_EXTRA_DICT.get(stripped_key, stripped_key)
 
+            # Add in_library column if this is a library schema
+            if self.library and not df.empty:
+                df[df_constants.in_library] = self.library
+
             # Merge with existing schema extras if present (from withStandard base schema)
             standard_df = self._schema.extras.get(stripped_key, None)
             self._schema.extras[stripped_key] = df_util.merge_extras_dataframes(df, standard_df)

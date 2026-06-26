@@ -59,7 +59,7 @@ class Schema2JSON(Schema2Base):
         Parameters:
             hed_schema (HedSchema): The schema being output
         """
-        sources = hed_schema.get_extras(df_constants.SOURCES_KEY)
+        sources = self._get_merged_extras(df_constants.SOURCES_KEY)
         if sources is None or sources.empty:
             return
 
@@ -80,7 +80,7 @@ class Schema2JSON(Schema2Base):
         Parameters:
             hed_schema (HedSchema): The schema being output
         """
-        prefixes = hed_schema.get_extras(df_constants.PREFIXES_KEY)
+        prefixes = self._get_merged_extras(df_constants.PREFIXES_KEY)
         if prefixes is None or prefixes.empty:
             return
 
@@ -101,7 +101,7 @@ class Schema2JSON(Schema2Base):
         Parameters:
             hed_schema (HedSchema): The schema being output
         """
-        externals = hed_schema.get_extras(df_constants.EXTERNAL_ANNOTATION_KEY)
+        externals = self._get_merged_extras(df_constants.EXTERNAL_ANNOTATION_KEY)
         if externals is None or externals.empty:
             return
 

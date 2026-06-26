@@ -37,6 +37,7 @@ from hed import load_schema
 FORMAT_DIR_MAP = {"xml": "hedxml", "mediawiki": "hedwiki", "json": "hedjson", "tsv": "hedtsv"}
 FORMAT_EXTENSIONS = {"hedxml": ".xml", "hedwiki": ".mediawiki", "hedjson": ".json"}
 ALL_FORMATS = ["xml", "mediawiki", "json", "tsv"]
+EXTRA_DIRS = ["schemas_latest_json", "schemas_xml_unmerged"]
 
 
 class SchemaLoadTester:
@@ -333,6 +334,84 @@ class SchemaLoadTester:
 
         return library_dirs
 
+    def _test_flat_directory(self, directory_path, format_extension, format_name, indent=""):
+        """Test loading schemas from a flat directory structure.
+
+        Parameters:
+            directory_path (Path): Path to the flat directory.
+            format_extension (str): File extension to search for (e.g., '.json', '.xml').
+            format_name (str): Name of format for display (e.g., 'JSON', 'XML').
+            indent (str): Indentation prefix for output.
+        """
+        schema_files = []
+        for item in directory_path.glob(f"*{format_extension}"):
+            if item.is_file():
+                schema_files.append(item)
+
+        if not schema_files:
+            return
+
+        schema_names = [s.name for s in schema_files]
+        print(f"{indent}{format_name} ({len(schema_files)}): {', '.join(schema_names)}")
+
+        for schema_path in sorted(schema_files):
+            relative_path = schema_path.relative_to(self.hed_schemas_root)
+            success, error = self.try_load_schema(schema_path, relative_path)
+            self.results["total"] += 1
+
+            if success:
+                self.results["passed"] += 1
+                if self.verbose:
+                    print(f"{indent}  ✓ {schema_path.name}")
+            else:
+                self.results["failed"] += 1
+                self.failures.append({"path": str(relative_path), "error": error})
+                print(f"{indent}  ✗ {schema_path.name}: {error}")
+
+    def test_schemas_latest_json(self, format_filter=None):
+        """Test loading schemas from schemas_latest_json directory (flat structure).
+
+        Parameters:
+            format_filter (str or None): If provided, only test this format.
+        """
+        print("\n" + "=" * 80)
+        print("SCHEMAS_LATEST_JSON")
+        print("=" * 80)
+
+        extra_dir = self.hed_schemas_root / "schemas_latest_json"
+
+        if not extra_dir.exists():
+            print(f"[INFO] Directory not found: {extra_dir}")
+            return
+
+        if not any(extra_dir.iterdir()):
+            print("[INFO] Directory is empty")
+            return
+
+        self._test_flat_directory(extra_dir, ".json", "JSON", indent="\n")
+
+    def test_schemas_xml_unmerged(self, format_filter=None):
+        """Test loading schemas from schemas_xml_unmerged directory (flat structure).
+
+        Parameters:
+            format_filter (str or None): If provided, only test this format.
+        """
+        print("\n" + "=" * 80)
+        print("SCHEMAS_XML_UNMERGED")
+        print("=" * 80)
+
+        extra_dir = self.hed_schemas_root / "schemas_xml_unmerged"
+
+        if not extra_dir.exists():
+            print(f"[INFO] Directory not found: {extra_dir}")
+            return
+
+        if not any(extra_dir.iterdir()):
+            print("[INFO] Directory is empty")
+            return
+
+        self._test_flat_directory(extra_dir, ".xml", "XML", indent="\n")
+
     def print_summary(self):
         """Print test summary."""
         print("\n" + "=" * 80)
@@ -365,6 +444,7 @@ def run_loading_check(
     exclude_prereleases=False,
     prerelease_only=False,
     verbose=False,
+    exclude_extras=False,
 ):
     """Run schema loading checks and return results.
 
@@ -379,6 +459,7 @@ def run_loading_check(
         exclude_prereleases (bool): If True, exclude prerelease schemas.
         prerelease_only (bool): If True, test only prerelease schemas.
         verbose (bool): If True, show detailed success messages.
+        exclude_extras (bool): If True, exclude extra schema directories (schemas_latest_json, schemas_xml_unmerged).
 
     Returns:
         dict: Results dictionary with keys 'total', 'passed', 'failed',
@@ -409,6 +490,10 @@ def run_loading_check(
         print("Mode: Prerelease schemas only")
     elif exclude_prereleases:
         print("Mode: Releases only (prereleases excluded)")
+    if exclude_extras:
+        print("Mode: Extra directories excluded")
+    else:
+        print("Mode: Extra directories included")
 
     if prerelease_only:
         if library_filter:
@@ -438,6 +523,10 @@ def run_loading_check(
             tester.test_library_schemas(format_filter, None)
             tester.test_standard_prereleases(format_filter)
             tester.test_library_prereleases(format_filter, None)
+
+    if not exclude_extras:
+        tester.test_schemas_latest_json(format_filter)
+        tester.test_schemas_xml_unmerged(format_filter)
 
     tester.print_summary()
 
@@ -474,6 +563,7 @@ def parse_arguments(arg_list=None):
     parser.add_argument("--standard-only", action="store_true", help="Test only standard schemas")
     parser.add_argument("--exclude-prereleases", action="store_true", help="Exclude prerelease schemas (releases only)")
     parser.add_argument("--prerelease-only", action="store_true", help="Test only prerelease schemas")
+    parser.add_argument("--exclude-extras", action="store_true", help="Exclude extra schema directories (schemas_latest_json, schemas_xml_unmerged)")
     parser.add_argument("--verbose", action="store_true", help="Show detailed success messages")
 
     return parser.parse_args(arg_list)
@@ -524,6 +614,7 @@ def main(arg_list=None):
             exclude_prereleases=args.exclude_prereleases,
             prerelease_only=args.prerelease_only,
             verbose=args.verbose,
+            exclude_extras=args.exclude_extras,
         )
 
         sys.exit(0 if results["failed"] == 0 else 1)

@@ -7,7 +7,7 @@
 - Google-style docstrings; use `Parameters:` not `Args:`
 - Line length: 120 characters (configured in `pyproject.toml`)
 - Markdown headers use sentence case: capitalize only the first word (and proper nouns/acronyms)
-- When creating work summaries, place them in `.status/` at the repository root
+- **Temporary files** (test scripts, debug files, notes): Always create in `.status/` directory, never in the repository root
 
 ## Project overview
 

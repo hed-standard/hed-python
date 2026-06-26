@@ -652,10 +652,10 @@ class TestPrereleaseSchemaLoading(unittest.TestCase):
 
     def test_load_prerelease_library(self):
         """Test loading a prerelease library schema."""
-        schema = load_schema_version("testlib_2.1.0", xml_folder=self.schema_dir)
+        schema = load_schema_version("testliba_2.1.0", xml_folder=self.schema_dir)
         self.assertIsInstance(schema, HedSchema)
         self.assertEqual(schema.version_number, "2.1.0")
-        self.assertEqual(schema.library, "testlib")
+        self.assertEqual(schema.library, "testliba")
         self.assertIn("prerelease-item", schema.tags.all_names)
 
     def test_mixed_regular_and_prerelease_schemas(self):

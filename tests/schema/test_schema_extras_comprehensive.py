@@ -83,7 +83,7 @@ class TestSchemaExtrasAllFormats(unittest.TestCase):
                 self.assertEqual(schema.library, "testlib")
                 self.assertEqual(schema.version_number, "4.0.0")
                 self.assertEqual(schema.with_standard, "8.4.0")
-                self.assertFalse(schema.merged)
+                self.assertTrue(schema.merged)  # Test files are saved merged
 
                 # Verify Sources
                 sources = schema.get_extras(df_constants.SOURCES_KEY)

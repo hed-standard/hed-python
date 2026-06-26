@@ -92,6 +92,9 @@ class SchemaLoaderDF(SchemaLoader):
             )
         extras = {key: self.input_data[key] for key in constants.DF_EXTRAS if key in self.input_data}
         for key, _item in extras.items():
+            # Add in_library column if this is a library schema
+            if self.library and not extras[key].empty and constants.in_library not in extras[key].columns:
+                extras[key][constants.in_library] = self.library
             self._schema.extras[key] = df_util.merge_extras_dataframes(extras[key], self._schema.extras.get(key, None))
 
     def _get_prologue_epilogue(self, file_data):

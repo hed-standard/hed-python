@@ -61,15 +61,17 @@ def merge_dataframes(df1, df2, key):
 def merge_extras_dataframes(library_df, standard_df):
     """Merge library and standard extras DataFrames by combining and deduplicating.
 
-    The library extras should contain all entries (standard + library-specific).
-    This function combines both and removes exact duplicates.
+    When the same entry appears in both library and standard schemas, the library version
+    (with in_library attribute) is retained. This ensures we can track which library
+    specific entries came from.
 
     Parameters:
         library_df (pd.DataFrame): DataFrame from library schema extras section
         standard_df (pd.DataFrame): DataFrame from standard schema extras section
 
     Returns:
-        pd.DataFrame: Combined DataFrame with duplicates removed and sorted
+        pd.DataFrame: Combined DataFrame with duplicates removed and sorted, with in_library
+                      preserved for duplicate entries
     """
     if standard_df is None or standard_df.empty:
         if library_df is None or library_df.empty:
@@ -78,10 +80,35 @@ def merge_extras_dataframes(library_df, standard_df):
     if library_df is None or library_df.empty:
         return standard_df.drop_duplicates().sort_values(by=list(standard_df.columns)).reset_index(drop=True)
 
-    combined = pd.concat([standard_df, library_df], ignore_index=True)
-    combined = combined.drop_duplicates()
-    combined = combined.sort_values(by=list(combined.columns)).reset_index(drop=True)
-    return combined
+    # Columns to compare for deduplication (exclude in_library)
+    compare_cols = [col for col in library_df.columns if col != constants.in_library]
+    if not compare_cols:
+        # If only in_library column, just return library_df
+        return library_df.drop_duplicates().sort_values(by=list(library_df.columns)).reset_index(drop=True)
+
+    # For each row in standard_df, check if it appears in library_df (by content, not by in_library)
+    # If it does, use the library version (which has in_library). If not, keep the standard version.
+    library_df[compare_cols].drop_duplicates()
+    standard_df[compare_cols].drop_duplicates()
+
+    # Find rows in standard_df that are NOT in library_df
+    merged = library_df.copy()
+
+    # Use merge with indicator to find non-matching rows from standard_df
+    merge_result = standard_df[compare_cols].merge(
+        library_df[compare_cols],
+        on=compare_cols,
+        how='left',
+        indicator=True
+    )
+    non_matching_indices = merge_result[merge_result['_merge'] == 'left_only'].index
+
+    if len(non_matching_indices) > 0:
+        non_matching = standard_df.iloc[non_matching_indices].copy()
+        merged = pd.concat([merged, non_matching], ignore_index=True)
+
+    merged = merged.drop_duplicates().sort_values(by=compare_cols).reset_index(drop=True)
+    return merged
 
 
 def merge_dataframe_dicts(df_dict1, df_dict2, key_column=constants.KEY_COLUMN_NAME):
@@ -110,15 +137,21 @@ def merge_dataframe_dicts(df_dict1, df_dict2, key_column=constants.KEY_COLUMN_NA
 
 
 def _merge_dataframes(df1, df2, key_column):
-    # Add columns from df2 that are not in df1, only for rows that are in df1
+    """Merge two DataFrames by adding columns from df2 to df1 based on key column matching.
 
+    Keeps all rows from df1 and adds columns from df2 where keys match.
+    This is used for enriching schema attribute DataFrames with additional column data.
+    """
     if df1.empty or df2.empty or key_column not in df1.columns or key_column not in df2.columns:
         raise HedFileError(
             HedExceptions.BAD_COLUMN_NAMES,
-            f"Both dataframes to be merged must be non-empty had nave a '{key_column}' column",
+            f"Both dataframes to be merged must be non-empty and have a '{key_column}' column",
             "",
         )
+
     df1 = df1.copy()
+
+    # Add columns from df2 that are not in df1
     for col in df2.columns:
         if col not in df1.columns and col != key_column:
             df1 = df1.merge(df2[[key_column, col]], on=key_column, how="left")
