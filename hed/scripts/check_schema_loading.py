@@ -37,7 +37,10 @@ from hed import load_schema
 FORMAT_DIR_MAP = {"xml": "hedxml", "mediawiki": "hedwiki", "json": "hedjson", "tsv": "hedtsv"}
 FORMAT_EXTENSIONS = {"hedxml": ".xml", "hedwiki": ".mediawiki", "hedjson": ".json"}
 ALL_FORMATS = ["xml", "mediawiki", "json", "tsv"]
-EXTRA_DIRS = ["schemas_latest_json", "schemas_xml_unmerged"]
+EXTRA_DIRS_CONFIG = {
+    "schemas_latest_json": ".json",
+    "schemas_xml_unmerged": ".xml",
+}
 
 
 class SchemaLoadTester:
@@ -368,49 +371,29 @@ class SchemaLoadTester:
                 self.failures.append({"path": str(relative_path), "error": error})
                 print(f"{indent}  ✗ {schema_path.name}: {error}")
 
-    def test_schemas_latest_json(self, format_filter=None):
-        """Test loading schemas from schemas_latest_json directory (flat structure).
+    def test_extra_directories(self):
+        """Test loading schemas from all EXTRA_DIRS_CONFIG directories (flat structure).
 
-        Parameters:
-            format_filter (str or None): If provided, only test this format.
+        Uses EXTRA_DIRS_CONFIG to drive testing of each directory with its corresponding
+        file extension. README files are automatically excluded by extension filtering.
         """
-        print("\n" + "=" * 80)
-        print("SCHEMAS_LATEST_JSON")
-        print("=" * 80)
+        for dir_name, file_extension in EXTRA_DIRS_CONFIG.items():
+            extra_dir = self.hed_schemas_root / dir_name
+            format_name = file_extension.lstrip(".").upper()
 
-        extra_dir = self.hed_schemas_root / "schemas_latest_json"
+            print("\n" + "=" * 80)
+            print(dir_name.upper())
+            print("=" * 80)
 
-        if not extra_dir.exists():
-            print(f"[INFO] Directory not found: {extra_dir}")
-            return
+            if not extra_dir.exists():
+                print(f"[INFO] Directory not found: {extra_dir}")
+                continue
 
-        if not any(extra_dir.iterdir()):
-            print("[INFO] Directory is empty")
-            return
+            if not any(extra_dir.iterdir()):
+                print("[INFO] Directory is empty")
+                continue
 
-        self._test_flat_directory(extra_dir, ".json", "JSON", indent="\n")
-
-    def test_schemas_xml_unmerged(self, format_filter=None):
-        """Test loading schemas from schemas_xml_unmerged directory (flat structure).
-
-        Parameters:
-            format_filter (str or None): If provided, only test this format.
-        """
-        print("\n" + "=" * 80)
-        print("SCHEMAS_XML_UNMERGED")
-        print("=" * 80)
-
-        extra_dir = self.hed_schemas_root / "schemas_xml_unmerged"
-
-        if not extra_dir.exists():
-            print(f"[INFO] Directory not found: {extra_dir}")
-            return
-
-        if not any(extra_dir.iterdir()):
-            print("[INFO] Directory is empty")
-            return
-
-        self._test_flat_directory(extra_dir, ".xml", "XML", indent="\n")
+            self._test_flat_directory(extra_dir, file_extension, format_name, indent="\n")
 
     def print_summary(self):
         """Print test summary."""
@@ -525,8 +508,7 @@ def run_loading_check(
             tester.test_library_prereleases(format_filter, None)
 
     if not exclude_extras:
-        tester.test_schemas_latest_json(format_filter)
-        tester.test_schemas_xml_unmerged(format_filter)
+        tester.test_extra_directories()
 
     tester.print_summary()
 

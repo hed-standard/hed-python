@@ -88,19 +88,20 @@ class Schema2Base:
         self._schema = hed_schema  # This is needed to save attributes in dataframes for now
         self._base_schema = None  # Reset base schema reference
 
+        # If it is a library schema with a standard schema, we need to determine if we are saving merged or not.
         if hed_schema.with_standard:
             self._save_lib = True
             if save_merged:
                 self._save_base = True
                 self._strip_out_in_library = False
-                # Load base schema so extras can be merged when outputting
-                try:
-                    from hed.schema.hed_schema_io import load_schema_version
+                # Load base schema so extras can be merged when outputting.
+                # We intentionally do NOT wrap this in try/except. If the base schema cannot be loaded,
+                # we fail fast rather than silently producing an incomplete "merged" output
+                # (e.g., missing Sources/Prefixes/External annotations). This design prevents
+                # the subtle bug of producing partial output that looks valid but is missing data.
+                from hed.schema.hed_schema_io import load_schema_version
 
-                    self._base_schema = load_schema_version(hed_schema.with_standard)
-                except Exception:
-                    # If base schema cannot be loaded, continue without it
-                    self._base_schema = None
+                self._base_schema = load_schema_version(hed_schema.with_standard)
         else:
             # Saving a standard schema or a library schema without a standard schema
             save_merged = True

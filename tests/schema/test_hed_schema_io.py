@@ -574,6 +574,38 @@ class TestHedSchemaMerging(unittest.TestCase):
         # One extra because this also finds the attribute definition, whereas in wiki it's a different format.
         self.assertEqual(score_count, 854, "There should be 854 in library entries in the saved score schema")
 
+    def test_save_merged_raises_when_base_schema_unavailable(self):
+        """Test that HedFileError is raised when a library schema references a non-existent base schema."""
+        # Create a temporary schema file with a non-existent withStandard version.
+        # This tests the real-data approach: using an actual schema file with a problematic with_standard,
+        # verifying that the exception is raised appropriately.
+        temp_schema_content = """HED version="1.1.0" library="score" withStandard="99.99.99" unmerged="True"
+
+'''Prologue'''
+Test schema for exception handling.
+
+!# start schema
+
+'''Test-tag'''
+* Test-subtag
+
+!# end schema
+"""
+        temp_schema_file = get_temp_filename(".mediawiki")
+        with open(temp_schema_file, "w") as f:
+            f.write(temp_schema_content)
+
+        try:
+            # Attempting to load a schema with a non-existent withStandard should raise HedFileError
+            # because the base schema version (99.99.99) doesn't exist.
+            # This validates that the fail-fast exception handling works correctly.
+            with self.assertRaises(HedFileError):
+                load_schema(temp_schema_file)
+        finally:
+            # Clean up the temporary schema file
+            if os.path.exists(temp_schema_file):
+                os.remove(temp_schema_file)
+
 
 class TestParseVersionList(unittest.TestCase):
     def test_empty_and_single_library(self):

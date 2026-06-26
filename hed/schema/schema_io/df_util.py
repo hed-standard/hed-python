@@ -88,9 +88,6 @@ def merge_extras_dataframes(library_df, standard_df):
 
     # For each row in standard_df, check if it appears in library_df (by content, not by in_library)
     # If it does, use the library version (which has in_library). If not, keep the standard version.
-    library_df[compare_cols].drop_duplicates()
-    standard_df[compare_cols].drop_duplicates()
-
     # Find rows in standard_df that are NOT in library_df
     merged = library_df.copy()
 
