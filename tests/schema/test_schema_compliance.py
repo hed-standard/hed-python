@@ -538,7 +538,6 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
         # Set annotation to dc:source Wikipedia is great
         test_entry = test_schema[HedSectionKey.Tags]["Event"]
         test_entry.attributes["annotation"] = "dc:source Wikipedia is great"
-
         sv = SchemaValidator(test_schema, ErrorHandler())
         issues = sv.check_annotation_attribute_values()
         source_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_SOURCE_MISSING"]

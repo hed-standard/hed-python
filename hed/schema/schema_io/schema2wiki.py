@@ -61,7 +61,7 @@ class Schema2Wiki(Schema2Base):
             wiki_key (string): The key in the wiki constants for the section.
 
         """
-        extra = hed_schema.get_extras(section_key)
+        extra = self._get_merged_extras(section_key)
         if extra is None or extra.empty:
             return
 
@@ -73,6 +73,9 @@ class Schema2Wiki(Schema2Base):
             # Build column string from all columns
             column_strings = []
             for col in extra.columns:
+                # Always skip in_library column - it's internal metadata, never serialized
+                if col == df_constants.in_library:
+                    continue
                 if pd.notna(row[col]) and row[col] != "":
                     column_strings.append(f"{col}={row[col]}")
             self.current_tag_extra = ",".join(column_strings)

@@ -1,2 +1,47 @@
 hedId	rdfs:label	omn:SubClassOf	Attributes	dc:description	hasUnitClass
-	deg	TestlibUnit	SIUnit, conversionFactor=1.0		myAngleUnits
+HED_0011600	m-per-s^2	TestlibUnit	SIUnit, unitSymbol, conversionFactor=1.0, allowedCharacter=caret		accelerationUnits
+HED_0011601	radian	TestlibUnit	SIUnit, conversionFactor=1.0		angleUnits
+HED_0011602	rad	TestlibUnit	SIUnit, unitSymbol, conversionFactor=1.0		angleUnits
+HED_0011603	degree	TestlibUnit	conversionFactor=0.0174533		angleUnits
+HED_0011604	m^2	TestlibUnit	SIUnit, unitSymbol, conversionFactor=1.0, allowedCharacter=caret		areaUnits
+HED_0011605	dollar	TestlibUnit	conversionFactor=1.0		currencyUnits
+HED_0011606	$	TestlibUnit	unitPrefix, unitSymbol, conversionFactor=1.0, allowedCharacter=dollar		currencyUnits
+HED_0011607	euro	TestlibUnit		The official currency of a large subset of member countries of the European Union.	currencyUnits
+HED_0011608	point	TestlibUnit		An arbitrary unit of value, usually an integer indicating reward or penalty.	currencyUnits
+HED_0011609	V	TestlibUnit	SIUnit, unitSymbol, conversionFactor=0.000001		electricPotentialUnits
+HED_0011644	uV	TestlibUnit	conversionFactor=1.0	Added as a direct unit because it is the default unit.	electricPotentialUnits
+HED_0011610	volt	TestlibUnit	SIUnit, conversionFactor=0.000001		electricPotentialUnits
+HED_0011611	hertz	TestlibUnit	SIUnit, conversionFactor=1.0		frequencyUnits
+HED_0011612	Hz	TestlibUnit	SIUnit, unitSymbol, conversionFactor=1.0		frequencyUnits
+HED_0011613	dB	TestlibUnit	unitSymbol, conversionFactor=1.0	Intensity expressed as ratio to a threshold. May be used for sound intensity.	intensityUnits
+HED_0011614	candela	TestlibUnit	SIUnit	Units used to express light intensity.	intensityUnits
+HED_0011615	cd	TestlibUnit	SIUnit, unitSymbol	Units used to express light intensity.	intensityUnits
+HED_0011616	m-per-s^3	TestlibUnit	unitSymbol, conversionFactor=1.0, allowedCharacter=caret		jerkUnits
+HED_0011617	tesla	TestlibUnit	SIUnit, conversionFactor=10e-15		magneticFieldUnits
+HED_0011618	T	TestlibUnit	SIUnit, unitSymbol, conversionFactor=10e-15		magneticFieldUnits
+HED_0011619	byte	TestlibUnit	SIUnit, conversionFactor=1.0		memorySizeUnits
+HED_0011620	B	TestlibUnit	SIUnit, unitSymbol, conversionFactor=1.0		memorySizeUnits
+HED_0011621	foot	TestlibUnit	conversionFactor=0.3048		physicalLengthUnits
+HED_0011622	inch	TestlibUnit	conversionFactor=0.0254		physicalLengthUnits
+HED_0011623	meter	TestlibUnit	SIUnit, conversionFactor=1.0		physicalLengthUnits
+HED_0011624	metre	TestlibUnit	SIUnit, conversionFactor=1.0		physicalLengthUnits
+HED_0011625	m	TestlibUnit	SIUnit, unitSymbol, conversionFactor=1.0		physicalLengthUnits
+HED_0011626	mile	TestlibUnit	conversionFactor=1609.34		physicalLengthUnits
+HED_0011627	m-per-s	TestlibUnit	SIUnit, unitSymbol, conversionFactor=1.0		speedUnits
+HED_0011628	mph	TestlibUnit	unitSymbol, conversionFactor=0.44704		speedUnits
+HED_0011629	kph	TestlibUnit	unitSymbol, conversionFactor=0.277778		speedUnits
+HED_0011630	degree-Celsius	TestlibUnit	SIUnit, conversionFactor=1.0		temperatureUnits
+HED_0011631	degree Celsius	TestlibUnit	deprecatedFrom=8.2.0, SIUnit, conversionFactor=1.0	Units are not allowed to have spaces. Use degree-Celsius or oC.	temperatureUnits
+HED_0011632	oC	TestlibUnit	SIUnit, unitSymbol, conversionFactor=1.0		temperatureUnits
+HED_0011633	second	TestlibUnit	SIUnit, conversionFactor=1.0		timeUnits
+HED_0011634	s	TestlibUnit	SIUnit, unitSymbol, conversionFactor=1.0		timeUnits
+HED_0011635	day	TestlibUnit	conversionFactor=86400		timeUnits
+HED_0011645	month	TestlibUnit			timeUnits
+HED_0011636	minute	TestlibUnit	conversionFactor=60		timeUnits
+HED_0011637	hour	TestlibUnit	conversionFactor=3600	Should be in 24-hour format.	timeUnits
+HED_0011638	year	TestlibUnit		Years do not have a constant conversion factor to seconds.	timeUnits
+HED_0011639	m^3	TestlibUnit	SIUnit, unitSymbol, conversionFactor=1.0, allowedCharacter=caret		volumeUnits
+HED_0011640	g	TestlibUnit	SIUnit, unitSymbol, conversionFactor=1.0		weightUnits
+HED_0011641	gram	TestlibUnit	SIUnit, conversionFactor=1.0		weightUnits
+HED_0011642	pound	TestlibUnit	conversionFactor=453.592		weightUnits
+HED_0011643	lb	TestlibUnit	conversionFactor=453.592		weightUnits

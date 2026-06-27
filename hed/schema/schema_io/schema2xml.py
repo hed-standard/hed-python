@@ -45,7 +45,7 @@ class Schema2XML(Schema2Base):
         self._output_external_annotations(hed_schema)
 
     def _output_sources(self, hed_schema):
-        sources = hed_schema.get_extras(df_constants.SOURCES_KEY)
+        sources = self._get_merged_extras(df_constants.SOURCES_KEY)
         if sources is None or sources.empty:
             return
 
@@ -60,7 +60,7 @@ class Schema2XML(Schema2Base):
             description.text = row[df_constants.description]
 
     def _output_prefixes(self, hed_schema):
-        prefixes = hed_schema.get_extras(df_constants.PREFIXES_KEY)
+        prefixes = self._get_merged_extras(df_constants.PREFIXES_KEY)
         if prefixes is None or prefixes.empty:
             return
 
@@ -75,7 +75,7 @@ class Schema2XML(Schema2Base):
             prefix_description.text = row[df_constants.description]
 
     def _output_external_annotations(self, hed_schema):
-        externals = hed_schema.get_extras(df_constants.EXTERNAL_ANNOTATION_KEY)
+        externals = self._get_merged_extras(df_constants.EXTERNAL_ANNOTATION_KEY)
         if externals is None or externals.empty:
             return
 

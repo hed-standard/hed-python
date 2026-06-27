@@ -126,6 +126,10 @@ class SchemaLoaderXML(SchemaLoader):
             )
         library_df = pd.DataFrame(data)
 
+        # Add in_library column if this is a library schema
+        if self.library:
+            library_df[df_constants.in_library] = self.library
+
         # Merge with existing schema extras if present (from withStandard base schema)
         standard_df = self._schema.extras.get(df_constants.SOURCES_KEY, None)
         self._schema.extras[df_constants.SOURCES_KEY] = df_util.merge_extras_dataframes(library_df, standard_df)
@@ -146,6 +150,10 @@ class SchemaLoaderXML(SchemaLoader):
                 }
             )
         library_df = pd.DataFrame(data)
+
+        # Add in_library column if this is a library schema
+        if self.library:
+            library_df[df_constants.in_library] = self.library
 
         # Merge with existing schema extras if present (from withStandard base schema)
         standard_df = self._schema.extras.get(df_constants.PREFIXES_KEY, None)
@@ -169,6 +177,10 @@ class SchemaLoaderXML(SchemaLoader):
                 }
             )
         library_df = pd.DataFrame(data)
+
+        # Add in_library column if this is a library schema
+        if self.library:
+            library_df[df_constants.in_library] = self.library
 
         # Merge with existing schema extras if present (from withStandard base schema)
         standard_df = self._schema.extras.get(df_constants.EXTERNAL_ANNOTATION_KEY, None)

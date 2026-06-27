@@ -2,6 +2,8 @@
 
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.errors.exceptions import HedFileError, HedExceptions
+from hed.schema.schema_io import df_util
+from hed.schema.schema_io import df_constants
 
 
 class Schema2Base:
@@ -45,6 +47,7 @@ class Schema2Base:
         self._save_merged = False
         self._strip_out_in_library = False
         self._schema = None
+        self._base_schema = None  # Used when saving merged library schema to include base schema extras
 
     def process_schema(self, hed_schema, save_merged=False):
         """Convert a HedSchema object to the subclass's output format (mediawiki, XML, JSON, or TSV).
@@ -83,11 +86,22 @@ class Schema2Base:
         self._save_base = False
         self._strip_out_in_library = True
         self._schema = hed_schema  # This is needed to save attributes in dataframes for now
+        self._base_schema = None  # Reset base schema reference
+
+        # If it is a library schema with a standard schema, we need to determine if we are saving merged or not.
         if hed_schema.with_standard:
             self._save_lib = True
             if save_merged:
                 self._save_base = True
                 self._strip_out_in_library = False
+                # Load base schema so extras can be merged when outputting.
+                # We intentionally do NOT wrap this in try/except. If the base schema cannot be loaded,
+                # we fail fast rather than silently producing an incomplete "merged" output
+                # (e.g., missing Sources/Prefixes/External annotations). This design prevents
+                # the subtle bug of producing partial output that looks valid but is missing data.
+                from hed.schema.hed_schema_io import load_schema_version
+
+                self._base_schema = load_schema_version(hed_schema.with_standard)
         else:
             # Saving a standard schema or a library schema without a standard schema
             save_merged = True
@@ -238,6 +252,37 @@ class Schema2Base:
 
     def _attribute_disallowed(self, attribute):
         return self._strip_out_in_library and attribute == HedKey.InLibrary
+
+    def _get_merged_extras(self, extras_key):
+        """Get extras, merging base schema extras when saving merged library schema.
+
+        Parameters:
+            extras_key (str): The key for the extras type (e.g., df_constants.SOURCES_KEY)
+
+        Returns:
+            pd.DataFrame or None: The extras dataframe, merged if applicable
+        """
+        lib_extras = self._schema.get_extras(extras_key)
+
+        # If not saving merged or no base schema, just return library extras
+        if not self._save_merged or not self._base_schema:
+            return lib_extras
+
+        # Merge base schema extras with library extras
+        base_extras = self._base_schema.get_extras(extras_key)
+        if base_extras is None and lib_extras is None:
+            return None
+
+        # Ensure both DataFrames have consistent columns, especially in_library
+        if lib_extras is not None and not lib_extras.empty and df_constants.in_library in lib_extras.columns:
+            # Library extras have in_library column - ensure base extras has it too
+            if base_extras is not None and not base_extras.empty and df_constants.in_library not in base_extras.columns:
+                base_extras = base_extras.copy()
+                base_extras[df_constants.in_library] = ""  # Mark base schema rows with empty string
+
+        # Use merge_extras_dataframes to combine them
+        merged = df_util.merge_extras_dataframes(lib_extras, base_extras)
+        return merged if not merged.empty else None
 
     def _format_tag_attributes(self, attributes):
         """Takes a dictionary of tag attributes and returns a string with the .mediawiki representation.

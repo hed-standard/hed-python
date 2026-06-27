@@ -130,9 +130,11 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
             all_hed_versions[found_library_name].append(version)
     for name, hed_versions in all_hed_versions.items():
         all_hed_versions[name] = _sort_version_list(hed_versions)
+    if library_name == "all":
+        return all_hed_versions
     if library_name in all_hed_versions:
         return all_hed_versions[library_name]
-    return all_hed_versions
+    return []
 
 
 def get_hed_version_path(xml_version, library_name=None, local_hed_directory=None) -> Union[str, None]:

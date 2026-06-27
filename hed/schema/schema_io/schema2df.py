@@ -90,8 +90,36 @@ class Schema2DF(Schema2Base):
             hed_schema(HedSchema): The HED schema to extract the information from
 
         """
+        # Import here to avoid circular imports
+        from hed.schema.schema_io import df_constants
+
+        # Get all extras keys that might exist
+        extras_keys = [df_constants.SOURCES_KEY, df_constants.PREFIXES_KEY, df_constants.EXTERNAL_ANNOTATION_KEY]
+
+        for key in extras_keys:
+            merged_extras = self._get_merged_extras(key)
+            if merged_extras is not None and not merged_extras.empty:
+                output_df = merged_extras.copy()
+                # Always strip in_library column - it's internal metadata, never serialized
+                if df_constants.in_library in output_df.columns:
+                    output_df = output_df.drop(columns=[df_constants.in_library])
+                self.output[key] = output_df
+            elif key in hed_schema.extras and hed_schema.extras[key] is not None:
+                # Include empty dataframes with proper structure
+                output_df = hed_schema.extras[key].copy()
+                # Always strip in_library column - it's internal metadata, never serialized
+                if df_constants.in_library in output_df.columns:
+                    output_df = output_df.drop(columns=[df_constants.in_library])
+                self.output[key] = output_df
+
+        # Also include any other extras that might exist
         for key, df in hed_schema.extras.items():
-            self.output[key] = df.copy()
+            if key not in self.output:
+                output_df = df.copy()
+                # Always strip in_library column - it's internal metadata, never serialized
+                if df_constants.in_library in output_df.columns:
+                    output_df = output_df.drop(columns=[df_constants.in_library])
+                self.output[key] = output_df
 
     def _output_epilogue(self, epilogue):
         base_object = "HedEpilogue"

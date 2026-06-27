@@ -243,6 +243,22 @@ class TestHedSchemaUnmerged(unittest.TestCase):
                 new_filename = f"HED_{cls.dupe_library_name}.xml"
                 loaded_schema.save_as_xml(os.path.join(cls.hed_cache_dir, new_filename), save_merged=False)
 
+        # Also copy testlib schemas from spec_tests/hed-schemas if available for testing library merging
+        testlib_spec_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../../spec_tests/hed-schemas/library_schemas/testlib"
+        )
+        if os.path.exists(testlib_spec_path):
+            for root, _dirs, files in os.walk(testlib_spec_path):
+                for filename in files:
+                    if filename.endswith(".xml"):
+                        testlib_file = os.path.join(root, filename)
+                        try:
+                            loaded_schema = schema.load_schema(testlib_file)
+                            loaded_schema.save_as_xml(os.path.join(cls.hed_cache_dir, filename), save_merged=False)
+                        except Exception:
+                            # Skip if there's an issue loading this particular testlib schema
+                            pass
+
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.hed_cache_dir)
@@ -574,6 +590,58 @@ class TestHedSchemaMerging(unittest.TestCase):
         # One extra because this also finds the attribute definition, whereas in wiki it's a different format.
         self.assertEqual(score_count, 854, "There should be 854 in library entries in the saved score schema")
 
+    def test_save_merged_raises_when_base_schema_unavailable(self):
+        """Test that HedFileError is raised when saving merged output with non-existent base schema."""
+        # Create a temporary schema file with a non-existent withStandard version.
+        # The schema must be syntactically valid and marked as merged (no unmerged="True")
+        # to trigger the save_merged code path in schema2base.
+        # This validates the fail-fast behavior: when saving merged output, an exception is raised
+        # immediately if the base schema cannot be loaded, preventing silent production of partial output.
+        temp_schema_content = """HED version="1.1.0" library="score" withStandard="99.99.99"
+
+'''Prologue'''
+Test schema for exception handling.
+
+!# start schema
+
+'''Test-tag'''
+* Test-subtag
+
+!# end schema
+
+'''Unit classes'''
+
+'''Unit modifiers'''
+
+'''Value classes'''
+
+'''Schema attributes'''
+
+'''Properties'''
+
+'''Epilogue'''
+
+!# end hed
+"""
+        temp_schema_file = get_temp_filename(".mediawiki")
+        with open(temp_schema_file, "w", encoding="utf-8", newline="\n") as f:
+            f.write(temp_schema_content)
+
+        try:
+            # Load the schema successfully (it's syntactically valid and marked as merged)
+            schema_obj = load_schema(temp_schema_file)
+
+            # Attempting to save the merged schema should raise HedFileError because the base schema
+            # version (99.99.99) doesn't exist. The fail-fast design in schema2base.__init__
+            # intentionally does NOT wrap the load_schema_version() call in try/except, ensuring
+            # this error is raised immediately rather than silently producing an incomplete output.
+            with self.assertRaises(HedFileError):
+                schema_obj.get_as_mediawiki_string(save_merged=True)
+        finally:
+            # Clean up the temporary schema file
+            if os.path.exists(temp_schema_file):
+                os.remove(temp_schema_file)
+
 
 class TestParseVersionList(unittest.TestCase):
     def test_empty_and_single_library(self):
@@ -652,10 +720,10 @@ class TestPrereleaseSchemaLoading(unittest.TestCase):
 
     def test_load_prerelease_library(self):
         """Test loading a prerelease library schema."""
-        schema = load_schema_version("testlib_2.1.0", xml_folder=self.schema_dir)
+        schema = load_schema_version("testliba_2.1.0", xml_folder=self.schema_dir)
         self.assertIsInstance(schema, HedSchema)
         self.assertEqual(schema.version_number, "2.1.0")
-        self.assertEqual(schema.library, "testlib")
+        self.assertEqual(schema.library, "testliba")
         self.assertIn("prerelease-item", schema.tags.all_names)
 
     def test_mixed_regular_and_prerelease_schemas(self):

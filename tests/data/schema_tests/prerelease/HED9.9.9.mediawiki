@@ -24,4 +24,8 @@ resolution via load_schema/from_string.
 
 '''Epilogue'''
 
+'''Sources'''
+
+'''External annotations'''
+
 !# end hed

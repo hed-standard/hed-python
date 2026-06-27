@@ -512,6 +512,10 @@ class SchemaLoaderJSON(SchemaLoader):
         else:
             library_df = pd.DataFrame([], columns=df_constants.source_columns)
 
+        # Add in_library column if this is a library schema
+        if self.library and not library_df.empty:
+            library_df[df_constants.in_library] = self.library
+
         # Merge with existing schema extras if present (from withStandard base schema)
         standard_df = self._schema.extras.get(df_constants.SOURCES_KEY, None)
         self._schema.extras[df_constants.SOURCES_KEY] = df_util.merge_extras_dataframes(library_df, standard_df)
@@ -533,6 +537,10 @@ class SchemaLoaderJSON(SchemaLoader):
             library_df = pd.DataFrame(prefixes_list).fillna("").astype(str)
         else:
             library_df = pd.DataFrame([], columns=df_constants.prefix_columns)
+
+        # Add in_library column if this is a library schema
+        if self.library and not library_df.empty:
+            library_df[df_constants.in_library] = self.library
 
         # Merge with existing schema extras if present (from withStandard base schema)
         standard_df = self._schema.extras.get(df_constants.PREFIXES_KEY, None)
@@ -556,6 +564,10 @@ class SchemaLoaderJSON(SchemaLoader):
             library_df = pd.DataFrame(externals_list).fillna("").astype(str)
         else:
             library_df = pd.DataFrame([], columns=df_constants.external_annotation_columns)
+
+        # Add in_library column if this is a library schema
+        if self.library and not library_df.empty:
+            library_df[df_constants.in_library] = self.library
 
         # Merge with existing schema extras if present (from withStandard base schema)
         standard_df = self._schema.extras.get(df_constants.EXTERNAL_ANNOTATION_KEY, None)
