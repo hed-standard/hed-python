@@ -274,6 +274,169 @@ class TestSchemaExtrasAllFormats(unittest.TestCase):
                     df2 = self._extras_without_in_library(schema_fmt.get_extras(key))
                     pd.testing.assert_frame_equal(df1, df2, check_dtype=False, obj=f"{label}: XML vs {fmt_name}")
 
+    def test_09_base_extras_preserve_empty_in_library_after_merged_save(self):
+        """After merged save, base-schema extras retain empty/NaN in_library (not rewritten to lib name).
+
+        This test validates the fix for schema2base.py line 293-305 where empty/NaN in_library
+        (the explicit marker for base-schema rows) must NOT be rewritten to the library name.
+        If this bug exists, base extras get serialized with inLibrary attribute and break
+        future unmerge operations.
+        """
+
+        schema = load_schema(self.xml_path)
+        temp_xml = os.path.join(self.temp_dir, "merged_preserve_base.xml")
+
+        # Save as merged (this is where the bug manifests)
+        schema.save_as_xml(temp_xml, save_merged=True)
+        schema_reloaded = load_schema(temp_xml)
+
+        for key, label, expected_base_count in [
+            (df_constants.SOURCES_KEY, "Sources", self.expected_sources - 1),
+            (df_constants.PREFIXES_KEY, "Prefixes", self.expected_prefixes - 1),
+            (df_constants.EXTERNAL_ANNOTATION_KEY, "ExternalAnnotations", self.expected_externals - 1),
+        ]:
+            with self.subTest(section=label):
+                df = schema_reloaded.get_extras(key)
+                self.assertIsNotNone(df, f"{label} should exist after merged roundtrip")
+                self.assertIn(df_constants.in_library, df.columns, f"{label} should have in_library column")
+
+                # After merged save, merged schema contains ALL rows: library + base
+                lib_rows = (df[df_constants.in_library] == self.library_name).sum()
+                # Base rows have NaN or empty string (both are valid markers for "not a library row")
+                not_lib_rows = df[df_constants.in_library].isna().sum() + (df[df_constants.in_library] == "").sum()
+
+                # Verify counts match expected totals (library + base)
+                self.assertEqual(lib_rows, 1, f"{label}: should have 1 library row (in_library={self.library_name})")
+                self.assertEqual(
+                    not_lib_rows,
+                    expected_base_count,
+                    f"{label}: should have {expected_base_count} base rows with NaN/empty in_library (not rewritten to {self.library_name})",
+                )
+                self.assertEqual(
+                    len(df),
+                    self.expected_sources
+                    if label == "Sources"
+                    else (self.expected_prefixes if label == "Prefixes" else self.expected_externals),
+                    f"{label}: total rows should match expected count",
+                )
+
+                # Verify unmerge behavior: save unmerged should only have library rows
+                temp_xml_unmerged = os.path.join(self.temp_dir, f"check_unmerge_{label}.xml")
+                schema_reloaded.save_as_xml(temp_xml_unmerged, save_merged=False)
+                schema_unmerged = load_schema(temp_xml_unmerged)
+
+                df_unmerged = schema_unmerged.get_extras(key)
+                if df_unmerged is not None and not df_unmerged.empty:
+                    # After unmerge, only library rows should remain (base rows dropped)
+                    self.assertEqual(
+                        len(df_unmerged), 1, f"{label}: unmerged should only have library row, not base rows"
+                    )
+
+    def test_10_json_loader_normalizes_in_library_column(self):
+        """JSON loader normalizes in_library to string (NaN → empty string) for all extras sections.
+
+        This test validates the fix in json2schema.py _load_extras() where extras DataFrames
+        can end up with NaN in the in_library column. Downstream code expects string values,
+        not NaN. This test ensures all three extras sections (sources, prefixes, external annotations)
+        have in_library as string type with no NaN values after JSON loading.
+        """
+
+        schema = load_schema(self.json_path)
+
+        for key, label in [
+            (df_constants.SOURCES_KEY, "Sources"),
+            (df_constants.PREFIXES_KEY, "Prefixes"),
+            (df_constants.EXTERNAL_ANNOTATION_KEY, "ExternalAnnotations"),
+        ]:
+            with self.subTest(section=label):
+                df = schema.get_extras(key)
+                self.assertIsNotNone(df, f"JSON: {label} should not be None")
+                self.assertIn(df_constants.in_library, df.columns, f"JSON: {label} should have in_library column")
+
+                # Check that in_library is string type (not object with NaN)
+                self.assertTrue(
+                    df[df_constants.in_library].dtype == object or df[df_constants.in_library].dtype == str,
+                    f"JSON: {label} in_library should be string/object type",
+                )
+
+                # Check that there are NO NaN values in in_library
+                nan_count = df[df_constants.in_library].isna().sum()
+                self.assertEqual(
+                    nan_count, 0, f"JSON: {label} in_library should have no NaN values (found {nan_count})"
+                )
+
+                # Verify all values are strings
+                for idx, val in enumerate(df[df_constants.in_library]):
+                    self.assertIsInstance(
+                        val,
+                        str,
+                        f"JSON: {label} in_library[{idx}] should be string, got {type(val).__name__}: {repr(val)}",
+                    )
+
+    def test_11_xml_loader_normalizes_in_library_column(self):
+        """XML loader normalizes in_library to string (NaN → empty string) for all extras sections."""
+
+        schema = load_schema(self.xml_path)
+
+        for key, label in [
+            (df_constants.SOURCES_KEY, "Sources"),
+            (df_constants.PREFIXES_KEY, "Prefixes"),
+            (df_constants.EXTERNAL_ANNOTATION_KEY, "ExternalAnnotations"),
+        ]:
+            with self.subTest(section=label):
+                df = schema.get_extras(key)
+                self.assertIsNotNone(df, f"XML: {label} should not be None")
+                self.assertIn(df_constants.in_library, df.columns, f"XML: {label} should have in_library column")
+
+                # Check that there are NO NaN values in in_library
+                nan_count = df[df_constants.in_library].isna().sum()
+                self.assertEqual(nan_count, 0, f"XML: {label} in_library should have no NaN values (found {nan_count})")
+
+                # Verify all values are strings
+                for idx, val in enumerate(df[df_constants.in_library]):
+                    self.assertIsInstance(
+                        val,
+                        str,
+                        f"XML: {label} in_library[{idx}] should be string, got {type(val).__name__}: {repr(val)}",
+                    )
+
+    def test_12_all_loaders_normalize_in_library_column(self):
+        """All loaders (XML, JSON, MediaWiki, TSV) normalize in_library to string with no NaN."""
+
+        formats = {
+            "XML": self.xml_path,
+            "JSON": self.json_path,
+            "MediaWiki": self.wiki_path,
+            "TSV": self.tsv_path,
+        }
+
+        for format_name, path in formats.items():
+            schema = load_schema(path)
+
+            for key, label in [
+                (df_constants.SOURCES_KEY, "Sources"),
+                (df_constants.PREFIXES_KEY, "Prefixes"),
+                (df_constants.EXTERNAL_ANNOTATION_KEY, "ExternalAnnotations"),
+            ]:
+                with self.subTest(format=format_name, section=label):
+                    df = schema.get_extras(key)
+                    self.assertIsNotNone(df, f"{format_name}: {label} should not be None")
+
+                    if df_constants.in_library in df.columns:
+                        # No NaN values
+                        nan_count = df[df_constants.in_library].isna().sum()
+                        self.assertEqual(
+                            nan_count, 0, f"{format_name}: {label} in_library should have no NaN (found {nan_count})"
+                        )
+
+                        # All values are strings
+                        for val in df[df_constants.in_library]:
+                            self.assertIsInstance(
+                                val,
+                                str,
+                                f"{format_name}: {label} in_library value should be string, got {type(val).__name__}",
+                            )
+
 
 if __name__ == "__main__":
     unittest.main()

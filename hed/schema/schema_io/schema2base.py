@@ -297,12 +297,8 @@ class Schema2Base:
                 # No tracking yet – mark all as library-specific (unmerged source)
                 lib_extras[df_constants.in_library] = self._schema.library
             else:
-                # Fill any missing/empty in_library values (shouldn't normally happen)
-                lib_extras[df_constants.in_library] = (
-                    lib_extras[df_constants.in_library]
-                    .fillna("")
-                    .where(lib_extras[df_constants.in_library].ne(""), self._schema.library)
-                )
+                # Normalize missing values; empty string denotes base-schema entries and must not be rewritten.
+                lib_extras[df_constants.in_library] = lib_extras[df_constants.in_library].fillna("").astype(str)
 
         # Mark base-schema extras rows with empty in_library so they don't round-trip as library
         if base_extras is not None and not base_extras.empty and df_constants.in_library not in base_extras.columns:

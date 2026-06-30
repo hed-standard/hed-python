@@ -148,6 +148,10 @@ class SchemaLoaderXML(SchemaLoader):
             data.append(entry)
         library_df = pd.DataFrame(data) if data else pd.DataFrame(columns=df_constants.source_columns)
 
+        # Normalize in_library column: NaN → "", ensure string type
+        if df_constants.in_library in library_df.columns:
+            library_df[df_constants.in_library] = library_df[df_constants.in_library].fillna("").astype(str)
+
         # For unmerged loading, all entries are library-specific – mark them all
         if self.library and not library_df.empty and not self._loading_merged:
             library_df[df_constants.in_library] = self.library
@@ -174,6 +178,10 @@ class SchemaLoaderXML(SchemaLoader):
                 entry[df_constants.in_library] = in_lib
             data.append(entry)
         library_df = pd.DataFrame(data) if data else pd.DataFrame(columns=df_constants.prefix_columns)
+
+        # Normalize in_library column: NaN → "", ensure string type
+        if df_constants.in_library in library_df.columns:
+            library_df[df_constants.in_library] = library_df[df_constants.in_library].fillna("").astype(str)
 
         # For unmerged loading, all entries are library-specific – mark them all
         if self.library and not library_df.empty and not self._loading_merged:
@@ -203,6 +211,10 @@ class SchemaLoaderXML(SchemaLoader):
                 entry[df_constants.in_library] = in_lib
             data.append(entry)
         library_df = pd.DataFrame(data) if data else pd.DataFrame(columns=df_constants.external_annotation_columns)
+
+        # Normalize in_library column: NaN → "", ensure string type
+        if df_constants.in_library in library_df.columns:
+            library_df[df_constants.in_library] = library_df[df_constants.in_library].fillna("").astype(str)
 
         # For unmerged loading, all entries are library-specific – mark them all
         if self.library and not library_df.empty and not self._loading_merged:

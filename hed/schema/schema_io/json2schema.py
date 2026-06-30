@@ -512,6 +512,9 @@ class SchemaLoaderJSON(SchemaLoader):
         if sources_list:
             library_df = pd.DataFrame(sources_list).fillna(dict.fromkeys(df_constants.source_columns, ""))
             library_df = library_df.astype({c: str for c in df_constants.source_columns if c in library_df.columns})
+            # Normalize in_library column: NaN → "", ensure string type
+            if df_constants.in_library in library_df.columns:
+                library_df[df_constants.in_library] = library_df[df_constants.in_library].fillna("").astype(str)
         else:
             library_df = pd.DataFrame([], columns=df_constants.source_columns)
 
@@ -541,6 +544,9 @@ class SchemaLoaderJSON(SchemaLoader):
         if prefixes_list:
             library_df = pd.DataFrame(prefixes_list).fillna(dict.fromkeys(df_constants.prefix_columns, ""))
             library_df = library_df.astype({c: str for c in df_constants.prefix_columns if c in library_df.columns})
+            # Normalize in_library column: NaN → "", ensure string type
+            if df_constants.in_library in library_df.columns:
+                library_df[df_constants.in_library] = library_df[df_constants.in_library].fillna("").astype(str)
         else:
             library_df = pd.DataFrame([], columns=df_constants.prefix_columns)
 
@@ -575,6 +581,9 @@ class SchemaLoaderJSON(SchemaLoader):
             library_df = library_df.astype(
                 {c: str for c in df_constants.external_annotation_columns if c in library_df.columns}
             )
+            # Normalize in_library column: NaN → "", ensure string type
+            if df_constants.in_library in library_df.columns:
+                library_df[df_constants.in_library] = library_df[df_constants.in_library].fillna("").astype(str)
         else:
             library_df = pd.DataFrame([], columns=df_constants.external_annotation_columns)
 
