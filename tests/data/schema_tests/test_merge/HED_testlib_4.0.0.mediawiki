@@ -1,4 +1,4 @@
-HED version="4.0.0" library="testlib" withStandard="8.4.0"
+HED version="4.0.0" library="testlib" withStandard="8.5.0"
 
 '''Prologue'''
 This schema is designed to be lazy partnered with prerelease 8.4.0.
@@ -8,7 +8,7 @@ This schema is designed to be lazy partnered with prerelease 8.4.0.
 '''Test-some''' <nowiki>{inLibrary=testlib} [Unknown stuff.]</nowiki>
 * Unknown1 <nowiki>{inLibrary=testlib} [Unknown1 stuff]</nowiki>
 
-'''Event''' <nowiki>{suggestedTag=Task-property, annotation=ncit:C25499, annotation=rdfs:comment Should have this tag in every event process., hedId=HED_0012001} [Something that happens at a given time and (typically) place. Elements of this tag subtree designate the general category in which an event falls.]</nowiki>
+'''Event''' <nowiki>{suggestedTag=Task-property, hedId=HED_0012001} [Something that happens at a given time and (typically) place. Elements of this tag subtree designate the general category in which an event falls.]</nowiki>
 * Sensory-event <nowiki>{suggestedTag=Task-event-role, suggestedTag=Sensory-presentation, hedId=HED_0012002} [Something perceivable by the participant. An event meant to be an experimental stimulus should include the tag Task-property/Task-event-role/Experimental-stimulus.]</nowiki>
 * Agent-action <nowiki>{suggestedTag=Task-event-role, suggestedTag=Agent, hedId=HED_0012003} [Any action engaged in by an agent (see the Agent subtree for agent categories). A participant response to an experiment stimulus should include the tag Agent-property/Agent-task-role/Experiment-participant.]</nowiki>
 * Data-feature <nowiki>{suggestedTag=Data-property, hedId=HED_0012004} [An event marking the occurrence of a data feature such as an interictal spike or alpha burst that is often added post hoc to the data record.]</nowiki>
@@ -561,12 +561,14 @@ This schema is designed to be lazy partnered with prerelease 8.4.0.
 *** Nonbiological-artifact <nowiki>{hedId=HED_0012512} [A data artifact arising from a non-biological source.]</nowiki>
 **** Artificial-ventilation-artifact <nowiki>{hedId=HED_0012513} [Artifact stemming from mechanical ventilation. These can occur at the same rate as the ventilator, but also have other patterns.]</nowiki>
 **** Dialysis-artifact <nowiki>{hedId=HED_0012514} [Artifacts seen in recordings during continuous renal replacement therapy (dialysis).]</nowiki>
+**** Electrical-artifact <nowiki>[Signal Contamination due to extraneous or unwanted electrical signals.]</nowiki>
+***** Induction-artifact <nowiki>{hedId=HED_0012517} [Artifacts induced by nearby equipment. In EEG, these are usually of high frequency.]</nowiki>
+***** Line-noise-artifact <nowiki>{hedId=HED_0012518} [Power line noise at 50 Hz or 60 Hz.]</nowiki>
+******  <nowiki># {takesValue, valueClass=numericClass, unitClass=frequencyUnits, hedId=HED_0012519}</nowiki>
 **** Electrode-movement-artifact <nowiki>{hedId=HED_0012515} [Artifact from electrode movement.]</nowiki>
-**** Electrode-pops-artifact <nowiki>{hedId=HED_0012516} [Brief artifact with a steep rise and slow fall of an electrophysiological signal, most often caused by a loose electrode.]</nowiki>
-**** Induction-artifact <nowiki>{hedId=HED_0012517} [Artifacts induced by nearby equipment. In EEG, these are usually of high frequency.]</nowiki>
-**** Line-noise-artifact <nowiki>{hedId=HED_0012518} [Power line noise at 50 Hz or 60 Hz.]</nowiki>
-*****  <nowiki># {takesValue, valueClass=numericClass, unitClass=frequencyUnits, hedId=HED_0012519}</nowiki>
-**** Salt-bridge-artifact <nowiki>{hedId=HED_0012520} [Artifact from salt-bridge between EEG electrodes.]</nowiki>
+**** Localized-channel-artifact <nowiki>{suggestedTag=ID} [Transient artifact usually involving a single channel or a small subset of channels.]</nowiki>
+***** Electrode-pops-artifact <nowiki>{hedId=HED_0012516} [Brief artifact with a steep rise and slow fall of an electrophysiological signal, most often caused by a loose electrode.]</nowiki>
+***** Salt-bridge-artifact <nowiki>{hedId=HED_0012520} [Artifact from salt-bridge between EEG electrodes.]</nowiki>
 ** Data-marker <nowiki>{hedId=HED_0012521} [An indicator placed to mark something.]</nowiki>
 *** Data-break-marker <nowiki>{hedId=HED_0012522} [An indicator place to indicate a gap in the data.]</nowiki>
 *** Temporal-marker <nowiki>{hedId=HED_0012523} [An indicator placed at a particular time in the data.]</nowiki>
@@ -1167,6 +1169,7 @@ This schema is designed to be lazy partnered with prerelease 8.4.0.
 *** Not-meaningful <nowiki>{hedId=HED_0013114} [Not having a serious, important, or useful quality or purpose.]</nowiki>
 *** Novel <nowiki>{hedId=HED_0013115} [Having no previous example or precedent or parallel.]</nowiki>
 *** Oddball <nowiki>{relatedTag=Unexpected, suggestedTag=Target, hedId=HED_0013116} [Something unusual, or infrequent.]</nowiki>
+*** Omitted-presentation <nowiki>[Something that is expected to happen or usually happens but doesn't.]</nowiki>
 *** Penalty <nowiki>{hedId=HED_0013117} [A disadvantage, loss, or hardship due to some action.]</nowiki>
 *** Planned <nowiki>{relatedTag=Unplanned, hedId=HED_0013118} [Something that was decided on or arranged in advance.]</nowiki>
 *** Priming <nowiki>{hedId=HED_0013119} [An implicit memory effect in which exposure to a stimulus influences response to a later stimulus.]</nowiki>
@@ -1415,13 +1418,13 @@ This schema is designed to be lazy partnered with prerelease 8.4.0.
 A final section.
 
 '''Sources'''
-* <nowiki>source=FoodDB,link=https://fooddb.example.org,description=Botanical and nutritional database for fruits and vegetables.</nowiki>
+* <nowiki>{inLibrary=testlib} source=FoodDB,link=https://fooddb.example.org,description=Botanical and nutritional database for fruits and vegetables.</nowiki>
 * <nowiki>source=Wikipedia,link=https://en.wikipedia.org,description=General definitions of concepts.</nowiki>
 
 '''Prefixes'''
 * <nowiki>prefix=dc:,namespace=http://purl.org/dc/elements/1.1/#,description=The Dublin Core elements</nowiki>
 * <nowiki>prefix=foaf:,namespace=http://xmlns.com/foaf/0.1/#,description=Friend-of-a-Friend http://xmlns.com/foaf/spec/</nowiki>
-* <nowiki>prefix=foodonto:,namespace=http://purl.obolibrary.org/obo/foodon.owl,description=Food Ontology (FOODON)</nowiki>
+* <nowiki>{inLibrary=testlib} prefix=foodonto:,namespace=http://purl.obolibrary.org/obo/foodon.owl,description=Food Ontology (FOODON)</nowiki>
 * <nowiki>prefix=iao:,namespace=http://purl.obolibrary.org/obo/iao.owl,description=Information Artifact Ontology (IAO)</nowiki>
 * <nowiki>prefix=ncit:,namespace=http://purl.obolibrary.org/obo/ncit.owl,description=NCI Thesaurus OBO Edition</nowiki>
 * <nowiki>prefix=obogo:,namespace=http://www.geneontology.org/formats/oboInOwl,description=The OBO Format Namespace</nowiki>
@@ -1449,8 +1452,9 @@ A final section.
 * <nowiki>prefix=dc:,id=title,iri=http://purl.org/dc/elements/1.1/title,description=A name given to the resource.</nowiki>
 * <nowiki>prefix=dc:,id=type,iri=http://purl.org/dc/elements/1.1/type,description=The nature or genre of the resource.</nowiki>
 * <nowiki>prefix=foaf:,id=homepage,iri=http://xmlns.com/foaf/0.1/homepage,description=A homepage for some thing.</nowiki>
-* <nowiki>prefix=foodonto:,id=has_botanical_name,iri=http://purl.obolibrary.org/obo/FOODON_00001234,description=The botanical or scientific name of a food item.</nowiki>
+* <nowiki>{inLibrary=testlib} prefix=foodonto:,id=has_botanical_name,iri=http://purl.obolibrary.org/obo/FOODON_00001234,description=The botanical or scientific name of a food item.</nowiki>
 * <nowiki>prefix=obogo:,id=has_dbxref,iri=http://www.geneontology.org/formats/oboInOwl#hasDbXref,description=Property indicating that an ontology term has a cross-reference to a database.</nowiki>
+* <nowiki>prefix=rdfs:,id=comment,iri=http://www.w3.org/2000/01/rdf-schema#comment,description=Standard way to provide a human-readable description.</nowiki>
 * <nowiki>prefix=terms:,id=license,iri=http://purl.org/dc/terms/license,description=A legal document giving official permission to do something with the resource.</nowiki>
 
 !# end hed

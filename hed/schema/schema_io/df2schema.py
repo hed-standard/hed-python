@@ -92,10 +92,34 @@ class SchemaLoaderDF(SchemaLoader):
             )
         extras = {key: self.input_data[key] for key in constants.DF_EXTRAS if key in self.input_data}
         for key, _item in extras.items():
-            # Add in_library column if this is a library schema
-            if self.library and not extras[key].empty and constants.in_library not in extras[key].columns:
-                extras[key][constants.in_library] = self.library
-            self._schema.extras[key] = df_util.merge_extras_dataframes(extras[key], self._schema.extras.get(key, None))
+            df = extras[key].copy()
+            # If the TSV file has an Attributes column, extract inLibrary from it.
+            # This mirrors how unit-class/value-class files carry inLibrary in Attributes.
+            if constants.attributes in df.columns:
+
+                def _extract_in_library(attr_str):
+                    if not attr_str or not isinstance(attr_str, str):
+                        return ""
+                    for part in attr_str.split(","):
+                        part = part.strip()
+                        if part.startswith("inLibrary="):
+                            return part[len("inLibrary=") :]
+                    return ""
+
+                in_lib_vals = df[constants.attributes].apply(_extract_in_library)
+                if in_lib_vals.any():
+                    df[constants.in_library] = in_lib_vals
+                # Drop the Attributes column from internal representation
+                df = df.drop(columns=[constants.attributes])
+            # If Attributes column is absent, that's fine – no in_library tracking yet.
+
+            # For unmerged loading, all entries are library-specific – mark them all.
+            # For merged loading, in_library may already be set from the Attributes column above.
+            if not self._loading_merged and self.library and not df.empty and constants.in_library not in df.columns:
+                df[constants.in_library] = self.library
+            # Store library extras directly – do NOT merge with base schema extras here.
+            # Base schema extras are always added on-the-fly by _get_merged_extras when saving merged.
+            self._schema.extras[key] = df
 
     def _get_prologue_epilogue(self, file_data):
         prologue, epilogue = "", ""

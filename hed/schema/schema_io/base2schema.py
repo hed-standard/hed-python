@@ -249,9 +249,6 @@ class SchemaLoader(ABC):
 
         for key, extra in self._schema.extras.items():
             self._schema.extras[key] = extra.rename(columns=df_constants.EXTRAS_CONVERSIONS)
-            # Always strip in_library column (internal metadata, never serialized)
-            if df_constants.in_library in self._schema.extras[key].columns:
-                self._schema.extras[key] = self._schema.extras[key].drop(columns=[df_constants.in_library])
             if key in df_constants.extras_column_dict:
                 self._schema.extras[key] = self.fix_extra(key)
 
@@ -270,9 +267,9 @@ class SchemaLoader(ABC):
         col_to_add = [col for col in priority_cols if col not in df.columns]
         if col_to_add:
             df[col_to_add] = ""
-        other_cols = sorted(set(df.columns) - set(priority_cols))
-        # Strip in_library column (internal metadata, never serialized) and any unknown columns
-        other_cols = [col for col in other_cols if col != df_constants.in_library]
-        df = df[priority_cols + other_cols]
-        df = df.sort_values(by=list(df.columns))
+        # Keep in_library column (if present) at the end for round-trip tracking
+        other_cols = sorted(set(df.columns) - set(priority_cols) - {df_constants.in_library})
+        in_library_col = [df_constants.in_library] if df_constants.in_library in df.columns else []
+        df = df[priority_cols + other_cols + in_library_col]
+        df = df.sort_values(by=priority_cols + other_cols)
         return df

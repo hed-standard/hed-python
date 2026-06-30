@@ -109,6 +109,26 @@ class SchemaLoaderXML(SchemaLoader):
         self._read_prefixes()
         self._read_external_annotations()
 
+    def _get_extras_in_library(self, element):
+        """Read the inLibrary value from <attribute> children of an extras element.
+
+        Extras elements (schemaSource, schemaPrefix, externalAnnotation) encode inLibrary
+        using the same ``<attribute><name>inLibrary</name><value>X</value></attribute>``
+        format as tag nodes.
+
+        Parameters:
+            element: An XML element representing an extras definition.
+
+        Returns:
+            str: The inLibrary value, or "" if not present.
+        """
+        for attr_el in element.findall(xml_constants.ATTRIBUTE_ELEMENT):
+            name_el = attr_el.find(xml_constants.NAME_ELEMENT)
+            if name_el is not None and name_el.text == xml_constants.IN_LIBRARY_ELEMENT:
+                val_el = attr_el.find(xml_constants.VALUE_ELEMENT)
+                return val_el.text if val_el is not None and val_el.text else ""
+        return ""
+
     def _read_sources(self):
         source_elements = self._get_elements_by_name(xml_constants.SCHEMA_SOURCE_DEF_ELEMENT)
         data = []
@@ -116,18 +136,20 @@ class SchemaLoaderXML(SchemaLoader):
             source_name = self._get_element_value(source_element, xml_constants.NAME_ELEMENT)
             source_link = self._get_element_value(source_element, xml_constants.LINK_ELEMENT)
             description = self._get_element_value(source_element, xml_constants.DESCRIPTION_ELEMENT)
+            in_lib = self._get_extras_in_library(source_element)
 
-            data.append(
-                {
-                    df_constants.source: source_name,
-                    df_constants.link: source_link,
-                    df_constants.description: description,
-                }
-            )
-        library_df = pd.DataFrame(data)
+            entry = {
+                df_constants.source: source_name,
+                df_constants.link: source_link,
+                df_constants.description: description,
+            }
+            if in_lib:
+                entry[df_constants.in_library] = in_lib
+            data.append(entry)
+        library_df = pd.DataFrame(data) if data else pd.DataFrame(columns=df_constants.source_columns)
 
-        # Add in_library column if this is a library schema
-        if self.library:
+        # For unmerged loading, all entries are library-specific – mark them all
+        if self.library and not library_df.empty and not self._loading_merged:
             library_df[df_constants.in_library] = self.library
 
         # Merge with existing schema extras if present (from withStandard base schema)
@@ -141,18 +163,20 @@ class SchemaLoaderXML(SchemaLoader):
             prefix_name = self._get_element_value(prefix_element, xml_constants.NAME_ELEMENT)
             prefix_namespace = self._get_element_value(prefix_element, xml_constants.NAMESPACE_ELEMENT)
             prefix_description = self._get_element_value(prefix_element, xml_constants.DESCRIPTION_ELEMENT)
+            in_lib = self._get_extras_in_library(prefix_element)
 
-            data.append(
-                {
-                    df_constants.prefix: prefix_name,
-                    df_constants.namespace: prefix_namespace,
-                    df_constants.description: prefix_description,
-                }
-            )
-        library_df = pd.DataFrame(data)
+            entry = {
+                df_constants.prefix: prefix_name,
+                df_constants.namespace: prefix_namespace,
+                df_constants.description: prefix_description,
+            }
+            if in_lib:
+                entry[df_constants.in_library] = in_lib
+            data.append(entry)
+        library_df = pd.DataFrame(data) if data else pd.DataFrame(columns=df_constants.prefix_columns)
 
-        # Add in_library column if this is a library schema
-        if self.library:
+        # For unmerged loading, all entries are library-specific – mark them all
+        if self.library and not library_df.empty and not self._loading_merged:
             library_df[df_constants.in_library] = self.library
 
         # Merge with existing schema extras if present (from withStandard base schema)
@@ -167,19 +191,21 @@ class SchemaLoaderXML(SchemaLoader):
             external_id = self._get_element_value(external_element, xml_constants.ID_ELEMENT)
             external_iri = self._get_element_value(external_element, xml_constants.IRI_ELEMENT)
             external_description = self._get_element_value(external_element, xml_constants.DESCRIPTION_ELEMENT)
+            in_lib = self._get_extras_in_library(external_element)
 
-            data.append(
-                {
-                    df_constants.prefix: external_name,
-                    df_constants.id: external_id,
-                    df_constants.iri: external_iri,
-                    df_constants.description: external_description,
-                }
-            )
-        library_df = pd.DataFrame(data)
+            entry = {
+                df_constants.prefix: external_name,
+                df_constants.id: external_id,
+                df_constants.iri: external_iri,
+                df_constants.description: external_description,
+            }
+            if in_lib:
+                entry[df_constants.in_library] = in_lib
+            data.append(entry)
+        library_df = pd.DataFrame(data) if data else pd.DataFrame(columns=df_constants.external_annotation_columns)
 
-        # Add in_library column if this is a library schema
-        if self.library:
+        # For unmerged loading, all entries are library-specific – mark them all
+        if self.library and not library_df.empty and not self._loading_merged:
             library_df[df_constants.in_library] = self.library
 
         # Merge with existing schema extras if present (from withStandard base schema)

@@ -99,27 +99,55 @@ class Schema2DF(Schema2Base):
         for key in extras_keys:
             merged_extras = self._get_merged_extras(key)
             if merged_extras is not None and not merged_extras.empty:
-                output_df = merged_extras.copy()
-                # Always strip in_library column - it's internal metadata, never serialized
-                if df_constants.in_library in output_df.columns:
-                    output_df = output_df.drop(columns=[df_constants.in_library])
-                self.output[key] = output_df
+                output_df = self._extras_df_to_tsv(merged_extras, key)
             elif key in hed_schema.extras and hed_schema.extras[key] is not None:
-                # Include empty dataframes with proper structure
-                output_df = hed_schema.extras[key].copy()
-                # Always strip in_library column - it's internal metadata, never serialized
-                if df_constants.in_library in output_df.columns:
-                    output_df = output_df.drop(columns=[df_constants.in_library])
+                output_df = self._extras_df_to_tsv(hed_schema.extras[key].copy(), key)
+            else:
+                output_df = None
+
+            if output_df is not None:
                 self.output[key] = output_df
 
         # Also include any other extras that might exist
         for key, df in hed_schema.extras.items():
             if key not in self.output:
-                output_df = df.copy()
-                # Always strip in_library column - it's internal metadata, never serialized
-                if df_constants.in_library in output_df.columns:
-                    output_df = output_df.drop(columns=[df_constants.in_library])
-                self.output[key] = output_df
+                self.output[key] = self._extras_df_to_tsv(df.copy(), key)
+
+    @staticmethod
+    def _extras_df_to_tsv(df, key):
+        """Convert an internal extras DataFrame (with optional in_library column) to TSV format.
+
+        Translates the ``in_library`` tracking column to an ``Attributes`` column
+        (``inLibrary=<name>``) positioned before the ``description`` column, matching
+        the layout used by unit-class and value-class TSV files.
+
+        Parameters:
+            df (pd.DataFrame): Internal extras DataFrame.
+            key (str): Extras key (e.g. SOURCES_KEY) used to look up expected TSV columns.
+
+        Returns:
+            pd.DataFrame: DataFrame ready for TSV output with Attributes column included.
+        """
+        df = df.copy()
+        # Build the Attributes column from in_library
+        if constants.in_library in df.columns:
+            df[constants.attributes] = df[constants.in_library].apply(
+                lambda x: f"inLibrary={x}" if (pd.notna(x) and x != "") else ""
+            )
+            df = df.drop(columns=[constants.in_library])
+        else:
+            df[constants.attributes] = ""
+
+        # Reorder to the canonical TSV column order for this extras type
+        tsv_cols = constants.extras_tsv_column_dict.get(key)
+        if tsv_cols:
+            missing = [c for c in tsv_cols if c not in df.columns]
+            if missing:
+                df[missing] = ""
+            extra_cols = sorted(c for c in df.columns if c not in tsv_cols)
+            df = df[tsv_cols + extra_cols]
+
+        return df
 
     def _output_epilogue(self, epilogue):
         base_object = "HedEpilogue"

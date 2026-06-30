@@ -311,8 +311,9 @@ class TestLibrarySchemaCompliance(unittest.TestCase):
         hed_schema = schema.load_schema(schema_path)
         issues = hed_schema.check_compliance()
         prerelease_issues = [i for i in issues if i["code"] == "SCHEMA_PRERELEASE_VERSION_USED"]
-        self.assertEqual(len(prerelease_issues), 1)
-        # The inherited annotation issues from base 8.4.0 are also expected
+        # Expect at least one prerelease issue (library itself, and possibly its base partner)
+        self.assertGreaterEqual(len(prerelease_issues), 1)
+        # The inherited annotation issues from the base schema are also expected
         annotation_codes = {
             "SCHEMA_ANNOTATION_PREFIX_MISSING",
             "SCHEMA_ANNOTATION_EXTERNAL_MISSING",

@@ -2,6 +2,17 @@
 
 > **Local environment**: If `.status/local-environment.md` exists in the repository root, read it first — it contains machine-specific shell, OS, and venv details (e.g. Windows/PowerShell vs Linux/bash) that override the generic commands shown here.
 
+## Session summaries and reports
+
+**When you fix bugs, implement features, or investigate issues, always create a summary report in `.status/` directory.** Name it descriptively (e.g., `.status/fix_missing_extra_sections.md`, `.status/investigation_cache_bug.md`, `.status/implement_feature_x.md`). The report should document:
+- What problem was being solved
+- What approach was taken
+- What code changes were made and why
+- Current status and any blockers
+- Next steps if incomplete
+
+This helps track work across sessions and creates a searchable history of fixes and investigations.
+
 ## Code style
 
 - Google-style docstrings; use `Parameters:` not `Args:`
