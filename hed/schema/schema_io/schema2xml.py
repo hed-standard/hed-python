@@ -1,5 +1,6 @@
 """Allows output of HedSchema objects as .xml format"""
 
+import pandas as pd
 from xml.etree.ElementTree import Element, SubElement
 from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema.schema_io import xml_constants, df_constants as df_constants
@@ -52,12 +53,28 @@ class Schema2XML(Schema2Base):
         sources_node = SubElement(self.hed_node, xml_constants.SCHEMA_SOURCE_SECTION_ELEMENT)
         for _, row in sources.iterrows():
             source_node = SubElement(sources_node, xml_constants.SCHEMA_SOURCE_DEF_ELEMENT)
-            source_name = SubElement(source_node, xml_constants.NAME_ELEMENT)
-            source_name.text = row[df_constants.source]
+            source_name_node = SubElement(source_node, xml_constants.NAME_ELEMENT)
+            source_name_node.text = row[df_constants.source]
             source_link = SubElement(source_node, xml_constants.LINK_ELEMENT)
             source_link.text = row[df_constants.link]
             description = SubElement(source_node, xml_constants.DESCRIPTION_ELEMENT)
             description.text = row[df_constants.description]
+            in_lib = row.get(df_constants.in_library, "") if df_constants.in_library in sources.columns else ""
+            if pd.notna(in_lib) and in_lib:
+                self._write_in_library_attribute(source_node, str(in_lib))
+
+    def _write_in_library_attribute(self, parent_node, in_lib_value):
+        """Write inLibrary as a standard <attribute> element, consistent with tag attributes.
+
+        Parameters:
+            parent_node: The XML element to add the attribute to.
+            in_lib_value (str): The library name value.
+        """
+        attr_node = SubElement(parent_node, xml_constants.ATTRIBUTE_ELEMENT)
+        name_node = SubElement(attr_node, xml_constants.NAME_ELEMENT)
+        name_node.text = xml_constants.IN_LIBRARY_ELEMENT
+        val_node = SubElement(attr_node, xml_constants.VALUE_ELEMENT)
+        val_node.text = in_lib_value
 
     def _output_prefixes(self, hed_schema):
         prefixes = self._get_merged_extras(df_constants.PREFIXES_KEY)
@@ -67,12 +84,15 @@ class Schema2XML(Schema2Base):
         prefixes_node = SubElement(self.hed_node, xml_constants.SCHEMA_PREFIX_SECTION_ELEMENT)
         for _, row in prefixes.iterrows():
             prefix_node = SubElement(prefixes_node, xml_constants.SCHEMA_PREFIX_DEF_ELEMENT)
-            prefix_name = SubElement(prefix_node, xml_constants.NAME_ELEMENT)
-            prefix_name.text = row[df_constants.prefix]
+            prefix_name_node = SubElement(prefix_node, xml_constants.NAME_ELEMENT)
+            prefix_name_node.text = row[df_constants.prefix]
             prefix_namespace = SubElement(prefix_node, xml_constants.NAMESPACE_ELEMENT)
             prefix_namespace.text = row[df_constants.namespace]
             prefix_description = SubElement(prefix_node, xml_constants.DESCRIPTION_ELEMENT)
             prefix_description.text = row[df_constants.description]
+            in_lib = row.get(df_constants.in_library, "") if df_constants.in_library in prefixes.columns else ""
+            if pd.notna(in_lib) and in_lib:
+                self._write_in_library_attribute(prefix_node, str(in_lib))
 
     def _output_external_annotations(self, hed_schema):
         externals = self._get_merged_extras(df_constants.EXTERNAL_ANNOTATION_KEY)
@@ -82,14 +102,17 @@ class Schema2XML(Schema2Base):
         externals_node = SubElement(self.hed_node, xml_constants.SCHEMA_EXTERNAL_SECTION_ELEMENT)
         for _, row in externals.iterrows():
             external_node = SubElement(externals_node, xml_constants.SCHEMA_EXTERNAL_DEF_ELEMENT)
-            external_name = SubElement(external_node, xml_constants.NAME_ELEMENT)
-            external_name.text = row[df_constants.prefix]
+            external_name_node = SubElement(external_node, xml_constants.NAME_ELEMENT)
+            external_name_node.text = row[df_constants.prefix]
             external_id = SubElement(external_node, xml_constants.ID_ELEMENT)
             external_id.text = row[df_constants.id]
             external_iri = SubElement(external_node, xml_constants.IRI_ELEMENT)
             external_iri.text = row[df_constants.iri]
             external_description = SubElement(external_node, xml_constants.DESCRIPTION_ELEMENT)
             external_description.text = row[df_constants.description]
+            in_lib = row.get(df_constants.in_library, "") if df_constants.in_library in externals.columns else ""
+            if pd.notna(in_lib) and in_lib:
+                self._write_in_library_attribute(external_node, str(in_lib))
 
     def _output_epilogue(self, epilogue):
         if epilogue:

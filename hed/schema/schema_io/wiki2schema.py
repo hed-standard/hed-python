@@ -137,8 +137,9 @@ class SchemaLoaderWiki(SchemaLoader):
             stripped_key = extra_key.strip("'")
             stripped_key = WIKI_EXTRA_DICT.get(stripped_key, stripped_key)
 
-            # Add in_library column if this is a library schema
-            if self.library and not df.empty:
+            # Add in_library column only for unmerged loading (all entries are library-specific).
+            # For merged format, in_library is already in the parsed data for library rows.
+            if self.library and not df.empty and not self._loading_merged:
                 df[df_constants.in_library] = self.library
 
             # Merge with existing schema extras if present (from withStandard base schema)
@@ -147,7 +148,11 @@ class SchemaLoaderWiki(SchemaLoader):
 
     @staticmethod
     def parse_star_string(s):
-        """Parse a ``* key=value, key=value`` attribute string into a dictionary.
+        """Parse a ``* [{attr}] key=value, key=value`` extras line into a dictionary.
+
+        Handles an optional leading ``{name=value, ...}`` schema-attribute block
+        (used to encode attributes like ``inLibrary`` on extras entries) followed
+        by the regular comma-separated ``key=value`` data pairs.
 
         Parameters:
             s (str): Raw star-prefixed attribute line from the MediaWiki source.
@@ -157,8 +162,24 @@ class SchemaLoaderWiki(SchemaLoader):
 
         """
         s = s.lstrip("* ").strip()  # remove leading '* ' and any surrounding whitespace
-        pairs = s.split(",") if s else []
         result = {}
+
+        # Check for a leading schema-attribute block in {}, e.g. {inLibrary=testlib}
+        if s.startswith("{"):
+            end_brace = s.find("}")
+            if end_brace >= 0:
+                attr_str = s[1:end_brace]  # content inside {}
+                s = s[end_brace + 1 :].strip()  # remainder after the {} block
+                for attr in attr_str.split(","):
+                    attr = attr.strip()
+                    if "=" in attr:
+                        key, value = attr.split("=", 1)
+                        result[key.strip()] = value.strip()
+                    elif attr:
+                        result[attr] = True
+
+        # Parse the remaining comma-separated key=value data pairs
+        pairs = s.split(",") if s else []
         for pair in pairs:
             if "=" in pair:
                 key, value = pair.strip().split("=", 1)

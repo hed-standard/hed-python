@@ -11,6 +11,7 @@ XSI_SOURCE = XSI_NAMESPACE
 NAME_ELEMENT = "name"
 DESCRIPTION_ELEMENT = "description"
 VALUE_ELEMENT = "value"
+IN_LIBRARY_ELEMENT = "inLibrary"
 
 # These should mostly match the HedKey values
 # These are repeated here for clarification primarily

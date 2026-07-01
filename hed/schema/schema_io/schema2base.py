@@ -256,31 +256,55 @@ class Schema2Base:
     def _get_merged_extras(self, extras_key):
         """Get extras, merging base schema extras when saving merged library schema.
 
+        For unmerged saves: returns only library-specific extras (rows where in_library == library
+        name), with in_library column stripped from the result so output is clean.
+
+        For merged saves: returns all extras (library + base) with in_library column present so
+        writers can track which entries came from the library.  Library rows have
+        in_library=<library_name>; base-schema rows have in_library="".
+
         Parameters:
             extras_key (str): The key for the extras type (e.g., df_constants.SOURCES_KEY)
 
         Returns:
-            pd.DataFrame or None: The extras dataframe, merged if applicable
+            pd.DataFrame or None: The extras dataframe, merged/filtered as applicable
         """
         lib_extras = self._schema.get_extras(extras_key)
 
-        # If not saving merged or no base schema, just return library extras
         if not self._save_merged or not self._base_schema:
+            # Unmerged save: return only library-specific rows, without in_library column
+            if lib_extras is None or lib_extras.empty:
+                return lib_extras
+            if df_constants.in_library in lib_extras.columns:
+                library_name = self._schema.library
+                if library_name:
+                    filtered = lib_extras[lib_extras[df_constants.in_library] == library_name]
+                else:
+                    filtered = lib_extras
+                out = filtered.drop(columns=[df_constants.in_library]).reset_index(drop=True)
+                return out if not out.empty else None
             return lib_extras
 
-        # Merge base schema extras with library extras
+        # Merged save: combine library extras + base schema extras with in_library tracking
         base_extras = self._base_schema.get_extras(extras_key)
         if base_extras is None and lib_extras is None:
             return None
 
-        # Ensure both DataFrames have consistent columns, especially in_library
-        if lib_extras is not None and not lib_extras.empty and df_constants.in_library in lib_extras.columns:
-            # Library extras have in_library column - ensure base extras has it too
-            if base_extras is not None and not base_extras.empty and df_constants.in_library not in base_extras.columns:
-                base_extras = base_extras.copy()
-                base_extras[df_constants.in_library] = ""  # Mark base schema rows with empty string
+        # Ensure lib_extras rows carry the in_library marker
+        if lib_extras is not None and not lib_extras.empty:
+            lib_extras = lib_extras.copy()
+            if df_constants.in_library not in lib_extras.columns:
+                # No tracking yet – mark all as library-specific (unmerged source)
+                lib_extras[df_constants.in_library] = self._schema.library
+            else:
+                # Normalize missing values; empty string denotes base-schema entries and must not be rewritten.
+                lib_extras[df_constants.in_library] = lib_extras[df_constants.in_library].fillna("").astype(str)
 
-        # Use merge_extras_dataframes to combine them
+        # Mark base-schema extras rows with empty in_library so they don't round-trip as library
+        if base_extras is not None and not base_extras.empty and df_constants.in_library not in base_extras.columns:
+            base_extras = base_extras.copy()
+            base_extras[df_constants.in_library] = ""
+
         merged = df_util.merge_extras_dataframes(lib_extras, base_extras)
         return merged if not merged.empty else None
 
