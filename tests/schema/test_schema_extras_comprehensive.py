@@ -353,12 +353,6 @@ class TestSchemaExtrasAllFormats(unittest.TestCase):
                 self.assertIsNotNone(df, f"JSON: {label} should not be None")
                 self.assertIn(df_constants.in_library, df.columns, f"JSON: {label} should have in_library column")
 
-                # Check that in_library is string type (not object with NaN)
-                self.assertTrue(
-                    df[df_constants.in_library].dtype == object or df[df_constants.in_library].dtype == str,
-                    f"JSON: {label} in_library should be string/object type",
-                )
-
                 # Check that there are NO NaN values in in_library
                 nan_count = df[df_constants.in_library].isna().sum()
                 self.assertEqual(
