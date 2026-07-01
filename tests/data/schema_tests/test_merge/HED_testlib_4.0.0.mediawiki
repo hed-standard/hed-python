@@ -1,7 +1,7 @@
 HED version="4.0.0" library="testlib" withStandard="8.5.0"
 
 '''Prologue'''
-This schema is designed to be lazy partnered with prerelease 8.4.0.
+This schema is designed to be lazy partnered with prerelease 8.5.0.
 
 !# start schema
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <HED version="4.0.0" library="testlib" withStandard="8.5.0">
-   <prologue>This schema is designed to be lazy partnered with prerelease 8.4.0.</prologue>
+   <prologue>This schema is designed to be lazy partnered with prerelease 8.5.0.</prologue>
    <schema>
       <node>
          <name>Test-some</name>
