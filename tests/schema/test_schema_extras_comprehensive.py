@@ -275,12 +275,15 @@ class TestSchemaExtrasAllFormats(unittest.TestCase):
                     pd.testing.assert_frame_equal(df1, df2, check_dtype=False, obj=f"{label}: XML vs {fmt_name}")
 
     def test_09_base_extras_preserve_empty_in_library_after_merged_save(self):
-        """After merged save, base-schema extras retain empty/NaN in_library (not rewritten to lib name).
+        """After merged save, base-schema extras retain empty-string in_library (not rewritten to lib name).
 
-        This test validates the fix for schema2base.py line 293-305 where empty/NaN in_library
+        This test validates the fix for schema2base.py line 293-305 where empty-string in_library
         (the explicit marker for base-schema rows) must NOT be rewritten to the library name.
         If this bug exists, base extras get serialized with inLibrary attribute and break
         future unmerge operations.
+
+        Note: Loaders normalize in_library to strings with no NaN (see tests 10-12).
+        Base rows are marked with empty string, not NaN.
         """
 
         schema = load_schema(self.xml_path)
@@ -302,15 +305,15 @@ class TestSchemaExtrasAllFormats(unittest.TestCase):
 
                 # After merged save, merged schema contains ALL rows: library + base
                 lib_rows = (df[df_constants.in_library] == self.library_name).sum()
-                # Base rows have NaN or empty string (both are valid markers for "not a library row")
-                not_lib_rows = df[df_constants.in_library].isna().sum() + (df[df_constants.in_library] == "").sum()
+                # Base rows have empty string as the marker (never NaN due to normalization)
+                base_rows = (df[df_constants.in_library] == "").sum()
 
                 # Verify counts match expected totals (library + base)
                 self.assertEqual(lib_rows, 1, f"{label}: should have 1 library row (in_library={self.library_name})")
                 self.assertEqual(
-                    not_lib_rows,
+                    base_rows,
                     expected_base_count,
-                    f"{label}: should have {expected_base_count} base rows with NaN/empty in_library (not rewritten to {self.library_name})",
+                    f"{label}: should have {expected_base_count} base rows with empty-string in_library (not rewritten to {self.library_name})",
                 )
                 self.assertEqual(
                     len(df),

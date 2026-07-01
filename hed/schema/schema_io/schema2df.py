@@ -98,15 +98,13 @@ class Schema2DF(Schema2Base):
 
         for key in extras_keys:
             merged_extras = self._get_merged_extras(key)
-            if merged_extras is not None and not merged_extras.empty:
-                output_df = self._extras_df_to_tsv(merged_extras, key)
-            elif key in hed_schema.extras and hed_schema.extras[key] is not None:
-                output_df = self._extras_df_to_tsv(hed_schema.extras[key].copy(), key)
+            if merged_extras is not None:
+                self.output[key] = self._extras_df_to_tsv(merged_extras, key)
             else:
-                output_df = None
-
-            if output_df is not None:
-                self.output[key] = output_df
+                # Create an empty DataFrame in TSV format for this extras key
+                empty_df = pd.DataFrame(columns=constants.extras_tsv_column_dict.get(key, []))
+                if not empty_df.empty or list(empty_df.columns):
+                    self.output[key] = empty_df
 
         # Also include any other extras that might exist
         for key, df in hed_schema.extras.items():
