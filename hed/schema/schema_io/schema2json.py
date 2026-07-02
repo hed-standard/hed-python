@@ -1,6 +1,7 @@
 """Allows output of HedSchema objects as .json format"""
 
 import json
+import pandas as pd
 from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from hed.schema.schema_io import json_constants, df_constants
 from hed.schema.schema_io.schema2base import Schema2Base
@@ -70,6 +71,9 @@ class Schema2JSON(Schema2Base):
                 "link": row[df_constants.link],
                 json_constants.DESCRIPTION_KEY: row[df_constants.description],
             }
+            in_lib = row.get(df_constants.in_library, "") if df_constants.in_library in sources.columns else ""
+            if pd.notna(in_lib) and in_lib:
+                source_dict[json_constants.IN_LIBRARY_KEY] = str(in_lib)
             sources_list.append(source_dict)
 
         self.output[json_constants.SOURCES_KEY] = sources_list
@@ -91,6 +95,9 @@ class Schema2JSON(Schema2Base):
                 "namespace": row[df_constants.namespace],
                 json_constants.DESCRIPTION_KEY: row[df_constants.description],
             }
+            in_lib = row.get(df_constants.in_library, "") if df_constants.in_library in prefixes.columns else ""
+            if pd.notna(in_lib) and in_lib:
+                prefix_dict[json_constants.IN_LIBRARY_KEY] = str(in_lib)
             prefixes_list.append(prefix_dict)
 
         self.output[json_constants.PREFIXES_KEY] = prefixes_list
@@ -113,6 +120,9 @@ class Schema2JSON(Schema2Base):
                 "iri": row[df_constants.iri],
                 json_constants.DESCRIPTION_KEY: row[df_constants.description],
             }
+            in_lib = row.get(df_constants.in_library, "") if df_constants.in_library in externals.columns else ""
+            if pd.notna(in_lib) and in_lib:
+                external_dict[json_constants.IN_LIBRARY_KEY] = str(in_lib)
             externals_list.append(external_dict)
 
         self.output[json_constants.EXTERNAL_ANNOTATIONS_KEY] = externals_list

@@ -499,21 +499,27 @@ class SchemaLoaderJSON(SchemaLoader):
         if json_constants.SOURCES_KEY in self._json_data:
             sources_data = self._json_data[json_constants.SOURCES_KEY]
             for source_data in sources_data:
-                sources_list.append(
-                    {
-                        df_constants.source: source_data.get("name", ""),
-                        df_constants.link: source_data.get("link", ""),
-                        df_constants.description: source_data.get(json_constants.DESCRIPTION_KEY, ""),
-                    }
-                )
+                entry = {
+                    df_constants.source: source_data.get("name", ""),
+                    df_constants.link: source_data.get("link", ""),
+                    df_constants.description: source_data.get(json_constants.DESCRIPTION_KEY, ""),
+                }
+                in_lib = source_data.get(json_constants.IN_LIBRARY_KEY, "")
+                if in_lib:
+                    entry[df_constants.in_library] = in_lib
+                sources_list.append(entry)
         # Create DataFrame - if empty, use column specification to match XML/MEDIAWIKI behavior
         if sources_list:
-            library_df = pd.DataFrame(sources_list).fillna("").astype(str)
+            library_df = pd.DataFrame(sources_list).fillna(dict.fromkeys(df_constants.source_columns, ""))
+            library_df = library_df.astype({c: str for c in df_constants.source_columns if c in library_df.columns})
+            # Normalize in_library column: NaN → "", ensure string type
+            if df_constants.in_library in library_df.columns:
+                library_df[df_constants.in_library] = library_df[df_constants.in_library].fillna("").astype(str)
         else:
             library_df = pd.DataFrame([], columns=df_constants.source_columns)
 
-        # Add in_library column if this is a library schema
-        if self.library and not library_df.empty:
+        # For unmerged loading, all entries are library-specific – mark them all
+        if self.library and not library_df.empty and not self._loading_merged:
             library_df[df_constants.in_library] = self.library
 
         # Merge with existing schema extras if present (from withStandard base schema)
@@ -525,21 +531,27 @@ class SchemaLoaderJSON(SchemaLoader):
         if json_constants.PREFIXES_KEY in self._json_data:
             prefixes_data = self._json_data[json_constants.PREFIXES_KEY]
             for prefix_data in prefixes_data:
-                prefixes_list.append(
-                    {
-                        df_constants.prefix: prefix_data.get("name", ""),
-                        df_constants.namespace: prefix_data.get("namespace", ""),
-                        df_constants.description: prefix_data.get(json_constants.DESCRIPTION_KEY, ""),
-                    }
-                )
+                entry = {
+                    df_constants.prefix: prefix_data.get("name", ""),
+                    df_constants.namespace: prefix_data.get("namespace", ""),
+                    df_constants.description: prefix_data.get(json_constants.DESCRIPTION_KEY, ""),
+                }
+                in_lib = prefix_data.get(json_constants.IN_LIBRARY_KEY, "")
+                if in_lib:
+                    entry[df_constants.in_library] = in_lib
+                prefixes_list.append(entry)
         # Create DataFrame - if empty, use column specification to match XML/MEDIAWIKI behavior
         if prefixes_list:
-            library_df = pd.DataFrame(prefixes_list).fillna("").astype(str)
+            library_df = pd.DataFrame(prefixes_list).fillna(dict.fromkeys(df_constants.prefix_columns, ""))
+            library_df = library_df.astype({c: str for c in df_constants.prefix_columns if c in library_df.columns})
+            # Normalize in_library column: NaN → "", ensure string type
+            if df_constants.in_library in library_df.columns:
+                library_df[df_constants.in_library] = library_df[df_constants.in_library].fillna("").astype(str)
         else:
             library_df = pd.DataFrame([], columns=df_constants.prefix_columns)
 
-        # Add in_library column if this is a library schema
-        if self.library and not library_df.empty:
+        # For unmerged loading, all entries are library-specific – mark them all
+        if self.library and not library_df.empty and not self._loading_merged:
             library_df[df_constants.in_library] = self.library
 
         # Merge with existing schema extras if present (from withStandard base schema)
@@ -551,22 +563,32 @@ class SchemaLoaderJSON(SchemaLoader):
         if json_constants.EXTERNAL_ANNOTATIONS_KEY in self._json_data:
             externals_data = self._json_data[json_constants.EXTERNAL_ANNOTATIONS_KEY]
             for external_data in externals_data:
-                externals_list.append(
-                    {
-                        df_constants.prefix: external_data.get("name", ""),
-                        df_constants.id: external_data.get("id", ""),
-                        df_constants.iri: external_data.get("iri", ""),
-                        df_constants.description: external_data.get(json_constants.DESCRIPTION_KEY, ""),
-                    }
-                )
+                entry = {
+                    df_constants.prefix: external_data.get("name", ""),
+                    df_constants.id: external_data.get("id", ""),
+                    df_constants.iri: external_data.get("iri", ""),
+                    df_constants.description: external_data.get(json_constants.DESCRIPTION_KEY, ""),
+                }
+                in_lib = external_data.get(json_constants.IN_LIBRARY_KEY, "")
+                if in_lib:
+                    entry[df_constants.in_library] = in_lib
+                externals_list.append(entry)
         # Create DataFrame - if empty, use column specification to match XML/MEDIAWIKI behavior
         if externals_list:
-            library_df = pd.DataFrame(externals_list).fillna("").astype(str)
+            library_df = pd.DataFrame(externals_list).fillna(
+                dict.fromkeys(df_constants.external_annotation_columns, "")
+            )
+            library_df = library_df.astype(
+                {c: str for c in df_constants.external_annotation_columns if c in library_df.columns}
+            )
+            # Normalize in_library column: NaN → "", ensure string type
+            if df_constants.in_library in library_df.columns:
+                library_df[df_constants.in_library] = library_df[df_constants.in_library].fillna("").astype(str)
         else:
             library_df = pd.DataFrame([], columns=df_constants.external_annotation_columns)
 
-        # Add in_library column if this is a library schema
-        if self.library and not library_df.empty:
+        # For unmerged loading, all entries are library-specific – mark them all
+        if self.library and not library_df.empty and not self._loading_merged:
             library_df[df_constants.in_library] = self.library
 
         # Merge with existing schema extras if present (from withStandard base schema)

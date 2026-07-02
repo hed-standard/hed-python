@@ -83,7 +83,7 @@ type = "Type"
 properties = "Properties"  # for the schema properties, this is the column name in the properties dataframe
 description = "description"
 in_library = (
-    "in_library"  # for extras sections, tracks which library an entry came from (internal metadata, not serialized)
+    "in_library"  # for extras sections, tracks which library an entry came from (serialized to enable schema unmerging)
 )
 
 struct_columns = [hed_id, name, attributes, subclass_of, dcdescription]
@@ -107,6 +107,19 @@ extras_column_dict = {
     SOURCES_KEY: source_columns,
 }  # For the sources section
 
+# TSV file format column definitions for extras sections.
+# Include the Attributes column (before description) to carry inLibrary and
+# other schema attributes in the same way as unit-class and value-class TSV files.
+source_columns_tsv = [source, link, attributes, description]
+prefix_columns_tsv = [prefix, namespace, attributes, description]
+external_annotation_columns_tsv = [prefix, id, iri, attributes, description]
+
+extras_tsv_column_dict = {
+    SOURCES_KEY: source_columns_tsv,
+    PREFIXES_KEY: prefix_columns_tsv,
+    EXTERNAL_ANNOTATION_KEY: external_annotation_columns_tsv,
+}
+
 # The columns for unit class, value class, and unit modifier
 other_columns = [hed_id, name, subclass_of, attributes, dcdescription]
 
@@ -125,9 +138,9 @@ attribute_key_names = {
     DATA_KEY: attribute_columns,
     OBJECT_KEY: attribute_columns,
     ATTRIBUTE_PROPERTY_KEY: property_columns,
-    PREFIXES_KEY: prefix_columns,
-    EXTERNAL_ANNOTATION_KEY: external_annotation_columns,
-    SOURCES_KEY: source_columns,
+    PREFIXES_KEY: prefix_columns_tsv,
+    EXTERNAL_ANNOTATION_KEY: external_annotation_columns_tsv,
+    SOURCES_KEY: source_columns_tsv,
 }
 
 # HED_00X__YY where X is the library starting index, and Y is the entity number below.
@@ -155,6 +168,7 @@ EXTRAS_CONVERSIONS = {
     "definition": "description",
     "Description": "description",
     "IRI": "iri",
+    "inLibrary": in_library,  # schema attribute name -> internal column name
 }
 
 

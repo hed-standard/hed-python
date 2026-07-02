@@ -406,17 +406,8 @@ class HedSchema(HedSchemaBase):
         Raises:
             OSError: File cannot be saved for some reason.
         """
-        from hed.schema.schema_io import df_constants
 
         output_dfs = Schema2DF().process_schema(self, save_merged)
-        if hasattr(self, "extras") and self.extras and not save_merged:
-            # Only update with original extras if not saving merged
-            # When saving merged, the serializer's merged extras should be preserved
-            output_dfs.update(self.extras)
-            # Strip in_library column from extras - it's internal metadata, never serialized
-            for key, df in output_dfs.items():
-                if key in df_constants.DF_EXTRAS and df_constants.in_library in df.columns:
-                    df.drop(columns=[df_constants.in_library], inplace=True)
         df_util.save_dataframes(base_filename, output_dfs)
 
     def set_schema_prefix(self, schema_namespace):

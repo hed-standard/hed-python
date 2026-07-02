@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-<HED version="4.0.0" library="testlib" withStandard="8.4.0">
-   <prologue>This schema is designed to be lazy partnered with prerelease 8.4.0.</prologue>
+<HED version="4.0.0" library="testlib" withStandard="8.5.0">
+   <prologue>This schema is designed to be lazy partnered with prerelease 8.5.0.</prologue>
    <schema>
       <node>
          <name>Test-some</name>
@@ -24,11 +24,6 @@
          <attribute>
             <name>suggestedTag</name>
             <value>Task-property</value>
-         </attribute>
-         <attribute>
-            <name>annotation</name>
-            <value>ncit:C25499</value>
-            <value>rdfs:comment Should have this tag in every event process.</value>
          </attribute>
          <attribute>
             <name>hedId</name>
@@ -4632,6 +4627,44 @@
                      </attribute>
                   </node>
                   <node>
+                     <name>Electrical-artifact</name>
+                     <description>Signal Contamination due to extraneous or unwanted electrical signals.</description>
+                     <node>
+                        <name>Induction-artifact</name>
+                        <description>Artifacts induced by nearby equipment. In EEG, these are usually of high frequency.</description>
+                        <attribute>
+                           <name>hedId</name>
+                           <value>HED_0012517</value>
+                        </attribute>
+                     </node>
+                     <node>
+                        <name>Line-noise-artifact</name>
+                        <description>Power line noise at 50 Hz or 60 Hz.</description>
+                        <attribute>
+                           <name>hedId</name>
+                           <value>HED_0012518</value>
+                        </attribute>
+                        <node>
+                           <name>#</name>
+                           <attribute>
+                              <name>takesValue</name>
+                           </attribute>
+                           <attribute>
+                              <name>valueClass</name>
+                              <value>numericClass</value>
+                           </attribute>
+                           <attribute>
+                              <name>unitClass</name>
+                              <value>frequencyUnits</value>
+                           </attribute>
+                           <attribute>
+                              <name>hedId</name>
+                              <value>HED_0012519</value>
+                           </attribute>
+                        </node>
+                     </node>
+                  </node>
+                  <node>
                      <name>Electrode-movement-artifact</name>
                      <description>Artifact from electrode movement.</description>
                      <attribute>
@@ -4640,54 +4673,28 @@
                      </attribute>
                   </node>
                   <node>
-                     <name>Electrode-pops-artifact</name>
-                     <description>Brief artifact with a steep rise and slow fall of an electrophysiological signal, most often caused by a loose electrode.</description>
+                     <name>Localized-channel-artifact</name>
+                     <description>Transient artifact usually involving a single channel or a small subset of channels.</description>
                      <attribute>
-                        <name>hedId</name>
-                        <value>HED_0012516</value>
-                     </attribute>
-                  </node>
-                  <node>
-                     <name>Induction-artifact</name>
-                     <description>Artifacts induced by nearby equipment. In EEG, these are usually of high frequency.</description>
-                     <attribute>
-                        <name>hedId</name>
-                        <value>HED_0012517</value>
-                     </attribute>
-                  </node>
-                  <node>
-                     <name>Line-noise-artifact</name>
-                     <description>Power line noise at 50 Hz or 60 Hz.</description>
-                     <attribute>
-                        <name>hedId</name>
-                        <value>HED_0012518</value>
+                        <name>suggestedTag</name>
+                        <value>ID</value>
                      </attribute>
                      <node>
-                        <name>#</name>
-                        <attribute>
-                           <name>takesValue</name>
-                        </attribute>
-                        <attribute>
-                           <name>valueClass</name>
-                           <value>numericClass</value>
-                        </attribute>
-                        <attribute>
-                           <name>unitClass</name>
-                           <value>frequencyUnits</value>
-                        </attribute>
+                        <name>Electrode-pops-artifact</name>
+                        <description>Brief artifact with a steep rise and slow fall of an electrophysiological signal, most often caused by a loose electrode.</description>
                         <attribute>
                            <name>hedId</name>
-                           <value>HED_0012519</value>
+                           <value>HED_0012516</value>
                         </attribute>
                      </node>
-                  </node>
-                  <node>
-                     <name>Salt-bridge-artifact</name>
-                     <description>Artifact from salt-bridge between EEG electrodes.</description>
-                     <attribute>
-                        <name>hedId</name>
-                        <value>HED_0012520</value>
-                     </attribute>
+                     <node>
+                        <name>Salt-bridge-artifact</name>
+                        <description>Artifact from salt-bridge between EEG electrodes.</description>
+                        <attribute>
+                           <name>hedId</name>
+                           <value>HED_0012520</value>
+                        </attribute>
+                     </node>
                   </node>
                </node>
             </node>
@@ -10729,6 +10736,10 @@
                   </attribute>
                </node>
                <node>
+                  <name>Omitted-presentation</name>
+                  <description>Something that is expected to happen or usually happens but doesn't.</description>
+               </node>
+               <node>
                   <name>Penalty</name>
                   <description>A disadvantage, loss, or hardship due to some action.</description>
                   <attribute>
@@ -13507,6 +13518,10 @@
          <name>FoodDB</name>
          <link>https://fooddb.example.org</link>
          <description>Botanical and nutritional database for fruits and vegetables.</description>
+         <attribute>
+            <name>inLibrary</name>
+            <value>testlib</value>
+         </attribute>
       </schemaSource>
       <schemaSource>
          <name>Wikipedia</name>
@@ -13529,6 +13544,10 @@
          <name>foodonto:</name>
          <namespace>http://purl.obolibrary.org/obo/foodon.owl</namespace>
          <description>Food Ontology (FOODON)</description>
+         <attribute>
+            <name>inLibrary</name>
+            <value>testlib</value>
+         </attribute>
       </schemaPrefix>
       <schemaPrefix>
          <name>iao:</name>
@@ -13676,12 +13695,22 @@
          <id>has_botanical_name</id>
          <iri>http://purl.obolibrary.org/obo/FOODON_00001234</iri>
          <description>The botanical or scientific name of a food item.</description>
+         <attribute>
+            <name>inLibrary</name>
+            <value>testlib</value>
+         </attribute>
       </externalAnnotation>
       <externalAnnotation>
          <name>obogo:</name>
          <id>has_dbxref</id>
          <iri>http://www.geneontology.org/formats/oboInOwl#hasDbXref</iri>
          <description>Property indicating that an ontology term has a cross-reference to a database.</description>
+      </externalAnnotation>
+      <externalAnnotation>
+         <name>rdfs:</name>
+         <id>comment</id>
+         <iri>http://www.w3.org/2000/01/rdf-schema#comment</iri>
+         <description>Standard way to provide a human-readable description.</description>
       </externalAnnotation>
       <externalAnnotation>
          <name>terms:</name>

@@ -70,15 +70,17 @@ class Schema2Wiki(Schema2Base):
         self._flush_current_tag()
         for _, row in extra.iterrows():
             self.current_tag_string += "*"
-            # Build column string from all columns
+            # Emit inLibrary as a schema attribute in {}, consistent with node format
+            in_lib = row.get(df_constants.in_library, "") if df_constants.in_library in extra.columns else ""
+            attr_prefix = f"{{inLibrary={in_lib}}} " if (pd.notna(in_lib) and in_lib) else ""
+            # Build column string from the fixed data columns (skip in_library)
             column_strings = []
             for col in extra.columns:
-                # Always skip in_library column - it's internal metadata, never serialized
                 if col == df_constants.in_library:
                     continue
                 if pd.notna(row[col]) and row[col] != "":
                     column_strings.append(f"{col}={row[col]}")
-            self.current_tag_extra = ",".join(column_strings)
+            self.current_tag_extra = attr_prefix + ",".join(column_strings)
             self._flush_current_tag()
 
     def _output_epilogue(self, epilogue):

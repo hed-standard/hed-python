@@ -21,6 +21,7 @@ PROPERTIES_KEY = "properties"
 SOURCES_KEY = "sources"
 PREFIXES_KEY = "prefixes"
 EXTERNAL_ANNOTATIONS_KEY = "external_annotations"
+IN_LIBRARY_KEY = "inLibrary"
 
 # Tag entry keys
 SHORT_FORM_KEY = "short_form"

@@ -1,7 +1,7 @@
 hedId	Level	rdfs:label	omn:SubClassOf	Attributes	dc:description
 	0	Test-some	HedTag	inLibrary=testlib	Unknown stuff.
 	1	Unknown1	Test-some	inLibrary=testlib	Unknown1 stuff
-HED_0012001	0	Event	HedTag	suggestedTag=Task-property, annotation=ncit:C25499, annotation=rdfs:comment Should have this tag in every event process.	Something that happens at a given time and (typically) place. Elements of this tag subtree designate the general category in which an event falls.
+HED_0012001	0	Event	HedTag	suggestedTag=Task-property	Something that happens at a given time and (typically) place. Elements of this tag subtree designate the general category in which an event falls.
 HED_0012002	1	Sensory-event	Event	suggestedTag=Task-event-role, suggestedTag=Sensory-presentation	Something perceivable by the participant. An event meant to be an experimental stimulus should include the tag Task-property/Task-event-role/Experimental-stimulus.
 HED_0012003	1	Agent-action	Event	suggestedTag=Task-event-role, suggestedTag=Agent	Any action engaged in by an agent (see the Agent subtree for agent categories). A participant response to an experiment stimulus should include the tag Agent-property/Agent-task-role/Experiment-participant.
 HED_0012004	1	Data-feature	Event	suggestedTag=Data-property	An event marking the occurrence of a data feature such as an interictal spike or alpha burst that is often added post hoc to the data record.
@@ -550,12 +550,14 @@ HED_0012511	4	Tongue-movement-artifact	Biological-artifact		Artifact from tongue
 HED_0012512	3	Nonbiological-artifact	Data-artifact		A data artifact arising from a non-biological source.
 HED_0012513	4	Artificial-ventilation-artifact	Nonbiological-artifact		Artifact stemming from mechanical ventilation. These can occur at the same rate as the ventilator, but also have other patterns.
 HED_0012514	4	Dialysis-artifact	Nonbiological-artifact		Artifacts seen in recordings during continuous renal replacement therapy (dialysis).
+	4	Electrical-artifact	Nonbiological-artifact		Signal Contamination due to extraneous or unwanted electrical signals.
+HED_0012517	5	Induction-artifact	Electrical-artifact		Artifacts induced by nearby equipment. In EEG, these are usually of high frequency.
+HED_0012518	5	Line-noise-artifact	Electrical-artifact		Power line noise at 50 Hz or 60 Hz.
+HED_0012519	6	Line-noise-artifact-#	Line-noise-artifact	takesValue, valueClass=numericClass, unitClass=frequencyUnits	
 HED_0012515	4	Electrode-movement-artifact	Nonbiological-artifact		Artifact from electrode movement.
-HED_0012516	4	Electrode-pops-artifact	Nonbiological-artifact		Brief artifact with a steep rise and slow fall of an electrophysiological signal, most often caused by a loose electrode.
-HED_0012517	4	Induction-artifact	Nonbiological-artifact		Artifacts induced by nearby equipment. In EEG, these are usually of high frequency.
-HED_0012518	4	Line-noise-artifact	Nonbiological-artifact		Power line noise at 50 Hz or 60 Hz.
-HED_0012519	5	Line-noise-artifact-#	Line-noise-artifact	takesValue, valueClass=numericClass, unitClass=frequencyUnits	
-HED_0012520	4	Salt-bridge-artifact	Nonbiological-artifact		Artifact from salt-bridge between EEG electrodes.
+	4	Localized-channel-artifact	Nonbiological-artifact	suggestedTag=ID	Transient artifact usually involving a single channel or a small subset of channels.
+HED_0012516	5	Electrode-pops-artifact	Localized-channel-artifact		Brief artifact with a steep rise and slow fall of an electrophysiological signal, most often caused by a loose electrode.
+HED_0012520	5	Salt-bridge-artifact	Localized-channel-artifact		Artifact from salt-bridge between EEG electrodes.
 HED_0012521	2	Data-marker	Data-property		An indicator placed to mark something.
 HED_0012522	3	Data-break-marker	Data-marker		An indicator place to indicate a gap in the data.
 HED_0012523	3	Temporal-marker	Data-marker		An indicator placed at a particular time in the data.
@@ -1156,6 +1158,7 @@ HED_0013113	3	Non-target	Task-stimulus-role	relatedTag=Target	Something other th
 HED_0013114	3	Not-meaningful	Task-stimulus-role		Not having a serious, important, or useful quality or purpose.
 HED_0013115	3	Novel	Task-stimulus-role		Having no previous example or precedent or parallel.
 HED_0013116	3	Oddball	Task-stimulus-role	relatedTag=Unexpected, suggestedTag=Target	Something unusual, or infrequent.
+	3	Omitted-presentation	Task-stimulus-role		Something that is expected to happen or usually happens but doesn't.
 HED_0013117	3	Penalty	Task-stimulus-role		A disadvantage, loss, or hardship due to some action.
 HED_0013118	3	Planned	Task-stimulus-role	relatedTag=Unplanned	Something that was decided on or arranged in advance.
 HED_0013119	3	Priming	Task-stimulus-role		An implicit memory effect in which exposure to a stimulus influences response to a later stimulus.
