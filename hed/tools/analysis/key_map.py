@@ -142,13 +142,25 @@ class KeyMap:
         Returns:
             list:  The row numbers that had no correspondence in the mapping.
         """
-        key_series = df.apply(lambda row: data_util.get_row_hash(row, self.key_cols), axis=1)
+        # The values here are Python hash() values, which can differ in magnitude by more than
+        # 2**63 (e.g. one near sys.maxsize and another near -sys.maxsize). Keep this Series as
+        # dtype=object (rather than letting pandas infer int64) so that neither this Series nor
+        # anything built from its values is ever treated as a plain numeric array - see the
+        # dtype="object" comment below for why that matters.
+        key_series = df.apply(lambda row: data_util.get_row_hash(row, self.key_cols), axis=1).astype(object)
         # Key series now contains row_number: hash for each row in the dataframe
 
         # Add a column containing the mapped index for each row
-        # Use explicit index/data to ensure pandas 3.0+ compatibility
+        # If pandas is allowed to infer a numeric dtype for an Index built from these hash
+        # values, it may try to detect an evenly-spaced integer range by subtracting adjacent
+        # values, and that subtraction can silently overflow int64. Under pandas >= 3.0 this can
+        # corrupt the resulting Index (e.g. collapse it to length 0), which later raises "Length
+        # of values does not match length of index" - see hed-standard/hed-python for details.
+        # Forcing dtype="object" on the index bypasses that numeric fast path entirely, since
+        # hash keys are only ever used for equality lookups, never arithmetic.
+        map_index = pd.Index(list(self.map_dict.keys()), dtype="object")
         map_series = pd.Series(
-            data=list(self.map_dict.values()), index=list(self.map_dict.keys())
+            data=list(self.map_dict.values()), index=map_index
         )  # map_series is hash:row_index for each entry in the map_dict index
         key_values = key_series.map(map_series)  # key_values is df_row_number:map_dict_index
         # e.g. a key_value entry of 0:79 means row 0 maps to row 79 in the map_dict
