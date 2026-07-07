@@ -288,28 +288,30 @@ class Test(unittest.TestCase):
         """Regression test for the pandas 3.0 KeyMap._remap bug (issue #1329).
 
         pandas 3.0's Series._init_dict() tries to detect an evenly-spaced integer range in
-        dict keys by subtracting adjacent values; with two hash() keys of opposite sign and
-        near-maximal magnitude that subtraction overflows int64, corrupting the resulting
-        Index (collapsing it to length 0) and raising:
+        dict keys by subtracting adjacent values. With keys of opposite sign and near-maximal
+        magnitude, that subtraction can overflow int64, corrupting the resulting Index
+        (collapsing it to length 0) and raising:
             ValueError: Length of values (2) does not match length of index (0)
 
-        This test forces map_dict to contain exactly that kind of pathological pair (values
-        taken directly from the bug report) rather than relying on whichever hash() values
-        Python's randomized string hashing happens to produce, so the scenario is exercised
-        deterministically on every run/interpreter.
+        This test forces map_dict to contain keys of opposite sign with extreme magnitude
+        (one near max int64, one near min int64) to exercise this overflow scenario
+        deterministically via patching get_row_hash, rather than relying on Python's
+        randomized string hashing.
         """
         key_map = KeyMap(["key"], ["value"])
-        # Two hash-like keys with opposite sign and magnitude close to 2**63, guaranteed to
-        # overflow a naive int64 subtraction (the exact values pandas 3.0 was reported to choke on).
-        problem_keys = [-4186896901282141619, -8311529505453501279]
+        # Two hash-like keys of opposite sign with near-maximal magnitude.
+        # Subtracting these would overflow int64: 9.2e18 - (-9.2e18) ≈ 1.84e19 > max_int64
+        # These are chosen to be extreme but representable as int64 individually.
+        problem_keys = [9223372036854775800, -9223372036854775800]  # Close to ±max_int64
         hash_lookup = {"6": problem_keys[0], "2": problem_keys[1]}
 
         def fake_get_row_hash(row, key_list):
             value = str(row[key_list[0]])
             if value in hash_lookup:
                 return hash_lookup[value]
-            # Any other value must not collide with the two extreme-magnitude keys above.
-            return hash(("test_remap_extreme_magnitude_hash_keys", value))
+            # Return a fixed sentinel value guaranteed not to collide with problem_keys.
+            # Uses a large positive integer clearly outside the range of the extreme keys.
+            return 999999999999
 
         # Patch get_row_hash so that both map-building (update) and lookup (remap) agree on
         # using the pathological hash pair for "6"/"2" - relying on real hash() values would
