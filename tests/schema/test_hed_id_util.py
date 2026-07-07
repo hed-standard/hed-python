@@ -34,7 +34,7 @@ class TestLibraryFunctions(unittest.TestCase):
 
     def test_get_library_name_and_id_unknown(self):
         # Test for an unknown library
-        schema = load_schema_version("testlib_2.0.0")
+        schema = load_schema_version("testlib_2.1.0")
         name, first_id = get_library_name_and_id(schema)
         self.assertEqual(name, "Testlib")
         self.assertEqual(first_id, df_util.UNKNOWN_LIBRARY_VALUE)
