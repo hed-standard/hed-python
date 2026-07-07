@@ -103,7 +103,7 @@ Validates all HED annotations in a BIDS dataset against the specified schema.
 
 ### Validate BIDS dataset with non-default settings
 
-Validates a BIDS dataset that has HED annotations in files other than `events.tsv` (e.g., `participants.tsv`), by passing `suffixes=None` to `BidsDataset` so all `.tsv`/`.json` files are checked instead of just the default event files.
+Demonstrates validation of HED annotations in BIDS files beyond the default `events` and `participants` suffixes. By passing `suffixes=None` to `BidsDataset`, validation expands to include all `.tsv`/`.json` files, including non-standard files like `channels.tsv`, `scans.tsv`, `sessions.tsv`, or custom suffixes that may contain HED annotations.
 
 **Key parameters**: `dataset_dir`, `suffixes`, `check_for_warnings`
 
