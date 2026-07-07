@@ -14,6 +14,7 @@ This directory contains Jupyter notebooks that provide interactive workflows for
 | [sidecar_to_spreadsheet.ipynb](sidecar_to_spreadsheet.ipynb)                             | Convert JSON sidecar to 4-column spreadsheet for editing     |
 | [summarize_events.ipynb](summarize_events.ipynb)                                         | Summarize event file contents and value distributions        |
 | [validate_bids_dataset.ipynb](validate_bids_dataset.ipynb)                               | Validate HED annotations in a BIDS dataset                   |
+| [validate_bids_dataset_nondefault.ipynb](validate_bids_dataset_nondefault.ipynb)         | Validate a BIDS dataset with HED outside `events.tsv` files  |
 | [validate_bids_dataset_with_libraries.ipynb](validate_bids_dataset_with_libraries.ipynb) | Validate with HED library schemas                            |
 | [validate_bids_datasets.ipynb](validate_bids_datasets.ipynb)                             | Batch validate multiple BIDS datasets                        |
 
@@ -99,6 +100,12 @@ Validates all HED annotations in a BIDS dataset against the specified schema.
 **Key parameters**: `dataset_path`, `check_for_warnings`
 
 **Note**: This validates HED only, not full BIDS compliance.
+
+### Validate BIDS dataset with non-default settings
+
+Validates a BIDS dataset that has HED annotations in files other than `events.tsv` (e.g., `participants.tsv`), by passing `suffixes=None` to `BidsDataset` so all `.tsv`/`.json` files are checked instead of just the default event files.
+
+**Key parameters**: `dataset_dir`, `suffixes`, `check_for_warnings`
 
 ### Validate BIDS dataset with libraries
 

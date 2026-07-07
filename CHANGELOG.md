@@ -1,3 +1,46 @@
+# Release 1.1.1 July 7, 2026
+
+## Bug fixes
+
+### KeyMap crash under pandas 3.0 with certain hash-key combinations
+
+`KeyMap._remap()` (used by `hed.tools` remap utilities and by `table-remodeler`'s `RemapColumnsOp`) builds a `pandas.Series` from a dict whose keys are Python `hash()` values of row contents. pandas 3.0's `Series._init_dict()` tries to detect an evenly spaced integer range in dict keys by subtracting adjacent keys; when two hash keys have opposite sign and near-maximal magnitude, that subtraction silently overflows `int64`, corrupting the resulting `Index` (collapsing it to length 0) and raising `ValueError: Length of values (N) does not match length of index (0)`. 1.1.0 already addressed the pandas 3.0 breaking changes known at the time, but this code path only surfaces with particular hash-value combinations and wasn't caught by that pass.
+
+- `hed/tools/analysis/key_map.py`: the lookup `Index` is now built explicitly with `dtype="object"`, and the per-row hash `Series` is likewise kept as `dtype=object`, so pandas' numeric range-detection fast path is never invoked for these hash-based lookups.
+- Added `tests/tools/analysis/test_key_map.py::test_remap_extreme_magnitude_hash_keys`, which patches `get_row_hash` to force the exact pathological key pair deterministically, plus five other new `KeyMap` tests covering numeric keys as integers, as strings, with `n/a` values, multi-key cascades, and a 100-entry dictionary.
+
+### Missing `inLibrary` attribute on merged library-schema extras
+
+`HedSchema.save_as_dataframes()` unconditionally overwrote its computed output with `self.extras` whenever a schema had extras, even when the caller requested a merged save, discarding the serializer's correctly computed `in_library` values. `merge_extras_dataframes()` could also lose the `in_library` marking on entries duplicated between a library and its standard schema, depending on `drop_duplicates()` ordering. Both are fixed, completing the merged-extras support across all schema formats:
+
+- `hed/schema/hed_schema.py`: the extras override in `save_as_dataframes()` is now skipped when `save_merged=True`, preserving the serializer's own merged output; the internal `in_library` bookkeeping column is stripped before non-merged saves since it is metadata, not schema content.
+- `hed/schema/schema_io/df_util.py`: `merge_extras_dataframes()` now explicitly prefers the library version (which carries `in_library`) for entries that exist in both library and standard extras, using an indicator merge to find standard-only rows.
+- Updated `df2schema.py`, `json2schema.py`, `xml2schema.py`, `wiki2schema.py`, `schema2json.py`, `schema2xml.py`, `schema2wiki.py`, `schema2df.py`, `schema2base.py`, `base2schema.py`, the `df_constants.py`/`json_constants.py`/`xml_constants.py` constant modules, and `schema_comparer.py` for consistency.
+- Added comprehensive round-trip coverage in `tests/schema/test_schema_extras_comprehensive.py` and related schema I/O tests.
+
+### `get_hed_versions()` returned every library for an unrecognized name
+
+`hed_cache.get_hed_versions(library_name=...)` fell through to returning the entire dict of every cached library's versions when given a name that matched nothing. `library_name="all"` now has its own explicit branch, and any other unrecognized name correctly returns `[]`.
+
+## Packaging
+
+- Removed ~28,800 lines of dev/test-only `HED_testlib_*.xml` schemas that were being bundled into the installed `hed/schema/schema_data/` package directory; these are used only by hedtools' own test suite, not real published HED libraries, and had no effect on any documented API.
+- Added `typeguard>=4.5.2` as an explicit dependency in `pyproject.toml`.
+
+## Testing
+
+- Six new `KeyMap` pandas-3 regression tests (see above).
+- Comprehensive schema-extras round-trip tests across DataFrame, JSON, XML, and MediaWiki formats.
+- Loosened an overly strict dtype assertion on the `in_library` column in `test_schema_extras_comprehensive.py` so it tolerates a broader range of pandas versions.
+- Test fixtures switched from `testlib_1.0.2` to `testlib_2.1.0` to avoid extra schema-cache network loading during CI.
+
+## CI/CD
+
+- Removed the `claude-code-review.yml` and `claude.yml` GitHub Actions workflows.
+- Bumped `actions/checkout` (to 6.0.3, then 7.0.0), `astral-sh/setup-uv` (to 8.1.0, then 8.2.0), and `qltysh/qlty-action` to 2.2.1.
+- Bumped `anthropics/claude-code-action` repeatedly from 1.0.104 through 1.0.133.
+- Updated `spec_tests/hed-schemas` and `spec_tests/hed-tests` submodules.
+
 # Release 1.1.0 April 19, 2026
 
 ## New features

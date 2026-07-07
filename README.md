@@ -84,7 +84,7 @@ from hed import HedString, get_printable_issue_string, load_schema_version
 schema = load_schema_version("8.4.0")
 
 # Create and validate a HED string
-hed_string = HedString("Sensory-event, Visual-presentation, (Onset, (Red, Square))", schema)
+hed_string = HedString("Sensory-event, Visual-presentation, (Red, Square)", schema)
 issues = hed_string.validate()
 
 if issues:
@@ -110,11 +110,17 @@ hedpy validate string "Sensory-event, (Red, Square)" -sv 8.4.0
 # Extract sidecar template from a BIDS dataset
 hedpy extract bids-sidecar /path/to/dataset
 
+# Extract column-value summary from a set of TSV files
+hedpy extract tabular-summary /path/to/data
+
 # Validate HED schemas
 hedpy schema validate /path/to/schema.xml
 
 # Convert schema between formats (XML, MEDIAWIKI, TSV, JSON)
 hedpy schema convert /path/to/schema.xml
+
+# Add HED IDs to a schema under development
+hedpy schema add-ids /path/to/hed-schemas standard 8.4.0
 ```
 
 **Legacy commands** (deprecated, use `hedpy` instead):
@@ -137,12 +143,14 @@ For more examples, see the [user guide](https://www.hedtags.org/hed-python/user_
 The [`examples/`](examples/) directory contains Jupyter notebooks demonstrating common HED workflows with BIDS datasets:
 
 - **validate_bids_dataset.ipynb** - Validate HED annotations in a BIDS dataset
+- **validate_bids_dataset_nondefault.ipynb** - Validate a BIDS dataset that has HED in files other than `events.tsv`
+- **validate_bids_datasets.ipynb** - Batch-validate a list of BIDS datasets
+- **validate_bids_dataset_with_libraries.ipynb** - Validate with HED library schemas
 - **summarize_events.ipynb** - Summarize event file contents and value counts
 - **sidecar_to_spreadsheet.ipynb** - Convert JSON sidecars to spreadsheet format
 - **merge_spreadsheet_into_sidecar.ipynb** - Merge spreadsheet annotations into JSON sidecars
 - **extract_json_template.ipynb** - Generate JSON sidecar templates from event files
 - **find_event_combinations.ipynb** - Find unique combinations of event values
-- **validate_bids_dataset_with_libraries.ipynb** - Validate with HED library schemas
 
 To use these notebooks:
 
@@ -290,7 +298,7 @@ If you use HEDTools in your research, please cite:
 
 ```bibtex
 @software{hedtools,
-  author = {Ian Callanan, Robbins, Kay and others},
+  author = {Callanan, Ian and Robbins, Kay and others},
   title = {HEDTools: Python tools for HED},
   year = {2026},
   publisher = {GitHub},
