@@ -1,5 +1,6 @@
 import unittest
 import os
+from unittest.mock import patch
 import pandas as pd
 from hed.errors.exceptions import HedFileError
 from hed.tools.analysis.key_map import KeyMap
@@ -282,6 +283,51 @@ class Test(unittest.TestCase):
         self.assertEqual(df_result.iloc[0]["event_name"], "event_0")
         self.assertEqual(df_result.iloc[50]["event_name"], "event_0")  # 50 % 50 = 0
         self.assertEqual(df_result.iloc[99]["event_name"], "event_49")  # 99 % 50 = 49
+
+    def test_remap_extreme_magnitude_hash_keys(self):
+        """Regression test for the pandas 3.0 KeyMap._remap bug (issue #1329).
+
+        pandas 3.0's Series._init_dict() tries to detect an evenly-spaced integer range in
+        dict keys by subtracting adjacent values. With keys of opposite sign and near-maximal
+        magnitude, that subtraction can overflow int64, corrupting the resulting Index
+        (collapsing it to length 0) and raising:
+            ValueError: Length of values (2) does not match length of index (0)
+
+        This test forces map_dict to contain keys of opposite sign with extreme magnitude
+        (one near max int64, one near min int64) to exercise this overflow scenario
+        deterministically via patching get_row_hash, rather than relying on Python's
+        randomized string hashing.
+        """
+        key_map = KeyMap(["key"], ["value"])
+        # Two hash-like keys of opposite sign with near-maximal magnitude.
+        # Subtracting these would overflow int64: 9.2e18 - (-9.2e18) ≈ 1.84e19 > max_int64
+        # These are chosen to be extreme but representable as int64 individually.
+        problem_keys = [9223372036854775800, -9223372036854775800]  # Close to ±max_int64
+        hash_lookup = {"6": problem_keys[0], "2": problem_keys[1]}
+
+        def fake_get_row_hash(row, key_list):
+            value = str(row[key_list[0]])
+            if value in hash_lookup:
+                return hash_lookup[value]
+            # Return a fixed sentinel value guaranteed not to collide with problem_keys.
+            # Uses a large positive integer clearly outside the range of the extreme keys.
+            return 999999999999
+
+        # Patch get_row_hash so that both map-building (update) and lookup (remap) agree on
+        # using the pathological hash pair for "6"/"2" - relying on real hash() values would
+        # only trigger the bug by chance, since Python's string hashing is randomized per run.
+        with patch("hed.tools.util.data_util.get_row_hash", side_effect=fake_get_row_hash):
+            map_df = pd.DataFrame({"key": ["6", "2"], "value": ["six", "two"]})
+            key_map.update(map_df)
+
+            test_df = pd.DataFrame({"key": ["6", "2", "unmapped"]})
+            df_result, missing = key_map.remap(test_df)
+
+        self.assertEqual(len(df_result), 3, "remap should preserve number of rows")
+        self.assertEqual(df_result.iloc[0]["value"], "six")
+        self.assertEqual(df_result.iloc[1]["value"], "two")
+        self.assertEqual(df_result.iloc[2]["value"], "n/a")
+        self.assertEqual(missing, [2], "remap should report the unmapped row")
 
 
 if __name__ == "__main__":
