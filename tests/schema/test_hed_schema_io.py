@@ -184,6 +184,96 @@ class TestHedSchema(unittest.TestCase):
 
                 self.assertEqual(os.listdir(tmp_dir), [hed_cache.AVAILABLE_VERSIONS_CACHE_FILENAME])
 
+    def test_get_available_hed_versions_skips_unneeded_urls(self):
+        """library_name=None or a specific name should skip fetches whose result is unused.
+
+        Verified by inspecting the on-disk per-URL cache afterward (real network calls, no
+        mocks, per this repo's testing policy) - it should only ever contain entries for URLs
+        that were actually necessary for the requested library_name, never anything extra.
+        """
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with patch.object(hed_cache, "HED_CACHE_DIRECTORY", tmp_dir):
+                standard_only = hed_cache.get_available_hed_versions(library_name=None)
+                if not standard_only:
+                    self.skipTest("GitHub unreachable or rate-limited in this environment")
+
+                cache_filename = os.path.join(tmp_dir, hed_cache.AVAILABLE_VERSIONS_CACHE_FILENAME)
+                with open(cache_filename, "r") as f:
+                    cached_urls = set(json.load(f).keys())
+                self.assertTrue(
+                    all("library_schemas" not in url for url in cached_urls),
+                    f"library_name=None should never touch library URLs, but cached: {cached_urls}",
+                )
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with patch.object(hed_cache, "HED_CACHE_DIRECTORY", tmp_dir):
+                score_only = hed_cache.get_available_hed_versions(library_name="score")
+                if not score_only:
+                    self.skipTest("GitHub unreachable or rate-limited in this environment")
+
+                cache_filename = os.path.join(tmp_dir, hed_cache.AVAILABLE_VERSIONS_CACHE_FILENAME)
+                with open(cache_filename, "r") as f:
+                    cached_urls = set(json.load(f).keys())
+                self.assertTrue(
+                    all("standard_schema" not in url for url in cached_urls),
+                    f"library_name='score' should never touch standard-schema URLs, but cached: {cached_urls}",
+                )
+                library_base = hed_cache.LIBRARY_HED_URL
+                for url in cached_urls:
+                    if url == library_base:
+                        continue  # the one unavoidable "list all libraries" call
+                    # Trailing slash matters here - without it, a hypothetical library named
+                    # e.g. "scoreboard" would incorrectly pass a plain startswith(".../score").
+                    self.assertTrue(
+                        url.startswith(library_base + "/score/"),
+                        f"Unexpected library URL fetched while only 'score' was requested: {url}",
+                    )
+
+    def test_get_available_hed_versions_degrades_on_malformed_response(self):
+        """A GitHub response shaped differently than expected should degrade gracefully.
+
+        GitHub's contents API returns a JSON *object* (file metadata) for a path that's a
+        file, rather than the *list* every parser in this module expects for a directory.
+        Pointing hed_library_urls at a real file's contents URL reproduces exactly the
+        "unexpected response shape" Copilot's review flagged as unhandled - using a real,
+        live URL rather than mocking a bad response, per this repo's testing policy.
+        """
+        real_file_url = hed_cache.DEFAULT_HED_LIST_VERSIONS_URL + "/hedxml/HED8.2.0.xml"
+        try:
+            result = hed_cache.get_available_hed_versions(
+                hed_base_urls=(),
+                hed_library_urls=(real_file_url,),
+                library_name="all",
+            )
+        except Exception as ex:
+            self.fail(f"get_available_hed_versions() should degrade gracefully, not raise: {ex!r}")
+        self.assertEqual(result, {})
+
+    def test_get_available_hed_versions_tolerates_corrupted_cache_entry(self):
+        """A non-dict per-URL cache entry should degrade to a cache miss, not raise AttributeError.
+
+        Reproduces the exact scenario Copilot's review flagged in _get_json_with_etag(): a
+        corrupted cache file, or one written by an older/newer format, could have an entry that
+        isn't the expected {"etag", "body", "timestamp"} dict. Hand-writing such an entry for a
+        real URL and confirming get_available_hed_versions() still returns real data (rather than
+        crashing on cached_entry.get(...)) covers this without mocking any network response.
+        """
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with patch.object(hed_cache, "HED_CACHE_DIRECTORY", tmp_dir):
+                cache_filename = os.path.join(tmp_dir, hed_cache.AVAILABLE_VERSIONS_CACHE_FILENAME)
+                corrupted_url = hed_cache.DEFAULT_HED_LIST_VERSIONS_URL + hed_cache.hedxml_suffix
+                with open(cache_filename, "w") as f:
+                    json.dump({corrupted_url: "not-a-dict-entry"}, f)
+
+                try:
+                    versions = hed_cache.get_available_hed_versions()
+                except AttributeError as ex:
+                    self.fail(f"A corrupted cache entry should degrade to a cache miss, not raise: {ex!r}")
+
+                if not versions:
+                    self.skipTest("GitHub unreachable or rate-limited in this environment")
+                self.assertIn("8.2.0", versions)
+
     def test_load_schema_version_default_no_standard_raises(self):
         """Test that empty version with only library schemas raises HedFileError."""
         with tempfile.TemporaryDirectory() as tmp_dir:

@@ -294,7 +294,10 @@ def get_available_hed_versions(
     This still talks to the network - it never fetches a schema file's actual XML content, but
     listing everything can still add up to a couple dozen small JSON directory-listing requests
     in one call: 1-2 for the standard schema (plus its prerelease folder), 1 to enumerate the
-    library folders, and 1-2 more per library folder found. It's the live-from-GitHub counterpart
+    library folders, and 1-2 more per library folder found. That worst case only applies to
+    library_name="all"; passing library_name=None (the default) skips every library-related
+    request entirely, and passing a specific library name skips the standard-schema request and
+    restricts the library side to just that one library's folder. It's the live-from-GitHub counterpart
     to get_hed_versions() (which only reports what's already bundled with hedtools or previously
     cached on disk, with zero network calls), and it's still far cheaper than cache_xml_versions()
     (which makes those same listing calls AND then downloads every version's full content - fine
@@ -407,29 +410,55 @@ def get_available_hed_versions(
     url_cache = _read_available_versions_cache(cache_folder)
     cache_before = json.dumps(url_cache, sort_keys=True)
 
+    # Only fetch the standard-schema URLs when the result could actually include them
+    # (library_name is None or "all") - a request for one specific library has no use for
+    # this data, and fetching it anyway would be pure wasted requests.
+    needs_standard = library_name is None or library_name == "all"
+    # Likewise, only touch any library URL when the result could include library data at
+    # all - a plain standard-schema request (library_name=None) never looks at it.
+    needs_libraries = library_name is not None
+
     all_hed_versions = {}
-    for hed_base_url in hed_base_urls:
-        try:
-            new_hed_versions = _get_hed_xml_versions_one_library(
-                hed_base_url, url_cache, force_refresh, cache_time_threshold
-            )
-            _merge_in_versions(all_hed_versions, new_hed_versions)
-        except (URLError, ValueError):
-            # GitHub unreachable, or an unexpected response, for this particular URL - skip it
-            # so the caller still gets whatever else could be listed.
-            continue
-    for hed_library_url in hed_library_urls:
-        try:
-            new_hed_versions = _get_hed_xml_versions_from_url_all_libraries(
-                hed_library_url,
-                skip_folders=skip_folders,
-                etag_cache=url_cache,
-                force_refresh=force_refresh,
-                cache_time_threshold=cache_time_threshold,
-            )
-            _merge_in_versions(all_hed_versions, new_hed_versions)
-        except (URLError, ValueError):
-            continue
+    if needs_standard:
+        for hed_base_url in hed_base_urls:
+            try:
+                new_hed_versions = _get_hed_xml_versions_one_library(
+                    hed_base_url, url_cache, force_refresh, cache_time_threshold
+                )
+                _merge_in_versions(all_hed_versions, new_hed_versions)
+            except Exception:
+                # GitHub unreachable, or an unexpected/malformed response, for this
+                # particular URL - skip it so the caller still gets whatever else could be
+                # listed. Deliberately broad: this function's whole contract is to degrade
+                # gracefully rather than raise, so this isn't limited to network-level
+                # errors (URLError/HTTPError) - a rate-limited or otherwise unexpected
+                # response body (e.g. missing an expected JSON key) should be just as
+                # harmless to the caller as a plain connection failure.
+                continue
+    if needs_libraries:
+        # "all" means no filter (list every library); a specific name restricts the
+        # helper to just that one library's folder, instead of listing and fetching
+        # every library found under hed_library_urls.
+        library_filter = None if library_name == "all" else library_name
+        for hed_library_url in hed_library_urls:
+            try:
+                new_hed_versions = _get_hed_xml_versions_from_url_all_libraries(
+                    hed_library_url,
+                    library_name=library_filter,
+                    skip_folders=skip_folders,
+                    etag_cache=url_cache,
+                    force_refresh=force_refresh,
+                    cache_time_threshold=cache_time_threshold,
+                )
+                if library_filter is not None and new_hed_versions:
+                    # When filtered to one library, _get_hed_xml_versions_from_url_all_libraries()
+                    # returns that library's {version: (...)} dict directly, unwrapped, rather
+                    # than nested under its name - re-nest it here so _merge_in_versions() sees
+                    # the same {lib_name: {version: (...)}} shape it gets from the "all" case.
+                    new_hed_versions = {library_filter: new_hed_versions}
+                _merge_in_versions(all_hed_versions, new_hed_versions)
+            except Exception:
+                continue
 
     # Only rewrite the cache file if something was actually checked over the network (a fresh
     # fetch or a conditional 304) - if every URL was served from tier 1 above, nothing changed
@@ -523,7 +552,9 @@ def _get_json_with_etag(url, etag_cache, force_refresh=False, cache_time_thresho
                                    for a recent failure instead of hitting the network again.
                                    Pass None to always do a plain, unconditional fetch with none
                                    of this caching behavior (used by callers, like
-                                   cache_xml_versions(), that don't want it).
+                                   cache_xml_versions(), that don't want it). A per-URL entry
+                                   that isn't a dict (corrupted cache file, older/newer format)
+                                   is treated as a cache miss rather than raising.
         force_refresh (bool): Skip tier 1 (the time-based shortcut) even if the cached entry is
                               still within cache_time_threshold. Tier 2's conditional GET is
                               still used, so this remains cheap when nothing has changed.
@@ -537,6 +568,11 @@ def _get_json_with_etag(url, etag_cache, force_refresh=False, cache_time_thresho
                                failure recorded by an earlier call - see etag_cache above).
     """
     cached_entry = etag_cache.get(url) if etag_cache is not None else None
+    if not isinstance(cached_entry, dict):
+        # A non-dict entry (e.g. a corrupted cache file, or one written by a future/older
+        # format) can't be trusted - treat it exactly like "nothing cached yet" rather than
+        # letting cached_entry.get(...) raise AttributeError below.
+        cached_entry = None
 
     if cached_entry and not force_refresh:
         age = time.time() - cached_entry.get("timestamp", 0)
@@ -699,16 +735,19 @@ def _get_hed_xml_versions_one_library(
             hed_one_library_url + hedxml_suffix, etag_cache, force_refresh, cache_time_threshold
         )
         _merge_in_versions(all_hed_versions, finalized_versions)
-    except urllib.error.URLError:
-        # Silently ignore ones without a hedxml section for now.
+    except Exception:
+        # Silently ignore ones without a hedxml section for now. Deliberately broad (not just
+        # URLError) - a rate-limited or otherwise unexpected GitHub response can fail with a
+        # KeyError/ValueError while parsing rather than a network-level error, and this
+        # function's contract is to degrade gracefully either way.
         pass
     try:
         pre_release_folder_versions = _get_hed_xml_versions_one_folder(
             hed_one_library_url + prerelease_suffix, etag_cache, force_refresh, cache_time_threshold
         )
         _merge_in_versions(all_hed_versions, pre_release_folder_versions)
-    except urllib.error.URLError:
-        # Silently ignore ones without a prerelease section for now.
+    except Exception:
+        # Silently ignore ones without a prerelease section for now. See note above.
         pass
 
     ordered_versions = {}
