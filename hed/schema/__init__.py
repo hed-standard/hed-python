@@ -19,6 +19,19 @@ Load a library schema alongside a standard schema::
 
     schema = load_schema_version(["8.3.0", "sc:score_1.0.0"])
 
+List what versions exist on GitHub before loading one - e.g. to populate a version-picker
+in a UI. This still calls the GitHub API (small directory-listing requests), but it never
+fetches an actual schema file's content::
+
+    from hed.schema import get_available_hed_versions, load_schema_version
+
+    choices = get_available_hed_versions()          # ['8.4.0', '8.3.0', '8.2.0', ...] - a
+                                                     # few lightweight listing calls, no
+                                                     # schema content fetched
+    schema = load_schema_version(choices[0])        # the actual schema XML is downloaded
+                                                     # and cached here, for just this one
+                                                     # version, the first time it's used
+
 Key exports
 -----------
 - :class:`HedSchema` — a single loaded schema; use it to validate tags.
@@ -29,10 +42,17 @@ Key exports
 - :func:`from_dataframes` — reconstruct a schema from TSV DataFrames.
 - :data:`HedKey` / :data:`HedSectionKey` — enumerations of schema attribute and
   section names used when querying schema entries.
-- :func:`get_hed_versions` — list versions available in the local cache.
+- :func:`get_hed_versions` — list versions already available in the local cache
+  (bundled with hedtools, or previously downloaded). No network calls.
+- :func:`get_available_hed_versions` — list versions available on GitHub right now,
+  without downloading any of them. Cheap enough to call on every request, e.g. to
+  populate a version-picker; see the example above.
 - :func:`get_hed_xml_version` — read the HED version string from an XML schema file on disk.
 - :func:`cache_xml_versions` — pre-populate the local cache from the HED GitHub
-  releases.
+  releases. This downloads every discovered version's content and should not
+  be called on a user-facing hot path; prefer get_available_hed_versions() to
+  list what's available and let load_schema_version() fetch a specific
+  version lazily, on demand.
 
 See also
 --------
@@ -44,4 +64,10 @@ from .hed_schema import HedSchema
 from .hed_schema_group import HedSchemaGroup
 from .hed_schema_io import load_schema, load_schema_version, from_string, get_hed_xml_version, from_dataframes
 from .hed_schema_constants import HedKey, HedSectionKey
-from .hed_cache import cache_xml_versions, get_hed_versions, set_cache_directory, get_cache_directory
+from .hed_cache import (
+    cache_xml_versions,
+    get_hed_versions,
+    get_available_hed_versions,
+    set_cache_directory,
+    get_cache_directory,
+)

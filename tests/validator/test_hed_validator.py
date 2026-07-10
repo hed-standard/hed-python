@@ -214,6 +214,71 @@ class Test(unittest.TestCase):
         issues = test_string.validate(hed_schema)
         self.assertEqual(len(issues), 1)
 
+    def test_severity_enum_not_string_github_hedit_161(self):
+        """Regression test for critical bug: severity should be ErrorSeverity enum, not string.
+
+        GitHub issue: Annotation-Garden/HEDit#161
+        Bug: Downstream code comparing issue["severity"] == "error" always fails because
+        hedtools returns ErrorSeverity.ERROR (enum=1), not the string "error".
+
+        This test verifies:
+        1. Invalid HED strings return errors with ErrorSeverity.ERROR (enum), not string
+        2. Valid HED strings don't return errors
+        3. Severity values can be compared to ErrorSeverity enum
+        """
+        from hed.errors.error_reporter import check_for_any_errors
+
+        # Test 1: Invalid HED string (bare non-schema tag without extension)
+        # "Sky" is invalid because it's not in schema and has no extension
+        invalid_string = "Sensory-event, Sky"
+        test_string_obj = HedString(invalid_string, self.hed_schema)
+        issues = test_string_obj.validate(self.hed_schema)
+
+        # Should have at least one error
+        self.assertGreater(len(issues), 0, "Invalid HED string should produce validation errors")
+
+        # Verify severity is enum, not string
+        for issue in issues:
+            severity = issue.get("severity")
+            # Severity should be an int (enum value), not a string
+            self.assertIsInstance(severity, int, f"Severity should be int (enum), not {type(severity)}")
+            # Should be comparable to ErrorSeverity enum
+            self.assertTrue(
+                severity == ErrorSeverity.ERROR or severity == ErrorSeverity.WARNING,
+                f"Severity {severity} should equal ErrorSeverity.ERROR (1) or ErrorSeverity.WARNING (10)",
+            )
+
+        # check_for_any_errors should return True (indicating errors exist)
+        self.assertTrue(check_for_any_errors(issues), "check_for_any_errors should return True for invalid HED string")
+
+        # Test 2: Valid HED string
+        valid_string = "Event"
+        test_string_obj = HedString(valid_string, self.hed_schema)
+        issues = test_string_obj.validate(self.hed_schema)
+
+        # Should have no errors
+        error_issues = [issue for issue in issues if issue.get("severity", ErrorSeverity.ERROR) <= ErrorSeverity.ERROR]
+        self.assertEqual(len(error_issues), 0, "Valid HED string 'Event' should not produce errors")
+
+        # check_for_any_errors should return False (no errors)
+        self.assertFalse(check_for_any_errors(issues), "check_for_any_errors should return False for valid HED string")
+
+        # Test 3: Verify downstream consumers can correctly filter errors by severity enum
+        invalid_string_obj = HedString("Sensory-event, Sky", self.hed_schema)
+        invalid_issues = invalid_string_obj.validate(self.hed_schema)
+
+        # Simulate what downstream code should do (compare to enum, not string)
+        error_count = sum(
+            1 for issue in invalid_issues if issue.get("severity", ErrorSeverity.ERROR) == ErrorSeverity.ERROR
+        )
+        self.assertGreater(
+            error_count, 0, "Should detect at least one error when comparing to ErrorSeverity.ERROR enum"
+        )
+
+        # Show that comparing to string "error" would fail (the bug)
+        error_count_string = sum(1 for issue in invalid_issues if issue.get("severity") == "error")
+        self.assertEqual(error_count_string, 0, "Comparing to string 'error' incorrectly returns 0 errors (the bug)")
+
 
 if __name__ == "__main__":
     unittest.main()

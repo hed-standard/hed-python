@@ -272,6 +272,119 @@ def cache_xml_versions(
     return 0
 
 
+def get_available_hed_versions(
+    hed_base_urls=DEFAULT_URL_LIST,
+    hed_library_urls=DEFAULT_LIBRARY_URL_LIST,
+    skip_folders=DEFAULT_SKIP_FOLDERS,
+    library_name=None,
+    check_prerelease=False,
+) -> Union[list, dict]:
+    """List HED schema versions available on GitHub, without downloading or caching their content.
+
+    This still talks to the network - it makes a handful of GitHub API calls that each return a
+    small JSON directory listing (file names, not file contents). What it avoids is the
+    expensive part: it never fetches a schema file's actual XML content. It's the
+    live-from-GitHub counterpart to get_hed_versions() (which only reports what's already
+    bundled with hedtools or previously cached on disk, with zero network calls), and it's far
+    cheaper than cache_xml_versions() (which makes those same listing calls AND then downloads
+    every version's full content - fine to do once for a version you're about to use, wasteful
+    to do just to show a list of names).
+
+    Typical usage is: call this to populate something like a version-picker dropdown, then only
+    fetch the one version the user actually selects, via load_schema_version() (which downloads
+    and caches just that version, lazily, the first time it's needed).
+
+    Parameters:
+        hed_base_urls (str or list): Path or list of paths for the standard schema folder(s).
+        hed_library_urls (str or list): Path or list of paths for folder(s) containing library
+                                        schema subfolders.
+        skip_folders (list): A list of library subfolders to skip. Default is 'deprecated'.
+        library_name (str or None): None retrieves the standard schema only. Pass "all" to
+                                    retrieve all standard and library schemas as a dict.
+                                    Pass a specific library name to retrieve just that library.
+        check_prerelease (bool): If True, results can include prerelease schemas.
+                                 Default is False, returning only released versions.
+
+    Returns:
+        Union[list, dict]: List of version numbers, or {library_name: [versions]} if
+                           library_name is "all". Returns an empty list/dict for any URL that
+                           couldn't be reached rather than raising - this is meant to degrade
+                           gracefully for use in unattended user-facing listings.
+
+    Examples:
+        Standard schema only (the default) - just a list of version strings, newest first::
+
+            >>> get_available_hed_versions()
+            ['8.4.0', '8.3.0', '8.2.0', '8.1.0', '8.0.0']
+
+        Everything - standard schema plus every library, as a dict keyed by library name
+        (the standard schema is under the None key)::
+
+            >>> get_available_hed_versions(library_name="all")
+            {None: ['8.4.0', '8.3.0', '8.2.0'], 'score': ['2.1.0', '1.0.0'], 'lang': ['1.1.0']}
+
+        Just one library, by name::
+
+            >>> get_available_hed_versions(library_name="score")
+            ['2.1.0', '1.0.0']
+
+        Including prereleases (adds anything only found in GitHub's "prerelease" folders)::
+
+            >>> get_available_hed_versions(check_prerelease=True)
+            ['8.5.0', '8.4.0', '8.3.0', '8.2.0', '8.1.0', '8.0.0']
+
+        Once the user picks a version from a list like the above, fetch that one version's
+        actual XML content (this is the step that downloads a schema file - the calls above
+        only ever downloaded small directory listings, never a schema itself)::
+
+            >>> from hed.schema import load_schema_version
+            >>> schema = load_schema_version("8.4.0")
+
+    Notes:
+        - Unlike cache_xml_versions(), this does not use the cache refresh-time threshold in
+          hed_cache_lock.py: every call queries GitHub directly, since there's no expensive
+          download step here to throttle.
+        - This does not touch the on-disk cache at all - it has no interaction with
+          get_hed_versions(), cache_local_versions(), or cache_xml_versions()'s cache folder.
+    """
+    if isinstance(hed_base_urls, str):
+        hed_base_urls = [hed_base_urls]
+    if isinstance(hed_library_urls, str):
+        hed_library_urls = [hed_library_urls]
+
+    all_hed_versions = {}
+    for hed_base_url in hed_base_urls:
+        try:
+            new_hed_versions = _get_hed_xml_versions_one_library(hed_base_url)
+            _merge_in_versions(all_hed_versions, new_hed_versions)
+        except (URLError, ValueError):
+            # GitHub unreachable, or an unexpected response, for this particular URL - skip it
+            # so the caller still gets whatever else could be listed.
+            continue
+    for hed_library_url in hed_library_urls:
+        try:
+            new_hed_versions = _get_hed_xml_versions_from_url_all_libraries(hed_library_url, skip_folders=skip_folders)
+            _merge_in_versions(all_hed_versions, new_hed_versions)
+        except (URLError, ValueError):
+            continue
+
+    result = {}
+    for lib_name, versions_info in all_hed_versions.items():
+        filtered = [
+            version
+            for version, (_sha, _download_url, prerelease) in versions_info.items()
+            if check_prerelease or not prerelease
+        ]
+        if filtered:
+            result[lib_name] = _sort_version_list(filtered)
+
+    if library_name == "all":
+        return result
+    if library_name in result:
+        return result[library_name]
+    return []
+
+
 @functools.lru_cache(maxsize=50)
 def get_library_data(library_name, cache_folder=None) -> dict:
     """Retrieve the library data for the given library.

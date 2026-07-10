@@ -97,6 +97,27 @@ class TestHedSchema(unittest.TestCase):
         self.assertIsInstance(versions, list)
         self.assertEqual(schema_default.version_number, versions[0])
 
+    def test_get_available_hed_versions_lists_without_downloading(self):
+        """get_available_hed_versions() should list real GitHub versions without caching any content."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with patch.object(hed_cache, "HED_CACHE_DIRECTORY", tmp_dir):
+                versions = hed_cache.get_available_hed_versions()
+                self.assertIsInstance(versions, list)
+                self.assertGreater(len(versions), 0)
+                self.assertIn("8.2.0", versions)
+
+                versions_all = hed_cache.get_available_hed_versions(library_name="all")
+                self.assertIsInstance(versions_all, dict)
+                self.assertIn(None, versions_all)
+                self.assertIn("score", versions_all)
+
+                versions_with_pre = hed_cache.get_available_hed_versions(check_prerelease=True)
+                self.assertGreaterEqual(len(versions_with_pre), len(versions))
+
+            # This function only lists what's on GitHub - it should never download or cache
+            # any schema content, unlike cache_xml_versions().
+            self.assertEqual(os.listdir(tmp_dir), [])
+
     def test_load_schema_version_default_no_standard_raises(self):
         """Test that empty version with only library schemas raises HedFileError."""
         with tempfile.TemporaryDirectory() as tmp_dir:
