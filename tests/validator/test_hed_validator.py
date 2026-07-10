@@ -243,7 +243,9 @@ class Test(unittest.TestCase):
             # Severity should be the ErrorSeverity enum itself, not a plain int or a string.
             # (assertIsInstance(severity, int) would also pass for a bare int, since
             # ErrorSeverity is an IntEnum - that wouldn't actually lock in the enum contract.)
-            self.assertIsInstance(severity, ErrorSeverity, f"Severity should be ErrorSeverity enum, not {type(severity)}")
+            self.assertIsInstance(
+                severity, ErrorSeverity, f"Severity should be ErrorSeverity enum, not {type(severity)}"
+            )
             # Should be comparable to ErrorSeverity enum
             self.assertTrue(
                 severity == ErrorSeverity.ERROR or severity == ErrorSeverity.WARNING,

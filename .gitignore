@@ -119,6 +119,10 @@ site/
 #machine specific files
 .vimrc
 
+# direnv - local, per-checkout environment variables (e.g. HED_GITHUB_TOKEN).
+# Never committed; see .envrc for a template.
+.envrc
+
 # Pycharm
 .idea/
 /venv/

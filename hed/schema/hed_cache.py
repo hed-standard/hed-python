@@ -690,7 +690,9 @@ def _get_hed_xml_versions_one_folder(hed_folder_url, etag_cache=None, force_refr
     return all_hed_versions
 
 
-def _get_hed_xml_versions_one_library(hed_one_library_url, etag_cache=None, force_refresh=False, cache_time_threshold=0):
+def _get_hed_xml_versions_one_library(
+    hed_one_library_url, etag_cache=None, force_refresh=False, cache_time_threshold=0
+):
     all_hed_versions = {}
     try:
         finalized_versions = _get_hed_xml_versions_one_folder(
