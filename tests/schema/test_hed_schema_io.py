@@ -10,11 +10,32 @@ from tests.schema.schema_test_helpers import with_temp_file, get_temp_filename
 import os
 import json
 import tempfile
+from semantic_version import Version
 from hed.errors import HedExceptions
 from hed.schema import HedKey
 from hed.schema import hed_cache
 from hed import schema
 import shutil
+
+
+def _assert_valid_sorted_versions(test_case, versions):
+    """Assert every entry is a valid semver string and the list is sorted newest-first.
+
+    Deliberately avoids pinning to any specific version number (e.g. "8.2.0") - upstream can
+    prune or add versions at any time, and that shouldn't make this assertion fail as long as
+    get_available_hed_versions() is still returning well-formed, correctly ordered data.
+    """
+    test_case.assertTrue(versions, "expected at least one version")
+    for version in versions:
+        try:
+            Version(version)
+        except ValueError:
+            test_case.fail(f"{version!r} is not a valid semver string")
+    test_case.assertEqual(
+        versions,
+        sorted(versions, key=Version, reverse=True),
+        "versions should be sorted newest-first",
+    )
 
 
 # todo: speed up these tests
@@ -110,7 +131,7 @@ class TestHedSchema(unittest.TestCase):
                     # outage, treat "nothing came back" as an environment limitation and skip.
                     self.skipTest("GitHub unreachable or rate-limited in this environment")
                 self.assertIsInstance(versions, list)
-                self.assertIn("8.2.0", versions)
+                _assert_valid_sorted_versions(self, versions)
 
                 versions_all = hed_cache.get_available_hed_versions(library_name="all")
                 self.assertIsInstance(versions_all, dict)
@@ -272,7 +293,7 @@ class TestHedSchema(unittest.TestCase):
 
                 if not versions:
                     self.skipTest("GitHub unreachable or rate-limited in this environment")
-                self.assertIn("8.2.0", versions)
+                _assert_valid_sorted_versions(self, versions)
 
     def test_load_schema_version_default_no_standard_raises(self):
         """Test that empty version with only library schemas raises HedFileError."""
