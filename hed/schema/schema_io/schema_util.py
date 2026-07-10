@@ -29,20 +29,33 @@ def get_api_key():
             return github_api_access_token
 
 
-def make_url_request(resource_url, try_authenticate=True):
+def make_url_request(resource_url, try_authenticate=True, extra_headers=None):
     """Make a request and adds the above GitHub access credentials.
 
     Parameters:
         resource_url (str): The url to retrieve.
         try_authenticate (bool): If True add the above credentials.
+        extra_headers (dict or None): Additional request headers, e.g. {"If-None-Match": etag}
+                                      to make a conditional request.
 
     Returns:
         url_request
+
+    Raises:
+        urllib.error.HTTPError: For any non-2xx response, including a 304 Not Modified to a
+                                conditional request. A caller making a conditional request
+                                should catch this and check `e.code == 304` to tell "nothing
+                                changed" apart from an actual failure - this function does not
+                                make that distinction itself, since it has no way to know
+                                whether an unmodified body would have been usable to the caller.
 
     """
     request = urllib.request.Request(resource_url)
     if try_authenticate and get_api_key():
         request.add_header("Authorization", "token %s" % get_api_key())
+    if extra_headers:
+        for header_name, header_value in extra_headers.items():
+            request.add_header(header_name, header_value)
     return urllib.request.urlopen(request)
 
 
