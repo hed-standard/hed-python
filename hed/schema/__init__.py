@@ -21,13 +21,16 @@ Load a library schema alongside a standard schema::
 
 List what versions exist on GitHub before loading one - e.g. to populate a version-picker
 in a UI. This still calls the GitHub API (small directory-listing requests), but it never
-fetches an actual schema file's content::
+fetches an actual schema file's content. Results are cached on disk for 60 seconds by
+default, so calling this on every page load (e.g. from a web service) won't trip GitHub's
+rate limits - pass force_refresh=True to bypass that cache when you need an immediate,
+up-to-date answer::
 
     from hed.schema import get_available_hed_versions, load_schema_version
 
-    choices = get_available_hed_versions()          # ['8.4.0', '8.3.0', '8.2.0', ...] - a
-                                                     # few lightweight listing calls, no
-                                                     # schema content fetched
+    choices = get_available_hed_versions()          # ['8.4.0', '8.3.0', '8.2.0', ...] -
+                                                     # several lightweight listing calls,
+                                                     # no schema content fetched
     schema = load_schema_version(choices[0])        # the actual schema XML is downloaded
                                                      # and cached here, for just this one
                                                      # version, the first time it's used
@@ -45,8 +48,9 @@ Key exports
 - :func:`get_hed_versions` — list versions already available in the local cache
   (bundled with hedtools, or previously downloaded). No network calls.
 - :func:`get_available_hed_versions` — list versions available on GitHub right now,
-  without downloading any of them. Cheap enough to call on every request, e.g. to
-  populate a version-picker; see the example above.
+  without downloading any of them. Caches its own result on disk for a short time (60s by
+  default), so it's safe to call on every request without extra throttling by the caller;
+  see the example above.
 - :func:`get_hed_xml_version` — read the HED version string from an XML schema file on disk.
 - :func:`cache_xml_versions` — pre-populate the local cache from the HED GitHub
   releases. This downloads every discovered version's content and should not

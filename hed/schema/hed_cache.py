@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import shutil
 import os
+import time
 
 import json
 from hashlib import sha1
@@ -44,6 +45,12 @@ DEFAULT_LIBRARY_URL_LIST = (LIBRARY_HED_URL,)
 
 
 DEFAULT_SKIP_FOLDERS = ("deprecated",)
+
+# Short-lived listing cache used by get_available_hed_versions() - deliberately much shorter
+# than hed_cache_lock.CACHE_TIME_THRESHOLD (which throttles the much more expensive
+# cache_xml_versions() download path).
+AVAILABLE_VERSIONS_CACHE_FILENAME = "available_versions_cache.json"
+AVAILABLE_VERSIONS_TIME_THRESHOLD = 60
 
 HED_CACHE_DIRECTORY = os.path.join(Path.home(), ".hedtools/hed_cache/")
 
@@ -278,17 +285,24 @@ def get_available_hed_versions(
     skip_folders=DEFAULT_SKIP_FOLDERS,
     library_name=None,
     check_prerelease=False,
+    cache_folder=None,
+    force_refresh=False,
+    cache_time_threshold=AVAILABLE_VERSIONS_TIME_THRESHOLD,
 ) -> Union[list, dict]:
     """List HED schema versions available on GitHub, without downloading or caching their content.
 
-    This still talks to the network - it makes a handful of GitHub API calls that each return a
-    small JSON directory listing (file names, not file contents). What it avoids is the
-    expensive part: it never fetches a schema file's actual XML content. It's the
-    live-from-GitHub counterpart to get_hed_versions() (which only reports what's already
-    bundled with hedtools or previously cached on disk, with zero network calls), and it's far
-    cheaper than cache_xml_versions() (which makes those same listing calls AND then downloads
-    every version's full content - fine to do once for a version you're about to use, wasteful
-    to do just to show a list of names).
+    This still talks to the network - it never fetches a schema file's actual XML content, but
+    listing everything can still add up to a couple dozen small JSON directory-listing requests
+    in one call: 1-2 for the standard schema (plus its prerelease folder), 1 to enumerate the
+    library folders, and 1-2 more per library folder found. It's the live-from-GitHub counterpart
+    to get_hed_versions() (which only reports what's already bundled with hedtools or previously
+    cached on disk, with zero network calls), and it's still far cheaper than cache_xml_versions()
+    (which makes those same listing calls AND then downloads every version's full content - fine
+    to do once for a version you're about to use, wasteful to do just to show a list of names).
+    Because of the request count, this function caches its own results on disk (see Notes) so
+    that a caller polling it frequently - e.g. a web service handling many requests - doesn't
+    trip GitHub's API rate limits. Callers don't need to implement their own throttling on top
+    of this.
 
     Typical usage is: call this to populate something like a version-picker dropdown, then only
     fetch the one version the user actually selects, via load_schema_version() (which downloads
@@ -304,6 +318,17 @@ def get_available_hed_versions(
                                     Pass a specific library name to retrieve just that library.
         check_prerelease (bool): If True, results can include prerelease schemas.
                                  Default is False, returning only released versions.
+        cache_folder (str or None): Where to read/write the listing cache (see Notes). None
+                                    uses the default HED cache folder.
+        force_refresh (bool): If True, skip the "don't even check yet" shortcut described in
+                              Notes and always at least ask GitHub whether anything changed.
+                              Use this when you specifically need a confirmed up-to-date
+                              answer - e.g. right after publishing a new release.
+        cache_time_threshold (int): How long, in seconds, a URL that was just checked is
+                                   reused without even asking GitHub whether it changed.
+                                   Default is 60 seconds - short enough that new releases
+                                   show up quickly, long enough that a caller polling this in
+                                   a tight loop doesn't generate a request per call.
 
     Returns:
         Union[list, dict]: List of version numbers, or {library_name: [versions]} if
@@ -340,22 +365,54 @@ def get_available_hed_versions(
             >>> from hed.schema import load_schema_version
             >>> schema = load_schema_version("8.4.0")
 
+        Force a fresh listing right after publishing a release, instead of possibly getting
+        a cached result from just before it went live::
+
+            >>> get_available_hed_versions(force_refresh=True)
+            ['8.5.0', '8.4.0', '8.3.0', ...]
+
     Notes:
-        - Unlike cache_xml_versions(), this does not use the cache refresh-time threshold in
-          hed_cache_lock.py: every call queries GitHub directly, since there's no expensive
-          download step here to throttle.
-        - This does not touch the on-disk cache at all - it has no interaction with
-          get_hed_versions(), cache_local_versions(), or cache_xml_versions()'s cache folder.
+        - Caching happens per GitHub URL (there are several under the hood: the standard
+          schema folder and its prerelease folder, the library-folder listing, and each
+          library's own folder and prerelease folder), in a small metadata file
+          (available_versions_cache.json) inside the cache folder, in two layers:
+          1. If a given URL was checked within cache_time_threshold seconds (default 60),
+             it's reused with no network call at all.
+          2. Otherwise, a conditional GET is made using the ETag from the last time that URL
+             was fetched. A 304 response means GitHub confirms nothing changed there, so the
+             prior result is reused - and, per GitHub's own documented behavior, this doesn't
+             count against the primary rate limit for authenticated requests. A 200 means
+             something changed, and the new content and ETag are stored for next time.
+        - A URL that failed (GitHub unreachable, rate-limited, etc.) is also remembered for
+          cache_time_threshold seconds, so a string of calls during an outage doesn't retry
+          it on every single one - it raises immediately instead, same as if it were just
+          fetched and failed.
+        - This uses a much shorter threshold than the one in hed_cache_lock.py, which throttles
+          cache_xml_versions()'s far more expensive per-version download step.
+        - Unlike cache_xml_versions(), this never writes schema content - the on-disk cache
+          used here holds only the same small directory-listing JSON GitHub itself returns
+          (version names, SHAs, and download URLs), never a schema file itself. It has no
+          interaction with get_hed_versions(), cache_local_versions(), or the schema files
+          cache_xml_versions() downloads.
+        - force_refresh=True skips layer 1 above but still uses layer 2 (the conditional GET),
+          so it stays cheap when nothing has actually changed.
     """
     if isinstance(hed_base_urls, str):
         hed_base_urls = [hed_base_urls]
     if isinstance(hed_library_urls, str):
         hed_library_urls = [hed_library_urls]
+    if not cache_folder:
+        cache_folder = HED_CACHE_DIRECTORY
+
+    url_cache = _read_available_versions_cache(cache_folder)
+    cache_before = json.dumps(url_cache, sort_keys=True)
 
     all_hed_versions = {}
     for hed_base_url in hed_base_urls:
         try:
-            new_hed_versions = _get_hed_xml_versions_one_library(hed_base_url)
+            new_hed_versions = _get_hed_xml_versions_one_library(
+                hed_base_url, url_cache, force_refresh, cache_time_threshold
+            )
             _merge_in_versions(all_hed_versions, new_hed_versions)
         except (URLError, ValueError):
             # GitHub unreachable, or an unexpected response, for this particular URL - skip it
@@ -363,10 +420,22 @@ def get_available_hed_versions(
             continue
     for hed_library_url in hed_library_urls:
         try:
-            new_hed_versions = _get_hed_xml_versions_from_url_all_libraries(hed_library_url, skip_folders=skip_folders)
+            new_hed_versions = _get_hed_xml_versions_from_url_all_libraries(
+                hed_library_url,
+                skip_folders=skip_folders,
+                etag_cache=url_cache,
+                force_refresh=force_refresh,
+                cache_time_threshold=cache_time_threshold,
+            )
             _merge_in_versions(all_hed_versions, new_hed_versions)
         except (URLError, ValueError):
             continue
+
+    # Only rewrite the cache file if something was actually checked over the network (a fresh
+    # fetch or a conditional 304) - if every URL was served from tier 1 above, nothing changed
+    # and there's no reason to touch the file.
+    if json.dumps(url_cache, sort_keys=True) != cache_before:
+        _write_available_versions_cache(cache_folder, url_cache)
 
     result = {}
     for lib_name, versions_info in all_hed_versions.items():
@@ -383,6 +452,127 @@ def get_available_hed_versions(
     if library_name in result:
         return result[library_name]
     return []
+
+
+def _read_available_versions_cache(cache_folder):
+    """Load the on-disk per-URL listing cache used by get_available_hed_versions().
+
+    Parameters:
+        cache_folder (str): Folder the listing cache file lives in.
+
+    Returns:
+        dict: {url: {"etag": str or None, "body": <parsed GitHub JSON>, "timestamp": float}}.
+             Empty dict if the file is absent, corrupt, or otherwise unreadable - this is
+             treated the same as "nothing cached yet" rather than raising.
+    """
+    cache_filename = os.path.join(cache_folder, AVAILABLE_VERSIONS_CACHE_FILENAME)
+    try:
+        with open(cache_filename, "r") as f:
+            data = json.load(f)
+    except (FileNotFoundError, ValueError, OSError):
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    return data
+
+
+def _write_available_versions_cache(cache_folder, url_cache):
+    """Best-effort write of the per-URL listing cache back to disk.
+
+    Writes to a temp file and renames it into place so a reader never sees a partial file.
+    Any failure here is silently ignored - this cache is a performance optimization, not a
+    correctness requirement, so it should never turn a successful listing into an error.
+
+    Parameters:
+        cache_folder (str): Folder to write the listing cache file into.
+        url_cache (dict): {url: {"etag", "body", "timestamp"}} to persist, as produced by
+                          _read_available_versions_cache() and updated by _get_json_with_etag().
+    """
+    cache_filename = os.path.join(cache_folder, AVAILABLE_VERSIONS_CACHE_FILENAME)
+    tmp_filename = cache_filename + ".tmp"
+    try:
+        os.makedirs(cache_folder, exist_ok=True)
+        with open(tmp_filename, "w") as f:
+            json.dump(url_cache, f)
+        os.replace(tmp_filename, cache_filename)
+    except OSError:
+        pass
+
+
+def _get_json_with_etag(url, etag_cache, force_refresh=False, cache_time_threshold=0):
+    """Fetch a GitHub JSON listing, reusing a recent or confirmed-unchanged result when possible.
+
+    Three tiers, cheapest first:
+      1. If this exact URL was checked within cache_time_threshold seconds (and force_refresh
+         is not set), skip the network entirely and reuse the stored body.
+      2. Otherwise, make a conditional GET using the stored ETag, if any (If-None-Match). A 304
+         response means GitHub confirms nothing changed - reuse the stored body. Per GitHub's
+         documented behavior, this doesn't count against the primary rate limit for
+         authenticated requests (see https://docs.github.com/en/rest/using-the-rest-api/
+         best-practices-for-using-the-rest-api#use-conditional-requests-if-appropriate).
+      3. A 200 response means something changed (or there was no prior ETag) - parse it and
+         store the new body and ETag for next time.
+
+    Parameters:
+        url (str): The URL to fetch.
+        etag_cache (dict or None): Maps url -> {"etag", "body", "timestamp"}, updated in place.
+                                   A failed attempt is recorded too, as {"etag": None, "body":
+                                   None, "timestamp": <now>} - this is what keeps a URL that's
+                                   currently unreachable (GitHub down, rate-limited) from being
+                                   retried on every single call; tier 1 re-raises immediately
+                                   for a recent failure instead of hitting the network again.
+                                   Pass None to always do a plain, unconditional fetch with none
+                                   of this caching behavior (used by callers, like
+                                   cache_xml_versions(), that don't want it).
+        force_refresh (bool): Skip tier 1 (the time-based shortcut) even if the cached entry is
+                              still within cache_time_threshold. Tier 2's conditional GET is
+                              still used, so this remains cheap when nothing has changed.
+        cache_time_threshold (int): How long, in seconds, tier 1 applies for.
+
+    Returns:
+        The parsed JSON body for this URL - freshly fetched, or reused from etag_cache.
+
+    Raises:
+        urllib.error.URLError: If the URL could not be reached (including a recent, still-fresh
+                               failure recorded by an earlier call - see etag_cache above).
+    """
+    cached_entry = etag_cache.get(url) if etag_cache is not None else None
+
+    if cached_entry and not force_refresh:
+        age = time.time() - cached_entry.get("timestamp", 0)
+        if age <= cache_time_threshold:
+            if cached_entry.get("body") is None:
+                raise URLError(f"A recent attempt to reach {url} failed; not retrying yet")
+            return cached_entry["body"]
+
+    extra_headers = {}
+    if cached_entry and cached_entry.get("etag"):
+        extra_headers["If-None-Match"] = cached_entry["etag"]
+
+    try:
+        url_request = make_url_request(url, extra_headers=extra_headers or None)
+    except urllib.error.HTTPError as e:
+        if e.code == 304 and cached_entry is not None and cached_entry.get("body") is not None:
+            # GitHub confirmed nothing changed since our last fetch of this URL.
+            cached_entry["timestamp"] = time.time()
+            return cached_entry["body"]
+        if etag_cache is not None:
+            etag_cache[url] = {"etag": None, "body": None, "timestamp": time.time()}
+        raise
+    except URLError:
+        if etag_cache is not None:
+            etag_cache[url] = {"etag": None, "body": None, "timestamp": time.time()}
+        raise
+
+    url_data = str(url_request.read(), "utf-8")
+    loaded_json = json.loads(url_data)
+    if etag_cache is not None:
+        etag_cache[url] = {
+            "etag": url_request.headers.get("ETag"),
+            "body": loaded_json,
+            "timestamp": time.time(),
+        }
+    return loaded_json
 
 
 @functools.lru_cache(maxsize=50)
@@ -478,10 +668,8 @@ def _sort_version_list(hed_versions):
     return sorted(hed_versions, key=Version, reverse=True)
 
 
-def _get_hed_xml_versions_one_folder(hed_folder_url):
-    url_request = make_url_request(hed_folder_url)
-    url_data = str(url_request.read(), "utf-8")
-    loaded_json = json.loads(url_data)
+def _get_hed_xml_versions_one_folder(hed_folder_url, etag_cache=None, force_refresh=False, cache_time_threshold=0):
+    loaded_json = _get_json_with_etag(hed_folder_url, etag_cache, force_refresh, cache_time_threshold)
 
     all_hed_versions = {}
     for file_entry in loaded_json:
@@ -502,16 +690,20 @@ def _get_hed_xml_versions_one_folder(hed_folder_url):
     return all_hed_versions
 
 
-def _get_hed_xml_versions_one_library(hed_one_library_url):
+def _get_hed_xml_versions_one_library(hed_one_library_url, etag_cache=None, force_refresh=False, cache_time_threshold=0):
     all_hed_versions = {}
     try:
-        finalized_versions = _get_hed_xml_versions_one_folder(hed_one_library_url + hedxml_suffix)
+        finalized_versions = _get_hed_xml_versions_one_folder(
+            hed_one_library_url + hedxml_suffix, etag_cache, force_refresh, cache_time_threshold
+        )
         _merge_in_versions(all_hed_versions, finalized_versions)
     except urllib.error.URLError:
         # Silently ignore ones without a hedxml section for now.
         pass
     try:
-        pre_release_folder_versions = _get_hed_xml_versions_one_folder(hed_one_library_url + prerelease_suffix)
+        pre_release_folder_versions = _get_hed_xml_versions_one_folder(
+            hed_one_library_url + prerelease_suffix, etag_cache, force_refresh, cache_time_threshold
+        )
         _merge_in_versions(all_hed_versions, pre_release_folder_versions)
     except urllib.error.URLError:
         # Silently ignore ones without a prerelease section for now.
@@ -527,7 +719,12 @@ def _get_hed_xml_versions_one_library(hed_one_library_url):
 
 
 def _get_hed_xml_versions_from_url_all_libraries(
-    hed_base_library_url, library_name=None, skip_folders=DEFAULT_SKIP_FOLDERS
+    hed_base_library_url,
+    library_name=None,
+    skip_folders=DEFAULT_SKIP_FOLDERS,
+    etag_cache=None,
+    force_refresh=False,
+    cache_time_threshold=0,
 ) -> Union[list, dict]:
     """Get all available schemas and their hash values
 
@@ -536,6 +733,11 @@ def _get_hed_xml_versions_from_url_all_libraries(
                                    The subfolders should be a schema folder containing hedxml and/or prerelease folders.
         library_name(str or None): If str, cache only the named library schemas.
         skip_folders (list): A list of sub folders to skip over when downloading.
+        etag_cache (dict or None): Passed through to _get_json_with_etag() for every request
+                                   this makes, including one per discovered library subfolder.
+                                   None (the default) disables conditional/cached requests.
+        force_refresh (bool): Passed through to _get_json_with_etag().
+        cache_time_threshold (int): Passed through to _get_json_with_etag().
 
     Returns:
         Union[list, dict]: List of version numbers or dictionary {library_name: [versions]}.
@@ -546,9 +748,7 @@ def _get_hed_xml_versions_from_url_all_libraries(
         - The directories on GitHub are of the form:
             https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema/hedxml
     """
-    url_request = make_url_request(hed_base_library_url)
-    url_data = str(url_request.read(), "utf-8")
-    loaded_json = json.loads(url_data)
+    loaded_json = _get_json_with_etag(hed_base_library_url, etag_cache, force_refresh, cache_time_threshold)
 
     all_hed_versions = {}
     for file_entry in loaded_json:
@@ -558,7 +758,9 @@ def _get_hed_xml_versions_from_url_all_libraries(
             found_library_name = file_entry["name"]
             if library_name is not None and found_library_name != library_name:
                 continue
-            single_library_versions = _get_hed_xml_versions_one_library(hed_base_library_url + "/" + found_library_name)
+            single_library_versions = _get_hed_xml_versions_one_library(
+                hed_base_library_url + "/" + found_library_name, etag_cache, force_refresh, cache_time_threshold
+            )
             _merge_in_versions(all_hed_versions, single_library_versions)
             continue
 
