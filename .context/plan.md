@@ -18,4 +18,6 @@
 
 <!-- One-line summaries of finished plans, newest first -->
 
+- 2026-07-10 - Added `get_available_hed_versions()` with two-tier (time + ETag) caching for GitHub schema-version listing; addressed all Copilot review rounds - PR #1351 (merged).
+
 <!-- Example: 2026-02-20 - Added CLI unified entry point (hedpy) - PR #1200 -->
