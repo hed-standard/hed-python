@@ -490,7 +490,11 @@ def get_available_hed_versions(
           elsewhere in the repo (docs, CI config, README, etc.) never forces either directory to
           be recrawled. If a gate check itself fails for any reason, it's treated as "unknown"
           and that directory falls back to the per-URL behavior described above, unaffected by
-          the gate ever having existed.
+          the gate ever having existed. When the gate confirms a directory is unchanged, that
+          directory's per-folder URLs are treated as fresh indefinitely - but only the ones that
+          were actually fetched successfully; see the "Note" on _get_json_with_etag() for why a
+          per-URL failure is never shielded from retry by this, no matter how long the gate goes
+          without seeing a change.
         - The gate checks use repo_check_interval (defaulting to cache_time_threshold) rather
           than cache_time_threshold directly, so the (already very cheap) gate checks can be
           made even less frequent without affecting how fresh a genuinely-changed directory's
@@ -688,7 +692,10 @@ def _get_json_with_etag(url, etag_cache, force_refresh=False, cache_time_thresho
         force_refresh (bool): Skip tier 1 (the time-based shortcut) even if the cached entry is
                               still within cache_time_threshold. Tier 2's conditional GET is
                               still used, so this remains cheap when nothing has changed.
-        cache_time_threshold (int): How long, in seconds, tier 1 applies for.
+        cache_time_threshold (int): How long, in seconds, tier 1 applies for. For a *recorded
+                                   failure* specifically, this is capped at
+                                   AVAILABLE_VERSIONS_TIME_THRESHOLD regardless of the value
+                                   passed in - see the note below.
 
     Returns:
         The parsed JSON body for this URL - freshly fetched, or reused from etag_cache.
@@ -696,6 +703,25 @@ def _get_json_with_etag(url, etag_cache, force_refresh=False, cache_time_thresho
     Raises:
         urllib.error.URLError: If the URL could not be reached (including a recent, still-fresh
                                failure recorded by an earlier call - see etag_cache above).
+
+    Note:
+        A successful result and a recorded failure are not equally safe to hold onto for a long
+        cache_time_threshold. get_available_hed_versions() has two independent directory-level
+        gates - one for standard_schema/, one for library_schemas/ - and each deliberately passes
+        a very large (or infinite) threshold here once it's confirmed its own directory hasn't
+        changed, so that already-fetched, successful per-folder entries under that directory can
+        be reused indefinitely without individually re-checking each one. This applies equally to
+        both gates, since they funnel through this same function. But a *failure* entry (body is
+        None) isn't "known good data" that staying unchanged makes safe to keep reusing - it's
+        the absence of data, typically from a transient rate-limit or network error unrelated to
+        whether the directory's content has actually changed. Honoring a large threshold for a
+        failure would mean a transient error picked up during one crawl keeps being silently
+        skipped (see the broad except clauses in _get_hed_xml_versions_one_library() and
+        _get_hed_xml_versions_from_url_all_libraries()) for as long as the directory happens not
+        to change - potentially days or weeks - even though the underlying problem may have
+        resolved within minutes. To prevent that, for either gate, a recorded failure is always
+        retried within AVAILABLE_VERSIONS_TIME_THRESHOLD seconds, no matter how large a
+        cache_time_threshold was passed in for this call.
     """
     cached_entry = etag_cache.get(url) if etag_cache is not None else None
     if not isinstance(cached_entry, dict):
@@ -705,8 +731,13 @@ def _get_json_with_etag(url, etag_cache, force_refresh=False, cache_time_thresho
         cached_entry = None
 
     if cached_entry and not force_refresh:
+        effective_threshold = cache_time_threshold
+        if cached_entry.get("body") is None:
+            # See the "Note" above: never let a recorded failure be shielded from retry by a
+            # large threshold that was only ever meant to apply to confirmed-good data.
+            effective_threshold = min(cache_time_threshold, AVAILABLE_VERSIONS_TIME_THRESHOLD)
         age = time.time() - cached_entry.get("timestamp", 0)
-        if age <= cache_time_threshold:
+        if age <= effective_threshold:
             if cached_entry.get("body") is None:
                 raise URLError(f"A recent attempt to reach {url} failed; not retrying yet")
             return cached_entry["body"]
