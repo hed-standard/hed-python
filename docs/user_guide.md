@@ -327,6 +327,146 @@ The five available checks are:
 
 Each method returns a list of issue dictionaries and updates `sv.summary` (a `ComplianceSummary` instance) with what was checked.
 
+## Schema caching
+
+```{index} schema caching, cache directory, offline use, GitHub rate limits, HED_GITHUB_TOKEN
+```
+
+The official HED schemas live in the [hed-standard/hed-schemas](https://github.com/hed-standard/hed-schemas) GitHub repository. HEDTools caches schema data locally so that repeated validation runs — and repeated program starts — don't re-download the same content from GitHub every time. This section explains what gets cached, where, and how to control it.
+
+### The cache directory
+
+By default, schemas are cached in `~/.hedtools/hed_cache/`. You can check or change this location:
+
+```python
+from hed.schema import get_cache_directory, set_cache_directory
+
+# Check the current cache location
+print(get_cache_directory())
+
+# Use a custom location instead (e.g. a writable path in a container image)
+set_cache_directory("/data/hed_cache")
+```
+
+A few common schema versions also ship *inside* the hedtools package itself (the "installed cache"), so a fresh install can validate against those versions with no network access at all, before anything has been downloaded.
+
+### How `load_schema_version()` uses the cache
+
+```{index} load_schema_version; caching
+```
+
+When you call `load_schema_version("8.4.0")`, HEDTools looks for that version in the local cache first (including its `prerelease/` subfolder). If it's not there, it downloads just that one version's XML content from GitHub and stores it in the cache directory — a one-time cost per version, per machine:
+
+```python
+from hed.schema import load_schema_version
+
+schema = load_schema_version("8.4.0")   # downloaded and cached on first use
+schema = load_schema_version("8.4.0")   # reused from disk on every call after that
+```
+
+Nothing here is fetched again once a version is cached, since released schemas are immutable — the same version number never changes content.
+
+### Listing available versions without downloading
+
+```{index} get_available_hed_versions, get_hed_versions, version picker
+```
+
+There are two different functions for listing versions, and it's easy to reach for the wrong one:
+
+| Function                       | Where it looks                            | Network calls                             |
+| ------------------------------ | ----------------------------------------- | ----------------------------------------- |
+| `get_hed_versions()`           | Local cache only (installed + downloaded) | None                                      |
+| `get_available_hed_versions()` | GitHub, live                              | Small listing requests, no schema content |
+
+`get_available_hed_versions()` is the right choice for something like a version-picker dropdown — it tells you everything currently published on GitHub without downloading any of it:
+
+```python
+from hed.schema import get_available_hed_versions, load_schema_version
+
+# Standard schema versions only, newest first
+versions = get_available_hed_versions()
+# ['8.4.0', '8.3.0', '8.2.0', ...]
+
+# Everything: standard schema plus every library, keyed by library name
+# (the standard schema is under the None key)
+all_versions = get_available_hed_versions(library_name="all")
+# {None: ['8.4.0', ...], 'score': ['2.1.0', '1.0.0'], 'lang': ['1.1.0']}
+
+# Include prerelease (in-development) versions
+versions_with_prerelease = get_available_hed_versions(check_prerelease=True)
+
+# Once the user picks one, load it — this is the step that actually downloads content
+schema = load_schema_version(versions[0])
+```
+
+If GitHub can't be reached (offline, rate-limited, etc.), `get_available_hed_versions()` returns an empty list or dict rather than raising, so it's safe to call from a user-facing listing without wrapping it in a try/except.
+
+### How repeated calls stay cheap
+
+```{index} caching; rate limits, ETag, ETag-conditional
+```
+
+`get_available_hed_versions()` is designed to be called often — e.g. every time a web page loads — without adding up to a lot of GitHub traffic. It keeps its own small on-disk listing cache (separate from the downloaded schema content) and checks it in increasingly cheap tiers before ever making a real request:
+
+1. **Recently checked** — if a given piece of information was checked within the last `cache_time_threshold` seconds (60 by default), it's reused with no network call at all.
+2. **Confirmed unchanged** — otherwise, a conditional request is made using a stored ETag. If GitHub confirms nothing changed (a 304 response), the previous result is reused.
+3. **Directory-level gate** — before checking individual folders, one cheap check asks whether the `standard_schema/` directory (or the `library_schemas/` directory, depending on what you asked for) has had any new commits at all since the last full check. Since hed-schemas typically only changes every few days or weeks, this lets an entire crawl be skipped in the common case where nothing has changed anywhere relevant.
+
+For most uses the defaults are fine, but two parameters are available for tuning:
+
+```python
+# Force an immediate, confirmed-fresh answer (e.g. right after publishing a release)
+get_available_hed_versions(force_refresh=True)
+
+# Widen the gap between the cheap directory-level "did anything change?" checks,
+# independent of how fresh content is once a real change is found. Useful for a
+# long-running, unauthenticated service - see "Authenticating with GitHub" below.
+get_available_hed_versions(repo_check_interval=3600)
+```
+
+### Authenticating with GitHub
+
+```{index} GITHUB_TOKEN, HED_GITHUB_TOKEN, authentication, rate limits
+```
+
+GitHub's API allows 60 requests per hour per IP address for unauthenticated callers, versus 5,000 per hour for authenticated ones. Authentication also makes conditional (ETag) requests free of charge against that limit — for unauthenticated callers, even a confirmed-unchanged response still counts against the 60/hour budget.
+
+If your use of HEDTools makes frequent GitHub calls — a web service checking for new versions, a CI pipeline, a container that restarts often — set a GitHub personal access token (no special scopes needed; it only needs to read a public repository) as an environment variable:
+
+```bash
+export HED_GITHUB_TOKEN=ghp_your_token_here
+# GITHUB_TOKEN is also recognized (checked second), which many CI systems set automatically
+```
+
+HEDTools picks this up automatically; no code changes are needed.
+
+### Working offline / pre-populating the cache
+
+```{index} cache_xml_versions, offline, pre-populating cache
+```
+
+To prepare an environment that won't have network access later (an offline workstation, a Docker image built once and deployed many times), pre-download everything with `cache_xml_versions()`:
+
+```python
+from hed.schema import cache_xml_versions, set_cache_directory
+
+set_cache_directory("/opt/hed_cache")   # optional: a specific location to ship or mount
+cache_xml_versions()                    # downloads every discovered version's full content
+```
+
+This is a much heavier operation than `get_available_hed_versions()` — it downloads every version it finds, not just a listing — so it's meant to be run once (e.g. during image build or setup), not on a request-handling hot path. It's throttled independently (won't re-run within 30 minutes of its last successful run in the same cache folder) to avoid accidental repeated use.
+
+### Clearing the cache
+
+There's no dedicated CLI command for this; the cache is just a regular directory, so you can remove it directly and it will be rebuilt automatically the next time it's needed:
+
+```python
+import shutil
+from hed.schema import get_cache_directory
+
+shutil.rmtree(get_cache_directory(), ignore_errors=True)
+```
+
 ## Jupyter notebooks
 
 ```{index} Jupyter notebooks, examples, workflows
@@ -859,6 +999,8 @@ If you are annotating an NWB dataset, the instructions are somewhat similar but 
 from hed.schema import get_cache_directory
 print(get_cache_directory())
 ```
+
+See the [Schema caching](#schema-caching) chapter for more on how the cache works, working offline, and avoiding GitHub rate limits.
 
 #### Validation errors
 

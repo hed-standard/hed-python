@@ -5,6 +5,7 @@ from __future__ import annotations
 import shutil
 import os
 import time
+import math
 
 import json
 from hashlib import sha1
@@ -40,6 +41,18 @@ prerelease_suffix = "/prerelease"  # The prerelease schemas at the given URLs
 DEFAULT_HED_LIST_VERSIONS_URL = "https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema"
 LIBRARY_HED_URL = "https://api.github.com/repos/hed-standard/hed-schemas/contents/library_schemas"
 LIBRARY_DATA_URL = "https://raw.githubusercontent.com/hed-standard/hed-schemas/main/library_data.json"
+# Cheap, path-scoped endpoints used to detect whether the standard-schema directory or the
+# library-schemas directory has changed since the last full crawl of that directory, without
+# touching any of the per-version URLs below. Each is scoped (via GitHub's commits-list
+# `?path=` filter) to just the one top-level directory a caller actually needs, so a commit
+# elsewhere in the repo (docs, CI config, README, etc.) never forces a recrawl here. See
+# _get_last_commit_sha() and its use in get_available_hed_versions().
+STANDARD_SCHEMA_HEAD_URL = (
+    "https://api.github.com/repos/hed-standard/hed-schemas/commits?path=standard_schema&per_page=1"
+)
+LIBRARY_SCHEMAS_HEAD_URL = (
+    "https://api.github.com/repos/hed-standard/hed-schemas/commits?path=library_schemas&per_page=1"
+)
 DEFAULT_URL_LIST = (DEFAULT_HED_LIST_VERSIONS_URL,)
 DEFAULT_LIBRARY_URL_LIST = (LIBRARY_HED_URL,)
 
@@ -51,6 +64,12 @@ DEFAULT_SKIP_FOLDERS = ("deprecated",)
 # cache_xml_versions() download path).
 AVAILABLE_VERSIONS_CACHE_FILENAME = "available_versions_cache.json"
 AVAILABLE_VERSIONS_TIME_THRESHOLD = 60
+
+# Keys inside available_versions_cache.json (alongside the per-URL entries) recording the
+# last commit SHA affecting each top-level directory, as of the last time that directory's
+# per-folder cache entries were actually crawled.
+_STANDARD_HEAD_CACHE_KEY = "_standard_schema_head_sha_at_last_crawl"
+_LIBRARY_HEAD_CACHE_KEY = "_library_schemas_head_sha_at_last_crawl"
 
 HED_CACHE_DIRECTORY = os.path.join(Path.home(), ".hedtools/hed_cache/")
 
@@ -279,6 +298,50 @@ def cache_xml_versions(
     return 0
 
 
+def _get_last_commit_sha(url, etag_cache, force_refresh=False, cache_time_threshold=0):
+    """Best-effort fetch of the latest commit SHA affecting one top-level directory.
+
+    Used by get_available_hed_versions() as a single, cheap gate ahead of the much more
+    expensive per-folder crawl of that same directory (standard schema, or library listing plus
+    every library's own hedxml/prerelease folders): if this SHA is unchanged since the last full
+    crawl of that directory, nothing under it could have changed, so every per-folder URL under
+    it can be treated as still fresh without individually re-checking - let alone re-fetching -
+    any of them. Scoping the check to one directory, via GitHub's commits-list `?path=` filter,
+    means an unrelated commit elsewhere in the repo (docs, CI config, README, etc.) never forces
+    a recrawl here. hed-schemas changes on the order of days or weeks, so in steady state this
+    turns what would otherwise be a recurring multi-request burst into a single request per
+    directory actually needed.
+
+    This participates in the exact same two-tier caching (time-based, then ETag-conditional)
+    that every other URL here does, via the same etag_cache dict and _get_json_with_etag() -
+    it is not a separate caching mechanism, just one more URL in the same cache.
+
+    Parameters:
+        url (str): STANDARD_SCHEMA_HEAD_URL or LIBRARY_SCHEMAS_HEAD_URL.
+        etag_cache (dict or None): Same per-URL cache dict get_available_hed_versions() uses.
+        force_refresh (bool): Passed through to _get_json_with_etag().
+        cache_time_threshold (int): Passed through to _get_json_with_etag().
+
+    Returns:
+        str or None: The latest commit SHA touching this directory, or None if it couldn't be
+                    determined - network error, rate limit, an empty commit history, or a
+                    response shaped differently than expected. Callers must treat None as
+                    "unknown", not "unchanged": every caller of this function falls back to the
+                    pre-existing per-folder behavior whenever this returns None, so a problem
+                    with this one extra endpoint can never produce a stale answer - at worst, it
+                    costs the same (already-optimized) per-folder crawl that would have run
+                    without this gate at all.
+    """
+    try:
+        loaded_json = _get_json_with_etag(url, etag_cache, force_refresh, cache_time_threshold)
+        if not loaded_json:
+            return None
+        sha = loaded_json[0].get("sha")
+        return sha if isinstance(sha, str) else None
+    except Exception:
+        return None
+
+
 def get_available_hed_versions(
     hed_base_urls=DEFAULT_URL_LIST,
     hed_library_urls=DEFAULT_LIBRARY_URL_LIST,
@@ -288,6 +351,7 @@ def get_available_hed_versions(
     cache_folder=None,
     force_refresh=False,
     cache_time_threshold=AVAILABLE_VERSIONS_TIME_THRESHOLD,
+    repo_check_interval=None,
 ) -> Union[list, dict]:
     """List HED schema versions available on GitHub, without downloading or caching their content.
 
@@ -332,6 +396,20 @@ def get_available_hed_versions(
                                    Default is 60 seconds - short enough that new releases
                                    show up quickly, long enough that a caller polling this in
                                    a tight loop doesn't generate a request per call.
+        repo_check_interval (int or None): How long, in seconds, to go between the cheap
+                                   top-level-directory gate checks described in Notes, before
+                                   even asking GitHub whether that directory's latest commit
+                                   changed. None (the default) reuses cache_time_threshold, so
+                                   behavior is unchanged unless this is set explicitly. A
+                                   longer interval directly helps an unauthenticated caller:
+                                   GitHub's 60-requests/hour anonymous cap is charged even for
+                                   a confirmed-unchanged (304) response, unlike for
+                                   authenticated requests, where conditional 304s are free.
+                                   Since hed-schemas typically only changes every few days or
+                                   weeks, an unauthenticated long-running caller (e.g. a web
+                                   service polling this periodically) can safely set this much
+                                   larger - minutes to hours - without meaningfully delaying
+                                   when a real change is noticed.
 
     Returns:
         Union[list, dict]: List of version numbers, or {library_name: [versions]} if
@@ -399,6 +477,25 @@ def get_available_hed_versions(
           cache_xml_versions() downloads.
         - force_refresh=True skips layer 1 above but still uses layer 2 (the conditional GET),
           so it stays cheap when nothing has actually changed.
+        - Before crawling either the standard schema or the library folders, one extra cheap
+          check runs first, scoped to just that one top-level directory: the latest commit SHA
+          affecting standard_schema/ (if the result could include it) or library_schemas/ (if
+          the result could include library data) - see _get_last_commit_sha() - compared
+          against the SHA that was current the last time that directory was actually fully
+          crawled. hed-schemas changes on the order of days or weeks, so if the SHA still
+          matches, every per-folder URL under that directory is known to still be correct
+          without checking - or fetching - any of them individually; the "couple dozen
+          requests" figure above is the cold-start/actual-change case, not the (far more common)
+          steady-state case. Scoping each gate to just the directory it protects means a commit
+          elsewhere in the repo (docs, CI config, README, etc.) never forces either directory to
+          be recrawled. If a gate check itself fails for any reason, it's treated as "unknown"
+          and that directory falls back to the per-URL behavior described above, unaffected by
+          the gate ever having existed.
+        - The gate checks use repo_check_interval (defaulting to cache_time_threshold) rather
+          than cache_time_threshold directly, so the (already very cheap) gate checks can be
+          made even less frequent without affecting how fresh a genuinely-changed directory's
+          own content is once a change is actually detected. This matters most for
+          unauthenticated callers - see repo_check_interval above.
     """
     if isinstance(hed_base_urls, str):
         hed_base_urls = [hed_base_urls]
@@ -418,12 +515,33 @@ def get_available_hed_versions(
     # all - a plain standard-schema request (library_name=None) never looks at it.
     needs_libraries = library_name is not None
 
+    if repo_check_interval is None:
+        repo_check_interval = cache_time_threshold
+
     all_hed_versions = {}
     if needs_standard:
+        # A single, cheap check ahead of the standard-schema crawl below, scoped to just that
+        # directory: if standard_schema/ hasn't changed since the last time this crawl actually
+        # ran, nothing any of its per-folder URLs would return could have changed either, so
+        # every one of them can be treated as still fresh - regardless of how much wall-clock
+        # time has passed - without individually re-checking or re-fetching any of them. A None
+        # result (network error, rate limit, unexpected response) means "unknown", so these are
+        # simply left equal to the caller's own values, i.e. exactly the pre-existing behavior.
+        standard_head_sha = _get_last_commit_sha(
+            STANDARD_SCHEMA_HEAD_URL, url_cache, force_refresh, repo_check_interval
+        )
+        standard_folder_force_refresh = force_refresh
+        standard_folder_cache_time_threshold = cache_time_threshold
+        if standard_head_sha is not None and standard_head_sha == url_cache.get(_STANDARD_HEAD_CACHE_KEY):
+            standard_folder_force_refresh = False
+            standard_folder_cache_time_threshold = math.inf
+        if standard_head_sha is not None:
+            url_cache[_STANDARD_HEAD_CACHE_KEY] = standard_head_sha
+
         for hed_base_url in hed_base_urls:
             try:
                 new_hed_versions = _get_hed_xml_versions_one_library(
-                    hed_base_url, url_cache, force_refresh, cache_time_threshold
+                    hed_base_url, url_cache, standard_folder_force_refresh, standard_folder_cache_time_threshold
                 )
                 _merge_in_versions(all_hed_versions, new_hed_versions)
             except Exception:
@@ -436,6 +554,18 @@ def get_available_hed_versions(
                 # harmless to the caller as a plain connection failure.
                 continue
     if needs_libraries:
+        # Same idea as the standard-schema gate above, scoped to library_schemas/ instead -
+        # kept as an entirely separate gate (rather than one whole-repo check) so a commit
+        # under, say, standard_schema/ or docs/ never forces a library recrawl, and vice versa.
+        library_head_sha = _get_last_commit_sha(LIBRARY_SCHEMAS_HEAD_URL, url_cache, force_refresh, repo_check_interval)
+        library_folder_force_refresh = force_refresh
+        library_folder_cache_time_threshold = cache_time_threshold
+        if library_head_sha is not None and library_head_sha == url_cache.get(_LIBRARY_HEAD_CACHE_KEY):
+            library_folder_force_refresh = False
+            library_folder_cache_time_threshold = math.inf
+        if library_head_sha is not None:
+            url_cache[_LIBRARY_HEAD_CACHE_KEY] = library_head_sha
+
         # "all" means no filter (list every library); a specific name restricts the
         # helper to just that one library's folder, instead of listing and fetching
         # every library found under hed_library_urls.
@@ -447,8 +577,8 @@ def get_available_hed_versions(
                     library_name=library_filter,
                     skip_folders=skip_folders,
                     etag_cache=url_cache,
-                    force_refresh=force_refresh,
-                    cache_time_threshold=cache_time_threshold,
+                    force_refresh=library_folder_force_refresh,
+                    cache_time_threshold=library_folder_cache_time_threshold,
                 )
                 if library_filter is not None and new_hed_versions:
                     # When filtered to one library, _get_hed_xml_versions_from_url_all_libraries()
