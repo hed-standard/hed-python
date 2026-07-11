@@ -242,9 +242,15 @@ class TestHedSchema(unittest.TestCase):
                     f"library_name='score' should never touch standard-schema URLs, but cached: {cached_urls}",
                 )
                 library_base = hed_cache.LIBRARY_HED_URL
+                # Besides the actual per-library content URLs, the cache also legitimately holds
+                # two library_schemas/-gate entries that aren't library-content URLs at all: the
+                # gate's own commits-endpoint URL, and the plain-string SHA marker recorded under
+                # it (see _LIBRARY_HEAD_CACHE_KEY) - neither is scoped to a specific library, so
+                # both are expected regardless of which library_name was requested.
+                non_library_keys = {library_base, hed_cache.LIBRARY_SCHEMAS_HEAD_URL, hed_cache._LIBRARY_HEAD_CACHE_KEY}
                 for url in cached_urls:
-                    if url == library_base:
-                        continue  # the one unavoidable "list all libraries" call
+                    if url in non_library_keys:
+                        continue  # the one unavoidable "list all libraries" call, or a gate entry
                     # Trailing slash matters here - without it, a hypothetical library named
                     # e.g. "scoreboard" would incorrectly pass a plain startswith(".../score").
                     self.assertTrue(
