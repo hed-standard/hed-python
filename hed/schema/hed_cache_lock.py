@@ -44,14 +44,15 @@ class CacheLock:
 
         try:
             self.cache_lock = portalocker.Lock(self.cache_lock_filename, timeout=1)
+            self.cache_lock.acquire()
         except portalocker.exceptions.LockException as e:
             raise CacheError(f"Could not lock cache using {self.cache_lock_filename}") from e
-        pass
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if self.write_time:
+        if self.write_time and exc_type is None:
             _write_last_cached_time(self.current_timestamp, self.cache_folder)
-        self.cache_lock.release()
+        if self.cache_lock is not None:
+            self.cache_lock.release()
 
 
 def _read_last_cached_time(cache_folder):
