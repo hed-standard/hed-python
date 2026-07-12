@@ -1,3 +1,49 @@
+# Release 1.2.0 July 12, 2026
+
+## New features
+
+### `get_available_hed_versions()` — list schema versions on GitHub without downloading them
+
+A new public function, `get_available_hed_versions()`, lists the HED schema versions available on GitHub *without* fetching any schema file's actual XML content. It is the live-from-GitHub counterpart to `get_hed_versions()` (which reports only what is already bundled or cached locally, with no network calls) and a far cheaper alternative to `cache_xml_versions()` (which downloads every discovered version's full content). The intended use is populating a version-picker in a UI or web service and then fetching only the one version the user selects via `load_schema_version()`.
+
+```python
+from hed.schema import get_available_hed_versions, load_schema_version
+
+choices = get_available_hed_versions()      # ['8.4.0', '8.3.0', ...] — listing calls only
+if choices:                                 # empty if GitHub is unreachable or rate-limited
+    schema = load_schema_version(choices[0])  # this is the step that downloads schema content
+```
+
+- Exported from `hed/schema/__init__.py` alongside the existing cache functions.
+- Supports `library_name=None` (standard schema only, the default), `library_name="all"` (returns a `{library_name: [versions]}` dict), and a specific library name (restricted to that one library's folder). A `check_prerelease` flag optionally includes prerelease folders.
+- Degrades gracefully: any URL that can't be reached yields an empty result rather than raising, so it is safe on an unattended user-facing path.
+
+### Rate-limit-friendly listing cache (ETag + directory-scoped commit gating)
+
+`get_available_hed_versions()` is designed to be called frequently (e.g. on every web request) without tripping GitHub's API rate limits, using three tiers of throttling implemented in `hed/schema/hed_cache.py`:
+
+- **Time-based reuse** — a URL checked within `cache_time_threshold` seconds (default 60) is reused with no network call at all.
+- **ETag conditional requests** — otherwise a conditional GET (`If-None-Match`) is made; a `304 Not Modified` reuses the stored body and, for authenticated requests, does not count against GitHub's primary rate limit. Results are persisted in a small on-disk metadata file (`available_versions_cache.json`) in the cache folder, holding only directory-listing JSON — never schema content.
+- **Directory-scoped commit gating** — before crawling `standard_schema/` or `library_schemas/`, a single cheap check compares that directory's latest commit SHA (via GitHub's `?path=` commits filter) against the SHA from the last full crawl. If unchanged, every per-folder URL under it is treated as fresh without individual re-checks. Each directory has its own independent gate, so a commit elsewhere in the repo never forces a recrawl. A `repo_check_interval` argument lets callers throttle these gate checks separately — particularly useful for unauthenticated callers, whose conditional 304s still count against the 60-requests/hour anonymous cap.
+
+Recorded failures are never shielded from retry by a large threshold, so a transient network/rate-limit error is retried within `AVAILABLE_VERSIONS_TIME_THRESHOLD` (60s) rather than being cached for as long as the directory stays unchanged.
+
+### `make_url_request()` supports conditional-request headers
+
+`schema_util.make_url_request()` gained an `extra_headers` argument so callers can add headers such as `If-None-Match`. Its docstring now documents that a `304 Not Modified` surfaces as an `HTTPError` the caller must interpret. Existing calls are unaffected (the argument is optional).
+
+## Testing
+
+- Added 13 new tests in `tests/schema/test_hed_schema_io.py` covering `get_available_hed_versions()`: listing without downloading, result caching, conditional requests after `force_refresh`, skipping unneeded URLs, graceful degradation on malformed responses and corrupted cache entries, commit-SHA gating (skip-when-unchanged, recrawl-when-stale, independently-scoped gates, `repo_check_interval`), and failure-entry retry despite a large threshold.
+- Added a regression test in `tests/validator/test_hed_validator.py` (`test_severity_enum_not_string_github_hedit_161`) confirming that validation issue `severity` is the `ErrorSeverity` enum, not a string — verifying downstream code can correctly filter by `ErrorSeverity.ERROR` (Annotation-Garden/HEDit#161).
+
+## Documentation
+
+- Expanded `docs/user_guide.md` with guidance on listing available versions and the lazy-download workflow.
+- Updated the `hed.schema` module docstring to document `get_available_hed_versions()` and clarify the trade-offs between it, `get_hed_versions()`, and `cache_xml_versions()`.
+- Cleaned up `RELEASE_GUIDE.md`: replaced version-specific examples with `<version>`/`<date>` placeholders, removed Black-specific and Copilot-specific references, and corrected `git add .` to `git add <files>`.
+- Added `.envrc` (direnv) to `.gitignore` for per-checkout local environment variables such as a GitHub token.
+
 # Release 1.1.1 July 7, 2026
 
 ## Bug fixes
