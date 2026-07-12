@@ -10,7 +10,8 @@ A new public function, `get_available_hed_versions()`, lists the HED schema vers
 from hed.schema import get_available_hed_versions, load_schema_version
 
 choices = get_available_hed_versions()      # ['8.4.0', '8.3.0', ...] — listing calls only
-schema = load_schema_version(choices[0])    # this is the step that downloads schema content
+if choices:                                 # empty if GitHub is unreachable or rate-limited
+    schema = load_schema_version(choices[0])  # this is the step that downloads schema content
 ```
 
 - Exported from `hed/schema/__init__.py` alongside the existing cache functions.
