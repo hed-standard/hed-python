@@ -36,22 +36,34 @@ class CacheLock:
 
     def __enter__(self):
         os.makedirs(self.cache_folder, exist_ok=True)
-        last_timestamp = _read_last_cached_time(self.cache_folder)
-        self.current_timestamp = time.time()
-        time_since_update = self.current_timestamp - last_timestamp
-        if time_since_update < self.time_threshold:
-            raise CacheError(f"Last updated {time_since_update} seconds ago. Threshold is {self.time_threshold}")
-
         try:
             self.cache_lock = portalocker.Lock(self.cache_lock_filename, timeout=1)
+            self.cache_lock.acquire()
         except portalocker.exceptions.LockException as e:
             raise CacheError(f"Could not lock cache using {self.cache_lock_filename}") from e
-        pass
+
+        # Re-read the timestamp *under the lock* so two processes that both pass
+        # a pre-lock threshold check can't both proceed with a redundant refresh.
+        if self.write_time:
+            last_timestamp = _read_last_cached_time(self.cache_folder)
+            self.current_timestamp = time.time()
+            time_since_update = self.current_timestamp - last_timestamp
+            if time_since_update < self.time_threshold:
+                self.cache_lock.release()
+                self.cache_lock = None
+                raise CacheError(f"Last updated {time_since_update} seconds ago. Threshold is {self.time_threshold}")
+        else:
+            self.current_timestamp = time.time()
+
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if self.write_time:
-            _write_last_cached_time(self.current_timestamp, self.cache_folder)
-        self.cache_lock.release()
+        try:
+            if self.write_time and exc_type is None:
+                _write_last_cached_time(self.current_timestamp, self.cache_folder)
+        finally:
+            if self.cache_lock is not None:
+                self.cache_lock.release()
 
 
 def _read_last_cached_time(cache_folder):

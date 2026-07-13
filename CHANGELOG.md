@@ -36,6 +36,16 @@ Recorded failures are never shielded from retry by a large threshold, so a trans
 
 - Added 13 new tests in `tests/schema/test_hed_schema_io.py` covering `get_available_hed_versions()`: listing without downloading, result caching, conditional requests after `force_refresh`, skipping unneeded URLs, graceful degradation on malformed responses and corrupted cache entries, commit-SHA gating (skip-when-unchanged, recrawl-when-stale, independently-scoped gates, `repo_check_interval`), and failure-entry retry despite a large threshold.
 - Added a regression test in `tests/validator/test_hed_validator.py` (`test_severity_enum_not_string_github_hedit_161`) confirming that validation issue `severity` is the `ErrorSeverity` enum, not a string — verifying downstream code can correctly filter by `ErrorSeverity.ERROR` (Annotation-Garden/HEDit#161).
+- `test_get_hed_versions_includes_bundled_score`: new always-runs (no-network) test in `tests/schema/test_hed_schema_io.py` asserting that the `score` library schemas bundled in `hed/schema/schema_data/` are always locally available via `get_hed_versions()`.
+- Fixed three rate-limit fragility issues in the test suite: `spec_tests/test_hed_cache.py` `setUpClass` now raises `unittest.SkipTest` (instead of re-raising the error) on any network failure, and additionally checks that both standard and library schemas were cached before proceeding; `test_get_available_hed_versions_lists_without_downloading` now skips rather than fails when the library API endpoint is independently rate-limited while the standard-schema endpoint succeeds.
+
+## Bug fixes
+
+### `CacheLock` never acquired its portalocker lock; failed refresh stamped throttle timestamp
+
+`CacheLock.__enter__` constructed a `portalocker.Lock` object but never called `.acquire()`, so every "locked" cache section ran without mutual exclusion and the `LockException` handler was unreachable dead code. `CacheLock.__exit__` also wrote the throttle timestamp unconditionally, so a failed cache refresh (network error, rate limit) blocked all retries for the full threshold period (default 30 minutes) — compounding the offline/HPC impact of any transient failure.
+
+- `hed/schema/hed_cache_lock.py`: added `self.cache_lock.acquire()` after `portalocker.Lock()` so the lock is actually held and `LockException` is reachable; guarded `_write_last_cached_time` with `exc_type is None` so only a successful refresh stamps the throttle; added a defensive `if self.cache_lock is not None:` guard on `release()`.
 
 ## Documentation
 
