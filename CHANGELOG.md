@@ -43,16 +43,9 @@ Recorded failures are never shielded from retry by a large threshold, so a trans
 
 ### `CacheLock` never acquired its portalocker lock; failed refresh stamped throttle timestamp
 
-`CacheLock.__enter__` constructed a `portalocker.Lock` object but never called `.acquire()`, so
-every "locked" cache section ran without mutual exclusion and the `LockException` handler was
-unreachable dead code. `CacheLock.__exit__` also wrote the throttle timestamp unconditionally,
-so a failed cache refresh (network error, rate limit) blocked all retries for the full threshold
-period (default 30 minutes) — compounding the offline/HPC impact of any transient failure.
+`CacheLock.__enter__` constructed a `portalocker.Lock` object but never called `.acquire()`, so every "locked" cache section ran without mutual exclusion and the `LockException` handler was unreachable dead code. `CacheLock.__exit__` also wrote the throttle timestamp unconditionally, so a failed cache refresh (network error, rate limit) blocked all retries for the full threshold period (default 30 minutes) — compounding the offline/HPC impact of any transient failure.
 
-- `hed/schema/hed_cache_lock.py`: added `self.cache_lock.acquire()` after `portalocker.Lock()`
-  so the lock is actually held and `LockException` is reachable; guarded
-  `_write_last_cached_time` with `exc_type is None` so only a successful refresh stamps the
-  throttle; added a defensive `if self.cache_lock is not None:` guard on `release()`.
+- `hed/schema/hed_cache_lock.py`: added `self.cache_lock.acquire()` after `portalocker.Lock()` so the lock is actually held and `LockException` is reachable; guarded `_write_last_cached_time` with `exc_type is None` so only a successful refresh stamps the throttle; added a defensive `if self.cache_lock is not None:` guard on `release()`.
 
 ## Documentation
 
