@@ -150,13 +150,17 @@ class TestHedSchema(unittest.TestCase):
                 self.assertIsInstance(versions_all, dict)
                 self.assertIn(None, versions_all)
                 # Library URLs may be independently rate-limited even when standard-schema URLs
-                # succeed.  Skip the library-presence check rather than failing in that case.
-                if "score" not in versions_all:
-                    self.skipTest("Library schema URLs rate-limited or unreachable; skipping library assertions")
-                _assert_valid_sorted_versions(self, versions_all["score"])
+                # succeed.  Only assert score-specific things when the data is actually present;
+                # don't skip the whole test — the cache-folder check below is unconditional and
+                # must always run.
+                score_available = "score" in versions_all
+                if score_available:
+                    _assert_valid_sorted_versions(self, versions_all["score"])
 
                 versions_with_pre = hed_cache.get_available_hed_versions(check_prerelease=True)
-                self.assertGreaterEqual(len(versions_with_pre), len(versions))
+                # Only comparable when the library endpoint was also reachable for the baseline call.
+                if score_available:
+                    self.assertGreaterEqual(len(versions_with_pre), len(versions))
 
             # This function only lists what's on GitHub - it should never download or cache
             # actual schema content, unlike cache_xml_versions(). It does write one small
@@ -520,6 +524,19 @@ class TestHedSchema(unittest.TestCase):
 
                 with open(cache_filename) as f:
                     cache_after_second = json.load(f)
+
+                # The SHA gate only fires when the commits endpoint is reachable on the second
+                # call.  If it was independently rate-limited, _get_last_commit_sha() returns
+                # None, the gate doesn't fire, force_refresh=True causes a genuine re-fetch of
+                # the standard-schema folder URLs, and the timestamp assertions below would fail
+                # even though the production code is behaving correctly.  Skip in that case.
+                sha_entry = cache_after_second.get(hed_cache.STANDARD_SCHEMA_HEAD_URL)
+                if not isinstance(sha_entry, dict) or sha_entry.get("body") is None:
+                    self.skipTest(
+                        "standard-schema commits endpoint was rate-limited on the second call; "
+                        "SHA gate couldn't revalidate, so timestamp assertions are not meaningful"
+                    )
+
                 for url in standard_folder_urls:
                     self.assertEqual(
                         cache_after_second[url]["timestamp"],

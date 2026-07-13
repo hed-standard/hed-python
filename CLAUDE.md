@@ -16,23 +16,6 @@ git submodule update --init --recursive  # fetch test data
 python -m unittest discover tests
 ```
 
-## Package Structure
-
-```
-hed/
-  cli/         - Click CLI: validate (bids-dataset|string|sidecar|tabular), schema (validate|convert|add-ids), extract (bids-sidecar|tabular-summary)
-  errors/      - Error types, messages, reporter, exceptions, known error codes
-  models/      - HedString, HedTag, HedGroup, Sidecar, TabularInput, queries, definitions
-  schema/      - Schema loading/caching, IO (XML/JSON/Wiki/DataFrame), validation, comparison
-  scripts/     - Legacy CLI entry points (deprecated; use hedpy)
-  tools/       - Analysis (tag counts, type factors, event manager), BIDS integration, utilities
-  validator/   - HED string validation, definition/onset validation, sidecar/spreadsheet validation
-tests/         - 60 test files mirroring hed/ structure; unittest-based (no conftest.py)
-spec_tests/    - Submodules: hed-tests, hed-examples, hed-schemas; spec compliance tests
-docs/          - Sphinx + Furo; autodoc, napoleon, myst-parser, intersphinx (Python, NumPy, Pandas)
-examples/      - 10 Jupyter notebooks (validation, extraction, summarization workflows)
-```
-
 ## Key Commands
 
 ```bash
@@ -50,11 +33,8 @@ typos
 # Documentation
 cd docs && sphinx-build -b html . _build/html
 
-# CLI
+# CLI (see `hedpy --help` and `hedpy COMMAND --help` for exact syntax)
 hedpy --help
-hedpy validate string --hed-string "Event" --schema-version 8.4.0
-hedpy validate bids-dataset --bids-path /path/to/bids
-hedpy schema convert --input schema.xml --output schema.json
 ```
 
 ## Core Principles
