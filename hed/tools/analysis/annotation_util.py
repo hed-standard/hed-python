@@ -43,6 +43,10 @@ def df_to_hed(dataframe, description_tag=True) -> dict:
     Returns:
         dict:  A dictionary compatible with BIDS JSON tabular file that includes HED.
 
+    Raises:
+        HedFileError: If any of the required columns (column_name, column_value, description, HED)
+                      are missing from the dataframe. The error code is "RequiredColumnsMissing".
+
     Notes:
         - The DataFrame must have the columns with names: column_name, column_value, description, and HED.
 
