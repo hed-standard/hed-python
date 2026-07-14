@@ -1,4 +1,4 @@
-# Release 1.2.0 July 13, 2026
+# Release 1.2.0 July 14, 2026
 
 ## New features
 
@@ -51,8 +51,15 @@ Recorded failures are never shielded from retry by a large threshold, so a trans
 
 - Expanded `docs/user_guide.md` with guidance on listing available versions and the lazy-download workflow.
 - Updated the `hed.schema` module docstring to document `get_available_hed_versions()` and clarify the trade-offs between it, `get_hed_versions()`, and `cache_xml_versions()`.
+- Documented the `HedFileError` (`RequiredColumnsMissing`) raised by `df_to_hed()` in `hed/tools/analysis/annotation_util.py` when required columns are absent (behavior unchanged; docstring now records it).
 - Cleaned up `RELEASE_GUIDE.md`: replaced version-specific examples with `<version>`/`<date>` placeholders, removed Black-specific and Copilot-specific references, and corrected `git add .` to `git add <files>`.
 - Added `.envrc` (direnv) to `.gitignore` for per-checkout local environment variables such as a GitHub token.
+
+## CI/CD
+
+- Bumped `astral-sh/setup-uv` from 8.2.0 to 8.3.2 across all workflows.
+- Bumped `qltysh/qlty-action/coverage` from 2.2.1 to 2.2.3.
+- Updated the `spec_tests/hed-schemas` and `spec_tests/hed-tests` submodules to their latest commits.
 
 # Release 1.1.1 July 7, 2026
 
@@ -788,6 +795,3 @@ The primary purpose of this release was to correct the JSON format for HED schem
 # Release 0.1.0 June 20, 2022
 
 - First release on PyPI
-
-```
-```
