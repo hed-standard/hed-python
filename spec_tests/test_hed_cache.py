@@ -122,7 +122,14 @@ class Test(unittest.TestCase):
             shutil.rmtree(empty_dir)
 
     def test_get_hed_version_path_auto_refresh_downloads_missing_version(self):
-        """get_hed_version_path automatically downloads from GitHub when a version is not cached locally."""
+        """get_hed_version_path downloads only the single requested version from GitHub.
+
+        Uses a testlib version, which is not bundled with hedtools, so the download must come from
+        GitHub rather than the local bundle. testlib lives in a normal ``hedxml/`` folder, so this
+        exercises the real on-demand download path (manifest fast path and REST API fallback alike)
+        without relying on deprecated versions. Only the listing for the relevant library and the
+        one XML file are fetched - not the entire catalog.
+        """
         # Use a fresh cache directory so the version is definitely not present
         fresh_cache = os.path.join(os.path.dirname(self.hed_cache_dir), "schema_cache_auto_refresh/")
         if os.path.exists(fresh_cache):
@@ -131,10 +138,17 @@ class Test(unittest.TestCase):
         saved = hed_cache.HED_CACHE_DIRECTORY
         try:
             hed_cache.HED_CACHE_DIRECTORY = fresh_cache
-            # 8.0.0 is a released version that should be downloadable from GitHub
-            result = hed_cache.get_hed_version_path("8.0.0")
-            self.assertIsNotNone(result, "Auto-refresh should download 8.0.0 from GitHub")
+            # testlib 2.0.0 is a released library version that is NOT bundled - it must come from GitHub.
+            result = hed_cache.get_hed_version_path("2.0.0", library_name="testlib")
+            self.assertIsNotNone(result, "get_hed_version_path should download testlib 2.0.0 from GitHub on demand")
             self.assertTrue(os.path.exists(result))
+            # Only the one requested file should have been downloaded (plus any bundled schemas the
+            # cache seeds); no full-catalog download.
+            xml_files = [f for f in os.listdir(fresh_cache) if hed_cache.version_pattern.match(f)]
+            self.assertTrue(
+                any("testlib" in f and "2.0.0" in f for f in xml_files),
+                f"HED_testlib_2.0.0.xml must be in the cache after on-demand download; found: {xml_files}",
+            )
         finally:
             hed_cache.HED_CACHE_DIRECTORY = saved
             shutil.rmtree(fresh_cache, ignore_errors=True)

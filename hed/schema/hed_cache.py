@@ -137,8 +137,9 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
             hed_files += os.listdir(hed_dir)
         except FileNotFoundError:
             pass
-    if not hed_files:
+    if not any(version_pattern.match(f) for f in hed_files):
         cache_local_versions(local_hed_directory)
+        hed_files = []
         for hed_dir in local_directories:
             try:
                 hed_files += os.listdir(hed_dir)
@@ -166,15 +167,16 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
 def get_hed_version_path(xml_version, library_name=None, local_hed_directory=None) -> Union[str, None]:
     """Get the HED XML file path for a given version.
 
-    Searches the local cache first. If the version is not found and local_hed_directory
-    is the default HED cache, the cache is refreshed from GitHub before a second lookup.
+    Searches the local cache first (including the bundled schemas that are always present).
+    If the version is not found and local_hed_directory is the default HED cache, downloads
+    only the single requested file from GitHub — never the entire catalog.
     No network call is made for custom directories.
 
     Parameters:
         xml_version (str): The version string to look up.
         library_name (str or None): Optional schema library name.
         local_hed_directory (str or None): Path to local HED directory. Defaults to HED_CACHE_DIRECTORY.
-            Passing a custom path disables the automatic GitHub refresh.
+            Passing a custom path disables the automatic GitHub download.
 
     Returns:
         Union[str, None]: The path to the requested HED XML file, or None.
@@ -187,13 +189,12 @@ def get_hed_version_path(xml_version, library_name=None, local_hed_directory=Non
     if result:
         return result
 
-    # Version not found locally — try refreshing cache from GitHub (default cache only).
-    # cache_xml_versions() returns -1 on failure (network error, lock contention, rate limit).
-    # In that case the second lookup will return None, which the caller treats as "version not found".
+    # Version not found locally — download only this specific version from GitHub.
+    # Never bulk-download the entire catalog; that is cache_xml_versions()'s job.
     if not xml_version or local_hed_directory != HED_CACHE_DIRECTORY:
         return None
 
-    cache_xml_versions()
+    _download_schema_version(xml_version, library_name, local_hed_directory)
     return _find_hed_version_path(xml_version, library_name, local_hed_directory)
 
 
@@ -271,6 +272,10 @@ def cache_xml_versions(
     """
     if not cache_folder:
         cache_folder = HED_CACHE_DIRECTORY
+
+    # Always seed the cache with bundled schemas first so the cache is usable even if the
+    # subsequent GitHub download fails (network error, rate limit, etc.).
+    cache_local_versions(cache_folder)
 
     try:
         with CacheLock(cache_folder):
@@ -508,8 +513,38 @@ def get_available_hed_versions(
     if not cache_folder:
         cache_folder = HED_CACHE_DIRECTORY
 
+    # Resolve repo_check_interval early so the manifest fast path can honour it.
+    # The manifest IS the "has anything changed?" gate for the whole repo, so it should
+    # be throttled by repo_check_interval (the interval for those repo-level checks),
+    # not by the shorter cache_time_threshold (which governs individual folder listings).
+    if repo_check_interval is None:
+        repo_check_interval = cache_time_threshold
+
     url_cache = _read_available_versions_cache(cache_folder)
     cache_before = json.dumps(url_cache, sort_keys=True)
+
+    # Fast path: read the repo-level manifest in a single fetch from the raw/CDN host (not subject
+    # to the GitHub REST API rate limit) instead of crawling the API directory listings. Only used
+    # for the canonical hed-schemas URLs; any custom/forked URL set falls through to the crawl. Any
+    # failure (unreachable, malformed, or an unrecognized manifest format) also falls through.
+    # The manifest is used as the "has the repo changed?" check: its per-file sha fields are the
+    # hashes we compare against locally cached files, and repo_check_interval controls how often
+    # we even ask GitHub whether the manifest itself has changed.
+    if (
+        list(hed_base_urls) == list(DEFAULT_URL_LIST)
+        and list(hed_library_urls) == list(DEFAULT_LIBRARY_URL_LIST)
+        and tuple(skip_folders) == tuple(DEFAULT_SKIP_FOLDERS)
+    ):
+        from hed.schema import schema_version_manifest as _manifest
+
+        try:
+            manifest_json = _get_json_with_etag(_manifest.MANIFEST_URL, url_cache, force_refresh, repo_check_interval)
+            if _manifest.is_supported(manifest_json):
+                if json.dumps(url_cache, sort_keys=True) != cache_before:
+                    _write_available_versions_cache(cache_folder, url_cache)
+                return _manifest.available_versions(manifest_json, library_name, check_prerelease)
+        except Exception:
+            pass  # fall through to the REST API crawl below
 
     # Only fetch the standard-schema URLs when the result could actually include them
     # (library_name is None or "all") - a request for one specific library has no use for
@@ -518,9 +553,6 @@ def get_available_hed_versions(
     # Likewise, only touch any library URL when the result could include library data at
     # all - a plain standard-schema request (library_name=None) never looks at it.
     needs_libraries = library_name is not None
-
-    if repo_check_interval is None:
-        repo_check_interval = cache_time_threshold
 
     all_hed_versions = {}
     if needs_standard:
@@ -1018,6 +1050,61 @@ def _safe_move_tmp_to_folder(temp_hed_xml_file, dest_filename):
         return None
 
     return dest_filename
+
+
+def _download_schema_version(xml_version, library_name, cache_folder):
+    """Download a single specific schema version from GitHub.
+
+    Fetches the directory listing for only the relevant library (2-3 small API calls), then
+    downloads only the one requested XML file.  Uses SHA comparison so a file whose content
+    has not changed on GitHub is never re-downloaded.
+
+    This is the on-demand complement to cache_xml_versions() (which bulk-downloads every
+    version). Call this when you need one specific version that is not in the local cache;
+    call cache_xml_versions() only when you want to pre-populate the entire catalog (e.g.
+    for an offline/air-gapped environment).
+
+    Parameters:
+        xml_version (str): The version string to download.
+        library_name (str or None): The library name, None for the standard schema.
+        cache_folder (str): The folder to save the downloaded file in.
+
+    Returns:
+        str or None: The local file path on success, None if the version was not found on
+                     GitHub or the download failed.
+    """
+    # Fast path: resolve this version from the manifest (single raw/CDN fetch, no REST API), then
+    # download just the one file. Falls back to the REST API resolution below on any failure.
+    from hed.schema import schema_version_manifest as _manifest
+
+    try:
+        manifest_json = _get_json_with_etag(_manifest.MANIFEST_URL, None)
+    except Exception:
+        manifest_json = None
+    if _manifest.is_supported(manifest_json):
+        version_info = _manifest.find_version_info(manifest_json, xml_version, library_name)
+        if version_info is not None:
+            return _cache_hed_version(xml_version, library_name, version_info, cache_folder)
+
+    if library_name is None:
+        url = DEFAULT_HED_LIST_VERSIONS_URL
+    else:
+        url = f"{LIBRARY_HED_URL}/{library_name}"
+
+    try:
+        available = _get_hed_xml_versions_one_library(url)
+    except Exception:
+        return None
+
+    versions_for_library = available.get(library_name)
+    if not versions_for_library:
+        return None
+
+    version_info = versions_for_library.get(xml_version)
+    if version_info is None:
+        return None
+
+    return _cache_hed_version(xml_version, library_name, version_info, cache_folder)
 
 
 def _cache_hed_version(version, library_name, version_info, cache_folder):
