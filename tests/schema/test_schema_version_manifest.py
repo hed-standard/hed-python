@@ -24,6 +24,14 @@ SAMPLE_MANIFEST = {
                 {"version": "8.5.0", "file": "standard_schema/prerelease/HED8.5.0.xml", "sha": "sha850", "date": "d"},
             ],
             "deprecated": [
+                # 8.3.5 is deliberately "mid-range" (between released 8.3.0 and 8.4.0) so the tests
+                # cover a deprecated version that falls inside the released range, not just below it.
+                {
+                    "version": "8.3.5",
+                    "file": "standard_schema/hedxml/deprecated/HED8.3.5.xml",
+                    "sha": "sha835",
+                    "date": "d",
+                },
                 {
                     "version": "7.2.0",
                     "file": "standard_schema/hedxml/deprecated/HED7.2.0.xml",
@@ -42,7 +50,15 @@ SAMPLE_MANIFEST = {
                 },
             ],
             "prerelease": [],
-            "deprecated": [],
+            "deprecated": [
+                # A deprecated *library* version, to confirm deprecated exclusion is not standard-only.
+                {
+                    "version": "2.0.0",
+                    "file": "library_schemas/score/hedxml/deprecated/HED_score_2.0.0.xml",
+                    "sha": "shascd",
+                    "date": "d",
+                },
+            ],
         },
         "mouse": {  # prerelease only - no released versions
             "released": [],
@@ -75,6 +91,7 @@ class TestIsSupported(unittest.TestCase):
 
 class TestAvailableVersions(unittest.TestCase):
     def test_standard_default_excludes_prerelease_and_deprecated(self):
+        # Also proves the mid-range deprecated version (8.3.5) is excluded from the listing.
         self.assertEqual(manifest.available_versions(SAMPLE_MANIFEST), ["8.4.0", "8.3.0"])
 
     def test_standard_with_prerelease_newest_first(self):
@@ -84,6 +101,7 @@ class TestAvailableVersions(unittest.TestCase):
         )
 
     def test_specific_library(self):
+        # score has a deprecated 2.0.0; it must not appear in the released listing.
         self.assertEqual(manifest.available_versions(SAMPLE_MANIFEST, "score"), ["2.1.0"])
 
     def test_all_maps_standard_to_none_and_omits_empty(self):
@@ -133,6 +151,14 @@ class TestFindVersionInfo(unittest.TestCase):
     def test_missing_version_returns_none(self):
         self.assertIsNone(manifest.find_version_info(SAMPLE_MANIFEST, "9.9.9", None))
         self.assertIsNone(manifest.find_version_info(SAMPLE_MANIFEST, "1.0.0", "nosuch"))
+
+    def test_deprecated_versions_are_not_loadable(self):
+        # Deprecated schemas are display-only (for the static schema browser); the download/load
+        # path must never surface them - for the standard schema or any library, and regardless of
+        # where the version falls in the range (below the released range, or in the middle of it).
+        self.assertIsNone(manifest.find_version_info(SAMPLE_MANIFEST, "8.3.5", None))  # mid-range standard
+        self.assertIsNone(manifest.find_version_info(SAMPLE_MANIFEST, "7.2.0", None))  # old standard
+        self.assertIsNone(manifest.find_version_info(SAMPLE_MANIFEST, "2.0.0", "score"))  # deprecated library
 
 
 class TestRawUrl(unittest.TestCase):

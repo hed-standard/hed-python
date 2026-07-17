@@ -5,6 +5,7 @@
 ## Session summaries and reports
 
 **When you fix bugs, implement features, or investigate issues, always create a summary report in `.status/` directory.** Name it descriptively (e.g., `.status/fix_missing_extra_sections.md`, `.status/investigation_cache_bug.md`, `.status/implement_feature_x.md`). The report should document:
+
 - What problem was being solved
 - What approach was taken
 - What code changes were made and why

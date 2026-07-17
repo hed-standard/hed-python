@@ -40,6 +40,11 @@ class Test(unittest.TestCase):
         self.assertEqual(HedIDValidator._get_previous_version("8.2.0", ""), "8.1.0")
         self.assertEqual(HedIDValidator._get_previous_version("8.0.0", ""), None)
         self.assertEqual(HedIDValidator._get_previous_version("3.0.0", "testlib"), "testlib_2.2.0")
+        # Regression guard: the previous version must come from the full (manifest) version list,
+        # not just whatever happens to be in the local cache. This reaches deeper into testlib's
+        # history than the case above, so it fails if the list is ever truncated/incomplete again
+        # (the bug that surfaced on a fresh CI runner). testlib releases: 1.0.2, 2.0.0, 2.1.0, ...
+        self.assertEqual(HedIDValidator._get_previous_version("2.0.0", "testlib"), "testlib_1.0.2")
 
     def test_verify_tag_id(self):
         event_entry = self.hed_schema84.tags["Event"]

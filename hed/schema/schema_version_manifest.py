@@ -56,9 +56,14 @@ def is_supported(manifest) -> bool:
         manifest: The parsed manifest (any type - non-dicts and unknown formats return False).
 
     Returns:
-        bool: True only for a dict whose ``manifest_format_version`` matches the supported version.
+        bool: True only for a dict whose ``manifest_format_version`` matches the supported version
+              and whose ``libraries`` value is a dict (the shape all downstream helpers require).
     """
-    return isinstance(manifest, dict) and manifest.get("manifest_format_version") == SUPPORTED_MANIFEST_FORMAT_VERSION
+    return (
+        isinstance(manifest, dict)
+        and manifest.get("manifest_format_version") == SUPPORTED_MANIFEST_FORMAT_VERSION
+        and isinstance(manifest.get("libraries"), dict)
+    )
 
 
 def raw_url_for(file_path: str, ref: str) -> str:

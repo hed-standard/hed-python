@@ -1074,17 +1074,19 @@ def _download_schema_version(xml_version, library_name, cache_folder):
                      GitHub or the download failed.
     """
     # Fast path: resolve this version from the manifest (single raw/CDN fetch, no REST API), then
-    # download just the one file. Falls back to the REST API resolution below on any failure.
+    # download just the one file. Falls back to the REST API resolution below on any failure,
+    # including a malformed manifest that passes is_supported() but raises inside find_version_info
+    # or _cache_hed_version (unexpected types, missing keys, etc.).
     from hed.schema import schema_version_manifest as _manifest
 
     try:
         manifest_json = _get_json_with_etag(_manifest.MANIFEST_URL, None)
+        if _manifest.is_supported(manifest_json):
+            version_info = _manifest.find_version_info(manifest_json, xml_version, library_name)
+            if version_info is not None:
+                return _cache_hed_version(xml_version, library_name, version_info, cache_folder)
     except Exception:
-        manifest_json = None
-    if _manifest.is_supported(manifest_json):
-        version_info = _manifest.find_version_info(manifest_json, xml_version, library_name)
-        if version_info is not None:
-            return _cache_hed_version(xml_version, library_name, version_info, cache_folder)
+        pass  # fall through to REST API resolution below
 
     if library_name is None:
         url = DEFAULT_HED_LIST_VERSIONS_URL
