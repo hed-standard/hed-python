@@ -1,9 +1,8 @@
 """Validator for HED ID consistency across schema versions."""
 
-from hed.schema.hed_cache import get_library_data
+from hed.schema.hed_cache import get_library_data, get_available_hed_versions, get_hed_versions
 from semantic_version import Version
 from hed.schema.hed_schema_io import load_schema_version
-from hed.schema.hed_cache import get_hed_versions
 from hed.schema.hed_schema_constants import HedKey
 from hed.errors.error_types import SchemaAttributeErrors
 from hed.errors.error_reporter import ErrorHandler
@@ -52,7 +51,13 @@ class HedIDValidator:
     @staticmethod
     def _get_previous_version(version, library):
         current_version = Version(version)
-        all_schema_versions = get_hed_versions(library_name=library, check_prerelease=False)
+        # Use the manifest-based listing as the authoritative version source so that a version
+        # released after the local cache was last populated is not silently skipped.  Fall back
+        # to the local cache when the network is unavailable.
+        library_name = library if library else None
+        all_schema_versions = get_available_hed_versions(library_name=library_name) or get_hed_versions(
+            library_name=library, check_prerelease=False
+        )
         for old_version in all_schema_versions:
             if Version(old_version) < current_version:
                 prev_version = old_version

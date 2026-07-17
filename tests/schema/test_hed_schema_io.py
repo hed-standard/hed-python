@@ -132,6 +132,139 @@ class TestHedSchema(unittest.TestCase):
         self.assertIsInstance(versions, list)
         self.assertTrue(versions, "score library schemas must always be present in the bundled schema_data")
 
+    def test_get_hed_versions_falls_back_when_dir_has_only_non_xml_files(self):
+        """get_hed_versions() must trigger the bundled-schema fallback even when the cache directory
+        exists and is non-empty — provided none of the files match the HED XML pattern.
+
+        This is the scenario that occurs when cache_xml_versions() fails after acquiring its lock:
+        the directory is created and cache_lock.lock is written, but no XML schemas are downloaded.
+        Before the fix, get_hed_versions() treated any non-empty directory as "already populated"
+        and skipped the fallback, returning [].
+        """
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # Plant only a lock file — no XML schema files.
+            with open(os.path.join(tmp_dir, "cache_lock.lock"), "w") as f:
+                f.write("")
+
+            standard_versions = hed_cache.get_hed_versions(tmp_dir)
+            self.assertIsInstance(standard_versions, list)
+            self.assertTrue(
+                standard_versions, "bundled standard schemas must be found even with only a lock file present"
+            )
+
+            score_versions = hed_cache.get_hed_versions(tmp_dir, library_name="score")
+            self.assertIsInstance(score_versions, list)
+            self.assertTrue(score_versions, "bundled score schemas must be found even with only a lock file present")
+
+    def test_cache_xml_versions_seeds_bundled_schemas_on_github_failure(self):
+        """cache_xml_versions() must seed the cache with bundled schemas even when the GitHub
+        download fails (network error, rate limit, etc.).
+
+        cache_local_versions() is called unconditionally before the CacheLock context, so the
+        cache always contains at least the bundled released schemas.
+        """
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with patch.object(
+                hed_cache, "_get_hed_xml_versions_one_library", side_effect=URLError("simulated failure")
+            ):
+                result = hed_cache.cache_xml_versions(cache_folder=tmp_dir)
+
+            # GitHub download failed — cache_xml_versions returns -1.
+            self.assertEqual(result, -1)
+
+            # Bundled schemas must still be present despite the failure.
+            cached_files = os.listdir(tmp_dir)
+            xml_files = [f for f in cached_files if hed_cache.version_pattern.match(f)]
+            self.assertTrue(xml_files, "bundled schemas must be seeded into the cache even when GitHub download fails")
+
+            standard = hed_cache.get_hed_versions(tmp_dir)
+            self.assertTrue(standard, "standard schemas must be in cache after failed cache_xml_versions")
+            score = hed_cache.get_hed_versions(tmp_dir, library_name="score")
+            self.assertTrue(score, "score schemas must be in cache after failed cache_xml_versions")
+
+    def test_get_hed_version_path_downloads_only_requested_version(self):
+        """get_hed_version_path must download only the single requested version, never the full catalog.
+
+        The old implementation fell back to cache_xml_versions() (bulk download of every schema).
+        The new implementation calls _download_schema_version() which fetches the listing for
+        only the relevant library and downloads only the one file.
+        """
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # Patch _download_schema_version so we can verify it's called with the right args,
+            # and patch cache_xml_versions to fail the test if it's called at all.
+            downloaded_calls = []
+
+            def fake_download(xml_version, library_name, cache_folder):
+                downloaded_calls.append((xml_version, library_name))
+                return None  # simulates GitHub failure; get_hed_version_path returns None
+
+            with patch.object(hed_cache, "_download_schema_version", side_effect=fake_download):
+                with patch.object(hed_cache, "cache_xml_versions") as mock_bulk:
+                    with patch.object(hed_cache, "HED_CACHE_DIRECTORY", tmp_dir):
+                        # Request a version not in the bundle.
+                        hed_cache.get_hed_version_path("7.1.1")
+
+            mock_bulk.assert_not_called()
+            self.assertEqual(
+                downloaded_calls,
+                [("7.1.1", None)],
+                "Only the requested version should be downloaded, not the full catalog",
+            )
+
+    def test_deprecated_library_folder_is_not_fetched(self):
+        """cache_xml_versions must never fetch schemas from a library folder named 'deprecated'.
+
+        DEFAULT_SKIP_FOLDERS = ("deprecated",) causes _get_hed_xml_versions_from_url_all_libraries
+        to skip any top-level library subfolder with that name.  The test injects a fake GitHub
+        listing that includes both 'score' and 'deprecated' library folders, then confirms only
+        score-related URLs are ever requested.
+        """
+        fake_library_listing = [
+            {"type": "dir", "name": "score"},
+            {"type": "dir", "name": "deprecated"},
+            {"type": "dir", "name": "lang"},
+        ]
+        fetched_library_names = []
+
+        def fake_get_json(url, *args, **kwargs):
+            if url == hed_cache.LIBRARY_HED_URL:
+                return fake_library_listing
+            # Record which library sub-URLs are actually requested.
+            for lib in ("score", "deprecated", "lang"):
+                if f"/{lib}" in url:
+                    fetched_library_names.append(lib)
+            return []
+
+        with patch.object(hed_cache, "_get_json_with_etag", side_effect=fake_get_json):
+            hed_cache._get_hed_xml_versions_from_url_all_libraries(hed_cache.LIBRARY_HED_URL)
+
+        self.assertNotIn("deprecated", fetched_library_names, "deprecated library folder must never be fetched")
+        self.assertIn("score", fetched_library_names, "score library should be fetched")
+        self.assertIn("lang", fetched_library_names, "lang library should be fetched")
+
+    def test_deprecated_subfolder_within_hedxml_is_skipped(self):
+        """_get_hed_xml_versions_one_folder must silently skip directory entries.
+
+        A deprecated/ subfolder inside hedxml/ (or any other dir entry in the API response)
+        is type='dir'.  The function skips all dir entries, so no deprecated schema stored
+        inside a subdirectory can ever be downloaded or cached.
+        """
+        fake_hedxml_listing = [
+            {"type": "file", "name": "HED8.4.0.xml", "sha": "abc", "download_url": ""},
+            {"type": "dir", "name": "deprecated"},
+        ]
+
+        with patch.object(hed_cache, "_get_json_with_etag", return_value=fake_hedxml_listing):
+            result = hed_cache._get_hed_xml_versions_one_folder("https://fake-url/hedxml")
+
+        # Standard schema should be found.
+        self.assertIn(None, result)
+        self.assertIn("8.4.0", result[None])
+        # 'deprecated' must not appear as a library key or a version.
+        self.assertNotIn("deprecated", result)
+        for lib_versions in result.values():
+            self.assertNotIn("deprecated", lib_versions)
+
     def test_get_available_hed_versions_lists_without_downloading(self):
         """get_available_hed_versions() should list real GitHub versions without caching any content."""
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -266,7 +399,16 @@ class TestHedSchema(unittest.TestCase):
                 # gate's own commits-endpoint URL, and the plain-string SHA marker recorded under
                 # it (see _LIBRARY_HEAD_CACHE_KEY) - neither is scoped to a specific library, so
                 # both are expected regardless of which library_name was requested.
-                non_library_keys = {library_base, hed_cache.LIBRARY_SCHEMAS_HEAD_URL, hed_cache._LIBRARY_HEAD_CACHE_KEY}
+                # The manifest fast path (schema_version_manifest) fetches a single global manifest
+                # file before doing any per-library crawl, so its URL is also library-neutral.
+                from hed.schema import schema_version_manifest as _manifest
+
+                non_library_keys = {
+                    library_base,
+                    hed_cache.LIBRARY_SCHEMAS_HEAD_URL,
+                    hed_cache._LIBRARY_HEAD_CACHE_KEY,
+                    _manifest.MANIFEST_URL,
+                }
                 for url in cached_urls:
                     if url in non_library_keys:
                         continue  # the one unavoidable "list all libraries" call, or a gate entry
@@ -545,15 +687,19 @@ class TestHedSchema(unittest.TestCase):
                     )
 
     def test_get_available_hed_versions_repo_check_interval_limits_gate_frequency(self):
-        """A larger repo_check_interval should reduce how often the gate URL itself is hit,
-        independently of cache_time_threshold for the per-folder content URLs.
+        """A larger repo_check_interval should reduce how often the "has the repo changed?" gate
+        is re-fetched, independently of cache_time_threshold for per-folder content URLs.
 
-        Verified by checking the on-disk cache after two rapid calls: with a large
-        repo_check_interval, the gate URL's own cache entry should not be re-checked on the
-        second call (tier-1 reuse). This can't assert anything about GitHub's actual request
-        count without mocking, which this repo's testing policy avoids - only the client-side
-        effect of not even attempting a network call is checkable here.
+        With the manifest fast path, the manifest URL IS that gate: its per-file sha values are
+        the hashes we compare against locally cached files, and repo_check_interval controls how
+        often we ask GitHub whether the manifest itself has changed.  With a large interval, a
+        rapid second call must reuse the cached manifest without making a new request (tier-1
+        reuse).  This can't assert actual HTTP request counts without mocking (which this repo's
+        testing policy avoids); we verify the client-side effect - the cached timestamp for the
+        gate URL is unchanged - instead.
         """
+        from hed.schema import schema_version_manifest as _manifest
+
         with tempfile.TemporaryDirectory() as tmp_dir:
             with patch.object(hed_cache, "HED_CACHE_DIRECTORY", tmp_dir):
                 first = hed_cache.get_available_hed_versions(repo_check_interval=3600)
@@ -563,8 +709,14 @@ class TestHedSchema(unittest.TestCase):
                 cache_filename = os.path.join(tmp_dir, hed_cache.AVAILABLE_VERSIONS_CACHE_FILENAME)
                 with open(cache_filename) as f:
                     cache_after_first = json.load(f)
-                gate_entry = cache_after_first.get(hed_cache.STANDARD_SCHEMA_HEAD_URL)
-                self.assertIsInstance(gate_entry, dict, "expected the gate URL itself to be cached")
+
+                # Determine which gate was used.  Normally the manifest fast path fires and the
+                # manifest URL is the gate; STANDARD_SCHEMA_HEAD_URL is only present when the
+                # manifest was unavailable and the REST API crawl ran instead.
+                manifest_entry = cache_after_first.get(_manifest.MANIFEST_URL)
+                gate_url = _manifest.MANIFEST_URL if manifest_entry is not None else hed_cache.STANDARD_SCHEMA_HEAD_URL
+                gate_entry = cache_after_first.get(gate_url)
+                self.assertIsInstance(gate_entry, dict, f"expected the gate URL to be cached: {gate_url}")
                 gate_timestamp_before = gate_entry["timestamp"]
 
                 hed_cache.get_available_hed_versions(repo_check_interval=3600)
@@ -572,9 +724,9 @@ class TestHedSchema(unittest.TestCase):
                 with open(cache_filename) as f:
                     cache_after_second = json.load(f)
                 self.assertEqual(
-                    cache_after_second[hed_cache.STANDARD_SCHEMA_HEAD_URL]["timestamp"],
+                    cache_after_second[gate_url]["timestamp"],
                     gate_timestamp_before,
-                    "a large repo_check_interval should have skipped re-checking the gate itself",
+                    f"a large repo_check_interval should have skipped re-checking the gate: {gate_url}",
                 )
 
     def test_load_schema_version_default_no_standard_raises(self):
