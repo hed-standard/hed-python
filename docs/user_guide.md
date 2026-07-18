@@ -406,22 +406,17 @@ If GitHub can't be reached (offline, rate-limited, etc.), `get_available_hed_ver
 ```{index} caching; rate limits, ETag, ETag-conditional
 ```
 
-`get_available_hed_versions()` is designed to be called often — e.g. every time a web page loads — without adding up to a lot of GitHub traffic. It keeps its own small on-disk listing cache (separate from the downloaded schema content) and checks it in increasingly cheap tiers before ever making a real request:
+`get_available_hed_versions()` is designed to be called often — e.g. every time a web page loads — without adding up to a lot of GitHub traffic.
+
+For the standard hed-schemas repository it reads a single repository-level manifest (`schema_versions.json`) from GitHub's raw/CDN host in one request. That host is *not* subject to GitHub's REST API rate limit, so this stays cheap even for an unauthenticated, frequently-polling caller. If that manifest can't be read — for example when you point the function at a custom or forked URL set, or the fetch fails — it falls back to crawling the REST API directory listings, backed by its own small on-disk cache (separate from the downloaded schema content) checked in two increasingly cheap tiers before making a real request:
 
 1. **Recently checked** — if a given piece of information was checked within the last `cache_time_threshold` seconds (60 by default), it's reused with no network call at all.
 2. **Confirmed unchanged** — otherwise, a conditional request is made using a stored ETag. If GitHub confirms nothing changed (a 304 response), the previous result is reused.
-3. **Directory-level gate** — before checking individual folders, one cheap check asks whether the `standard_schema/` directory (or the `library_schemas/` directory, depending on what you asked for) has had any new commits at all since the last full check. Since hed-schemas typically only changes every few days or weeks, this lets an entire crawl be skipped in the common case where nothing has changed anywhere relevant.
 
-For most uses the defaults are fine, but two parameters are available for tuning:
+For most uses the defaults are fine. To force an immediate, confirmed-fresh answer (e.g. right after publishing a release):
 
 ```python
-# Force an immediate, confirmed-fresh answer (e.g. right after publishing a release)
 get_available_hed_versions(force_refresh=True)
-
-# Widen the gap between the cheap directory-level "did anything change?" checks,
-# independent of how fresh content is once a real change is found. Useful for a
-# long-running, unauthenticated service - see "Authenticating with GitHub" below.
-get_available_hed_versions(repo_check_interval=3600)
 ```
 
 ### Authenticating with GitHub
