@@ -1,4 +1,4 @@
-# Release 1.2.0 July 14, 2026
+# Release 1.2.0 July 18, 2026
 
 ## New features
 
@@ -18,15 +18,31 @@ if choices:                                 # empty if GitHub is unreachable or 
 - Supports `library_name=None` (standard schema only, the default), `library_name="all"` (returns a `{library_name: [versions]}` dict), and a specific library name (restricted to that one library's folder). A `check_prerelease` flag optionally includes prerelease folders.
 - Degrades gracefully: any URL that can't be reached yields an empty result rather than raising, so it is safe on an unattended user-facing path.
 
-### Rate-limit-friendly listing cache (ETag + directory-scoped commit gating)
+### Repo-level manifest fast path for version discovery
 
-`get_available_hed_versions()` is designed to be called frequently (e.g. on every web request) without tripping GitHub's API rate limits, using three tiers of throttling implemented in `hed/schema/hed_cache.py`:
+`get_available_hed_versions()` now resolves versions from a single repository-level manifest instead of crawling GitHub's REST API directory listings whenever possible. hed-schemas publishes one `schema_versions.json` at its repository root listing every version (released, prerelease, and deprecated) for the standard schema and each library, with each XML file's git blob SHA. hedtools reads that one file from the raw/CDN host (`raw.githubusercontent.com`) in a single fetch — which is **not** subject to GitHub's REST API rate limit (60 requests/hour unauthenticated, where even conditional 304s count against the cap).
+
+- A new internal module, `hed/schema/schema_version_manifest.py`, parses the manifest. It is deliberately I/O-light and independent of `hed_cache` (the network fetch is performed by the caller via the existing ETag-aware helper), and is not part of the public API.
+- The manifest fetch is itself ETag-aware and throttled by `repo_check_interval`, so repeated calls cost at most one conditional request per interval — and a `304 Not Modified` on an authenticated request does not count against the rate limit at all.
+- Used only for the canonical hed-schemas URLs. Any custom/forked URL set, or any failure (host unreachable, malformed JSON, or an unrecognized `manifest_format_version`), transparently falls through to the REST API crawl below, so behavior is never worse than before.
+- Deprecated versions are recorded in the manifest so the static HED schema browser can display them, but hedtools never lists or loads deprecated schemas through this path — matching the REST crawl's skipping of the `deprecated` folder.
+
+### Rate-limit-friendly listing cache (ETag + directory-scoped commit gating) — REST API fallback
+
+When the manifest fast path is unavailable (a custom URL set or a fetch failure), the REST API crawl still avoids tripping GitHub's API rate limits, using three tiers of throttling implemented in `hed/schema/hed_cache.py`:
 
 - **Time-based reuse** — a URL checked within `cache_time_threshold` seconds (default 60) is reused with no network call at all.
 - **ETag conditional requests** — otherwise a conditional GET (`If-None-Match`) is made; a `304 Not Modified` reuses the stored body and, for authenticated requests, does not count against GitHub's primary rate limit. Results are persisted in a small on-disk metadata file (`available_versions_cache.json`) in the cache folder, holding only directory-listing JSON — never schema content.
 - **Directory-scoped commit gating** — before crawling `standard_schema/` or `library_schemas/`, a single cheap check compares that directory's latest commit SHA (via GitHub's `?path=` commits filter) against the SHA from the last full crawl. If unchanged, every per-folder URL under it is treated as fresh without individual re-checks. Each directory has its own independent gate, so a commit elsewhere in the repo never forces a recrawl. A `repo_check_interval` argument lets callers throttle these gate checks separately — particularly useful for unauthenticated callers, whose conditional 304s still count against the 60-requests/hour anonymous cap.
 
 Recorded failures are never shielded from retry by a large threshold, so a transient network/rate-limit error is retried within `AVAILABLE_VERSIONS_TIME_THRESHOLD` (60s) rather than being cached for as long as the directory stays unchanged.
+
+### On-demand single-version download
+
+`get_hed_version_path()` now downloads only the single requested version when it is absent from the local cache, rather than bulk-downloading the entire catalog. A new internal helper, `_download_schema_version()`, resolves the version from the manifest (a single CDN fetch) when possible and otherwise from a REST listing of just the relevant library, then downloads only that one XML file — using SHA comparison so a file whose content is unchanged on GitHub is never re-fetched.
+
+- `cache_xml_versions()` remains the way to pre-populate the entire catalog (e.g. for an offline/air-gapped environment) and now seeds the bundled schemas first, so the cache is usable even if the subsequent GitHub download fails.
+- Local lookups (including `get_hed_version_path()`) already consider the bundled schemas that ship with hedtools, so those versions never require a network call.
 
 ### `make_url_request()` supports conditional-request headers
 
@@ -38,8 +54,24 @@ Recorded failures are never shielded from retry by a large threshold, so a trans
 - Added a regression test in `tests/validator/test_hed_validator.py` (`test_severity_enum_not_string_github_hedit_161`) confirming that validation issue `severity` is the `ErrorSeverity` enum, not a string — verifying downstream code can correctly filter by `ErrorSeverity.ERROR` (Annotation-Garden/HEDit#161).
 - `test_get_hed_versions_includes_bundled_score`: new always-runs (no-network) test in `tests/schema/test_hed_schema_io.py` asserting that the `score` library schemas bundled in `hed/schema/schema_data/` are always locally available via `get_hed_versions()`.
 - All 13 new network-dependent tests in `tests/schema/test_hed_schema_io.py` call `self.skipTest()` when GitHub is unreachable or rate-limited rather than failing with an assertion error. `test_get_available_hed_versions_lists_without_downloading` additionally handles the specific case where the library API endpoint is independently rate-limited while the standard-schema endpoint succeeds: it marks `score_available = False` and skips only the score-specific assertions rather than skipping the entire test.
+- Added `tests/schema/test_schema_version_manifest.py` covering the manifest module: format-version gating (`is_supported`), the list/dict shapes returned by `available_versions()` (standard schema keyed as `None`, `"all"`, and a single library), prerelease inclusion, `find_version_info()` download-info resolution, and the exclusion of deprecated versions from both listing and loading.
+- Added tests in `tests/schema/test_hed_schema_io.py` for the on-demand download path: re-seeding when the cache directory holds only non-schema files, `cache_xml_versions()` seeding bundled schemas when the GitHub download fails, `get_hed_version_path()` fetching only the one requested version, and the `deprecated` folder (both a top-level library folder and a subfolder within `hedxml/`) never being fetched.
+- Added a regression guard in `tests/schema/test_schema_validator_hed_id.py` confirming `HedIDValidator._get_previous_version()` draws from the full manifest version list, not just the local cache (`testlib` 2.0.0 → `testlib_1.0.2`).
+- Updated the `spec_tests/test_hed_cache.py` auto-download test to use a non-bundled `testlib` version, so it exercises the real on-demand GitHub download and asserts that only the single requested file (not the whole catalog) is fetched.
 
 ## Bug fixes
+
+### `HedIDValidator` skipped versions released after the cache was last populated
+
+`HedIDValidator._get_previous_version()` determined a schema's previous version from only the local cache (`get_hed_versions()`), so a version released after the cache was last populated could be silently skipped — a failure that surfaced on a fresh CI runner. It now uses the manifest-based listing (`get_available_hed_versions()`) as the authoritative source, falling back to the local cache when the network is unavailable.
+
+- `hed/schema/schema_validation/hed_id_validator.py`: `_get_previous_version()` prefers the manifest listing and normalizes the standard schema's library name to `None`.
+
+### `get_hed_versions()` re-seeded the cache only when the directory was completely empty
+
+`get_hed_versions()` re-seeded the bundled schemas only when the cache directory listing was entirely empty (`if not hed_files:`), so a directory containing only non-schema files (lock files, the listing-cache JSON, etc.) would return no versions. It now re-seeds whenever no version-matching schema file is present.
+
+- `hed/schema/hed_cache.py`: the guard now checks `version_pattern` matches rather than mere directory non-emptiness, and re-lists the directory after seeding.
 
 ### `CacheLock` never acquired its portalocker lock; failed refresh stamped throttle timestamp
 
@@ -58,7 +90,8 @@ Recorded failures are never shielded from retry by a large threshold, so a trans
 ## CI/CD
 
 - Bumped `astral-sh/setup-uv` from 8.2.0 to 8.3.2 across all workflows.
-- Bumped `qltysh/qlty-action/coverage` from 2.2.1 to 2.2.3.
+- Bumped `qltysh/qlty-action/coverage` from 2.2.1 to 2.3.0.
+- Bumped `lycheeverse/lychee-action` from 2.8.0 to 2.9.0.
 - Updated the `spec_tests/hed-schemas` and `spec_tests/hed-tests` submodules to their latest commits.
 
 # Release 1.1.1 July 7, 2026
