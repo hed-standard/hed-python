@@ -395,23 +395,18 @@ class TestHedSchema(unittest.TestCase):
                 )
                 library_base = hed_cache.LIBRARY_HED_URL
                 # Besides the actual per-library content URLs, the cache also legitimately holds
-                # two library_schemas/-gate entries that aren't library-content URLs at all: the
-                # gate's own commits-endpoint URL, and the plain-string SHA marker recorded under
-                # it (see _LIBRARY_HEAD_CACHE_KEY) - neither is scoped to a specific library, so
-                # both are expected regardless of which library_name was requested.
-                # The manifest fast path (schema_version_manifest) fetches a single global manifest
-                # file before doing any per-library crawl, so its URL is also library-neutral.
+                # the one unavoidable "list all libraries" URL and, when the manifest fast path
+                # runs, the single global manifest URL - both library-neutral, so both are
+                # expected regardless of which library_name was requested.
                 from hed.schema import schema_version_manifest as _manifest
 
                 non_library_keys = {
                     library_base,
-                    hed_cache.LIBRARY_SCHEMAS_HEAD_URL,
-                    hed_cache._LIBRARY_HEAD_CACHE_KEY,
                     _manifest.MANIFEST_URL,
                 }
                 for url in cached_urls:
                     if url in non_library_keys:
-                        continue  # the one unavoidable "list all libraries" call, or a gate entry
+                        continue  # the one unavoidable "list all libraries" call, or the manifest URL
                     # Trailing slash matters here - without it, a hypothetical library named
                     # e.g. "scoreboard" would incorrectly pass a plain startswith(".../score").
                     self.assertTrue(
@@ -464,44 +459,18 @@ class TestHedSchema(unittest.TestCase):
                     self.skipTest("GitHub unreachable or rate-limited in this environment")
                 _assert_valid_sorted_versions(self, versions)
 
-    def test_get_last_commit_sha_returns_a_sha_for_standard_and_library_paths(self):
-        """_get_last_commit_sha() should return a real commit SHA for each scoped gate URL."""
-        for url in (hed_cache.STANDARD_SCHEMA_HEAD_URL, hed_cache.LIBRARY_SCHEMAS_HEAD_URL):
-            sha = hed_cache._get_last_commit_sha(url, {})
-            if sha is None:
-                self.skipTest("GitHub unreachable or rate-limited in this environment")
-            self.assertIsInstance(sha, str)
-            self.assertTrue(sha, f"expected a non-empty SHA for {url}")
-
-    def test_get_last_commit_sha_degrades_gracefully_on_bad_path(self):
-        """_get_last_commit_sha() should return None, not raise, for a path with no commit history.
-
-        Points at a real repo (hed-standard/hed-schemas) but a path that never existed, rather
-        than mocking a bad response, per this repo's testing policy. GitHub's commits-list
-        endpoint returns an empty array (not a 404) for such a path.
-        """
-        bad_url = (
-            "https://api.github.com/repos/hed-standard/hed-schemas/commits"
-            "?path=this-path-does-not-exist-abc123&per_page=1"
-        )
-        sha = hed_cache._get_last_commit_sha(bad_url, {})
-        self.assertIsNone(sha)
-
     def test_get_json_with_etag_retries_failed_entry_despite_large_threshold(self):
         """A recorded failure should be retried well before a very large cache_time_threshold
         would otherwise allow, even though a successful entry is legitimately allowed to be
         reused for that long.
 
-        Regression test for a gap flagged in review: get_available_hed_versions()'s
-        directory-level gate passes math.inf as the per-folder cache_time_threshold once it
-        confirms a directory is unchanged, so that already-fetched, successful entries can be
-        reused indefinitely. But a *failed* per-URL entry isn't "known good data" - honoring
-        that same infinite threshold for it would mean a transient rate-limit/network error
-        gets silently, permanently skipped until the gate happens to see a real change (days or
-        weeks later). Uses a real, guaranteed-unreachable address (no mocks, per this repo's
-        testing policy) so the "a retry actually happened" assertion reflects a genuine second
-        network attempt, not a mocked one - and works regardless of whether GitHub itself is
-        reachable in this environment.
+        A caller can pass an arbitrarily large cache_time_threshold, which for a *successful*
+        entry is fine. But a *failed* per-URL entry isn't "known good data" - honoring that same
+        large threshold for it would mean a transient rate-limit/network error gets silently
+        skipped for far longer than the outage that caused it. Uses a real, guaranteed-unreachable
+        address (no mocks, per this repo's testing policy) so the "a retry actually happened"
+        assertion reflects a genuine second network attempt, not a mocked one - and works
+        regardless of whether GitHub itself is reachable in this environment.
         """
         unreachable_url = "http://127.0.0.1:1/this-will-never-respond"
         etag_cache = {}
@@ -513,8 +482,8 @@ class TestHedSchema(unittest.TestCase):
         first_failure_timestamp = etag_cache[unreachable_url]["timestamp"]
 
         # Simulate the failure having been recorded a while ago - well past
-        # AVAILABLE_VERSIONS_TIME_THRESHOLD, but still comfortably inside a "the gate confirmed
-        # nothing changed" infinite threshold.
+        # AVAILABLE_VERSIONS_TIME_THRESHOLD, but still comfortably inside the large threshold
+        # passed below.
         etag_cache[unreachable_url]["timestamp"] = first_failure_timestamp - (
             hed_cache.AVAILABLE_VERSIONS_TIME_THRESHOLD + 30
         )
@@ -529,205 +498,6 @@ class TestHedSchema(unittest.TestCase):
         # timestamp would still be the artificially backdated one. Seeing a fresh timestamp
         # proves a real retry happened instead.
         self.assertGreater(etag_cache[unreachable_url]["timestamp"], first_failure_timestamp)
-
-    def test_get_available_hed_versions_skips_crawl_when_standard_schema_unchanged(self):
-        """A repeat call should skip the standard-schema crawl once its scoped gate confirms
-        nothing changed under standard_schema/ on GitHub - even when force_refresh=True forces
-        the gate itself to revalidate.
-
-        Verified by checking that every per-folder URL's stored timestamp is untouched by the
-        second call, while relying on real network calls throughout (no mocking, per this
-        repo's testing policy) - this assumes hed-schemas genuinely doesn't change mid-test,
-        which is exactly the (overwhelmingly common) scenario this gate exists for.
-
-        The gate itself is best-effort: _get_last_commit_sha() can return None (commits endpoint
-        unreachable or rate-limited independently of the rest of GitHub's API), in which case
-        get_available_hed_versions() falls back to a normal per-folder crawl and can still return
-        a non-empty, correct version list without ever recording the gate SHA. That's correct
-        behavior, not something this test is meant to catch - so skip rather than fail when the
-        gate key never got written.
-        """
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            with patch.object(hed_cache, "HED_CACHE_DIRECTORY", tmp_dir):
-                first = hed_cache.get_available_hed_versions()
-                if not first:
-                    self.skipTest("GitHub unreachable or rate-limited in this environment")
-
-                cache_filename = os.path.join(tmp_dir, hed_cache.AVAILABLE_VERSIONS_CACHE_FILENAME)
-                with open(cache_filename) as f:
-                    cache_after_first = json.load(f)
-                if hed_cache._STANDARD_HEAD_CACHE_KEY not in cache_after_first:
-                    self.skipTest(
-                        "standard-schema gate SHA unavailable this run (commits endpoint unreachable or "
-                        "rate-limited); get_available_hed_versions() correctly fell back to a per-folder crawl"
-                    )
-                gate_keys = {hed_cache._STANDARD_HEAD_CACHE_KEY, hed_cache._LIBRARY_HEAD_CACHE_KEY}
-                folder_urls = [
-                    url
-                    for url in cache_after_first
-                    if url not in gate_keys and url != hed_cache.STANDARD_SCHEMA_HEAD_URL
-                ]
-                self.assertTrue(folder_urls, "expected at least one per-folder URL cached")
-                folder_timestamps_before = {url: cache_after_first[url]["timestamp"] for url in folder_urls}
-
-                second = hed_cache.get_available_hed_versions(force_refresh=True)
-                self.assertEqual(second, first, "result should be unchanged since nothing on GitHub changed")
-
-                with open(cache_filename) as f:
-                    cache_after_second = json.load(f)
-                for url in folder_urls:
-                    self.assertEqual(
-                        cache_after_second[url]["timestamp"],
-                        folder_timestamps_before[url],
-                        f"{url} should not have been re-checked once the standard-schema gate confirmed "
-                        "nothing had changed",
-                    )
-
-    def test_get_available_hed_versions_recrawls_when_standard_schema_head_sha_stale(self):
-        """A stored standard-schema gate SHA that doesn't match the real one should trigger a
-        normal crawl of standard_schema/.
-
-        Hand-writing a deliberately wrong SHA into the cache file (mimicking what a real repo
-        change would look like on the next call) - without mocking any network response - and
-        confirming get_available_hed_versions() still returns real, complete data rather than
-        incorrectly trusting the stale marker, and that the marker gets corrected afterward.
-
-        Refreshing the marker is itself best-effort: _get_last_commit_sha() can return None
-        (commits endpoint unreachable or rate-limited independently of the rest of GitHub's
-        API), in which case get_available_hed_versions() falls back to a normal per-folder crawl
-        and still returns valid data, but deliberately leaves the existing marker untouched
-        rather than overwriting it with nothing useful. That's correct behavior, not something
-        this test is meant to catch - so skip rather than fail when the marker wasn't refreshed.
-        """
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            with patch.object(hed_cache, "HED_CACHE_DIRECTORY", tmp_dir):
-                cache_filename = os.path.join(tmp_dir, hed_cache.AVAILABLE_VERSIONS_CACHE_FILENAME)
-                with open(cache_filename, "w") as f:
-                    json.dump({hed_cache._STANDARD_HEAD_CACHE_KEY: "not-a-real-sha"}, f)
-
-                versions = hed_cache.get_available_hed_versions()
-                if not versions:
-                    self.skipTest("GitHub unreachable or rate-limited in this environment")
-                _assert_valid_sorted_versions(self, versions)
-
-                with open(cache_filename) as f:
-                    cache_after = json.load(f)
-                if cache_after[hed_cache._STANDARD_HEAD_CACHE_KEY] == "not-a-real-sha":
-                    self.skipTest(
-                        "standard-schema gate SHA unavailable this run (commits endpoint unreachable or "
-                        "rate-limited); get_available_hed_versions() correctly fell back to a per-folder crawl "
-                        "without refreshing the marker"
-                    )
-
-    def test_get_available_hed_versions_gates_are_scoped_independently(self):
-        """A stale library gate marker should not force a standard-schema recrawl, and vice
-        versa - confirming the two gates (standard_schema/ and library_schemas/) are
-        independent rather than one shared whole-repo check.
-
-        Both gate SHAs are best-effort: _get_last_commit_sha() can return None (its commits
-        endpoint unreachable or rate-limited independently of the rest of GitHub's API), in
-        which case get_available_hed_versions() falls back to a normal per-folder crawl for that
-        directory and never records the corresponding gate key - correct behavior, but not one
-        this test (which specifically manipulates the library gate key) can exercise. Skip
-        rather than fail when either key never got written.
-        """
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            with patch.object(hed_cache, "HED_CACHE_DIRECTORY", tmp_dir):
-                first = hed_cache.get_available_hed_versions(library_name="all")
-                if not first:
-                    self.skipTest("GitHub unreachable or rate-limited in this environment")
-
-                cache_filename = os.path.join(tmp_dir, hed_cache.AVAILABLE_VERSIONS_CACHE_FILENAME)
-                with open(cache_filename) as f:
-                    cache_after_first = json.load(f)
-                if (
-                    hed_cache._STANDARD_HEAD_CACHE_KEY not in cache_after_first
-                    or hed_cache._LIBRARY_HEAD_CACHE_KEY not in cache_after_first
-                ):
-                    self.skipTest(
-                        "a gate SHA was unavailable this run (commits endpoint unreachable or rate-limited); "
-                        "get_available_hed_versions() correctly fell back to a per-folder crawl"
-                    )
-
-                standard_folder_urls = [
-                    url for url in cache_after_first if url.startswith(hed_cache.DEFAULT_HED_LIST_VERSIONS_URL)
-                ]
-                self.assertTrue(standard_folder_urls, "expected at least one standard-schema folder URL cached")
-                standard_timestamps_before = {url: cache_after_first[url]["timestamp"] for url in standard_folder_urls}
-
-                # Corrupt only the library gate marker - the standard-schema gate marker is left
-                # untouched, so its crawl should still be skipped even though force_refresh=True
-                # forces both gates to revalidate against GitHub.
-                cache_after_first[hed_cache._LIBRARY_HEAD_CACHE_KEY] = "not-a-real-sha"
-                with open(cache_filename, "w") as f:
-                    json.dump(cache_after_first, f)
-
-                hed_cache.get_available_hed_versions(library_name="all", force_refresh=True)
-
-                with open(cache_filename) as f:
-                    cache_after_second = json.load(f)
-
-                # The SHA gate only fires when the commits endpoint is reachable on the second
-                # call.  If it was independently rate-limited, _get_last_commit_sha() returns
-                # None, the gate doesn't fire, force_refresh=True causes a genuine re-fetch of
-                # the standard-schema folder URLs, and the timestamp assertions below would fail
-                # even though the production code is behaving correctly.  Skip in that case.
-                sha_entry = cache_after_second.get(hed_cache.STANDARD_SCHEMA_HEAD_URL)
-                if not isinstance(sha_entry, dict) or sha_entry.get("body") is None:
-                    self.skipTest(
-                        "standard-schema commits endpoint was rate-limited on the second call; "
-                        "SHA gate couldn't revalidate, so timestamp assertions are not meaningful"
-                    )
-
-                for url in standard_folder_urls:
-                    self.assertEqual(
-                        cache_after_second[url]["timestamp"],
-                        standard_timestamps_before[url],
-                        f"{url} should not have been re-checked - only the library gate was made stale",
-                    )
-
-    def test_get_available_hed_versions_repo_check_interval_limits_gate_frequency(self):
-        """A larger repo_check_interval should reduce how often the "has the repo changed?" gate
-        is re-fetched, independently of cache_time_threshold for per-folder content URLs.
-
-        With the manifest fast path, the manifest URL IS that gate: its per-file sha values are
-        the hashes we compare against locally cached files, and repo_check_interval controls how
-        often we ask GitHub whether the manifest itself has changed.  With a large interval, a
-        rapid second call must reuse the cached manifest without making a new request (tier-1
-        reuse).  This can't assert actual HTTP request counts without mocking (which this repo's
-        testing policy avoids); we verify the client-side effect - the cached timestamp for the
-        gate URL is unchanged - instead.
-        """
-        from hed.schema import schema_version_manifest as _manifest
-
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            with patch.object(hed_cache, "HED_CACHE_DIRECTORY", tmp_dir):
-                first = hed_cache.get_available_hed_versions(repo_check_interval=3600)
-                if not first:
-                    self.skipTest("GitHub unreachable or rate-limited in this environment")
-
-                cache_filename = os.path.join(tmp_dir, hed_cache.AVAILABLE_VERSIONS_CACHE_FILENAME)
-                with open(cache_filename) as f:
-                    cache_after_first = json.load(f)
-
-                # Determine which gate was used.  Normally the manifest fast path fires and the
-                # manifest URL is the gate; STANDARD_SCHEMA_HEAD_URL is only present when the
-                # manifest was unavailable and the REST API crawl ran instead.
-                manifest_entry = cache_after_first.get(_manifest.MANIFEST_URL)
-                gate_url = _manifest.MANIFEST_URL if manifest_entry is not None else hed_cache.STANDARD_SCHEMA_HEAD_URL
-                gate_entry = cache_after_first.get(gate_url)
-                self.assertIsInstance(gate_entry, dict, f"expected the gate URL to be cached: {gate_url}")
-                gate_timestamp_before = gate_entry["timestamp"]
-
-                hed_cache.get_available_hed_versions(repo_check_interval=3600)
-
-                with open(cache_filename) as f:
-                    cache_after_second = json.load(f)
-                self.assertEqual(
-                    cache_after_second[gate_url]["timestamp"],
-                    gate_timestamp_before,
-                    f"a large repo_check_interval should have skipped re-checking the gate: {gate_url}",
-                )
 
     def test_load_schema_version_default_no_standard_raises(self):
         """Test that empty version with only library schemas raises HedFileError."""
