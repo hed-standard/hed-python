@@ -29,8 +29,9 @@ you need an immediate, up-to-date answer::
     from hed.schema import get_available_hed_versions, load_schema_version
 
     choices = get_available_hed_versions()          # ['8.4.0', '8.3.0', '8.2.0', ...] -
-                                                     # several lightweight listing calls,
-                                                     # no schema content fetched
+                                                     # one small manifest read (or a listing
+                                                     # crawl for custom URLs), no schema
+                                                     # content fetched
     schema = load_schema_version(choices[0])        # the actual schema XML is downloaded
                                                      # and cached here, for just this one
                                                      # version, the first time it's used
