@@ -42,6 +42,15 @@ class Test(unittest.TestCase):
         schema.set_cache_directory(cls.saved_cache_folder)
 
     def test_cache_again(self):
+        # This test exercises the throttle, not the download. Stamp a fresh timestamp explicitly
+        # so the result doesn't depend on setUpClass's network download having succeeded: on an
+        # unauthenticated CI runner cache_xml_versions() can be rate-limited partway, and since the
+        # throttle timestamp is only written on a fully successful refresh, the next call would then
+        # not be throttled and this assertion would flake.
+        import time
+        from hed.schema.hed_cache_lock import _write_last_cached_time
+
+        _write_last_cached_time(time.time(), self.hed_cache_dir)
         time_since_update = hed_cache.cache_xml_versions(cache_folder=self.hed_cache_dir)
         # this should fail to cache, since it was cached too recently.
         self.assertEqual(time_since_update, -1)

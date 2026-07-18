@@ -57,6 +57,7 @@ Recorded failures are never shielded from retry by a large threshold, so a trans
 - Added tests in `tests/schema/test_hed_schema_io.py` for the on-demand download path: re-seeding when the cache directory holds only non-schema files, `cache_xml_versions()` seeding bundled schemas when the GitHub download fails, `get_hed_version_path()` fetching only the one requested version, and the `deprecated` folder (both a top-level library folder and a subfolder within `hedxml/`) never being fetched.
 - Added a regression guard in `tests/schema/test_schema_validator_hed_id.py` confirming `HedIDValidator._get_previous_version()` draws from the full manifest version list, not just the local cache (`testlib` 2.0.0 → `testlib_1.0.2`).
 - Updated the `spec_tests/test_hed_cache.py` auto-download test to use a non-bundled `testlib` version, so it exercises the real on-demand GitHub download and asserts that only the single requested file (not the whole catalog) is fetched.
+- Made `spec_tests/test_hed_cache.py::test_cache_again` deterministic: it now stamps a fresh cache timestamp before re-calling `cache_xml_versions()`, so the "throttled, returns -1" assertion no longer flakes when the setup download is rate-limited on an unauthenticated CI runner (the throttle timestamp is written only on a successful refresh).
 
 ## Bug fixes
 
