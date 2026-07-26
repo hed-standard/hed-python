@@ -133,16 +133,16 @@ We use several tools to maintain code quality:
 Example docstring:
 
 ```python
-def validate_hed_string(hed_string, schema)->list[dict]:
+def validate_hed_string(hed_string, schema) -> list[dict]:
     """Validate a HED string against a schema.
-    
+
     Parameters:
         hed_string (str): The HED string to validate.
         schema (HedSchema): The schema to validate against.
-        
+
     Returns:
         list: A list of validation issues, empty if valid.
-        
+
     Example:
         >>> schema = load_schema_version('8.4.0')
         >>> issues = validate_hed_string("Event", schema)
@@ -173,22 +173,24 @@ Example test:
 import unittest
 from hed import HedString, load_schema
 
+
 class TestHedValidation(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.schema = load_schema_version('8.4.0')
-    
+        cls.schema = load_schema_version("8.4.0")
+
     def test_valid_hed_string(self):
         hed_string = HedString("Event", self.schema)
         issues = hed_string.validate()
         self.assertEqual(len(issues), 0)
-    
+
     def test_invalid_hed_string(self):
         hed_string = HedString("InvalidTag", self.schema)
         issues = hed_string.validate()
         self.assertGreater(len(issues), 0)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
 ```
 
