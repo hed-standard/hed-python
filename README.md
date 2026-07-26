@@ -287,7 +287,8 @@ By default, HED schemas are cached in `~/.hedtools/` (location varies by OS).
 ```python
 # Change the cache directory
 import hed
-hed.schema.set_cache_directory('/custom/path/to/cache')
+
+hed.schema.set_cache_directory("/custom/path/to/cache")
 ```
 
 Starting with `hedtools 0.2.0`, local copies of recent schema versions are bundled within the package for offline access.

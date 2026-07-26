@@ -113,7 +113,9 @@ schema = load_schema_version("8.4.0")
 schema = load_schema("path/to/schema.xml")
 
 # Load from URL (this URL is the raw content of a HED standard prerelease)
-schema = load_schema("https://raw.githubusercontent.com/hed-standard/hed-schemas/refs/heads/main/standard_schema/prerelease/HED8.5.0.json")
+schema = load_schema(
+    "https://raw.githubusercontent.com/hed-standard/hed-schemas/refs/heads/main/standard_schema/prerelease/HED8.5.0.json"
+)
 ```
 
 **Note:** The released schemas are automatically downloaded and cached in `~/.hedtools/` for offline use.
@@ -152,7 +154,6 @@ from hed import HedString, load_schema_version
 schema = load_schema_version("8.4.0")
 hed_string = HedString("Red, Blue, Green", schema)
 issues = hed_string.validate()
-
 ```
 
 ### Validating a BIDS dataset
@@ -194,10 +195,7 @@ from hed import TabularInput, load_schema_version
 schema = load_schema_version("8.4.0")
 
 # Load events file with sidecar
-tabular = TabularInput(
-    file="sub-01_task-rest_events.tsv",
-    sidecar="task-rest_events.json"
-)
+tabular = TabularInput(file="sub-01_task-rest_events.tsv", sidecar="task-rest_events.json")
 
 # Validate the file
 issues = tabular.validate(schema)
@@ -360,8 +358,8 @@ When you call `load_schema_version("8.4.0")`, HEDTools looks for that version in
 ```python
 from hed.schema import load_schema_version
 
-schema = load_schema_version("8.4.0")   # downloaded and cached on first use
-schema = load_schema_version("8.4.0")   # reused from disk on every call after that
+schema = load_schema_version("8.4.0")  # downloaded and cached on first use
+schema = load_schema_version("8.4.0")  # reused from disk on every call after that
 ```
 
 Nothing here is fetched again once a version is cached, since released schemas are immutable — the same version number never changes content.
@@ -445,8 +443,8 @@ To prepare an environment that won't have network access later (an offline works
 ```python
 from hed.schema import cache_xml_versions, set_cache_directory
 
-set_cache_directory("/opt/hed_cache")   # optional: a specific location to ship or mount
-cache_xml_versions()                    # downloads every discovered version's full content
+set_cache_directory("/opt/hed_cache")  # optional: a specific location to ship or mount
+cache_xml_versions()  # downloads every discovered version's full content
 ```
 
 This is a much heavier operation than `get_available_hed_versions()` — it downloads every version it finds, not just a listing — so it's meant to be run once (e.g. during image build or setup), not on a request-handling hot path. It's throttled independently (won't re-run within 30 minutes of its last successful run in the same cache folder) to avoid accidental repeated use.
@@ -992,6 +990,7 @@ If you are annotating an NWB dataset, the instructions are somewhat similar but 
 ```python
 # Check cache location
 from hed.schema import get_cache_directory
+
 print(get_cache_directory())
 ```
 
