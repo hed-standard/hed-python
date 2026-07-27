@@ -62,7 +62,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "ruff>=0.8.0",
+    "ruff>=0.16.0",
     "typos>=1.29.0",
     "mdformat>=0.7.0",
     "mdformat-myst>=0.1.5",
