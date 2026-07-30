@@ -414,6 +414,11 @@ get_available_hed_versions(
 )
 ```
 
+For a manifest hosted on `raw.githubusercontent.com`, schema files are read from the same
+owner/repository and pinned to the manifest's `repo_commit`. On other hosts, each manifest `file`
+path is resolved relative to `manifest_url`, so a mirror should publish the manifest and schema tree
+under the same base URL.
+
 If the manifest can't be read or uses an unsupported format, HEDTools falls back to the existing REST API directory crawl. The deprecated `hed_base_urls`, `hed_library_urls`, and `skip_folders` arguments still select that crawl when they have non-default values, but they will be removed in HEDTools 2.0.
 
 The manifest and REST results share a small on-disk metadata cache (separate from the downloaded schema content), checked in two increasingly cheap tiers before making a real request:
@@ -459,7 +464,7 @@ set_cache_directory("/opt/hed_cache")  # optional: a specific location to ship o
 cache_xml_versions()  # downloads every discovered version's full content
 ```
 
-By default, `cache_xml_versions()` discovers released and prerelease schemas from the same manifest and then downloads their XML files. This avoids the GitHub REST API directory crawl and reuses a recently fetched manifest from `get_available_hed_versions()`. A fork or mirror can be selected with `manifest_url`.
+By default, `cache_xml_versions()` discovers released and prerelease schemas from the same manifest and then downloads their XML files. This avoids the GitHub REST API directory crawl and reuses a recently fetched manifest from `get_available_hed_versions()`. A fork or mirror can be selected with `manifest_url`; schema files follow the URL rules described above.
 
 The old `hed_base_urls`, `hed_library_urls`, and `skip_folders` arguments still work for custom REST layouts during the 1.x deprecation period. `skip_folders` filters only top-level library folders; nested directories inside `hedxml` and `prerelease` are always ignored.
 

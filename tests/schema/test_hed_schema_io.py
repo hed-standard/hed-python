@@ -240,12 +240,12 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(cache_one.call_count, 3)
 
     def test_cache_xml_versions_accepts_custom_manifest(self):
-        """A fork can use its own manifest for bulk caching."""
-        custom_manifest_url = "https://example.test/schema_versions.json"
+        """A fork manifest should also select schema content from that fork."""
+        custom_manifest_url = "https://raw.githubusercontent.com/example/hed-schemas/dev/schema_versions.json"
         with tempfile.TemporaryDirectory() as tmp_dir:
             with (
                 patch.object(hed_cache, "_get_json_with_etag", return_value=SAMPLE_CACHE_MANIFEST) as manifest_fetch,
-                patch.object(hed_cache, "_cache_hed_version", return_value="cached"),
+                patch.object(hed_cache, "_cache_hed_version", return_value="cached") as cache_one,
             ):
                 result = hed_cache.cache_xml_versions(
                     cache_folder=tmp_dir,
@@ -254,6 +254,16 @@ class TestHedSchema(unittest.TestCase):
 
         self.assertEqual(result, 0)
         self.assertEqual(manifest_fetch.call_args.args[0], custom_manifest_url)
+        download_urls = [call.args[2][1] for call in cache_one.call_args_list]
+        self.assertTrue(download_urls)
+        self.assertTrue(
+            all(
+                url.startswith(
+                    f"https://raw.githubusercontent.com/example/hed-schemas/{SAMPLE_CACHE_MANIFEST['repo_commit']}/"
+                )
+                for url in download_urls
+            )
+        )
 
     def test_cache_xml_versions_falls_back_when_manifest_is_unsupported(self):
         """An unsupported manifest must leave the REST bulk-cache path available."""

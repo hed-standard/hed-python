@@ -234,7 +234,7 @@ def cache_xml_versions(
     skip_folders=DEFAULT_SKIP_FOLDERS,
     cache_folder=None,
     manifest_url=MANIFEST_URL,
-) -> float:
+) -> int:
     """Cache all released and prerelease schemas.
 
     Parameters:
@@ -248,8 +248,8 @@ def cache_xml_versions(
                             REST arguments have their default values.
 
     Returns:
-        float: Returns -1 if cache failed for any reason, including having been cached too recently.
-               Returns 0 if it successfully cached this time.
+        int: Returns -1 if cache failed for any reason, including having been cached too recently.
+             Returns 0 if it successfully cached this time.
 
     Notes:
         - By default, version discovery uses the manifest rather than GitHub's REST API.
@@ -294,7 +294,11 @@ def cache_xml_versions(
                         cache_time_threshold=AVAILABLE_VERSIONS_TIME_THRESHOLD,
                     )
                     if _manifest.is_supported(manifest_json):
-                        all_hed_versions = _manifest.all_version_infos(manifest_json, check_prerelease=True)
+                        all_hed_versions = _manifest.all_version_infos(
+                            manifest_json,
+                            check_prerelease=True,
+                            manifest_url=manifest_url,
+                        )
                 except Exception:
                     pass
                 finally:
