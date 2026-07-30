@@ -406,7 +406,17 @@ If GitHub can't be reached (offline, rate-limited, etc.), `get_available_hed_ver
 
 `get_available_hed_versions()` is designed to be called often — e.g. every time a web page loads — without adding up to a lot of GitHub traffic.
 
-For the standard hed-schemas repository it reads a single repository-level manifest (`schema_versions.json`) from GitHub's raw/CDN host in one request. That host is *not* subject to GitHub's REST API rate limit, so this stays cheap even for an unauthenticated, frequently-polling caller. If that manifest can't be read — for example when you point the function at a custom or forked URL set, or the fetch fails — it falls back to crawling the REST API directory listings, backed by its own small on-disk cache (separate from the downloaded schema content) checked in two increasingly cheap tiers before making a real request:
+For the standard hed-schemas repository it reads a single repository-level manifest (`schema_versions.json`) from GitHub's raw/CDN host in one request. That host is *not* subject to GitHub's REST API rate limit, so this stays cheap even for an unauthenticated, frequently-polling caller. A fork or mirror can provide the same manifest format through the `manifest_url` argument:
+
+```python
+get_available_hed_versions(
+    manifest_url="https://example.org/hed/schema_versions.json",
+)
+```
+
+If the manifest can't be read or uses an unsupported format, HEDTools falls back to the existing REST API directory crawl. The deprecated `hed_base_urls`, `hed_library_urls`, and `skip_folders` arguments still select that crawl when they have non-default values, but they will be removed in HEDTools 2.0.
+
+The manifest and REST results share a small on-disk metadata cache (separate from the downloaded schema content), checked in two increasingly cheap tiers before making a real request:
 
 1. **Recently checked** — if a given piece of information was checked within the last `cache_time_threshold` seconds (60 by default), it's reused with no network call at all.
 2. **Confirmed unchanged** — otherwise, a conditional request is made using a stored ETag. If GitHub confirms nothing changed (a 304 response), the previous result is reused.
@@ -423,6 +433,8 @@ get_available_hed_versions(force_refresh=True)
 ```
 
 GitHub's API allows 60 requests per hour per IP address for unauthenticated callers, versus 5,000 per hour for authenticated ones. Authentication also makes conditional (ETag) requests free of charge against that limit — for unauthenticated callers, even a confirmed-unchanged response still counts against the 60/hour budget.
+
+The default manifest request does not need a GitHub token. A token is useful only when HEDTools has to use the REST fallback or when custom REST URLs are supplied.
 
 If your use of HEDTools makes frequent GitHub calls — a web service checking for new versions, a CI pipeline, a container that restarts often — set a GitHub personal access token (no special scopes needed; it only needs to read a public repository) as an environment variable:
 
@@ -446,6 +458,10 @@ from hed.schema import cache_xml_versions, set_cache_directory
 set_cache_directory("/opt/hed_cache")  # optional: a specific location to ship or mount
 cache_xml_versions()  # downloads every discovered version's full content
 ```
+
+By default, `cache_xml_versions()` discovers released and prerelease schemas from the same manifest and then downloads their XML files. This avoids the GitHub REST API directory crawl and reuses a recently fetched manifest from `get_available_hed_versions()`. A fork or mirror can be selected with `manifest_url`.
+
+The old `hed_base_urls`, `hed_library_urls`, and `skip_folders` arguments still work for custom REST layouts during the 1.x deprecation period. `skip_folders` filters only top-level library folders; nested directories inside `hedxml` and `prerelease` are always ignored.
 
 This is a much heavier operation than `get_available_hed_versions()` — it downloads every version it finds, not just a listing — so it's meant to be run once (e.g. during image build or setup), not on a request-handling hot path. It's throttled independently (won't re-run within 30 minutes of its last successful run in the same cache folder) to avoid accidental repeated use.
 

@@ -114,6 +114,37 @@ def available_versions(manifest, library_name=None, check_prerelease=False):
     return _versions_for_key(manifest, manifest_key, check_prerelease)
 
 
+def all_version_infos(manifest, check_prerelease=True):
+    """Return manifest entries in the shape used by the schema cache.
+
+    Parameters:
+        manifest (dict): A supported manifest (see :func:`is_supported`).
+        check_prerelease (bool): If True, include prerelease versions.
+
+    Returns:
+        dict: ``{library_name_or_None: {version: (sha, download_url, prerelease)}}``.
+              Deprecated versions are never included.
+    """
+    result = {}
+    ref = manifest.get("repo_commit") or "main"
+    for manifest_key, categories in manifest.get("libraries", {}).items():
+        library_name = None if manifest_key == _STANDARD_MANIFEST_KEY else manifest_key
+        version_infos = {}
+        selected_categories = [("released", False)]
+        if check_prerelease:
+            selected_categories.append(("prerelease", True))
+        for category, is_prerelease in selected_categories:
+            for entry in categories.get(category, []):
+                version_infos[entry["version"]] = (
+                    entry["sha"],
+                    raw_url_for(entry["file"], ref),
+                    is_prerelease,
+                )
+        if version_infos:
+            result[library_name] = version_infos
+    return result
+
+
 def find_version_info(manifest, xml_version, library_name, ref=None):
     """Locate one version in ``manifest`` and return its download info, or None if absent.
 

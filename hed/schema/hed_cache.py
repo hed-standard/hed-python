@@ -5,6 +5,7 @@ from __future__ import annotations
 import shutil
 import os
 import time
+import warnings
 
 import json
 from hashlib import sha1
@@ -18,6 +19,7 @@ from typing import Union
 from semantic_version import Version
 from hed.schema.hed_cache_lock import CacheError, CacheLock
 from hed.schema.schema_io.schema_util import url_to_file, make_url_request
+from hed.schema.schema_version_manifest import MANIFEST_URL
 from pathlib import Path
 import urllib
 from urllib.error import URLError
@@ -231,26 +233,44 @@ def cache_xml_versions(
     hed_library_urls=DEFAULT_LIBRARY_URL_LIST,
     skip_folders=DEFAULT_SKIP_FOLDERS,
     cache_folder=None,
+    manifest_url=MANIFEST_URL,
 ) -> float:
-    """Cache all schemas at the given URLs.
+    """Cache all released and prerelease schemas.
 
     Parameters:
-        hed_base_urls (str or list): Path or list of paths. These should point to a single folder.
-        hed_library_urls (str or list): Path or list of paths. These should point to folder containing library folders.
-        skip_folders (list): A list of subfolders to skip over when downloading.
+        hed_base_urls (str or list): Deprecated REST URL(s) for the standard schema folder.
+                                     Non-default values continue to use the REST crawl.
+        hed_library_urls (str or list): Deprecated REST URL(s) containing library schema folders.
+                                        Non-default values continue to use the REST crawl.
+        skip_folders (list): Deprecated list of top-level library folders to skip during a REST crawl.
         cache_folder (str): The folder holding the cache.
+        manifest_url (str): URL of a ``schema_versions.json`` manifest. Used when the deprecated
+                            REST arguments have their default values.
 
     Returns:
         float: Returns -1 if cache failed for any reason, including having been cached too recently.
                Returns 0 if it successfully cached this time.
 
     Notes:
-        - The Default skip_folders is 'deprecated'.
+        - By default, version discovery uses the manifest rather than GitHub's REST API.
+        - Custom REST arguments are still honored and fall back to the existing directory crawl.
+        - ``skip_folders`` only filters top-level library folders. Directory entries inside a
+          schema's ``hedxml`` or ``prerelease`` folder are always ignored.
         - The HED cache folder defaults to HED_CACHE_DIRECTORY.
-        - The directories on GitHub are of the form:
-            https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema
 
     """
+    if isinstance(hed_base_urls, str):
+        hed_base_urls = [hed_base_urls]
+    else:
+        hed_base_urls = list(hed_base_urls)
+    if isinstance(hed_library_urls, str):
+        hed_library_urls = [hed_library_urls]
+    else:
+        hed_library_urls = list(hed_library_urls)
+    skip_folders = tuple(skip_folders)
+    use_manifest = _rest_arguments_are_default(hed_base_urls, hed_library_urls, skip_folders)
+    _warn_deprecated_rest_arguments(hed_base_urls, hed_library_urls, skip_folders)
+
     if not cache_folder:
         cache_folder = HED_CACHE_DIRECTORY
 
@@ -260,19 +280,37 @@ def cache_xml_versions(
 
     try:
         with CacheLock(cache_folder):
-            if isinstance(hed_base_urls, str):
-                hed_base_urls = [hed_base_urls]
-            if isinstance(hed_library_urls, str):
-                hed_library_urls = [hed_library_urls]
-            all_hed_versions = {}
-            for hed_base_url in hed_base_urls:
-                new_hed_versions = _get_hed_xml_versions_one_library(hed_base_url)
-                _merge_in_versions(all_hed_versions, new_hed_versions)
-            for hed_library_url in hed_library_urls:
-                new_hed_versions = _get_hed_xml_versions_from_url_all_libraries(
-                    hed_library_url, skip_folders=skip_folders
-                )
-                _merge_in_versions(all_hed_versions, new_hed_versions)
+            all_hed_versions = None
+            if use_manifest:
+                from hed.schema import schema_version_manifest as _manifest
+
+                url_cache = _read_available_versions_cache(cache_folder)
+                cache_before = json.dumps(url_cache, sort_keys=True)
+                try:
+                    manifest_json = _get_json_with_etag(
+                        manifest_url,
+                        url_cache,
+                        force_refresh=False,
+                        cache_time_threshold=AVAILABLE_VERSIONS_TIME_THRESHOLD,
+                    )
+                    if _manifest.is_supported(manifest_json):
+                        all_hed_versions = _manifest.all_version_infos(manifest_json, check_prerelease=True)
+                except Exception:
+                    pass
+                finally:
+                    if json.dumps(url_cache, sort_keys=True) != cache_before:
+                        _write_available_versions_cache(cache_folder, url_cache)
+
+            if all_hed_versions is None:
+                all_hed_versions = {}
+                for hed_base_url in hed_base_urls:
+                    new_hed_versions = _get_hed_xml_versions_one_library(hed_base_url)
+                    _merge_in_versions(all_hed_versions, new_hed_versions)
+                for hed_library_url in hed_library_urls:
+                    new_hed_versions = _get_hed_xml_versions_from_url_all_libraries(
+                        hed_library_url, skip_folders=skip_folders
+                    )
+                    _merge_in_versions(all_hed_versions, new_hed_versions)
 
             for library_name, hed_versions in all_hed_versions.items():
                 for version, version_info in hed_versions.items():
@@ -293,39 +331,30 @@ def get_available_hed_versions(
     cache_folder=None,
     force_refresh=False,
     cache_time_threshold=AVAILABLE_VERSIONS_TIME_THRESHOLD,
+    manifest_url=MANIFEST_URL,
 ) -> Union[list, dict]:
     """List HED schema versions available on GitHub, without downloading or caching their content.
 
-    For the canonical hed-schemas URLs this reads a single repository-level manifest
-    (schema_versions.json) from the raw/CDN host in one request - see schema_version_manifest -
-    which is not subject to GitHub's REST API rate limit. If that manifest can't be read (a
-    custom/forked URL set, or any fetch/parse failure) the function falls back to crawling
-    GitHub's REST API directory listings. That fallback never fetches a schema file's actual XML
-    content, but listing everything can still add up to a couple dozen small JSON directory-listing
-    requests in one call: 1-2 for the standard schema (plus its prerelease folder), 1 to enumerate
-    the library folders, and 1-2 more per library folder found. That worst case only applies to
-    library_name="all"; passing library_name=None (the default) skips every library-related
-    request entirely, and passing a specific library name skips the standard-schema request and
-    restricts the library side to just that one library's folder.
+    With the default arguments, this reads one repository-level ``schema_versions.json`` manifest
+    from GitHub's raw-content host. A compatible manifest from a fork or mirror can be selected
+    with ``manifest_url``. If the manifest cannot be read or parsed, the function falls back to
+    GitHub's REST API directory listings.
 
-    It's the live-from-GitHub counterpart to get_hed_versions() (which only reports what's already
-    bundled with hedtools or previously cached on disk, with zero network calls), and it's still
-    far cheaper than cache_xml_versions() (which makes those same listing calls AND then downloads
-    every version's full content - fine to do once for a version you're about to use, wasteful to
-    do just to show a list of names). The REST fallback caches its own results on disk (see Notes)
-    so that a caller polling it frequently - e.g. a web service handling many requests - doesn't
-    trip GitHub's API rate limits. Callers don't need to implement their own throttling on top of
-    this.
+    This is the live counterpart to :func:`get_hed_versions`, which reports only bundled or
+    previously cached schemas without making a network request. This function lists versions but
+    never downloads their XML content. The manifest and REST results are cached on disk so callers
+    can safely use the function for frequently refreshed interfaces.
 
     Typical usage is: call this to populate something like a version-picker dropdown, then only
     fetch the one version the user actually selects, via load_schema_version() (which downloads
     and caches just that version, lazily, the first time it's needed).
 
     Parameters:
-        hed_base_urls (str or list): Path or list of paths for the standard schema folder(s).
-        hed_library_urls (str or list): Path or list of paths for folder(s) containing library
-                                        schema subfolders.
-        skip_folders (list): A list of library subfolders to skip. Default is 'deprecated'.
+        hed_base_urls (str or list): Deprecated REST URL(s) for the standard schema folder.
+                                     Non-default values continue to use the REST crawl.
+        hed_library_urls (str or list): Deprecated REST URL(s) containing library schema folders.
+                                        Non-default values continue to use the REST crawl.
+        skip_folders (list): Deprecated list of top-level library folders to skip during a REST crawl.
         library_name (str or None): None retrieves the standard schema only. Pass "all" to
                                     retrieve all standard and library schemas as a dict.
                                     Pass a specific library name to retrieve just that library.
@@ -343,6 +372,8 @@ def get_available_hed_versions(
                                    Default is 60 seconds - short enough that new releases
                                    show up quickly, long enough that a caller polling this in
                                    a tight loop doesn't generate a request per call.
+        manifest_url (str): URL of a ``schema_versions.json`` manifest. Used when the deprecated
+                            REST arguments have their default values.
 
     Returns:
         Union[list, dict]: List of version numbers, or {library_name: [versions]} if
@@ -386,14 +417,18 @@ def get_available_hed_versions(
             ['8.5.0', '8.4.0', '8.3.0', ...]
 
     Notes:
-        - The manifest fast path is used only for the canonical hed-schemas URLs (the defaults
-          for hed_base_urls, hed_library_urls, and skip_folders). Any other URL set, or any
-          failure reading or parsing the manifest, transparently falls through to the REST crawl
-          described below, so behavior is never worse than before.
+        - The manifest path is used when ``hed_base_urls``, ``hed_library_urls``, and
+          ``skip_folders`` have their default values. Pass ``manifest_url`` to use a compatible
+          manifest from a fork or mirror.
+        - Non-default REST arguments are still honored and bypass the manifest path. Any failure
+          reading or parsing a manifest transparently falls through to the REST crawl.
+        - ``skip_folders`` only filters top-level library folders. Directory entries inside a
+          schema's ``hedxml`` or ``prerelease`` folder are always ignored.
         - The REST fallback caches per GitHub URL (there are several under the hood: the standard
           schema folder and its prerelease folder, the library-folder listing, and each
           library's own folder and prerelease folder), in a small metadata file
           (available_versions_cache.json) inside the cache folder, in two layers:
+
           1. If a given URL was checked within cache_time_threshold seconds (default 60),
              it's reused with no network call at all.
           2. Otherwise, a conditional GET is made using the ETag from the last time that URL
@@ -407,37 +442,36 @@ def get_available_hed_versions(
           fetched and failed.
         - This uses a much shorter threshold than the one in hed_cache_lock.py, which throttles
           cache_xml_versions()'s far more expensive per-version download step.
-        - Unlike cache_xml_versions(), this never writes schema content - the on-disk cache
-          used here holds only the same small directory-listing JSON GitHub itself returns
-          (version names, SHAs, and download URLs), never a schema file itself. It has no
-          interaction with get_hed_versions(), cache_local_versions(), or the schema files
-          cache_xml_versions() downloads.
+        - Unlike cache_xml_versions(), this never writes schema content. Its on-disk cache holds
+          only the manifest or small REST directory listings, never a schema file itself.
         - force_refresh=True skips layer 1 above but still uses layer 2 (the conditional GET),
           so it stays cheap when nothing has actually changed.
     """
     if isinstance(hed_base_urls, str):
         hed_base_urls = [hed_base_urls]
+    else:
+        hed_base_urls = list(hed_base_urls)
     if isinstance(hed_library_urls, str):
         hed_library_urls = [hed_library_urls]
+    else:
+        hed_library_urls = list(hed_library_urls)
+    skip_folders = tuple(skip_folders)
+    use_manifest = _rest_arguments_are_default(hed_base_urls, hed_library_urls, skip_folders)
+    _warn_deprecated_rest_arguments(hed_base_urls, hed_library_urls, skip_folders)
     if not cache_folder:
         cache_folder = HED_CACHE_DIRECTORY
 
     url_cache = _read_available_versions_cache(cache_folder)
     cache_before = json.dumps(url_cache, sort_keys=True)
 
-    # Fast path: read the repo-level manifest in a single fetch from the raw/CDN host (not subject
-    # to the GitHub REST API rate limit) instead of crawling the API directory listings. Only used
-    # for the canonical hed-schemas URLs; any custom/forked URL set falls through to the crawl. Any
-    # failure (unreachable, malformed, or an unrecognized manifest format) also falls through.
-    if (
-        list(hed_base_urls) == list(DEFAULT_URL_LIST)
-        and list(hed_library_urls) == list(DEFAULT_LIBRARY_URL_LIST)
-        and tuple(skip_folders) == tuple(DEFAULT_SKIP_FOLDERS)
-    ):
+    # Fast path: read one repo-level manifest from the raw/CDN host instead of crawling REST
+    # directory listings. A custom manifest URL works as long as the deprecated REST arguments
+    # retain their defaults. Any fetch, parse, or format failure falls through to the REST crawl.
+    if use_manifest:
         from hed.schema import schema_version_manifest as _manifest
 
         try:
-            manifest_json = _get_json_with_etag(_manifest.MANIFEST_URL, url_cache, force_refresh, cache_time_threshold)
+            manifest_json = _get_json_with_etag(manifest_url, url_cache, force_refresh, cache_time_threshold)
             if _manifest.is_supported(manifest_json):
                 if json.dumps(url_cache, sort_keys=True) != cache_before:
                     _write_available_versions_cache(cache_folder, url_cache)
@@ -516,6 +550,35 @@ def get_available_hed_versions(
     if library_name in result:
         return result[library_name]
     return []
+
+
+def _rest_arguments_are_default(hed_base_urls, hed_library_urls, skip_folders):
+    """Return True when the deprecated REST discovery arguments have their default values."""
+    return (
+        list(hed_base_urls) == list(DEFAULT_URL_LIST)
+        and list(hed_library_urls) == list(DEFAULT_LIBRARY_URL_LIST)
+        and tuple(skip_folders) == tuple(DEFAULT_SKIP_FOLDERS)
+    )
+
+
+def _warn_deprecated_rest_arguments(hed_base_urls, hed_library_urls, skip_folders):
+    """Warn when a caller still relies on custom REST discovery arguments."""
+    changed = []
+    if list(hed_base_urls) != list(DEFAULT_URL_LIST):
+        changed.append("hed_base_urls")
+    if list(hed_library_urls) != list(DEFAULT_LIBRARY_URL_LIST):
+        changed.append("hed_library_urls")
+    if tuple(skip_folders) != tuple(DEFAULT_SKIP_FOLDERS):
+        changed.append("skip_folders")
+    if not changed:
+        return
+
+    warnings.warn(
+        f"{', '.join(changed)} will be removed in HEDTools 2.0. "
+        "Publish a schema_versions.json manifest and pass manifest_url instead.",
+        DeprecationWarning,
+        stacklevel=3,
+    )
 
 
 def _read_available_versions_cache(cache_folder):
@@ -829,7 +892,8 @@ def _get_hed_xml_versions_from_url_all_libraries(
         hed_base_library_url(str): A single GitHub API url to cache, which contains library schema folders
                                    The subfolders should be a schema folder containing hedxml and/or prerelease folders.
         library_name(str or None): If str, cache only the named library schemas.
-        skip_folders (list): A list of sub folders to skip over when downloading.
+        skip_folders (list): Top-level library folders to skip. This does not filter
+                             directories inside ``hedxml`` or ``prerelease``.
         etag_cache (dict or None): Passed through to _get_json_with_etag() for every request
                                    this makes, including one per discovered library subfolder.
                                    None (the default) disables conditional/cached requests.
@@ -840,7 +904,7 @@ def _get_hed_xml_versions_from_url_all_libraries(
         Union[list, dict]: List of version numbers or dictionary {library_name: [versions]}.
 
     Notes:
-        - The Default skip_folders is 'deprecated'.
+        - The default ``skip_folders`` value is ``("deprecated",)``.
         - The HED cache folder defaults to HED_CACHE_DIRECTORY.
         - The directories on GitHub are of the form:
             https://api.github.com/repos/hed-standard/hed-schemas/contents/standard_schema/hedxml
