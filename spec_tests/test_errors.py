@@ -91,12 +91,12 @@ class MyTestCase(unittest.TestCase):
             error_code = info["error_code"]
             all_codes = [error_code] + info.get("alt_codes", [])
             if error_code in skip_tests:
-                print(f"  ⊘ Skipping {error_code} test: {skip_tests[error_code]}")
+                print(f"  [SKIP] Skipping {error_code} test: {skip_tests[error_code]}")
                 self.test_counter["skipped"] += 1
                 continue
             name = info.get("name", "")
             if name in skip_tests:
-                print(f"  ⊘ Skipping '{name}' test: {skip_tests[name]}")
+                print(f"  [SKIP] Skipping '{name}' test: {skip_tests[name]}")
                 self.test_counter["skipped"] += 1
                 continue
             if test_name is not None and name != test_name:
@@ -128,7 +128,7 @@ class MyTestCase(unittest.TestCase):
                     )
                     continue
                 except Exception as e:
-                    print(f"\n⚠️  Error loading schema for test '{name}' in {file_basename}")
+                    print(f"\n[WARN] Error loading schema for test '{name}' in {file_basename}")
                     print(f"   Schema: {schema}")
                     print(f"   Error: {str(e)}")
                     continue
@@ -136,7 +136,7 @@ class MyTestCase(unittest.TestCase):
                 definitions = info.get("definitions", None)
                 def_dict = DefinitionDict(definitions, schema)
                 if def_dict.issues:
-                    print(f"\n⚠️  Definition issues in test '{name}' in {file_basename}")
+                    print(f"\n[WARN] Definition issues in test '{name}' in {file_basename}")
                     print(f"   Definitions: {definitions}")
                     print(f"   Issues: {get_printable_issue_string(def_dict.issues)}")
                 self.assertFalse(def_dict.issues)
@@ -218,7 +218,7 @@ class MyTestCase(unittest.TestCase):
                 self.test_counter["failed"] += 1
                 failure_id = f"{test_file}::{error_code}::{name or 'unnamed'}::{test_type}"
                 print("\n" + "=" * 80)
-                print("❌ TEST FAILURE: Test passed but should have failed")
+                print("[FAIL] TEST FAILURE: Test passed but should have failed")
                 print("=" * 80)
                 print(f"Location:      {test_location}")
                 print(f"Test ID:       {failure_id}")
@@ -244,7 +244,7 @@ class MyTestCase(unittest.TestCase):
                 failure_id = f"{test_file}::{error_code}::{name or 'unnamed'}::{test_type}"
                 actual_codes = [issue["code"] for issue in issues]
                 print("\n" + "=" * 80)
-                print("❌ TEST FAILURE: Wrong error code returned")
+                print("[FAIL] TEST FAILURE: Wrong error code returned")
                 print("=" * 80)
                 print(f"Location:      {test_location}")
                 print(f"Test ID:       {failure_id}")
@@ -273,7 +273,7 @@ class MyTestCase(unittest.TestCase):
                 failure_id = f"{test_file}::{error_code}::{name or 'unnamed'}::{test_type}"
                 actual_codes = [issue["code"] for issue in issues]
                 print("\n" + "=" * 80)
-                print("❌ TEST FAILURE: Test failed but should have passed")
+                print("[FAIL] TEST FAILURE: Test failed but should have passed")
                 print("=" * 80)
                 print(f"Location:      {test_location}")
                 print(f"Test ID:       {failure_id}")
@@ -457,7 +457,7 @@ class MyTestCase(unittest.TestCase):
                 try:
                     loaded_schema = from_string(schema_string, schema_format=".mediawiki")
                     issues = loaded_schema.check_compliance()
-                    # Filter annotation compliance warnings — these are noise from schemas
+                    # Filter annotation compliance warnings - these are noise from schemas
                     # lacking complete ExternalAnnotations/Prefixes/Sources sections
                     _ANNOTATION_CODES = {
                         "SCHEMA_ANNOTATION_PREFIX_MISSING",
@@ -517,9 +517,9 @@ class MyTestCase(unittest.TestCase):
         print("=" * 80)
 
         if len(self.fail_count) == 0:
-            print("✅ All tests passed!")
+            print("[OK] All tests passed!")
         else:
-            print(f"\n❌ {len(self.fail_count)} test(s) failed:\n")
+            print(f"\n[FAIL] {len(self.fail_count)} test(s) failed:\n")
             for i, failed_test in enumerate(self.fail_count, 1):
                 if isinstance(failed_test, dict):
                     print(f"  {i}. {failed_test['location']}")
