@@ -30,7 +30,7 @@ CI runs ruff check, ruff format --check, typos, the unittest suite, and the spec
 
 ## Conventions that differ from defaults
 
-- **ASCII only** in prose, code, comments, docstrings, and filenames: `-` not em or en dashes, `->` not arrows, `...` not an ellipsis character, straight quotes, no emoji. Exception: genuine data (author names, dataset titles, recorded API responses) keeps whatever characters it actually contains.
+- **ASCII only** in prose, code, comments, docstrings, and filenames: `-` not em or en dashes, `->` not arrows, `...` not an ellipsis character, straight quotes, no emoji. Applies to new and edited content; never sweep existing files for it as a side effect of other work. Exception: genuine data (author names, dataset titles, recorded API responses) keeps whatever characters it actually contains.
 - Line length 120; ruff rules live in `pyproject.toml` under `[tool.ruff]`.
 - Google-style docstrings for public APIs, with `Parameters:` not `Args:`.
 - Markdown headers in sentence case: first word, proper nouns, and acronyms.
