@@ -12,8 +12,5 @@
     "python.testing.cwd": "${workspaceFolder}",
     "files.eol": "\n",
     "files.trimTrailingWhitespace": true,
-    "files.insertFinalNewline": true,
-    "chat.tools.terminal.autoApprove": {
-        "git submodule": true
-    }
+    "files.insertFinalNewline": true
 }
