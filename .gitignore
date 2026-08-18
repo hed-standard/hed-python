@@ -119,8 +119,8 @@ site/
 #machine specific files
 .vimrc
 
-# direnv - local, per-checkout environment variables (e.g. HED_GITHUB_TOKEN).
-# Never committed; see .envrc for a template.
+# Real tokens and machine values; .env.example is the committed documentation
+.env
 .envrc
 
 # Pycharm
@@ -129,8 +129,15 @@ site/
 /.venv/
 config.py
 
-# VS Code
-.vscode/
+# VS Code - everything except the portable workspace settings
+.vscode/*
+!.vscode/settings.json
+
+# Personal per-repo Claude Code notes (imports .status/local-environment.md)
+CLAUDE.local.md
+
+# Personal per-repo settings (absolute paths, claudeMdExcludes)
+.claude/settings.local.json
 
 ############
 ## Windows
