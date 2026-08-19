@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from hed.errors import HedFileError
 from hed.errors.error_types import SchemaErrors
@@ -11,6 +11,7 @@ import os
 import json
 import math
 import tempfile
+import warnings
 from urllib.error import URLError
 from semantic_version import Version
 from hed.errors import HedExceptions
@@ -18,6 +19,42 @@ from hed.schema import HedKey
 from hed.schema import hed_cache
 from hed import schema
 import shutil
+
+
+SAMPLE_CACHE_MANIFEST = {
+    "manifest_format_version": 1,
+    "repo_commit": "abc123",
+    "libraries": {
+        "": {
+            "released": [
+                {
+                    "version": "8.4.0",
+                    "file": "standard_schema/hedxml/HED8.4.0.xml",
+                    "sha": "sha840",
+                }
+            ],
+            "prerelease": [
+                {
+                    "version": "8.5.0",
+                    "file": "standard_schema/prerelease/HED8.5.0.xml",
+                    "sha": "sha850",
+                }
+            ],
+            "deprecated": [],
+        },
+        "score": {
+            "released": [
+                {
+                    "version": "2.1.0",
+                    "file": "library_schemas/score/hedxml/HED_score_2.1.0.xml",
+                    "sha": "shascore",
+                }
+            ],
+            "prerelease": [],
+            "deprecated": [],
+        },
+    },
+}
 
 
 def _assert_valid_sorted_versions(test_case, versions):
@@ -164,8 +201,11 @@ class TestHedSchema(unittest.TestCase):
         cache always contains at least the bundled released schemas.
         """
         with tempfile.TemporaryDirectory() as tmp_dir:
-            with patch.object(
-                hed_cache, "_get_hed_xml_versions_one_library", side_effect=URLError("simulated failure")
+            with (
+                patch.object(hed_cache, "_get_json_with_etag", side_effect=URLError("simulated manifest failure")),
+                patch.object(
+                    hed_cache, "_get_hed_xml_versions_one_library", side_effect=URLError("simulated REST failure")
+                ),
             ):
                 result = hed_cache.cache_xml_versions(cache_folder=tmp_dir)
 
@@ -181,6 +221,130 @@ class TestHedSchema(unittest.TestCase):
             self.assertTrue(standard, "standard schemas must be in cache after failed cache_xml_versions")
             score = hed_cache.get_hed_versions(tmp_dir, library_name="score")
             self.assertTrue(score, "score schemas must be in cache after failed cache_xml_versions")
+
+    def test_cache_xml_versions_uses_manifest_for_default_urls(self):
+        """The default bulk-cache path should not call GitHub's REST discovery helpers."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with (
+                patch.object(hed_cache, "_get_json_with_etag", return_value=SAMPLE_CACHE_MANIFEST) as manifest_fetch,
+                patch.object(hed_cache, "_get_hed_xml_versions_one_library") as standard_rest,
+                patch.object(hed_cache, "_get_hed_xml_versions_from_url_all_libraries") as library_rest,
+                patch.object(hed_cache, "_cache_hed_version", return_value="cached") as cache_one,
+            ):
+                result = hed_cache.cache_xml_versions(cache_folder=tmp_dir)
+
+        self.assertEqual(result, 0)
+        self.assertEqual(manifest_fetch.call_args.args[0], hed_cache.MANIFEST_URL)
+        standard_rest.assert_not_called()
+        library_rest.assert_not_called()
+        self.assertEqual(cache_one.call_count, 3)
+
+    def test_cache_xml_versions_accepts_custom_manifest(self):
+        """A fork manifest should also select schema content from that fork."""
+        custom_manifest_url = "https://raw.githubusercontent.com/example/hed-schemas/dev/schema_versions.json"
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with (
+                patch.object(hed_cache, "_get_json_with_etag", return_value=SAMPLE_CACHE_MANIFEST) as manifest_fetch,
+                patch.object(hed_cache, "_cache_hed_version", return_value="cached") as cache_one,
+            ):
+                result = hed_cache.cache_xml_versions(
+                    cache_folder=tmp_dir,
+                    manifest_url=custom_manifest_url,
+                )
+
+        self.assertEqual(result, 0)
+        self.assertEqual(manifest_fetch.call_args.args[0], custom_manifest_url)
+        download_urls = [call.args[2][1] for call in cache_one.call_args_list]
+        self.assertTrue(download_urls)
+        self.assertTrue(
+            all(
+                url.startswith(
+                    f"https://raw.githubusercontent.com/example/hed-schemas/{SAMPLE_CACHE_MANIFEST['repo_commit']}/"
+                )
+                for url in download_urls
+            )
+        )
+
+    def test_cache_xml_versions_falls_back_when_manifest_is_unsupported(self):
+        """An unsupported manifest must leave the REST bulk-cache path available."""
+        rest_versions = {None: {"8.4.0": ("sha840", "https://example.test/HED8.4.0.xml", False)}}
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with (
+                patch.object(
+                    hed_cache,
+                    "_get_json_with_etag",
+                    return_value={"manifest_format_version": 2, "libraries": {}},
+                ),
+                patch.object(
+                    hed_cache,
+                    "_get_hed_xml_versions_one_library",
+                    return_value=rest_versions,
+                ) as rest_fetch,
+                patch.object(hed_cache, "_get_hed_xml_versions_from_url_all_libraries", return_value={}),
+                patch.object(hed_cache, "_cache_hed_version", return_value="cached"),
+            ):
+                result = hed_cache.cache_xml_versions(cache_folder=tmp_dir)
+
+        self.assertEqual(result, 0)
+        rest_fetch.assert_called_once()
+
+    def test_cache_xml_versions_custom_urls_still_use_rest(self):
+        """Non-default REST arguments remain functional during the deprecation period."""
+        custom_standard_url = "https://example.test/standard"
+        rest_versions = {None: {"8.4.0": ("sha840", "https://example.test/HED8.4.0.xml", False)}}
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with (
+                patch.object(hed_cache, "_get_json_with_etag") as manifest_fetch,
+                patch.object(hed_cache, "_get_hed_xml_versions_one_library", return_value=rest_versions) as rest_fetch,
+                patch.object(hed_cache, "_get_hed_xml_versions_from_url_all_libraries", return_value={}),
+                patch.object(hed_cache, "_cache_hed_version", return_value="cached"),
+                self.assertWarnsRegex(DeprecationWarning, "hed_base_urls"),
+            ):
+                result = hed_cache.cache_xml_versions(
+                    hed_base_urls=(custom_standard_url,),
+                    cache_folder=tmp_dir,
+                )
+
+        self.assertEqual(result, 0)
+        manifest_fetch.assert_not_called()
+        rest_fetch.assert_called_once_with(custom_standard_url)
+
+    def test_default_rest_arguments_do_not_warn(self):
+        """Explicit or implicit default REST arguments should not produce deprecation noise."""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with (
+                patch.object(hed_cache, "_get_json_with_etag", return_value=SAMPLE_CACHE_MANIFEST),
+                patch.object(hed_cache, "_cache_hed_version", return_value="cached"),
+                warnings.catch_warnings(record=True) as caught,
+            ):
+                warnings.simplefilter("always")
+                hed_cache.cache_xml_versions(
+                    hed_base_urls=list(hed_cache.DEFAULT_URL_LIST),
+                    hed_library_urls=list(hed_cache.DEFAULT_LIBRARY_URL_LIST),
+                    skip_folders=list(hed_cache.DEFAULT_SKIP_FOLDERS),
+                    cache_folder=tmp_dir,
+                )
+
+        self.assertFalse(any(item.category is DeprecationWarning for item in caught))
+
+    def test_manifest_cache_is_reused_by_bulk_cache(self):
+        """Listing versions and then caching them should fetch the manifest only once."""
+        response = Mock()
+        response.read.return_value = json.dumps(SAMPLE_CACHE_MANIFEST).encode("utf-8")
+        response.headers = {"ETag": '"manifest-etag"'}
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with (
+                patch.object(hed_cache, "make_url_request", return_value=response) as request,
+                patch.object(hed_cache, "_cache_hed_version", return_value="cached"),
+            ):
+                versions = hed_cache.get_available_hed_versions(cache_folder=tmp_dir)
+                result = hed_cache.cache_xml_versions(cache_folder=tmp_dir)
+
+        self.assertEqual(versions, ["8.4.0"])
+        self.assertEqual(result, 0)
+        request.assert_called_once()
 
     def test_get_hed_version_path_downloads_only_requested_version(self):
         """get_hed_version_path must download only the single requested version, never the full catalog.
@@ -305,6 +469,77 @@ class TestHedSchema(unittest.TestCase):
                 f"Unexpected files in cache folder: {cached_files}",
             )
 
+    def test_get_available_hed_versions_accepts_custom_manifest(self):
+        """A fork can provide its own manifest without changing the deprecated REST arguments."""
+        custom_manifest_url = "https://example.test/schema_versions.json"
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with patch.object(
+                hed_cache,
+                "_get_json_with_etag",
+                return_value=SAMPLE_CACHE_MANIFEST,
+            ) as manifest_fetch:
+                versions = hed_cache.get_available_hed_versions(
+                    cache_folder=tmp_dir,
+                    manifest_url=custom_manifest_url,
+                )
+
+        self.assertEqual(versions, ["8.4.0"])
+        self.assertEqual(manifest_fetch.call_args.args[0], custom_manifest_url)
+
+    def test_unsupported_manifest_falls_back_to_rest(self):
+        """An unknown manifest format must leave the existing REST fallback available."""
+        rest_versions = {None: {"8.4.0": ("sha840", "https://example.test/HED8.4.0.xml", False)}}
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            with (
+                patch.object(
+                    hed_cache,
+                    "_get_json_with_etag",
+                    return_value={"manifest_format_version": 2, "libraries": {}},
+                ),
+                patch.object(
+                    hed_cache,
+                    "_get_hed_xml_versions_one_library",
+                    return_value=rest_versions,
+                ) as rest_fetch,
+            ):
+                versions = hed_cache.get_available_hed_versions(cache_folder=tmp_dir)
+
+        self.assertEqual(versions, ["8.4.0"])
+        rest_fetch.assert_called_once()
+
+    def test_manifest_and_rest_paths_return_the_same_versions(self):
+        """The transition must not change the version-list result."""
+        rest_versions = {
+            None: {
+                "8.4.0": ("sha840", "https://example.test/HED8.4.0.xml", False),
+                "8.5.0": ("sha850", "https://example.test/HED8.5.0.xml", True),
+            }
+        }
+        with tempfile.TemporaryDirectory() as manifest_cache:
+            with patch.object(hed_cache, "_get_json_with_etag", return_value=SAMPLE_CACHE_MANIFEST):
+                manifest_result = hed_cache.get_available_hed_versions(
+                    check_prerelease=True,
+                    cache_folder=manifest_cache,
+                )
+
+        with tempfile.TemporaryDirectory() as rest_cache:
+            with (
+                patch.object(
+                    hed_cache,
+                    "_get_hed_xml_versions_one_library",
+                    return_value=rest_versions,
+                ),
+                self.assertWarns(DeprecationWarning),
+            ):
+                rest_result = hed_cache.get_available_hed_versions(
+                    hed_base_urls=("https://example.test/standard",),
+                    hed_library_urls=(),
+                    check_prerelease=True,
+                    cache_folder=rest_cache,
+                )
+
+        self.assertEqual(manifest_result, rest_result)
+
     def test_get_available_hed_versions_caches_result(self):
         """A second call within the threshold should reuse the cached listing; force_refresh bypasses it."""
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -425,11 +660,12 @@ class TestHedSchema(unittest.TestCase):
         """
         real_file_url = hed_cache.DEFAULT_HED_LIST_VERSIONS_URL + "/hedxml/HED8.2.0.xml"
         try:
-            result = hed_cache.get_available_hed_versions(
-                hed_base_urls=(),
-                hed_library_urls=(real_file_url,),
-                library_name="all",
-            )
+            with self.assertWarns(DeprecationWarning):
+                result = hed_cache.get_available_hed_versions(
+                    hed_base_urls=(),
+                    hed_library_urls=(real_file_url,),
+                    library_name="all",
+                )
         except Exception as ex:
             self.fail(f"get_available_hed_versions() should degrade gracefully, not raise: {ex!r}")
         self.assertEqual(result, {})

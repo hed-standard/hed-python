@@ -120,6 +120,53 @@ class TestAvailableVersions(unittest.TestCase):
         self.assertEqual(manifest.available_versions(SAMPLE_MANIFEST, "nosuch"), [])
 
 
+class TestAllVersionInfos(unittest.TestCase):
+    def test_cache_shape_includes_released_and_prerelease(self):
+        result = manifest.all_version_infos(SAMPLE_MANIFEST)
+
+        self.assertEqual(
+            result[None]["8.4.0"],
+            (
+                "sha840",
+                "https://raw.githubusercontent.com/hed-standard/hed-schemas/"
+                "abc123def456/standard_schema/hedxml/HED8.4.0.xml",
+                False,
+            ),
+        )
+        self.assertTrue(result[None]["8.5.0"][2])
+        self.assertEqual(result["score"]["2.1.0"][0], "shasc")
+        self.assertNotIn("8.3.5", result[None])
+        self.assertNotIn("2.0.0", result["score"])
+
+    def test_prerelease_can_be_excluded(self):
+        result = manifest.all_version_infos(SAMPLE_MANIFEST, check_prerelease=False)
+
+        self.assertNotIn("8.5.0", result[None])
+        self.assertNotIn("mouse", result)
+
+    def test_custom_github_manifest_uses_same_repository(self):
+        result = manifest.all_version_infos(
+            SAMPLE_MANIFEST,
+            manifest_url="https://raw.githubusercontent.com/example/hed-schemas/dev/schema_versions.json",
+        )
+
+        self.assertEqual(
+            result[None]["8.4.0"][1],
+            "https://raw.githubusercontent.com/example/hed-schemas/abc123def456/standard_schema/hedxml/HED8.4.0.xml",
+        )
+
+    def test_mirror_manifest_resolves_schema_files_relative_to_manifest(self):
+        result = manifest.all_version_infos(
+            SAMPLE_MANIFEST,
+            manifest_url="https://schemas.example.org/hed/schema_versions.json",
+        )
+
+        self.assertEqual(
+            result[None]["8.4.0"][1],
+            "https://schemas.example.org/hed/standard_schema/hedxml/HED8.4.0.xml",
+        )
+
+
 class TestFindVersionInfo(unittest.TestCase):
     def test_released_pins_to_repo_commit(self):
         info = manifest.find_version_info(SAMPLE_MANIFEST, "8.4.0", None)
@@ -167,6 +214,14 @@ class TestRawUrl(unittest.TestCase):
             manifest.raw_url_for("standard_schema/hedxml/HED8.4.0.xml", "deadbeef"),
             "https://raw.githubusercontent.com/hed-standard/hed-schemas/deadbeef/standard_schema/hedxml/HED8.4.0.xml",
         )
+
+    def test_content_url_rejects_malformed_raw_github_manifest_url(self):
+        with self.assertRaisesRegex(ValueError, "Invalid raw GitHub manifest URL"):
+            manifest.content_url_for_manifest(
+                "standard_schema/hedxml/HED8.4.0.xml",
+                "deadbeef",
+                "https://raw.githubusercontent.com/schema_versions.json",
+            )
 
 
 if __name__ == "__main__":

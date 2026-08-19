@@ -1,3 +1,17 @@
+# Release 1.3.0 (unreleased)
+
+## Schema cache cleanup
+
+- `cache_xml_versions()` now uses `schema_versions.json` for default version discovery instead of crawling GitHub's REST API. Released and prerelease schemas are still downloaded and cached as before.
+- Added `manifest_url` to `cache_xml_versions()` and `get_available_hed_versions()` so a fork or mirror can publish a compatible manifest.
+- Non-default `hed_base_urls`, `hed_library_urls`, and `skip_folders` values are still honored through the REST crawl, but now raise `DeprecationWarning`; these arguments are planned for removal in HEDTools 2.0.
+- The listing and bulk-cache paths reuse the same ETag-aware manifest metadata cache.
+
+## Documentation and tests
+
+- Added `get_available_hed_versions()` to the schema API reference and clarified the scope of `skip_folders`.
+- Added coverage for the default manifest path, custom REST fallback, custom manifests, deprecation warnings, unsupported manifest formats, and manifest-cache reuse.
+
 # Release 1.2.0 July 18, 2026
 
 ## New features

@@ -114,7 +114,7 @@ Cache management
 ~~~~~~~~~~~~~~~~
 
 .. automodule:: hed.schema.hed_cache
-   :members: cache_xml_versions, get_hed_versions, set_cache_directory, get_cache_directory
+   :members: cache_xml_versions, get_hed_versions, get_available_hed_versions, set_cache_directory, get_cache_directory
    :undoc-members:
 
 Schema loader base class

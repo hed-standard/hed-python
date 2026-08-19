@@ -34,6 +34,8 @@ The standard schema is keyed by the empty string ``""`` in the manifest; interna
 
 from __future__ import annotations
 
+from urllib.parse import urljoin, urlsplit, urlunsplit
+
 from semantic_version import Version
 
 # The manifest is served as raw file content (CDN-backed), not through the REST API, so it is not
@@ -69,6 +71,24 @@ def is_supported(manifest) -> bool:
 def raw_url_for(file_path: str, ref: str) -> str:
     """Build the raw/CDN URL for a repo-relative file path at a given git ref (commit/branch/tag)."""
     return f"{RAW_CONTENT_BASE}/{ref}/{file_path}"
+
+
+def content_url_for_manifest(file_path: str, ref: str, manifest_url: str = MANIFEST_URL) -> str:
+    """Build a schema-content URL from the location of its manifest.
+
+    Raw GitHub manifests are pinned to ``ref`` in the same owner/repository. Other hosts resolve
+    manifest file paths relative to the manifest URL, which supports mirrors that publish the
+    manifest and schema tree together.
+    """
+    parsed = urlsplit(manifest_url)
+    path_parts = [part for part in parsed.path.split("/") if part]
+    if parsed.netloc.lower() == "raw.githubusercontent.com":
+        if len(path_parts) < 4 or path_parts[-1] != MANIFEST_FILE:
+            raise ValueError(f"Invalid raw GitHub manifest URL: {manifest_url}")
+        repo_path = "/" + "/".join(path_parts[:2])
+        repo_base = urlunsplit((parsed.scheme, parsed.netloc, repo_path, "", ""))
+        return f"{repo_base}/{ref}/{file_path}"
+    return urljoin(manifest_url, file_path)
 
 
 def _sort_versions(versions):
@@ -112,6 +132,39 @@ def available_versions(manifest, library_name=None, check_prerelease=False):
 
     manifest_key = _STANDARD_MANIFEST_KEY if library_name is None else library_name
     return _versions_for_key(manifest, manifest_key, check_prerelease)
+
+
+def all_version_infos(manifest, check_prerelease=True, manifest_url=MANIFEST_URL):
+    """Return manifest entries in the shape used by the schema cache.
+
+    Parameters:
+        manifest (dict): A supported manifest (see :func:`is_supported`).
+        check_prerelease (bool): If True, include prerelease versions.
+        manifest_url (str): Location of the manifest. Schema URLs use the same GitHub repository
+                            or resolve relative to this URL for other hosts.
+
+    Returns:
+        dict: ``{library_name_or_None: {version: (sha, download_url, prerelease)}}``.
+              Deprecated versions are never included.
+    """
+    result = {}
+    ref = manifest.get("repo_commit") or "main"
+    for manifest_key, categories in manifest.get("libraries", {}).items():
+        library_name = None if manifest_key == _STANDARD_MANIFEST_KEY else manifest_key
+        version_infos = {}
+        selected_categories = [("released", False)]
+        if check_prerelease:
+            selected_categories.append(("prerelease", True))
+        for category, is_prerelease in selected_categories:
+            for entry in categories.get(category, []):
+                version_infos[entry["version"]] = (
+                    entry["sha"],
+                    content_url_for_manifest(entry["file"], ref, manifest_url),
+                    is_prerelease,
+                )
+        if version_infos:
+            result[library_name] = version_infos
+    return result
 
 
 def find_version_info(manifest, xml_version, library_name, ref=None):
