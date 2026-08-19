@@ -1,7 +1,9 @@
 """Manager for type factors and type definitions."""
 
-import pandas as pd
 import json
+
+import pandas as pd
+
 from hed.tools.analysis.hed_type import HedType
 
 

@@ -1,7 +1,8 @@
 """Tests for JSON schema format explicit attributes handling."""
 
-import unittest
 import json
+import unittest
+
 from hed.schema import load_schema_version
 
 
@@ -212,8 +213,9 @@ class TestJSONBackwardsCompatibility(unittest.TestCase):
             "properties": {},
         }
 
-        from hed.schema.schema_io import json2schema
         import json
+
+        from hed.schema.schema_io import json2schema
 
         schema = json2schema.SchemaLoaderJSON.load(schema_as_string=json.dumps(old_format_json))
 

@@ -1,10 +1,8 @@
 """Utility checker that detects duplicate tags and groups within a HED annotation."""
 
-from typing import Union
-
 from hed.errors.error_reporter import ErrorHandler
-from hed.models.hed_tag import HedTag
 from hed.errors.error_types import ValidationErrors
+from hed.models.hed_tag import HedTag
 
 
 class DuplicateChecker:
@@ -34,7 +32,7 @@ class DuplicateChecker:
         self._get_recursive_hash(group)
         return self.issues
 
-    def get_hash(self, group) -> Union[int, None]:
+    def get_hash(self, group) -> int | None:
         """Return the unique hash for the group as long as no duplicates.
 
         Parameters:
@@ -49,7 +47,7 @@ class DuplicateChecker:
         duplication_hash = self._get_recursive_hash(group)
         return duplication_hash
 
-    def _get_recursive_hash(self, group) -> Union[int, None]:
+    def _get_recursive_hash(self, group) -> int | None:
         """Get recursive hash for a group.
 
         Parameters:

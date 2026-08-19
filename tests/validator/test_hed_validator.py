@@ -1,10 +1,11 @@
-import unittest
 import os
+import unittest
+
+from hed import schema
 
 # from hed import
 from hed.errors import ErrorContext, ErrorSeverity
-from hed import schema
-from hed.models import HedString, SpreadsheetInput, TabularInput, Sidecar
+from hed.models import HedString, Sidecar, SpreadsheetInput, TabularInput
 from hed.validator import HedValidator
 
 

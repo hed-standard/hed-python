@@ -1,6 +1,7 @@
 """Models a BIDS file."""
 
 import os
+
 from hed.tools.bids import bids_util
 
 

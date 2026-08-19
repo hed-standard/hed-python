@@ -1,10 +1,10 @@
-import unittest
 import os
+import unittest
 
 from hed import schema
+from hed.errors import ErrorContext, ErrorHandler
 from hed.models import DefinitionDict, HedString
 from hed.validator import DefValidator
-from hed.errors import ErrorHandler, ErrorContext
 
 
 class Test(unittest.TestCase):

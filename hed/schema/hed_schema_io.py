@@ -1,28 +1,28 @@
 """Utilities for loading and outputting HED schema."""
 
 from __future__ import annotations
-import os
-import json
-import functools
-from typing import Union
-from hed.schema.hed_schema import HedSchema
-from hed.schema.schema_io.xml2schema import SchemaLoaderXML
-from hed.schema.schema_io.wiki2schema import SchemaLoaderWiki
-from hed.schema.schema_io.df2schema import SchemaLoaderDF
-from hed.schema.schema_io.json2schema import SchemaLoaderJSON
-from hed.schema import hed_cache
 
-from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.schema_io import schema_util
-from hed.schema.hed_schema_group import HedSchemaGroup
-from hed.schema.schema_header_util import validate_version_string
+import functools
+import json
+import os
 from collections import defaultdict
 from urllib.error import URLError
+
+from hed.errors.exceptions import HedExceptions, HedFileError
+from hed.schema import hed_cache
+from hed.schema.hed_schema import HedSchema
+from hed.schema.hed_schema_group import HedSchemaGroup
+from hed.schema.schema_header_util import validate_version_string
+from hed.schema.schema_io import schema_util
+from hed.schema.schema_io.df2schema import SchemaLoaderDF
+from hed.schema.schema_io.json2schema import SchemaLoaderJSON
+from hed.schema.schema_io.wiki2schema import SchemaLoaderWiki
+from hed.schema.schema_io.xml2schema import SchemaLoaderXML
 
 MAX_MEMORY_CACHE = 40
 
 
-def load_schema_version(xml_version=None, xml_folder=None) -> Union["HedSchema", "HedSchemaGroup"]:
+def load_schema_version(xml_version=None, xml_folder=None) -> HedSchema | HedSchemaGroup:
     """Return a HedSchema or HedSchemaGroup extracted from xml_version
 
     Parameters:
@@ -61,7 +61,7 @@ def load_schema_version(xml_version=None, xml_folder=None) -> Union["HedSchema",
         return _load_schema_version(xml_version=xml_version, xml_folder=xml_folder)
 
 
-def load_schema(hed_path, schema_namespace=None, schema=None, name=None) -> "HedSchema":
+def load_schema(hed_path, schema_namespace=None, schema=None, name=None) -> HedSchema:
     """Load a schema from the given file or URL path.
 
     Parameters:
@@ -122,7 +122,7 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None) -> "Hed
     return hed_schema
 
 
-def from_string(schema_string, schema_format=".xml", schema_namespace=None, schema=None, name=None) -> "HedSchema":
+def from_string(schema_string, schema_format=".xml", schema_namespace=None, schema=None, name=None) -> HedSchema:
     """Create a schema from the given string.
 
     Parameters:
@@ -166,7 +166,7 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
     return hed_schema
 
 
-def from_dataframes(schema_data, schema_namespace=None, name=None) -> "HedSchema":
+def from_dataframes(schema_data, schema_namespace=None, name=None) -> HedSchema:
     """Create a schema from the given string.
 
     Parameters:

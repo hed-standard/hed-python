@@ -1,14 +1,15 @@
 """Allows output of HedSchema objects as .tsv format"""
 
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
+import pandas as pd
+
+import hed.schema.schema_io.df_constants as constants
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey
+from hed.schema.hed_schema_entry import HedTagEntry
 from hed.schema.schema_io.df_util import (
     create_empty_dataframes,
     get_library_name_and_id,
 )
 from hed.schema.schema_io.schema2base import Schema2Base
-import pandas as pd
-import hed.schema.schema_io.df_constants as constants
-from hed.schema.hed_schema_entry import HedTagEntry
 
 section_key_to_df = {
     HedSectionKey.Tags: constants.TAG_KEY,

@@ -1,9 +1,9 @@
 """Validation of the HED tags as strings."""
 
 from hed.errors.error_reporter import ErrorHandler
+from hed.errors.error_types import TemporalErrors, ValidationErrors
 from hed.models.model_constants import DefTagNames
 from hed.schema.hed_schema_constants import HedKey
-from hed.errors.error_types import ValidationErrors, TemporalErrors
 from hed.validator.reserved_checker import ReservedChecker
 from hed.validator.util.dup_util import DuplicateChecker
 

@@ -1,7 +1,7 @@
 """Format templates for HED schema error messages."""
 
-from hed.errors.error_types import SchemaErrors, SchemaWarnings, ErrorSeverity, SchemaAttributeErrors
 from hed.errors.error_reporter import hed_error
+from hed.errors.error_types import ErrorSeverity, SchemaAttributeErrors, SchemaErrors, SchemaWarnings
 
 
 @hed_error(SchemaErrors.SCHEMA_DUPLICATE_NODE)

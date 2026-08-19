@@ -3,14 +3,14 @@ Superclass representing a basic columnar file.
 """
 
 import os
-from typing import Union
+
 import openpyxl
 import pandas as pd
+
+from hed.errors.exceptions import HedExceptions, HedFileError
+from hed.models.column_mapper import ColumnMapper
 from hed.models.column_metadata import ColumnMetadata
 from hed.models.definition_dict import DefinitionDict
-from hed.models.column_mapper import ColumnMapper
-from hed.errors.exceptions import HedFileError, HedExceptions
-
 from hed.models.df_util import _handle_curly_braces_refs, filter_series_by_onset
 
 
@@ -127,7 +127,7 @@ class BaseInput:
         return self.combine_dataframe(self.assemble())
 
     @property
-    def series_filtered(self) -> Union[pd.Series, None]:
+    def series_filtered(self) -> pd.Series | None:
         """Return the assembled dataframe as a series, with rows that have the same onset combined.
 
         Returns:
@@ -256,7 +256,7 @@ class BaseInput:
         else:
             dataframe.to_excel(file, header=self._has_column_names)
 
-    def to_csv(self, file=None) -> Union[str, None]:
+    def to_csv(self, file=None) -> str | None:
         """Write to file or return as a string.
 
         Parameters:
@@ -321,7 +321,7 @@ class BaseInput:
         new_text = new_string_obj.get_as_form(tag_form)
         self._dataframe.iloc[row_number, column_number] = new_text
 
-    def get_worksheet(self, worksheet_name=None) -> Union[openpyxl.workbook.Workbook, None]:
+    def get_worksheet(self, worksheet_name=None) -> openpyxl.workbook.Workbook | None:
         """Get the requested worksheet.
 
         Parameters:

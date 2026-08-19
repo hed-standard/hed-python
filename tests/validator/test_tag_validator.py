@@ -1,11 +1,11 @@
 import unittest
-
-from hed.errors.error_types import ValidationErrors, DefinitionErrors
-from hed.errors import ErrorHandler, ErrorContext
-from hed.models.hed_string import HedString
-from tests.validator.test_tag_validator_base import TestValidatorBase
-from hed.schema.hed_schema_io import load_schema_version
 from functools import partial
+
+from hed.errors import ErrorContext, ErrorHandler
+from hed.errors.error_types import DefinitionErrors, ValidationErrors
+from hed.models.hed_string import HedString
+from hed.schema.hed_schema_io import load_schema_version
+from tests.validator.test_tag_validator_base import TestValidatorBase
 
 
 # todo: update these tests(TagValidator no longer exists)

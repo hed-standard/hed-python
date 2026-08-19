@@ -1,9 +1,11 @@
 """Allows output of HedSchema objects as .json format"""
 
 import json
+
 import pandas as pd
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
-from hed.schema.schema_io import json_constants, df_constants
+
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey
+from hed.schema.schema_io import df_constants, json_constants
 from hed.schema.schema_io.schema2base import Schema2Base
 
 

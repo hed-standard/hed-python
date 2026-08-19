@@ -1,8 +1,9 @@
 """Allows output of HedSchema objects as MEDIAWIKI format"""
 
 import pandas as pd
+
 from hed.schema.hed_schema_constants import HedSectionKey
-from hed.schema.schema_io import wiki_constants, df_constants
+from hed.schema.schema_io import df_constants, wiki_constants
 from hed.schema.schema_io.schema2base import Schema2Base
 
 

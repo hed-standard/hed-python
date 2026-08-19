@@ -8,12 +8,13 @@ against a specified HED schema version.
 
 import argparse
 import sys
+
 from hed import HedString
 from hed.errors import ErrorHandler
 from hed.models import DefinitionDict
 from hed.schema import load_schema_version
+from hed.scripts.script_utils import format_validation_results, setup_logging
 from hed.validator import HedValidator
-from hed.scripts.script_utils import setup_logging, format_validation_results
 
 
 def get_parser():

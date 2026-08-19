@@ -1,9 +1,8 @@
-from hed.models.hed_tag import HedTag
-from tests.validator.test_tag_validator_base import TestHedBase
-from hed.schema import HedKey
 from hed import load_schema_version
-
+from hed.models.hed_tag import HedTag
+from hed.schema import HedKey
 from tests.schema import util_create_schemas
+from tests.validator.test_tag_validator_base import TestHedBase
 
 # Load the schema once, globally
 hed_schema_global = load_schema_version("8.4.0")

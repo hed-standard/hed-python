@@ -23,8 +23,9 @@ Example:
     >>> print(comparer.pretty_print_change_dict(changes))
 """
 
-import pandas as pd
 from collections import defaultdict
+
+import pandas as pd
 
 from hed.schema.hed_schema import HedKey
 from hed.schema.hed_schema_constants import HedSectionKey
@@ -33,6 +34,8 @@ from hed.schema.schema_io.df_constants import (
     PREFIXES_KEY,
     SOURCES_KEY,
     UNIQUE_EXTRAS_KEYS,
+)
+from hed.schema.schema_io.df_constants import (
     in_library as _in_library,
 )
 

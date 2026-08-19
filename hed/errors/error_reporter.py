@@ -26,10 +26,10 @@ The standard error keys are:
 """
 
 from __future__ import annotations
-from functools import wraps
+
 import xml.etree.ElementTree as ET
 from collections import defaultdict
-from typing import Optional
+from functools import wraps
 
 from hed.errors.error_types import ErrorContext, ErrorSeverity
 from hed.errors.known_error_codes import known_error_codes
@@ -65,7 +65,7 @@ def _register_error_function(error_type, wrapper_func):
     error_functions[error_type] = wrapper_func
 
 
-def hed_error(error_type: str, actual_code: Optional[str] = None, default_severity: int = ErrorSeverity.ERROR):
+def hed_error(error_type: str, actual_code: str | None = None, default_severity: int = ErrorSeverity.ERROR):
     """Decorator for errors in error handler or inherited classes.
 
     Parameters:
@@ -175,8 +175,8 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                     list: A list of dict with the errors.
 
                 """
-                from hed.models.hed_tag import HedTag
                 from hed.models.hed_group import HedGroup
+                from hed.models.hed_tag import HedTag
 
                 if isinstance(tag, HedTag):
                     org_tag_text = tag.org_tag
@@ -196,8 +196,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
 
 
 # Import after hed_error decorators are defined.
-from hed.errors import error_messages  # noqa:E402
-from hed.errors import schema_error_messages  # noqa:E402
+from hed.errors import error_messages, schema_error_messages  # noqa: E402
 
 # Intentional to make sure tools don't think the import is unused
 error_messages.mark_as_used = True
@@ -322,7 +321,7 @@ class ErrorHandler:
 
     @staticmethod
     def format_error_from_context(
-        error_type: str, error_context: list, *args, actual_error: Optional[str], **kwargs
+        error_type: str, error_context: list, *args, actual_error: str | None, **kwargs
     ) -> list[dict]:
         """Format an error based on the error type.
 

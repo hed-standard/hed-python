@@ -1,10 +1,10 @@
-import unittest
 import os
+import unittest
 
 from hed import schema
-from hed.schema.schema_validation.compliance import DOMAIN_TO_SECTION, SECTION_TO_DOMAIN, CONTENT_SECTIONS
-from hed.schema.schema_validation.compliance_summary import ComplianceSummary
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
+from hed.schema.schema_validation.compliance import CONTENT_SECTIONS, DOMAIN_TO_SECTION, SECTION_TO_DOMAIN
+from hed.schema.schema_validation.compliance_summary import ComplianceSummary
 
 
 class Test(unittest.TestCase):
@@ -81,8 +81,9 @@ class TestComplianceSummary(unittest.TestCase):
     def test_detects_duplicate_hed_id(self):
         """check_duplicate_hed_ids must fire when two entries share a hedId."""
         import copy
-        from hed.schema.schema_validation.compliance import SchemaValidator
+
         from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         test_schema = copy.deepcopy(self.schema_84)
         tags = list(test_schema[HedSectionKey.Tags].values())
@@ -249,8 +250,8 @@ class TestDomainRangeValidation(unittest.TestCase):
 
     def test_build_validators_uses_range(self):
         """_build_validators should pull range validators from attribute definitions."""
-        from hed.schema.schema_validation.compliance import SchemaValidator
         from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         sv = SchemaValidator(self.schema, ErrorHandler())
         # suggestedTag has tagRange — should include item_exists_check
@@ -260,8 +261,8 @@ class TestDomainRangeValidation(unittest.TestCase):
 
     def test_build_validators_includes_semantic(self):
         """_build_validators should include semantic validators for known attributes."""
-        from hed.schema.schema_validation.compliance import SchemaValidator
         from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         sv = SchemaValidator(self.schema, ErrorHandler())
         validators = sv._build_validators(HedKey.TakesValue)
@@ -270,8 +271,8 @@ class TestDomainRangeValidation(unittest.TestCase):
 
     def test_build_validators_includes_hedid(self):
         """_build_validators should include the HedID validator for hedId."""
-        from hed.schema.schema_validation.compliance import SchemaValidator
         from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         sv = SchemaValidator(self.schema, ErrorHandler())
         validators = sv._build_validators(HedKey.HedID)
@@ -280,8 +281,8 @@ class TestDomainRangeValidation(unittest.TestCase):
 
     def test_build_validators_always_checks_deprecated(self):
         """Every attribute should always get the attribute_is_deprecated check."""
-        from hed.schema.schema_validation.compliance import SchemaValidator
         from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         sv = SchemaValidator(self.schema, ErrorHandler())
         for attr_name in list(self.schema.attributes.keys())[:5]:
@@ -351,8 +352,8 @@ class TestExtrasColumnsCompliance(unittest.TestCase):
 
     def test_no_missing_values_840(self):
         """8.4.0 extras should have no empty values."""
-        from hed.schema.schema_validation.compliance import SchemaValidator
         from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         sv = SchemaValidator(self.schema_84, ErrorHandler())
         issues = sv.check_extras_columns()
@@ -361,8 +362,8 @@ class TestExtrasColumnsCompliance(unittest.TestCase):
 
     def test_no_missing_values_testlib(self):
         """testlib 4.0.0 extras should have no empty values."""
-        from hed.schema.schema_validation.compliance import SchemaValidator
         from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         sv = SchemaValidator(self.testlib_schema, ErrorHandler())
         issues = sv.check_extras_columns()
@@ -372,10 +373,12 @@ class TestExtrasColumnsCompliance(unittest.TestCase):
     def test_detects_empty_value(self):
         """Should detect empty cells in extras DataFrames."""
         import copy
+
         import pandas as pd
-        from hed.schema.schema_validation.compliance import SchemaValidator
+
         from hed.errors.error_reporter import ErrorHandler
         from hed.schema.schema_io.df_constants import SOURCES_KEY
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         test_schema = copy.copy(self.schema_84)
         test_schema.extras = dict(self.schema_84.extras)
@@ -394,11 +397,13 @@ class TestExtrasColumnsCompliance(unittest.TestCase):
     def test_detects_nan_value(self):
         """Should detect NaN cells in extras DataFrames."""
         import copy
-        import pandas as pd
+
         import numpy as np
-        from hed.schema.schema_validation.compliance import SchemaValidator
+        import pandas as pd
+
         from hed.errors.error_reporter import ErrorHandler
         from hed.schema.schema_io.df_constants import PREFIXES_KEY
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         test_schema = copy.copy(self.schema_84)
         test_schema.extras = dict(self.schema_84.extras)
@@ -418,8 +423,9 @@ class TestExtrasColumnsCompliance(unittest.TestCase):
     def test_empty_extras_no_issues(self):
         """An empty extras dict should produce no issues."""
         import copy
-        from hed.schema.schema_validation.compliance import SchemaValidator
+
         from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         test_schema = copy.copy(self.schema_84)
         test_schema.extras = {}
@@ -448,8 +454,8 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
 
     def test_annotation_check_finds_issues_on_840(self):
         """8.4.0 has annotation entries (ncit:C25499, rdfs:comment) not in ExternalAnnotations."""
-        from hed.schema.schema_validation.compliance import SchemaValidator
         from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         sv = SchemaValidator(self.schema_84, ErrorHandler())
         issues = sv.check_annotation_attribute_values()
@@ -463,10 +469,12 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
     def test_annotation_prefix_check(self):
         """Should detect when an annotation prefix is not in Prefixes."""
         import copy
+
         import pandas as pd
-        from hed.schema.schema_validation.compliance import SchemaValidator
+
         from hed.errors.error_reporter import ErrorHandler
         from hed.schema.schema_io.df_constants import PREFIXES_KEY
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         test_schema = copy.copy(self.schema_84)
         test_schema.extras = dict(self.schema_84.extras)
@@ -479,8 +487,8 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
 
     def test_annotation_external_check(self):
         """Should detect when prefix:id is not in ExternalAnnotations."""
-        from hed.schema.schema_validation.compliance import SchemaValidator
         from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         sv = SchemaValidator(self.schema_84, ErrorHandler())
         issues = sv.check_annotation_attribute_values()
@@ -490,9 +498,10 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
     def test_valid_annotations_no_issues(self):
         """Annotations with valid prefix:id should produce no issues."""
         import pandas as pd
-        from hed.schema.schema_validation.compliance import SchemaValidator
+
         from hed.errors.error_reporter import ErrorHandler
         from hed.schema.schema_io import df_constants
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         # Create a schema where all annotation values are properly defined
         test_schema = schema.load_schema(self.testlib_path)
@@ -517,10 +526,11 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
     def test_dc_source_check_valid(self):
         """dc:source annotations with valid source names should pass."""
         import pandas as pd
-        from hed.schema.schema_validation.compliance import SchemaValidator
+
         from hed.errors.error_reporter import ErrorHandler
-        from hed.schema.schema_io import df_constants
         from hed.schema.hed_schema_constants import HedSectionKey
+        from hed.schema.schema_io import df_constants
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         test_schema = schema.load_schema(self.testlib_path)
         test_schema.extras = dict(test_schema.extras)
@@ -548,10 +558,11 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
     def test_dc_source_check_invalid(self):
         """dc:source annotations with invalid source names should fail."""
         import pandas as pd
-        from hed.schema.schema_validation.compliance import SchemaValidator
+
         from hed.errors.error_reporter import ErrorHandler
-        from hed.schema.schema_io import df_constants
         from hed.schema.hed_schema_constants import HedSectionKey
+        from hed.schema.schema_io import df_constants
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         test_schema = schema.load_schema(self.testlib_path)
         test_schema.extras = dict(test_schema.extras)
@@ -580,10 +591,11 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
     def test_comma_separated_annotations(self):
         """Comma-separated annotation values should each be checked independently."""
         import pandas as pd
-        from hed.schema.schema_validation.compliance import SchemaValidator
+
         from hed.errors.error_reporter import ErrorHandler
-        from hed.schema.schema_io import df_constants
         from hed.schema.hed_schema_constants import HedSectionKey
+        from hed.schema.schema_io import df_constants
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         test_schema = schema.load_schema(self.testlib_path)
         test_schema.extras = dict(test_schema.extras)
@@ -618,9 +630,9 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
 
     def test_annotation_no_colon_detected(self):
         """An annotation value without a colon should be flagged."""
-        from hed.schema.schema_validation.compliance import SchemaValidator
         from hed.errors.error_reporter import ErrorHandler
         from hed.schema.hed_schema_constants import HedSectionKey
+        from hed.schema.schema_validation.compliance import SchemaValidator
 
         test_schema = schema.load_schema(self.testlib_path)
         # Set annotation to a value with no colon

@@ -1,20 +1,22 @@
 """Validates spreadsheet tabular data."""
 
 from __future__ import annotations
+
 import copy
-import pandas as pd
 import math
 import re
+
+import pandas as pd
+
+from hed.errors.error_reporter import ErrorHandler, check_for_any_errors, sort_issues
+from hed.errors.error_types import ErrorContext, TemporalErrors, ValidationErrors
+from hed.models import df_util
 from hed.models.base_input import BaseInput
-from hed.errors.error_types import ErrorContext, ValidationErrors, TemporalErrors
-from hed.errors.error_reporter import ErrorHandler
 from hed.models.column_mapper import ColumnType
 from hed.models.hed_string import HedString
-from hed.errors.error_reporter import sort_issues, check_for_any_errors
-from hed.validator.onset_validator import OnsetValidator
-from hed.validator.hed_validator import HedValidator
-from hed.models import df_util
 from hed.models.model_constants import DefTagNames, TopTagReturnType
+from hed.validator.hed_validator import HedValidator
+from hed.validator.onset_validator import OnsetValidator
 
 PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 

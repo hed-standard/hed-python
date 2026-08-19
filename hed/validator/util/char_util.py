@@ -1,8 +1,8 @@
 """Classes responsible for basic character validation of a string or tag."""
 
 import json
-import re
 import os
+import re
 
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
@@ -243,5 +243,5 @@ class CharRexValidator(CharValidator):
     def _get_rex_dict():
         current_dir = os.path.dirname(os.path.abspath(__file__))
         json_path = os.path.realpath(os.path.join(current_dir, CLASS_REX_FILENAME))
-        with open(json_path, "r", encoding="utf-8") as f:
+        with open(json_path, encoding="utf-8") as f:
             return json.load(f)

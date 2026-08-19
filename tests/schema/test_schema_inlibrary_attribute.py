@@ -9,13 +9,15 @@ Tests that the inLibrary attribute is:
 5. Correctly formatted in each output format (XML, JSON, MediaWiki, TSV)
 """
 
-import unittest
 import os
-import tempfile
 import shutil
-import pandas as pd
+import tempfile
+import unittest
 import xml.etree.ElementTree as ET
-from hed.schema import load_schema_version, load_schema
+
+import pandas as pd
+
+from hed.schema import load_schema, load_schema_version
 
 
 class TestInLibraryAttribute(unittest.TestCase):
@@ -171,7 +173,7 @@ class TestInLibraryAttribute(unittest.TestCase):
 
     def _verify_inlibrary_in_json(self, json_path, library_name, should_have_inlibrary):
         """Verify inLibrary presence/absence in JSON file."""
-        with open(json_path, "r", encoding="utf-8") as f:
+        with open(json_path, encoding="utf-8") as f:
             content = f.read()
 
         inlibrary_pattern = f'"inLibrary": "{library_name}"'
@@ -185,7 +187,7 @@ class TestInLibraryAttribute(unittest.TestCase):
 
     def _verify_inlibrary_in_mediawiki(self, wiki_path, library_name, should_have_inlibrary):
         """Verify inLibrary presence/absence in MediaWiki file."""
-        with open(wiki_path, "r", encoding="utf-8") as f:
+        with open(wiki_path, encoding="utf-8") as f:
             content = f.read()
 
         # MediaWiki uses curly braces for attributes, not square brackets

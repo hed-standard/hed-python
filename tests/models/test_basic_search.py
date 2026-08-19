@@ -1,19 +1,19 @@
-import unittest
-import pandas as pd
-from hed import load_schema_version
-
 import os
-from hed import TabularInput
+import unittest
+
+import numpy as np
+import pandas as pd
+
+from hed import TabularInput, load_schema_version
 from hed.models import basic_search
 from hed.models.basic_search import (
-    find_words,
     check_parentheses,
-    reverse_and_flip_parentheses,
     construct_delimiter_map,
-    verify_search_delimiters,
     find_matching,
+    find_words,
+    reverse_and_flip_parentheses,
+    verify_search_delimiters,
 )
-import numpy as np
 from hed.models.df_util import convert_to_form
 
 

@@ -1,6 +1,7 @@
+import json
 import os
 import unittest
-import json
+
 from hed.tools.bids.bids_file import BidsFile
 
 
@@ -44,7 +45,7 @@ class Test(unittest.TestCase):
     def test_contents(self):
         bids = BidsFile(self.sidecar_path)
         self.assertFalse(bids.contents)
-        with open(self.sidecar_path, "r") as fp:
+        with open(self.sidecar_path) as fp:
             contents = json.load(fp)
         contents = json.dumps(contents)
         bids.set_contents(content_info=contents)

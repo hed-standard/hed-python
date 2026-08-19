@@ -1,7 +1,8 @@
-import unittest
-from hed import HedString, load_schema_version
-from hed.models.string_util import split_base_tags, split_def_tags, gather_descriptions, cleanup_empties
 import copy
+import unittest
+
+from hed import HedString, load_schema_version
+from hed.models.string_util import cleanup_empties, gather_descriptions, split_base_tags, split_def_tags
 
 hed_schema_global = load_schema_version("8.4.0")
 

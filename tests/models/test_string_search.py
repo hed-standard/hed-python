@@ -18,9 +18,8 @@ import unittest
 import pandas as pd
 
 from hed.errors.exceptions import HedQueryError
-from hed.models.string_search import StringNode, StringQueryHandler, parse_hed_string, string_search
 from hed.models.schema_lookup import generate_schema_lookup
-
+from hed.models.string_search import StringNode, StringQueryHandler, parse_hed_string, string_search
 
 # ---------------------------------------------------------------------------
 # Helper: mirror the base_test pattern from test_query_handler.py

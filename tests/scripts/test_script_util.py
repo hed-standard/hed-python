@@ -1,18 +1,18 @@
 import contextlib
 import copy
 import io
-import unittest
 import os
 import shutil
+import unittest
 
 from hed import load_schema_version
 from hed.scripts.schema_script_util import (
     add_extension,
     sort_base_schemas,
     validate_all_schema_formats,
+    validate_all_schemas,
     validate_schema,
     validate_schema_object,
-    validate_all_schemas,
 )
 
 

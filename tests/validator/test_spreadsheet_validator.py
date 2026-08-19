@@ -1,15 +1,15 @@
-import pandas as pd
+import io
+import json
 import os
 import shutil
-import json
-import io
-
 import unittest
-from hed import load_schema_version, load_schema
-from hed.validator import SpreadsheetValidator
-from hed import TabularInput, SpreadsheetInput, Sidecar
-from hed.errors.error_types import ValidationErrors
+
+import pandas as pd
+
+from hed import Sidecar, SpreadsheetInput, TabularInput, load_schema, load_schema_version
 from hed.errors.error_reporter import ErrorHandler
+from hed.errors.error_types import ValidationErrors
+from hed.validator import SpreadsheetValidator
 
 
 class TestSpreadsheetValidation(unittest.TestCase):

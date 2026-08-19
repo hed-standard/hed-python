@@ -1,7 +1,9 @@
-import unittest
 import os
+import unittest
 from unittest.mock import patch
+
 import pandas as pd
+
 from hed.errors.exceptions import HedFileError
 from hed.tools.analysis.key_map import KeyMap
 from hed.tools.util.data_util import get_new_dataframe

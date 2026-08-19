@@ -3,13 +3,12 @@
 import json
 import re
 
-from hed.models.column_metadata import ColumnMetadata
-from hed.errors.error_types import ErrorContext
 from hed.errors import ErrorHandler
-from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.models.hed_string import HedString
-from hed.models.column_metadata import ColumnType
+from hed.errors.error_types import ErrorContext
+from hed.errors.exceptions import HedExceptions, HedFileError
+from hed.models.column_metadata import ColumnMetadata, ColumnType
 from hed.models.definition_dict import DefinitionDict
+from hed.models.hed_string import HedString
 
 
 class Sidecar:
@@ -127,7 +126,7 @@ class Sidecar:
             if not self.name:
                 self.name = file
             try:
-                with open(file, "r") as fp:
+                with open(file) as fp:
                     return self._load_json_file(fp)
             except OSError as e:
                 raise HedFileError(HedExceptions.FILE_NOT_FOUND, e.strerror, file) from e

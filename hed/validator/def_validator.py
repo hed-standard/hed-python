@@ -1,13 +1,13 @@
 """Validates of Def, Def-expand and Temporal groups."""
 
 from __future__ import annotations
+
+from hed.errors.error_reporter import ErrorHandler
+from hed.errors.error_types import TemporalErrors, ValidationErrors
+from hed.models.definition_dict import DefinitionDict
 from hed.models.hed_group import HedGroup
 from hed.models.hed_tag import HedTag
-from hed.models.definition_dict import DefinitionDict
-from hed.errors.error_types import ValidationErrors
-from hed.errors.error_reporter import ErrorHandler
 from hed.models.model_constants import DefTagNames
-from hed.errors.error_types import TemporalErrors
 
 
 class DefValidator(DefinitionDict):

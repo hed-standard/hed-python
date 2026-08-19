@@ -1,7 +1,8 @@
-import os
 import io
+import os
 import unittest
 from unittest.mock import patch
+
 from hed.scripts.validate_bids import main
 
 

@@ -3,36 +3,34 @@
 from __future__ import annotations
 
 import json
-from typing import Union
 
 from pandas import DataFrame
 
-from hed.schema.hed_schema_entry import HedSchemaEntry, HedTagEntry
+from hed.errors import ErrorHandler
+from hed.errors.error_types import ValidationErrors
+from hed.errors.exceptions import HedExceptions, HedFileError
+from hed.schema.hed_schema_base import HedSchemaBase
 from hed.schema.hed_schema_constants import (
-    HedKey,
-    HedSectionKey,
-    HedKeyOld,
-    VERSION_ATTRIBUTE,
     LIBRARY_ATTRIBUTE,
-    WITH_STANDARD_ATTRIBUTE,
     UNMERGED_ATTRIBUTE,
+    VERSION_ATTRIBUTE,
+    WITH_STANDARD_ATTRIBUTE,
+    HedKey,
+    HedKeyOld,
+    HedSectionKey,
 )
-from hed.schema.schema_io import schema_util, df_util
-from hed.schema.schema_io.schema2xml import Schema2XML
-from hed.schema.schema_io.schema2wiki import Schema2Wiki
-from hed.schema.schema_io.schema2df import Schema2DF
-from hed.schema.schema_io.schema2json import Schema2JSON
-
+from hed.schema.hed_schema_entry import HedSchemaEntry, HedTagEntry
 from hed.schema.hed_schema_section import (
     HedSchemaSection,
     HedSchemaTagSection,
     HedSchemaUnitClassSection,
     HedSchemaUnitSection,
 )
-from hed.errors import ErrorHandler
-from hed.errors.error_types import ValidationErrors
-from hed.schema.hed_schema_base import HedSchemaBase
-from hed.errors.exceptions import HedFileError, HedExceptions
+from hed.schema.schema_io import df_util, schema_util
+from hed.schema.schema_io.schema2df import Schema2DF
+from hed.schema.schema_io.schema2json import Schema2JSON
+from hed.schema.schema_io.schema2wiki import Schema2Wiki
+from hed.schema.schema_io.schema2xml import Schema2XML
 
 
 class HedSchema(HedSchemaBase):
@@ -132,7 +130,7 @@ class HedSchema(HedSchemaBase):
         return not self.header_attributes.get(UNMERGED_ATTRIBUTE, "")
 
     @property
-    def tags(self) -> "HedSchemaTagSection":
+    def tags(self) -> HedSchemaTagSection:
         """Return the tag schema section.
 
         Returns:
@@ -141,7 +139,7 @@ class HedSchema(HedSchemaBase):
         return self._sections[HedSectionKey.Tags]
 
     @property
-    def unit_classes(self) -> "HedSchemaUnitClassSection":
+    def unit_classes(self) -> HedSchemaUnitClassSection:
         """Return the unit classes schema section.
 
         Returns:
@@ -150,7 +148,7 @@ class HedSchema(HedSchemaBase):
         return self._sections[HedSectionKey.UnitClasses]
 
     @property
-    def units(self) -> "HedSchemaUnitSection":
+    def units(self) -> HedSchemaUnitSection:
         """Return the unit schema section.
 
         Returns:
@@ -159,7 +157,7 @@ class HedSchema(HedSchemaBase):
         return self._sections[HedSectionKey.Units]
 
     @property
-    def unit_modifiers(self) -> "HedSchemaSection":
+    def unit_modifiers(self) -> HedSchemaSection:
         """Return the modifiers classes schema section.
 
         Returns:
@@ -168,7 +166,7 @@ class HedSchema(HedSchemaBase):
         return self._sections[HedSectionKey.UnitModifiers]
 
     @property
-    def value_classes(self) -> "HedSchemaSection":
+    def value_classes(self) -> HedSchemaSection:
         """Return the value classes schema section.
 
         Returns:
@@ -177,7 +175,7 @@ class HedSchema(HedSchemaBase):
         return self._sections[HedSectionKey.ValueClasses]
 
     @property
-    def attributes(self) -> "HedSchemaSection":
+    def attributes(self) -> HedSchemaSection:
         """Return the attributes schema section.
 
         Returns:
@@ -186,7 +184,7 @@ class HedSchema(HedSchemaBase):
         return self._sections[HedSectionKey.Attributes]
 
     @property
-    def properties(self) -> "HedSchemaSection":
+    def properties(self) -> HedSchemaSection:
         """Return the properties schema section.
 
         Returns:
@@ -236,7 +234,7 @@ class HedSchema(HedSchemaBase):
 
         return header_attributes
 
-    def schema_for_namespace(self, namespace: str) -> Union["HedSchema", None]:
+    def schema_for_namespace(self, namespace: str) -> HedSchema | None:
         """Return HedSchema object for this namespace.
 
         Parameters:
@@ -261,7 +259,7 @@ class HedSchema(HedSchemaBase):
         """
         return [self._namespace]
 
-    def get_extras(self, extras_key) -> Union[DataFrame, None]:
+    def get_extras(self, extras_key) -> DataFrame | None:
         """Get the extras corresponding to the given key
 
         Parameters:
@@ -479,7 +477,7 @@ class HedSchema(HedSchemaBase):
 
         return compliance.check_compliance(self, check_for_warnings, name, error_handler)
 
-    def get_tags_with_attribute(self, attribute, key_class=HedSectionKey.Tags) -> list["HedSchemaEntry"]:
+    def get_tags_with_attribute(self, attribute, key_class=HedSectionKey.Tags) -> list[HedSchemaEntry]:
         """Return tag entries with the given attribute.
 
         Parameters:
@@ -498,7 +496,7 @@ class HedSchema(HedSchemaBase):
 
     def get_tag_entry(
         self, name: str, key_class=HedSectionKey.Tags, schema_namespace: str = ""
-    ) -> Union["HedSchemaEntry", None]:
+    ) -> HedSchemaEntry | None:
         """Return the schema entry for this tag, if one exists.
 
         Parameters:
@@ -519,9 +517,7 @@ class HedSchema(HedSchemaBase):
 
         return self._get_tag_entry(name, key_class)
 
-    def find_tag_entry(
-        self, tag, schema_namespace=""
-    ) -> tuple[Union["HedTagEntry", None], Union[str, None], list[dict]]:
+    def find_tag_entry(self, tag, schema_namespace="") -> tuple[HedTagEntry | None, str | None, list[dict]]:
         """Find the schema entry for a given source tag.
 
         Parameters:
@@ -562,9 +558,7 @@ class HedSchema(HedSchemaBase):
         """
         return self._sections[key_class].get(name)
 
-    def _find_tag_entry(
-        self, tag, schema_namespace=""
-    ) -> tuple[Union["HedTagEntry", None], Union[str, None], list[dict]]:
+    def _find_tag_entry(self, tag, schema_namespace="") -> tuple[HedTagEntry | None, str | None, list[dict]]:
         """Find the schema entry for a given source tag.
 
         Parameters:

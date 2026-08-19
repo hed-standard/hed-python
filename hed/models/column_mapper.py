@@ -2,14 +2,14 @@
 Mapping of a base input file columns into HED tags.
 """
 
-from hed.models.column_metadata import ColumnMetadata, ColumnType
-from hed.errors.error_reporter import ErrorHandler
-from hed.errors.error_types import ValidationErrors
-from hed.models.definition_dict import DefinitionDict
-
 import copy
 from collections import Counter
 from functools import partial
+
+from hed.errors.error_reporter import ErrorHandler
+from hed.errors.error_types import ValidationErrors
+from hed.models.column_metadata import ColumnMetadata, ColumnType
+from hed.models.definition_dict import DefinitionDict
 
 PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 NO_WARN_COLUMNS = ["onset", "duration"]

@@ -5,11 +5,11 @@ import os
 
 import pandas as pd
 
-from hed.errors import HedFileError, HedExceptions
-from hed.schema.schema_io import df_constants as constants
-from hed.schema.hed_schema_constants import HedKey
+from hed.errors import HedExceptions, HedFileError
 from hed.schema.hed_cache import get_library_data
-from hed.schema.schema_io.text_util import parse_attribute_string, _parse_header_attributes_line
+from hed.schema.hed_schema_constants import HedKey
+from hed.schema.schema_io import df_constants as constants
+from hed.schema.schema_io.text_util import _parse_header_attributes_line, parse_attribute_string
 
 UNKNOWN_LIBRARY_VALUE = 0
 

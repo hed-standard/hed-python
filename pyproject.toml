@@ -165,44 +165,27 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-# Enable flake8-style checks plus additional rules
 select = [
-    "E",     # pycodestyle errors
-    "W",     # pycodestyle warnings
-    "F",     # pyflakes
-    "N",     # pep8-naming
-    "B",     # flake8-bugbear
-    "C4",    # flake8-comprehensions
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "N",  # pep8-naming
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
 ]
-
 ignore = [
-    "E501",   # Line too long (handled by formatter)
-    "N802",   # Function name should be lowercase (many test methods use camelCase)
-    "N803",   # Argument name should be lowercase (DataFrame df is common)
-    "N806",   # Variable in function should be lowercase (common in scientific code)
-    # Style rules that are too opinionated
-    "SIM108", # if-else-block-instead-of-if-exp (ternary operator preference)
-    "SIM105", # suppressible-exception (use contextlib.suppress)
-    "SIM118", # in-dict-keys (x in dict vs x in dict.keys())
-    "SIM102", # collapsible-if (nested if statements)
-    "SIM103", # needless-bool (return bool vs if/else return True/False)
-    "SIM110", # reimplemented-builtin (any/all reimplementation)
-    "SIM101", # duplicate-isinstance-call
-    # Python 3.10+ features
-    "UP007",  # Use X | Y for Union types (requires 3.10+)
-    "UP008",  # Use super() without parameters (we're okay with explicit)
-    "UP031",  # Use format strings over %-formatting (legacy code compatibility)
-    "UP028",  # yield in for loop
-    "UP045",  # Use X | None for Optional (requires 3.10+)
+    "E501",  # line too long, handled by ruff format
+    "N802",  # camelCase test methods (legacy convention)
+    "N803",  # non-lowercase argument names (scientific code)
+    "N806",  # non-lowercase variables in functions (scientific code)
 ]
 
-# Allow unused imports in __init__.py files
+# __init__.py files: unused imports are re-exports, and their import order is
+# curated by hand to avoid circular imports - isort must not reorder them.
 [tool.ruff.lint.per-file-ignores]
-"__init__.py" = ["F401"]
-
-[tool.ruff.lint.mccabe]
-# Maximum complexity (matching your flake8 setting)
-max-complexity = 10
+"__init__.py" = ["F401", "I001"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["hed"]

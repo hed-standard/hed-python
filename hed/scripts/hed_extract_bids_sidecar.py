@@ -37,10 +37,11 @@ import json
 import logging
 import sys
 from pathlib import Path
+
 from hed import __version__
+from hed.scripts.script_utils import setup_logging
 from hed.tools import BidsDataset
 from hed.tools.analysis.tabular_summary import TabularSummary
-from hed.scripts.script_utils import setup_logging
 
 
 def get_parser():

@@ -1,11 +1,11 @@
 """Column type for a column in a ColumnMapper."""
 
+import copy
 from enum import Enum
-from typing import Union
+
+import pandas as pd
 
 from hed.errors.error_types import SidecarErrors
-import pandas as pd
-import copy
 
 
 class ColumnType(Enum):
@@ -44,7 +44,7 @@ class ColumnMetadata:
         self.column_type = column_type
 
     @property
-    def hed_dict(self) -> Union[dict, str]:
+    def hed_dict(self) -> dict | str:
         """The HED strings for any given entry.
 
         Returns:
@@ -56,7 +56,7 @@ class ColumnMetadata:
         return self._source[self.column_name].get("HED", {})
 
     @property
-    def source_dict(self) -> Union[dict, str]:
+    def source_dict(self) -> dict | str:
         """The raw dict for this entry(if it exists).
 
         Returns:

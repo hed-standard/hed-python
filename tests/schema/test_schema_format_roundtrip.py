@@ -5,11 +5,12 @@ Tests that schemas can be loaded, saved in all 4 formats (XML, MEDIAWIKI, TSV, J
 and reloaded with perfect fidelity for both standard and library schemas.
 """
 
-import unittest
 import os
-import tempfile
 import shutil
-from hed.schema import load_schema_version, load_schema
+import tempfile
+import unittest
+
+from hed.schema import load_schema, load_schema_version
 from hed.schema.schema_io import df_constants
 
 
@@ -267,7 +268,7 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
         schema.save_as_json(json_path)
 
         # Read the JSON file and check for empty list attributes
-        with open(json_path, "r", encoding="utf-8") as f:
+        with open(json_path, encoding="utf-8") as f:
             json_data = json.load(f)
 
         # Check ALL tags for empty lists

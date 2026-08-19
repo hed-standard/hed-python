@@ -8,11 +8,13 @@ Tests that extras (Sources, Prefixes, ExternalAnnotations) are correctly:
 4. Properly separate library-specific entries from base-schema entries
 """
 
-import unittest
 import os
-import tempfile
 import shutil
+import tempfile
+import unittest
+
 import pandas as pd
+
 from hed.schema import load_schema
 from hed.schema.schema_io import df_constants
 

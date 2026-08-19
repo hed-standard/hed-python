@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import json
-from typing import Union
 
-from hed.schema.hed_schema import HedSchema
-from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.errors import ErrorHandler, ValidationErrors
+from hed.errors.exceptions import HedExceptions, HedFileError
+from hed.schema.hed_schema import HedSchema
+from hed.schema.hed_schema_base import HedSchemaBase
 from hed.schema.hed_schema_constants import HedSectionKey
 from hed.schema.hed_schema_entry import HedSchemaEntry, HedTagEntry
-from hed.schema.hed_schema_base import HedSchemaBase
 
 
 class HedSchemaGroup(HedSchemaBase):
@@ -72,7 +71,7 @@ class HedSchemaGroup(HedSchemaBase):
     def __eq__(self, other):
         return self._schemas == other._schemas
 
-    def schema_for_namespace(self, namespace) -> Union[HedSchema, None]:
+    def schema_for_namespace(self, namespace) -> HedSchema | None:
         """Return the HedSchema for the library namespace.
 
         Parameters:
@@ -130,7 +129,7 @@ class HedSchemaGroup(HedSchemaBase):
             tags.update(schema.get_tags_with_attribute(attribute, key_class))
         return list(tags)
 
-    def get_tag_entry(self, name, key_class=HedSectionKey.Tags, schema_namespace="") -> Union["HedSchemaEntry", None]:
+    def get_tag_entry(self, name, key_class=HedSectionKey.Tags, schema_namespace="") -> HedSchemaEntry | None:
         """Return the schema entry for this tag, if one exists.
 
         Parameters:
@@ -149,7 +148,7 @@ class HedSchemaGroup(HedSchemaBase):
 
         return specific_schema.get_tag_entry(name, key_class, schema_namespace)
 
-    def find_tag_entry(self, tag, schema_namespace="") -> tuple[Union["HedTagEntry", None], Union[str, None], list]:
+    def find_tag_entry(self, tag, schema_namespace="") -> tuple[HedTagEntry | None, str | None, list]:
         """Find the schema entry for a given source tag.
 
         Parameters:

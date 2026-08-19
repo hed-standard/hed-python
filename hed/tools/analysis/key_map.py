@@ -1,6 +1,7 @@
 """A map of column value keys into new column values."""
 
 import pandas as pd
+
 from hed.errors.exceptions import HedFileError
 from hed.tools.util import data_util
 

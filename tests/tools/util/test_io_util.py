@@ -1,18 +1,19 @@
 import os
 import unittest
 from unittest.mock import patch
+
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.io_util import (
     check_filename,
-    extract_suffix_path,
     clean_filename,
+    extract_suffix_path,
+    get_allowed,
     get_alphanumeric_path,
     get_file_list,
-    get_path_components,
-    get_task_from_file,
-    get_allowed,
     get_filtered_by_element,
     get_full_extension,
+    get_path_components,
+    get_task_from_file,
 )
 
 

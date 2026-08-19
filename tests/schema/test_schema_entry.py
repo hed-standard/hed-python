@@ -1,4 +1,5 @@
 import unittest
+
 from hed.schema.hed_schema_entry import HedTagEntry
 
 

@@ -1,9 +1,9 @@
-import unittest
 import copy
+import unittest
 
-from hed.schema.schema_validation import attribute_validators as schema_attribute_validators
-from hed.schema import HedSectionKey
 from hed import load_schema_version
+from hed.schema import HedSectionKey
+from hed.schema.schema_validation import attribute_validators as schema_attribute_validators
 
 
 class Test(unittest.TestCase):

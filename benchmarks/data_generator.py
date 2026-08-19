@@ -16,10 +16,10 @@ import random
 
 import pandas as pd
 
-from hed.schema import load_schema_version
+from hed.models.df_util import convert_to_form
 from hed.models.schema_lookup import generate_schema_lookup
 from hed.models.tabular_input import TabularInput
-from hed.models.df_util import convert_to_form
+from hed.schema import load_schema_version
 
 
 class DataGenerator:

@@ -1,9 +1,10 @@
-import os
-import unittest
 import json
-import tempfile
+import os
 import shutil
-from hed.tools.bids.bids_util import parse_bids_filename, group_by_suffix, get_schema_from_description
+import tempfile
+import unittest
+
+from hed.tools.bids.bids_util import get_schema_from_description, group_by_suffix, parse_bids_filename
 
 
 class TestGetSchemaFromDescription(unittest.TestCase):

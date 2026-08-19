@@ -1,7 +1,5 @@
 """Utilities used in HED validation/loading using a HED schema."""
 
-from typing import Union
-
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import SchemaWarnings
 from hed.schema import hed_schema_constants as constants
@@ -85,7 +83,7 @@ def validate_schema_description(hed_entry) -> list[dict]:
     return issues_list
 
 
-def schema_version_for_library(hed_schema, library_name) -> Union[str, None]:
+def schema_version_for_library(hed_schema, library_name) -> str | None:
     """Given the library name and HED schema object, return the version
 
     Parameters:

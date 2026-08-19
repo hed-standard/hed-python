@@ -1,17 +1,14 @@
 """Abstract base class for loading HED schema files into HedSchema objects."""
 
 import copy
+from abc import ABC, abstractmethod
 
-from hed.schema.schema_io import schema_util
-from hed.errors.exceptions import HedFileError, HedExceptions
-
-from hed.schema.hed_schema import HedSchema
+from hed.errors.exceptions import HedExceptions, HedFileError
+from hed.schema import hed_schema_constants, schema_header_util
 from hed.schema import hed_schema_constants as constants
+from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_constants import HedKey
-from abc import abstractmethod, ABC
-from hed.schema import schema_header_util
-from hed.schema import hed_schema_constants
-from hed.schema.schema_io import df_constants
+from hed.schema.schema_io import df_constants, schema_util
 
 
 class SchemaLoader(ABC):

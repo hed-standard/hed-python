@@ -1,7 +1,9 @@
 import unittest
+
 import pandas as pd
-from hed.schema.schema_io.df_util import _merge_dataframes, merge_dataframe_dicts
+
 from hed import HedFileError
+from hed.schema.schema_io.df_util import _merge_dataframes, merge_dataframe_dicts
 
 
 class TestMergeDataFrames(unittest.TestCase):

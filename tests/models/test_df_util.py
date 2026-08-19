@@ -1,14 +1,16 @@
 import unittest
+
 import pandas as pd
 
-
-from hed import load_schema_version
-from hed.models.df_util import shrink_defs, expand_defs, convert_to_form, process_def_expands
-from hed import DefinitionDict
+from hed import DefinitionDict, load_schema_version
 from hed.models.df_util import (
+    _filter_by_index_list,
     _handle_curly_braces_refs,
     _indexed_dict_from_onsets,
-    _filter_by_index_list,
+    convert_to_form,
+    expand_defs,
+    process_def_expands,
+    shrink_defs,
     split_delay_tags,
 )
 

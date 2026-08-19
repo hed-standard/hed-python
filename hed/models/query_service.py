@@ -1,15 +1,11 @@
 """Functions to get and use HED queries."""
 
-from typing import Union
-
 import pandas as pd
 
 from hed.models import QueryHandler
 
 
-def get_query_handlers(
-    queries, query_names=None
-) -> tuple[list[Union[QueryHandler, None]], list[Union[QueryHandler, None]], list]:
+def get_query_handlers(queries, query_names=None) -> tuple[list[QueryHandler | None], list[QueryHandler | None], list]:
     """Return a list of query handlers, query names, and issues if any.
 
     Parameters:

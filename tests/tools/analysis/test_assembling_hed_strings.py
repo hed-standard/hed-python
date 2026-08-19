@@ -1,9 +1,11 @@
 import os
 import unittest
+
 import pandas as pd
+
 from hed import schema as hedschema
-from hed.models.tabular_input import TabularInput
 from hed.models.df_util import expand_defs, shrink_defs
+from hed.models.tabular_input import TabularInput
 
 
 # noinspection PyBroadException

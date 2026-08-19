@@ -1,11 +1,12 @@
 """Schema entry classes representing individual nodes in the HED vocabulary."""
 
 from __future__ import annotations
-from typing import Union, Any
-from hed.schema.hed_schema_constants import HedSectionKey
-from hed.schema.hed_schema_constants import HedKey
+
+from typing import Any
 
 import inflect
+
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
@@ -73,7 +74,7 @@ class HedSchemaEntry:
             for item in to_remove:
                 self._unknown_attributes.pop(item)
 
-    def has_attribute(self, attribute, return_value=False) -> Union[bool, Any]:
+    def has_attribute(self, attribute, return_value=False) -> bool | Any:
         """Checks for the existence of an attribute in this entry.
 
         Parameters:

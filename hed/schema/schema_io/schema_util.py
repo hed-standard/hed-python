@@ -1,13 +1,14 @@
 """Utilities for writing content to files and for other file manipulation."""
 
-import tempfile
 import os
+import tempfile
 import urllib.request
 from xml.dom import minidom
 from xml.etree import ElementTree
+
 from semantic_version import Version
 
-from hed.errors import HedExceptions, ErrorContext
+from hed.errors import ErrorContext, HedExceptions
 
 # you can fill this in locally if you don't want to add it to environ.
 github_api_access_token = ""
@@ -52,7 +53,7 @@ def make_url_request(resource_url, try_authenticate=True, extra_headers=None):
     """
     request = urllib.request.Request(resource_url)
     if try_authenticate and get_api_key():
-        request.add_header("Authorization", "token %s" % get_api_key())
+        request.add_header("Authorization", f"token {get_api_key()}")
     if extra_headers:
         for header_name, header_value in extra_headers.items():
             request.add_header(header_name, header_value)

@@ -1,9 +1,7 @@
 """Ordered collections of schema entries representing a single section of the HED vocabulary."""
 
-from typing import Union
-
-from hed.schema.hed_schema_entry import HedSchemaEntry, UnitClassEntry, UnitEntry, HedTagEntry
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey, HedKeyOld
+from hed.schema.hed_schema_constants import HedKey, HedKeyOld, HedSectionKey
+from hed.schema.hed_schema_entry import HedSchemaEntry, HedTagEntry, UnitClassEntry, UnitEntry
 
 entries_by_section = {
     HedSectionKey.Properties: HedSchemaEntry,
@@ -121,7 +119,7 @@ class HedSchemaSection:
 
     def get_entries_with_attribute(
         self, attribute_name, return_name_only=False, schema_namespace=""
-    ) -> list[Union[HedSchemaEntry, str]]:
+    ) -> list[HedSchemaEntry | str]:
         """Return entries or names with given attribute.
 
         Parameters:

@@ -2,8 +2,9 @@
 Abstract base class for HedSchema and HedSchemaGroup, showing the common functionality
 """
 
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
 from abc import ABC, abstractmethod
+
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.schema.schema_io import schema_util
 
 

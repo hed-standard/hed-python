@@ -1,6 +1,8 @@
 import os
 import unittest
+
 from pandas import DataFrame
+
 from hed.models import DefinitionDict
 from hed.models.hed_string import HedString
 from hed.models.tabular_input import TabularInput

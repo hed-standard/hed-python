@@ -1,11 +1,11 @@
 import os
 import unittest
 
-from hed.schema.hed_schema_io import load_schema_version
-from hed.models import HedString, HedGroup, Sidecar, TabularInput
+from hed.models import HedGroup, HedString, Sidecar, TabularInput
 from hed.models.model_constants import TopTagReturnType
-from hed.tools.analysis.temporal_event import TemporalEvent
+from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.event_manager import EventManager
+from hed.tools.analysis.temporal_event import TemporalEvent
 
 
 # noinspection PyBroadException

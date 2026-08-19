@@ -1,12 +1,13 @@
 import os
 import unittest
+
 from hed.models import DefinitionDict
 from hed.models.hed_string import HedString
 from hed.models.hed_tag import HedTag
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
-from hed.tools.analysis.hed_type_defs import HedTypeDefs
 from hed.schema.hed_schema_io import load_schema_version
+from hed.tools.analysis.hed_type_defs import HedTypeDefs
 
 
 class Test(unittest.TestCase):

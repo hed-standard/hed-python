@@ -1,9 +1,8 @@
 """Baseclass for MEDIAWIKI/XML/JSON/TSV writers"""
 
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
-from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.schema_io import df_util
-from hed.schema.schema_io import df_constants
+from hed.errors.exceptions import HedExceptions, HedFileError
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey
+from hed.schema.schema_io import df_constants, df_util
 
 
 class Schema2Base:

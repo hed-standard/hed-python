@@ -1,9 +1,9 @@
-import unittest
-import os
 import io
+import os
+import unittest
 
-from hed.models import Sidecar
 from hed import schema
+from hed.models import Sidecar
 from hed.validator.sidecar_validator import SidecarValidator
 
 

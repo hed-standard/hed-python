@@ -1,9 +1,10 @@
 """BIDS utility functions for schema loading, sidecar merging, and inheritance chain resolution."""
 
-import os
 import json
-from hed.tools.util.io_util import get_full_extension
+import os
+
 import hed.schema.hed_schema_io as hed_schema_io
+from hed.tools.util.io_util import get_full_extension
 
 
 def get_schema_from_description(root_path):
@@ -18,7 +19,7 @@ def get_schema_from_description(root_path):
     """
     try:
         description_path = os.path.abspath(os.path.join(root_path, "dataset_description.json"))
-        with open(description_path, "r") as fp:
+        with open(description_path) as fp:
             dataset_description = json.load(fp)
             version = dataset_description.get("HEDVersion", None)
             return hed_schema_io.load_schema_version(version)
@@ -134,7 +135,7 @@ def get_merged_sidecar(root_path, tsv_file):
     merged_sidecar = {}
     # Process from closest to most distant - first file wins for each key
     for sidecar_file in sidecar_files:
-        with open(sidecar_file, "r", encoding="utf-8") as f:
+        with open(sidecar_file, encoding="utf-8") as f:
             sidecar_data = json.load(f)
         # Only add keys that don't already exist (closer files have precedence)
         for key, value in sidecar_data.items():

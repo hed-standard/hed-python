@@ -4,14 +4,14 @@ This module is used to create a HedSchema object from a set of .tsv files.
 
 import io
 
-from hed.schema.schema_io import df_util, load_dataframes
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
-from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.schema_io.base2schema import SchemaLoader
 import pandas as pd
+
 import hed.schema.schema_io.df_constants as constants
 from hed.errors import error_reporter
-from hed.schema.schema_io import text_util
+from hed.errors.exceptions import HedExceptions, HedFileError
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey
+from hed.schema.schema_io import df_util, load_dataframes, text_util
+from hed.schema.schema_io.base2schema import SchemaLoader
 
 
 class SchemaLoaderDF(SchemaLoader):

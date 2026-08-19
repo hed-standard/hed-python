@@ -1,10 +1,10 @@
 """Summarize the contents of columnar files."""
 
 import json
-from typing import Union
+
 from hed.errors.exceptions import HedFileError
-from hed.tools.util import data_util
 from hed.tools.analysis import annotation_util
+from hed.tools.util import data_util
 
 
 class TabularSummary:
@@ -86,7 +86,7 @@ class TabularSummary:
             side_dict[column_name] = annotation_util.generate_sidecar_entry(column_name, [])
         return side_dict
 
-    def get_summary(self, as_json=False) -> Union[dict, str]:
+    def get_summary(self, as_json=False) -> dict | str:
         """Return the summary in dictionary format.
 
         Parameters:

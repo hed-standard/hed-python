@@ -1,7 +1,7 @@
 """Checker that validates event-level HED annotation quality for BIDS datasets."""
 
+from hed.errors import ErrorContext, ErrorHandler, sort_issues
 from hed.errors.error_types import TagQualityErrors
-from hed.errors import ErrorHandler, ErrorContext, sort_issues
 from hed.tools import EventManager, HedTagManager
 
 

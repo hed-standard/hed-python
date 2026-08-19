@@ -1,9 +1,10 @@
 """Utilities supporting validation of HED tags as strings."""
 
 import re
+
 from hed.errors.error_reporter import ErrorHandler
-from hed.schema.hed_schema_constants import HedKey
 from hed.errors.error_types import ValidationErrors
+from hed.schema.hed_schema_constants import HedKey
 
 
 class TagValidator:

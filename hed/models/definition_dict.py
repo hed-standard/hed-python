@@ -1,12 +1,11 @@
 """Definition handler class."""
 
 from __future__ import annotations
-from typing import Union
 
+from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
+from hed.errors.error_types import DefinitionErrors
 from hed.models.definition_entry import DefinitionEntry
 from hed.models.hed_string import HedString
-from hed.errors.error_types import DefinitionErrors
-from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
 from hed.models.model_constants import DefTagNames
 from hed.schema.hed_schema_constants import HedKey
 
@@ -85,7 +84,7 @@ class DefinitionDict:
         for def_tag, def_value in def_dict.items():
             self._add_definition(def_tag, def_value)
 
-    def get(self, def_name) -> Union[DefinitionEntry, None]:
+    def get(self, def_name) -> DefinitionEntry | None:
         """Get the definition entry for the definition name.
 
             Not case-sensitive

@@ -1,7 +1,8 @@
 """Support utilities for hed_cache locking"""
 
-import time
 import os
+import time
+
 import portalocker
 
 TIMESTAMP_FILENAME = "last_update.txt"
@@ -79,10 +80,10 @@ def _read_last_cached_time(cache_folder):
     timestamp_filename = os.path.join(cache_folder, TIMESTAMP_FILENAME)
 
     try:
-        with open(timestamp_filename, "r") as f:
+        with open(timestamp_filename) as f:
             timestamp = float(f.readline())
             return timestamp
-    except (FileNotFoundError, ValueError, IOError):
+    except (OSError, FileNotFoundError, ValueError):
         return 0
 
 

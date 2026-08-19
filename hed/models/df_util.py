@@ -1,13 +1,15 @@
 """Utilities for assembly and conversion of HED strings to different forms."""
 
-import re
 import math
+import re
 from collections import defaultdict
 from functools import partial
+
 import pandas as pd
+
+from hed.models.definition_dict import DefinitionDict
 from hed.models.hed_string import HedString
 from hed.models.model_constants import DefTagNames
-from hed.models.definition_dict import DefinitionDict
 
 
 def convert_to_form(df, hed_schema, tag_form, columns=None):

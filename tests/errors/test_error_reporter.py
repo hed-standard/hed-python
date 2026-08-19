@@ -1,17 +1,17 @@
 import unittest
+
+from hed import HedString, HedTag, load_schema_version
 from hed.errors import (
-    ErrorHandler,
     ErrorContext,
+    ErrorHandler,
     ErrorSeverity,
-    ValidationErrors,
     SchemaWarnings,
+    ValidationErrors,
     get_printable_issue_string,
-    sort_issues,
     separate_issues,
+    sort_issues,
 )
-from hed.errors.error_reporter import hed_tag_error, get_printable_issue_string_html, iter_errors
-from hed import HedString, HedTag
-from hed import load_schema_version
+from hed.errors.error_reporter import get_printable_issue_string_html, hed_tag_error, iter_errors
 
 
 class Test(unittest.TestCase):

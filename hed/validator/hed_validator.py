@@ -1,11 +1,11 @@
 """Top level validation of HED strings."""
 
 import re
-from hed.errors.error_types import ValidationErrors, DefinitionErrors
-from hed.errors import error_reporter
 
+from hed.errors import error_reporter
+from hed.errors.error_types import DefinitionErrors, ValidationErrors
 from hed.validator.def_validator import DefValidator
-from hed.validator.util import UnitValueValidator, CharRexValidator, StringValidator, TagValidator, GroupValidator
+from hed.validator.util import CharRexValidator, GroupValidator, StringValidator, TagValidator, UnitValueValidator
 
 
 class HedValidator:

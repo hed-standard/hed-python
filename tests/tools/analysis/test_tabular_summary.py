@@ -1,9 +1,10 @@
-import unittest
 import os
+import unittest
+
 from hed.errors.exceptions import HedFileError
+from hed.tools import get_file_list, get_new_dataframe
 from hed.tools.analysis.file_dictionary import FileDictionary
 from hed.tools.analysis.tabular_summary import TabularSummary
-from hed.tools import get_file_list, get_new_dataframe
 
 
 class Test(unittest.TestCase):

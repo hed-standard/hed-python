@@ -1,6 +1,7 @@
 """Manager a type variable and its associated context."""
 
 import pandas as pd
+
 from hed.models.hed_group import HedGroup
 from hed.models.hed_tag import HedTag
 from hed.models.model_constants import DefTagNames

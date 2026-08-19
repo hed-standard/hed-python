@@ -1,10 +1,9 @@
-import unittest
 import os
+import unittest
 
-from hed.schema.schema_io import schema_util
+from hed import load_schema, load_schema_version
 from hed.schema import HedSchemaGroup
-from hed import load_schema_version
-from hed import load_schema
+from hed.schema.schema_io import schema_util
 
 
 class Test(unittest.TestCase):

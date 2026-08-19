@@ -1,11 +1,12 @@
 """Validator for HED ID consistency across schema versions."""
 
-from hed.schema.hed_cache import get_library_data, get_available_hed_versions, get_hed_versions
 from semantic_version import Version
-from hed.schema.hed_schema_io import load_schema_version
-from hed.schema.hed_schema_constants import HedKey
-from hed.errors.error_types import SchemaAttributeErrors
+
 from hed.errors.error_reporter import ErrorHandler
+from hed.errors.error_types import SchemaAttributeErrors
+from hed.schema.hed_cache import get_available_hed_versions, get_hed_versions, get_library_data
+from hed.schema.hed_schema_constants import HedKey
+from hed.schema.hed_schema_io import load_schema_version
 
 
 class HedIDValidator:

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from typing import Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from hed.models.model_constants import DefTagNames
 from hed.schema.hed_schema_constants import HedKey
@@ -60,7 +60,7 @@ class HedTag:
             if self.short_base_tag in {DefTagNames.DEF_KEY, DefTagNames.DEF_EXPAND_KEY}:
                 self._def_entry = def_dict.get_definition_entry(self)
 
-    def copy(self) -> "HedTag":
+    def copy(self) -> HedTag:
         """Return a deep copy of this tag.
 
         Returns:
@@ -271,7 +271,7 @@ class HedTag:
         return self._expanded
 
     @property
-    def expandable(self) -> Union["HedGroup", "HedTag", None]:
+    def expandable(self) -> HedGroup | HedTag | None:
         """Return what this expands to.
 
            This is primarily used for Def/Def-expand tags at present.
@@ -347,7 +347,7 @@ class HedTag:
 
         return tag_issues
 
-    def get_stripped_unit_value(self, extension_text) -> tuple[Union[str, None], Union[str, None]]:
+    def get_stripped_unit_value(self, extension_text) -> tuple[str | None, str | None]:
         """Return the extension divided into value and units, if the units are valid.
 
         Parameters:
@@ -369,7 +369,7 @@ class HedTag:
             return None, units
         return extension_text, None
 
-    def value_as_default_unit(self) -> Union[float, None]:
+    def value_as_default_unit(self) -> float | None:
         """Return the value converted to default units if possible or None if invalid.
 
         Returns:

@@ -1,6 +1,7 @@
 """Utilities for manipulating HedString objects."""
 
 import re
+
 from hed.models.hed_string import HedString
 
 

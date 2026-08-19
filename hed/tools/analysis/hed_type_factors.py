@@ -1,6 +1,7 @@
 """Manager for factor information for a columnar file."""
 
 import pandas as pd
+
 from hed.errors.exceptions import HedExceptions, HedFileError
 
 

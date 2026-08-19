@@ -1,8 +1,8 @@
-import unittest
 import os
+import unittest
 
 from hed import load_schema
-from hed.errors import HedFileError, HedExceptions
+from hed.errors import HedExceptions, HedFileError
 
 
 class TestHedSchema(unittest.TestCase):
@@ -84,7 +84,7 @@ class TestHedSchema(unittest.TestCase):
             with self.assertRaises(HedFileError) as context:
                 load_schema(full_filename)
                 # all of these should produce exceptions.
-            from hed.errors import ErrorHandler, ErrorContext, get_printable_issue_string
+            from hed.errors import ErrorContext, ErrorHandler, get_printable_issue_string
             from hed.errors.error_types import SchemaAttributeErrors
 
             # Verify basic properties of exception

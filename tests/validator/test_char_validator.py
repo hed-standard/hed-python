@@ -1,4 +1,5 @@
 import unittest
+
 from hed.validator.util.char_util import CharRexValidator
 
 

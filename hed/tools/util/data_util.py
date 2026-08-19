@@ -1,7 +1,8 @@
 """Data handling utilities involving dataframes."""
 
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 from hed.errors.exceptions import HedFileError
 
 
@@ -119,7 +120,7 @@ def get_key_hash(key_tuple):
 
     """
 
-    return hash(tuple((str(n) for n in key_tuple)))
+    return hash(tuple(str(n) for n in key_tuple))
 
 
 def get_new_dataframe(data):

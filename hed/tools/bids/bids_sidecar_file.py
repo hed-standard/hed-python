@@ -1,8 +1,9 @@
 """Container for a BIDS sidecar file."""
 
-import os
 import io
 import json
+import os
+
 from hed.models.sidecar import Sidecar
 from hed.tools.bids.bids_file import BidsFile
 

@@ -9,7 +9,6 @@ import unittest
 
 from hed.schema import schema_version_manifest as manifest
 
-
 SAMPLE_MANIFEST = {
     "manifest_format_version": 1,
     "generated": "2026-07-16T00:00:00+00:00",

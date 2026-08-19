@@ -25,11 +25,11 @@ import pandas as pd
 # Ensure the repo root is importable when running the script directly
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from data_generator import DataGenerator  # noqa: E402
+
 from hed import HedString, QueryHandler  # noqa: E402
 from hed.models.basic_search import find_matching  # noqa: E402
 from hed.models.string_search import StringQueryHandler, string_search  # noqa: E402
-
-from data_generator import DataGenerator  # noqa: E402
 
 RESULTS_DIR = Path(__file__).parent / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
