@@ -2,8 +2,8 @@
 
 from semantic_version import Version
 
-from hed.schema import hed_schema_constants as constants
 from hed.errors.exceptions import HedExceptions, HedFileError
+from hed.schema import hed_schema_constants as constants
 from hed.schema.hed_schema_constants import valid_header_attributes
 
 

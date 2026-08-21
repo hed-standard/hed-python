@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Union, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from hed.models.base_input import BaseInput
 from hed.models.column_mapper import ColumnMapper
@@ -70,7 +70,7 @@ class TabularInput(BaseInput):
 
         self.reset_mapper(new_mapper)
 
-    def get_def_dict(self, hed_schema, extra_def_dicts=None) -> "DefinitionDict":
+    def get_def_dict(self, hed_schema, extra_def_dicts=None) -> DefinitionDict:
         """Return the definition dict for this sidecar.
 
         Parameters:
@@ -97,6 +97,6 @@ class TabularInput(BaseInput):
             return self._sidecar.get_column_refs()
         return []
 
-    def get_sidecar(self) -> Union[Sidecar, None]:
+    def get_sidecar(self) -> Sidecar | None:
         """Return the sidecar associated with this TabularInput."""
         return self._sidecar

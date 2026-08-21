@@ -1,11 +1,12 @@
 """Tests for validate_hed_sidecar script."""
 
-import os
 import io
 import json
-import unittest
+import os
 import tempfile
+import unittest
 from unittest.mock import patch
+
 from hed.scripts.validate_hed_sidecar import main
 
 
@@ -89,7 +90,7 @@ class TestValidateHedSidecar(unittest.TestCase):
             self.assertEqual(result, 0)
             self.assertTrue(os.path.exists(output_file))
 
-            with open(output_file, "r") as f:
+            with open(output_file) as f:
                 content = f.read()
                 self.assertIn("valid", content.lower())
         finally:

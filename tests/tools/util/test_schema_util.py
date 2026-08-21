@@ -1,5 +1,7 @@
-import pandas as pd
 import unittest
+
+import pandas as pd
+
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.util.schema_util import flatten_schema
 

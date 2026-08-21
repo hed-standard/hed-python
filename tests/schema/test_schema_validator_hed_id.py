@@ -1,10 +1,9 @@
-import unittest
 import copy
+import unittest
 
-from hed.schema.schema_validation.hed_id_validator import HedIDValidator
-from hed.schema import hed_schema_constants
 from hed import load_schema_version
-from hed.schema import HedKey
+from hed.schema import HedKey, hed_schema_constants
+from hed.schema.schema_validation.hed_id_validator import HedIDValidator
 
 # tests needed:
 # 1. Verify HED id(HARDEST, MAY SKIP)

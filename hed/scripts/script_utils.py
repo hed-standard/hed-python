@@ -8,8 +8,9 @@ including logging configuration and argument handling.
 import json
 import logging
 import sys
+
 from hed import __version__
-from hed.errors import get_printable_issue_string, ErrorHandler, iter_errors
+from hed.errors import ErrorHandler, get_printable_issue_string, iter_errors
 
 
 def setup_logging(log_level, log_file=None, log_quiet=False, verbose=False, no_log=False):

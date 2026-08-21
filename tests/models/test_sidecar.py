@@ -1,14 +1,12 @@
-import unittest
-import os
 import io
+import os
 import shutil
+import unittest
 
-from hed.errors import HedFileError, HedExceptions, ValidationErrors, ErrorSeverity
-from hed.models import ColumnMetadata, HedString, Sidecar
 from hed import schema
-from hed.models import DefinitionDict
+from hed.errors import ErrorHandler, ErrorSeverity, HedExceptions, HedFileError, ValidationErrors
+from hed.models import ColumnMetadata, DefinitionDict, HedString, Sidecar
 from hed.models.definition_entry import DefinitionEntry
-from hed.errors import ErrorHandler
 
 
 class Test(unittest.TestCase):

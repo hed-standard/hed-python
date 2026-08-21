@@ -1,16 +1,17 @@
 """A group of BIDS files with specified suffix name."""
 
+import logging
 import os
 import re
-import logging
+
 import pandas as pd
 
 from hed.errors.error_reporter import ErrorHandler
-from hed.validator.sidecar_validator import SidecarValidator
 from hed.tools.analysis.tabular_summary import TabularSummary
-from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
+from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.util import io_util
+from hed.validator.sidecar_validator import SidecarValidator
 
 
 class BidsFileGroup:

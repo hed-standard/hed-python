@@ -3,15 +3,15 @@ This module is used to create a HedSchema object from a .mediawiki file.
 """
 
 import re
+
 import pandas as pd
 
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
-from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.errors import error_reporter
-from hed.schema.schema_io import wiki_constants, df_constants, df_util
+from hed.errors.exceptions import HedExceptions, HedFileError
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey
+from hed.schema.schema_io import df_constants, df_util, text_util, wiki_constants
 from hed.schema.schema_io.base2schema import SchemaLoader
-from hed.schema.schema_io.wiki_constants import HedWikiSection, WIKI_EXTRA_DICT
-from hed.schema.schema_io import text_util
+from hed.schema.schema_io.wiki_constants import WIKI_EXTRA_DICT, HedWikiSection
 
 extend_here_line = "extend here"
 invalid_characters_to_strip = ["&#8203;"]
@@ -60,7 +60,7 @@ class SchemaLoaderWiki(SchemaLoader):
 
     def _open_file(self):
         if self.filename:
-            with open(self.filename, "r", encoding="utf-8", errors="replace") as wiki_file:
+            with open(self.filename, encoding="utf-8", errors="replace") as wiki_file:
                 wiki_lines = wiki_file.readlines()
         else:
             # Split this into lines, but keep linebreaks.

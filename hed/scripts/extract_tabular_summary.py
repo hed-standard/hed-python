@@ -42,10 +42,11 @@ import json
 import logging
 import sys
 from pathlib import Path
+
 from hed import __version__
-from hed.tools.util.io_util import get_file_list
-from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.scripts.script_utils import setup_logging
+from hed.tools.analysis.tabular_summary import TabularSummary
+from hed.tools.util.io_util import get_file_list
 
 
 def get_parser():

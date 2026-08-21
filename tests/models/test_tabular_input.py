@@ -1,12 +1,11 @@
-import unittest
-import os
 import io
+import os
 import shutil
+import unittest
 
-from hed.models import Sidecar, TabularInput
 from hed import schema
-from hed.errors import HedFileError
-from hed.errors import ErrorHandler, ErrorContext
+from hed.errors import ErrorContext, ErrorHandler, HedFileError
+from hed.models import Sidecar, TabularInput
 
 
 class Test(unittest.TestCase):

@@ -1,17 +1,14 @@
+import io
+import json
 import os
 import unittest
 import urllib.error
 
+from hed import HedFileError, HedString, Sidecar, load_schema_version
+from hed.errors import ErrorHandler, SchemaWarnings, get_printable_issue_string
 from hed.models import DefinitionDict
-
-from hed import load_schema_version, HedString
 from hed.schema import from_string
 from hed.validator import HedValidator
-from hed import Sidecar
-import io
-import json
-from hed import HedFileError
-from hed.errors import ErrorHandler, get_printable_issue_string, SchemaWarnings
 
 skip_tests = {
     # "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
@@ -81,7 +78,7 @@ class MyTestCase(unittest.TestCase):
         pass
 
     def run_single_test(self, test_file, test_name=None, test_type=None):
-        with open(test_file, "r") as fp:
+        with open(test_file) as fp:
             test_info = json.load(fp)
 
         file_basename = os.path.basename(test_file)

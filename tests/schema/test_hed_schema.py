@@ -1,9 +1,9 @@
-import unittest
 import os
+import unittest
 
 from hed.errors import HedFileError
 from hed.models import HedTag
-from hed.schema import HedKey, get_hed_xml_version, load_schema, HedSchemaGroup, load_schema_version
+from hed.schema import HedKey, HedSchemaGroup, get_hed_xml_version, load_schema, load_schema_version
 
 
 class TestHedSchema(unittest.TestCase):
@@ -83,7 +83,7 @@ class TestHedSchema(unittest.TestCase):
                 self.assertEqual(
                     tag.has_attribute(attribute),
                     expected_value,
-                    "Test string: %s. Attribute: %s." % (test_string, attribute),
+                    f"Test string: {test_string}. Attribute: {attribute}.",
                 )
 
     def test_get_all_tag_attributes(self):

@@ -1,18 +1,20 @@
 import io
-import unittest
 import os
 import shutil
-from hed.models.sidecar import Sidecar
-from hed.schema.hed_schema_io import load_schema_version
+import unittest
+
+import numpy as np
+import pandas as pd
+
+from hed import schema
+from hed.errors.error_types import ErrorContext, ValidationErrors
+from hed.errors.exceptions import HedFileError
 from hed.models.base_input import BaseInput
-from hed.models.tabular_input import TabularInput
 from hed.models.column_mapper import ColumnMapper
 from hed.models.definition_dict import DefinitionDict
-from hed import schema
-from hed.errors.exceptions import HedFileError
-from hed.errors.error_types import ErrorContext, ValidationErrors
-import pandas as pd
-import numpy as np
+from hed.models.sidecar import Sidecar
+from hed.models.tabular_input import TabularInput
+from hed.schema.hed_schema_io import load_schema_version
 
 
 class Test(unittest.TestCase):

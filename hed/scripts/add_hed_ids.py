@@ -1,9 +1,10 @@
 """CLI script to add missing HED IDs to a schema in the hed-schemas repository."""
 
-from hed.scripts.schema_script_util import get_prerelease_path
-from hed.scripts.hed_convert_schema import convert_and_update
 import argparse
+
 from hed.schema.schema_io.df_util import convert_filenames_to_dict
+from hed.scripts.hed_convert_schema import convert_and_update
+from hed.scripts.schema_script_util import get_prerelease_path
 
 
 # Slightly tweaked version of hed_convert_schema.py with a new main function to allow different parameters.

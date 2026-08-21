@@ -1,9 +1,10 @@
-import os
 import io
 import json
+import os
 import tempfile
 import unittest
 from unittest.mock import patch
+
 from hed.scripts.hed_extract_bids_sidecar import main
 
 
@@ -67,7 +68,7 @@ class TestExtractBidsSidecar(unittest.TestCase):
 
             # Verify the file was created and contains valid JSON
             self.assertTrue(os.path.exists(output_path))
-            with open(output_path, "r", encoding="utf-8") as f:
+            with open(output_path, encoding="utf-8") as f:
                 output_dict = json.load(f)
 
             self.assertIn("sidecar_template", output_dict)

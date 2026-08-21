@@ -1,12 +1,13 @@
-import unittest
-import os
 import io
-
-from hed.errors import HedFileError
-from hed.models import TabularInput, SpreadsheetInput, Sidecar
+import os
 import shutil
-from hed import schema
+import unittest
+
 import pandas as pd
+
+from hed import schema
+from hed.errors import HedFileError
+from hed.models import Sidecar, SpreadsheetInput, TabularInput
 
 
 class Test(unittest.TestCase):

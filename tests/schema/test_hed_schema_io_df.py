@@ -1,9 +1,11 @@
-import unittest
-import shutil
 import os
+import shutil
+import unittest
+
 import pandas as pd
+
 from hed.errors import HedExceptions, HedFileError
-from hed.schema.hed_schema_io import load_schema, load_schema_version, from_dataframes
+from hed.schema.hed_schema_io import from_dataframes, load_schema, load_schema_version
 from hed.schema.schema_io import df_constants as df_constants
 from hed.schema.schema_io.df_util import convert_filenames_to_dict, create_empty_dataframes
 
@@ -53,7 +55,7 @@ class TestHedSchemaDF(unittest.TestCase):
         new_file_strings = {}
         for key, value in filenames.items():
             try:
-                with open(value, "r") as f:
+                with open(value) as f:
                     all_lines = f.readlines()
                     new_file_strings[key] = "".join(all_lines)
             except FileNotFoundError:
@@ -293,8 +295,9 @@ class TestHedSchemaDF(unittest.TestCase):
 
     def test_save_and_load_empty_schema(self):
         """Test that an empty schema can be saved and loaded with proper headers."""
-        from tests.schema.util_create_schemas import _get_test_schema
         import tempfile
+
+        from tests.schema.util_create_schemas import _get_test_schema
 
         schema = _get_test_schema([])
 
@@ -308,7 +311,7 @@ class TestHedSchemaDF(unittest.TestCase):
             self.assertTrue(os.path.exists(tag_file), "Tag TSV file should exist")
 
             # Read the file and verify it has headers
-            with open(tag_file, "r", encoding="utf-8") as f:
+            with open(tag_file, encoding="utf-8") as f:
                 first_line = f.readline().strip()
                 self.assertTrue(len(first_line) > 0, "Tag TSV should have header line")
                 # Should have tab-separated column names
@@ -378,8 +381,9 @@ class TestHedSchemaDF(unittest.TestCase):
 
     def test_all_formats_use_lf_line_endings(self):
         """Test that all output formats (TSV, XML, MediaWiki, JSON) always use LF line endings, not CRLF."""
-        from tests.schema.util_create_schemas import load_schema1
         import tempfile
+
+        from tests.schema.util_create_schemas import load_schema1
 
         schema = load_schema1()
 
@@ -419,9 +423,10 @@ class TestHedSchemaDF(unittest.TestCase):
 
     def test_tsv_reading_handles_both_line_endings(self):
         """Test that TSV files can be read correctly with either LF or CRLF line endings."""
-        from tests.schema.util_create_schemas import load_schema1
-        from hed.schema import load_schema
         import tempfile
+
+        from hed.schema import load_schema
+        from tests.schema.util_create_schemas import load_schema1
 
         schema = load_schema1()
 

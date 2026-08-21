@@ -15,12 +15,13 @@ Return value:
 
 """
 
-from hed.errors.error_types import SchemaWarnings, ValidationErrors, SchemaAttributeErrors, SchemaErrors
-from hed.errors.error_reporter import ErrorHandler
-from hed.schema.hed_cache import get_hed_versions
-from hed.schema.hed_schema_constants import HedKey, character_types, HedSectionKey
-from hed.schema.schema_validation.validation_util import schema_version_for_library
 from semantic_version import Version
+
+from hed.errors.error_reporter import ErrorHandler
+from hed.errors.error_types import SchemaAttributeErrors, SchemaErrors, SchemaWarnings, ValidationErrors
+from hed.schema.hed_cache import get_hed_versions
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey, character_types
+from hed.schema.schema_validation.validation_util import schema_version_for_library
 
 
 def tag_is_placeholder_check(hed_schema, tag_entry, attribute_name) -> list:

@@ -1,14 +1,16 @@
 import os
 import unittest
+
 from pandas import DataFrame
+
 from hed.models import DefinitionDict
 from hed.models.hed_string import HedString
 from hed.models.hed_tag import HedTag
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
-from hed.tools.analysis.hed_type import HedType
 from hed.tools.analysis.event_manager import EventManager
+from hed.tools.analysis.hed_type import HedType
 
 
 class Test(unittest.TestCase):

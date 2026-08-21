@@ -1,12 +1,14 @@
 """Tests for validate_hed_tabular script."""
 
-import os
 import io
 import json
-import unittest
+import os
 import tempfile
-import pandas as pd
+import unittest
 from unittest.mock import patch
+
+import pandas as pd
+
 from hed.scripts.validate_hed_tabular import main
 
 

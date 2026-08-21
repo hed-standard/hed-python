@@ -47,6 +47,10 @@ CI runs ruff check, ruff format --check, typos, the unittest suite, and the spec
 - If spec tests cannot find data, run `git submodule update --init --recursive`.
 - BIDS sidecar inheritance is resolved by `BidsFileGroup` - never resolve it by hand.
 
+## Git flow
+
+Hosted at hed-standard; `origin` is the VisLab fork and `upstream` is hed-standard. Local `main` is a clean mirror of `upstream/main` - never commit or merge to it locally. All work goes on a branch based on `upstream/main`, pushed to the fork, and merged via a PR to hed-standard.
+
 ## Related repositories
 
 - `hed-schemas` - the HED vocabularies (XML/MediaWiki/OWL); also a submodule under `spec_tests/`

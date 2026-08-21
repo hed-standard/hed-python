@@ -1,23 +1,20 @@
-import unittest
-from unittest.mock import patch
-
-from hed.errors import HedFileError
-from hed.errors.error_types import SchemaErrors
-from hed.schema import load_schema, HedSchemaGroup, load_schema_version, HedSchema
-from hed.schema.hed_schema_io import parse_version_list, _load_schema_version, from_string
-from tests.schema.schema_test_helpers import with_temp_file, get_temp_filename
-
-import os
 import json
 import math
-import tempfile
-from urllib.error import URLError
-from semantic_version import Version
-from hed.errors import HedExceptions
-from hed.schema import HedKey
-from hed.schema import hed_cache
-from hed import schema
+import os
 import shutil
+import tempfile
+import unittest
+from unittest.mock import patch
+from urllib.error import URLError
+
+from semantic_version import Version
+
+from hed import schema
+from hed.errors import HedExceptions, HedFileError
+from hed.errors.error_types import SchemaErrors
+from hed.schema import HedKey, HedSchema, HedSchemaGroup, hed_cache, load_schema, load_schema_version
+from hed.schema.hed_schema_io import _load_schema_version, from_string, parse_version_list
+from tests.schema.schema_test_helpers import get_temp_filename, with_temp_file
 
 
 def _assert_valid_sorted_versions(test_case, versions):
@@ -343,7 +340,7 @@ class TestHedSchema(unittest.TestCase):
                     self.skipTest("GitHub unreachable or rate-limited in this environment")
 
                 cache_filename = os.path.join(tmp_dir, hed_cache.AVAILABLE_VERSIONS_CACHE_FILENAME)
-                with open(cache_filename, "r") as f:
+                with open(cache_filename) as f:
                     cache_after_first = json.load(f)
                 # Every URL that was actually reached should have picked up an ETag to send on
                 # the next conditional request - if GitHub stopped returning ETags, this needs
@@ -373,7 +370,7 @@ class TestHedSchema(unittest.TestCase):
                     self.skipTest("GitHub unreachable or rate-limited in this environment")
 
                 cache_filename = os.path.join(tmp_dir, hed_cache.AVAILABLE_VERSIONS_CACHE_FILENAME)
-                with open(cache_filename, "r") as f:
+                with open(cache_filename) as f:
                     cached_urls = set(json.load(f).keys())
                 self.assertTrue(
                     all("library_schemas" not in url for url in cached_urls),
@@ -387,7 +384,7 @@ class TestHedSchema(unittest.TestCase):
                     self.skipTest("GitHub unreachable or rate-limited in this environment")
 
                 cache_filename = os.path.join(tmp_dir, hed_cache.AVAILABLE_VERSIONS_CACHE_FILENAME)
-                with open(cache_filename, "r") as f:
+                with open(cache_filename) as f:
                     cached_urls = set(json.load(f).keys())
                 self.assertTrue(
                     all("standard_schema" not in url for url in cached_urls),

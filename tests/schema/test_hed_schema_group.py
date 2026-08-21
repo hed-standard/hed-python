@@ -1,7 +1,7 @@
-import unittest
 import os
+import unittest
 
-from hed.schema import load_schema, HedSchemaGroup
+from hed.schema import HedSchemaGroup, load_schema
 
 
 class TestHedSchema(unittest.TestCase):

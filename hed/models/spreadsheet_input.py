@@ -1,7 +1,7 @@
 """A spreadsheet of HED tags."""
 
-from hed.models.column_mapper import ColumnMapper
 from hed.models.base_input import BaseInput
+from hed.models.column_mapper import ColumnMapper
 
 
 class SpreadsheetInput(BaseInput):

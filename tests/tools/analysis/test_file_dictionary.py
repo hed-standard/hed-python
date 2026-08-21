@@ -1,5 +1,5 @@
-import unittest
 import os
+import unittest
 
 from hed.errors.exceptions import HedFileError
 from hed.tools.analysis.file_dictionary import FileDictionary

@@ -1,7 +1,8 @@
 """Utilities"""
 
 import pandas as pd
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
+
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 
 
 def flatten_schema(hed_schema, skip_non_tag=False):

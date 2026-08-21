@@ -42,9 +42,10 @@ Examples:
 import argparse
 import logging
 import sys
+
 from hed import __version__
 from hed.errors import ErrorHandler
-from hed.scripts.script_utils import setup_logging, format_validation_results
+from hed.scripts.script_utils import format_validation_results, setup_logging
 from hed.tools import BidsDataset
 
 

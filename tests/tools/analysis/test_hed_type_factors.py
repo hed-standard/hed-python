@@ -1,13 +1,15 @@
 import os
 import unittest
+
 from pandas import DataFrame
+
+from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.models import DefinitionDict
 from hed.models.hed_string import HedString
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.event_manager import EventManager
 from hed.tools.analysis.hed_type import HedType
-from hed.errors.exceptions import HedFileError, HedExceptions
 from hed.tools.analysis.hed_type_factors import HedTypeFactors
 
 

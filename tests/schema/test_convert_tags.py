@@ -1,7 +1,7 @@
 import unittest
 
+from hed.errors import ErrorContext, ErrorHandler, ValidationErrors
 from hed.models import HedString
-from hed.errors import ValidationErrors, ErrorContext, ErrorHandler
 from tests.validator.test_tag_validator_base import TestHedBase
 
 
@@ -35,9 +35,7 @@ class TestConvertTag(TestTagFormat):
 
 class TestConvertToLongTag(TestConvertTag):
     def validator(self, test_strings, expected_results, expected_errors):
-        super(TestConvertToLongTag, self).converter_base(
-            test_strings, expected_results, expected_errors, convert_to_short=False
-        )
+        super().converter_base(test_strings, expected_results, expected_errors, convert_to_short=False)
 
     def test_tag(self):
         test_strings = {
@@ -237,9 +235,7 @@ class TestConvertToLongTag(TestConvertTag):
 
 class TestConvertToShortTag(TestConvertTag):
     def validator(self, test_strings, expected_results, expected_errors):
-        super(TestConvertToShortTag, self).converter_base(
-            test_strings, expected_results, expected_errors, convert_to_short=True
-        )
+        super().converter_base(test_strings, expected_results, expected_errors, convert_to_short=True)
 
     def test_tag(self):
         test_strings = {
@@ -457,9 +453,7 @@ class TestConvertToShortTag(TestConvertTag):
 
 class TestConvertHedStringToShort(TestConvertTag):
     def validator(self, test_strings, expected_results, expected_errors):
-        super(TestConvertHedStringToShort, self).converter_base(
-            test_strings, expected_results, expected_errors, convert_to_short=True
-        )
+        super().converter_base(test_strings, expected_results, expected_errors, convert_to_short=True)
 
     def test_empty_strings(self):
         test_strings = {
@@ -580,9 +574,7 @@ class TestConvertHedStringToShort(TestConvertTag):
 
 class TestConvertHedStringToLong(TestConvertTag):
     def validator(self, test_strings, expected_results, expected_errors):
-        super(TestConvertHedStringToLong, self).converter_base(
-            test_strings, expected_results, expected_errors, convert_to_short=False
-        )
+        super().converter_base(test_strings, expected_results, expected_errors, convert_to_short=False)
 
     def test_empty_strings(self):
         test_strings = {

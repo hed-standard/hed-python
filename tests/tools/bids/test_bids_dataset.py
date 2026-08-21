@@ -1,10 +1,11 @@
 import os
 import unittest
-from hed.schema.hed_schema_io import load_schema_version
+
+from hed.models.sidecar import Sidecar
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_group import HedSchemaGroup
+from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.bids.bids_dataset import BidsDataset
-from hed.models.sidecar import Sidecar
 from hed.tools.bids.bids_file_group import BidsFileGroup
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile

@@ -1,15 +1,15 @@
 """Manager of events of temporal extent."""
 
-import pandas as pd
 import bisect
 
+import pandas as pd
+
 from hed.errors.exceptions import HedFileError
+from hed.models import df_util, string_util
 from hed.models.hed_string import HedString
 from hed.models.model_constants import DefTagNames, TopTagReturnType
-from hed.models import df_util
-from hed.models import string_util
-from hed.tools.analysis.temporal_event import TemporalEvent
 from hed.tools.analysis.hed_type_defs import HedTypeDefs
+from hed.tools.analysis.temporal_event import TemporalEvent
 
 
 class EventManager:

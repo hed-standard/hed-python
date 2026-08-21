@@ -1,12 +1,13 @@
 """Singleton checker that validates reserved HED tag usage rules loaded from reservedTags.json."""
 
 import json
-import os
 import math
-from threading import Lock
+import os
 from collections import defaultdict
-from hed.errors.error_types import ValidationErrors, TemporalErrors
+from threading import Lock
+
 from hed.errors.error_reporter import ErrorHandler
+from hed.errors.error_types import TemporalErrors, ValidationErrors
 
 
 class ReservedChecker:
@@ -20,14 +21,14 @@ class ReservedChecker:
         if cls._instance is None:
             with cls._lock:
                 if cls._instance is None:
-                    cls._instance = super(ReservedChecker, cls).__new__(cls)
+                    cls._instance = super().__new__(cls)
                     cls._instance._initialize()
         return cls._instance
 
     def _initialize(self):
         # Load the JSON file during the first instantiation
         if not hasattr(self, "reserved_map"):
-            with open(self.reserved_reqs_path, "r") as file:
+            with open(self.reserved_reqs_path) as file:
                 self.reserved_map = json.load(file)
         self._initialize_special_tags()
 

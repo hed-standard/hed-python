@@ -1,9 +1,10 @@
 """Tests for validate_hed_string script."""
 
-import os
 import io
+import os
 import unittest
 from unittest.mock import patch
+
 from hed.scripts.validate_hed_string import main
 
 
@@ -85,7 +86,7 @@ class TestValidateHedString(unittest.TestCase):
             self.assertEqual(result, 0)
             self.assertTrue(os.path.exists(output_file))
 
-            with open(output_file, "r") as f:
+            with open(output_file) as f:
                 content = f.read()
                 self.assertIn("valid", content.lower())
         finally:

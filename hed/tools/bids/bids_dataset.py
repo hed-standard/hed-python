@@ -1,9 +1,10 @@
 """The contents of a BIDS dataset."""
 
-import os
 import logging
-from hed.tools.bids.bids_file_group import BidsFileGroup
+import os
+
 from hed.tools.bids import bids_util
+from hed.tools.bids.bids_file_group import BidsFileGroup
 from hed.tools.util import io_util
 
 # Sentinel value for default arguments (avoids mutable default bug)

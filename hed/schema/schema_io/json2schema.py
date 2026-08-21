@@ -3,9 +3,10 @@ This module is used to create a HedSchema object from a JSON file or string.
 """
 
 import json
-from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey
-from hed.schema.schema_io import json_constants, df_util
+
+from hed.errors.exceptions import HedExceptions, HedFileError
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey
+from hed.schema.schema_io import df_util, json_constants
 from hed.schema.schema_io.base2schema import SchemaLoader
 
 
@@ -35,7 +36,7 @@ class SchemaLoaderJSON(SchemaLoader):
         """Parses a JSON file and returns the dictionary."""
         try:
             if self.filename:
-                with open(self.filename, "r", encoding="utf-8") as f:
+                with open(self.filename, encoding="utf-8") as f:
                     data = json.load(f)
             else:
                 data = json.loads(self.schema_as_string)
@@ -489,8 +490,9 @@ class SchemaLoaderJSON(SchemaLoader):
 
     def _load_extras(self):
         """Load extra sections like sources, prefixes, and external annotations."""
-        from hed.schema.schema_io import df_constants
         import pandas as pd
+
+        from hed.schema.schema_io import df_constants
 
         self._schema.extras = {}
 

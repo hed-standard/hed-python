@@ -8,6 +8,7 @@ Provides a git-like interface with subcommands for validation and schema managem
 
 import click
 from click_option_group import optgroup
+
 from hed import __version__
 
 # Consistent metavar definitions used across all commands

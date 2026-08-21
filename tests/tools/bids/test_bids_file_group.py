@@ -1,10 +1,11 @@
 import os
 import unittest
+
+from hed.errors.error_reporter import ErrorHandler
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_file_group import BidsFileGroup
 from hed.tools.util import io_util
-from hed.errors.error_reporter import ErrorHandler
 
 # TODO: Add test when exclude directories have files of the type needed (such as JSON in code directory).
 

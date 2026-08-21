@@ -1,11 +1,12 @@
 """CLI script to validate and convert HED schema files across formats (XML, MediaWiki, TSV, JSON)."""
 
-from hed.scripts.schema_script_util import sort_base_schemas, validate_all_schemas, add_extension
+import argparse
+
+from hed.errors import HedFileError, get_printable_issue_string
+from hed.schema.hed_schema_io import from_dataframes, load_schema
 from hed.schema.schema_io import load_dataframes, save_dataframes
 from hed.schema.schema_io.hed_id_util import update_dataframes_from_schema
-from hed.schema.hed_schema_io import load_schema, from_dataframes
-from hed.errors import get_printable_issue_string, HedFileError
-import argparse
+from hed.scripts.schema_script_util import add_extension, sort_base_schemas, validate_all_schemas
 
 
 def convert_and_update(filenames, set_ids):

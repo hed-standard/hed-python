@@ -2,17 +2,17 @@
 
 import re
 
+from hed.errors.exceptions import HedQueryError
 from hed.models.query_expressions import (
     Expression,
     ExpressionAnd,
-    ExpressionWildcardNew,
-    ExpressionOr,
-    ExpressionNegation,
     ExpressionDescendantGroup,
     ExpressionExactMatch,
+    ExpressionNegation,
+    ExpressionOr,
+    ExpressionWildcardNew,
 )
 from hed.models.query_util import Token
-from hed.errors.exceptions import HedQueryError
 
 
 class QueryHandler:

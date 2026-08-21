@@ -15,15 +15,16 @@ Breakages addressed:
 """
 
 import unittest
+
 import pandas as pd
 
 from hed import load_schema_version
-from hed.models.df_util import shrink_defs, _filter_by_index_list
-from hed.tools.util.data_util import delete_columns
-from hed.schema.schema_io.df_util import _merge_dataframes, get_attributes_from_row
-from hed.schema.schema_io import df_constants as constants
-from hed.schema.schema_io.hed_id_util import _verify_hedid_matches, assign_hed_ids_section, _get_hedid_range
+from hed.models.df_util import _filter_by_index_list, shrink_defs
 from hed.schema.hed_schema_io import from_dataframes
+from hed.schema.schema_io import df_constants as constants
+from hed.schema.schema_io.df_util import _merge_dataframes, get_attributes_from_row
+from hed.schema.schema_io.hed_id_util import _get_hedid_range, _verify_hedid_matches, assign_hed_ids_section
+from hed.tools.util.data_util import delete_columns
 
 hed_schema_global = load_schema_version("8.4.0")
 

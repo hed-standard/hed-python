@@ -1,10 +1,10 @@
+import os
 import unittest
+
+from hed import HedTag, schema
+from hed.errors.exceptions import HedQueryError
 from hed.models.hed_string import HedString
 from hed.models.query_handler import QueryHandler
-from hed.errors.exceptions import HedQueryError
-import os
-from hed import schema
-from hed import HedTag
 
 
 # Override the tag terms function for testing purposes when we don't have a schema

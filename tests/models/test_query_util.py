@@ -12,10 +12,11 @@ For example, when searching for "Red" in "(Red, Blue, Green)":
 
 import os
 import unittest
-from hed.models.query_util import SearchResult
-from hed.models.hed_string import HedString
-from hed import schema
 from unittest.mock import Mock
+
+from hed import schema
+from hed.models.hed_string import HedString
+from hed.models.query_util import SearchResult
 
 
 class TestSearchResult(unittest.TestCase):

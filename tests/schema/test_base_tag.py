@@ -1,9 +1,9 @@
-import unittest
 import os
+import unittest
 
+from hed.errors import ErrorHandler
 from hed.models import HedString
 from hed.schema import load_schema
-from hed.errors import ErrorHandler
 
 
 class TestBaseTagBase(unittest.TestCase):

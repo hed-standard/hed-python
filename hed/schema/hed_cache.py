@@ -2,25 +2,22 @@
 
 from __future__ import annotations
 
-import shutil
-import os
-import time
-
-import json
-from hashlib import sha1
-from shutil import copyfile
 import functools
-
-
+import json
+import os
 import re
-from typing import Union
+import shutil
+import time
+import urllib
+from hashlib import sha1
+from pathlib import Path
+from shutil import copyfile
+from urllib.error import URLError
 
 from semantic_version import Version
+
 from hed.schema.hed_cache_lock import CacheError, CacheLock
-from hed.schema.schema_io.schema_util import url_to_file, make_url_request
-from pathlib import Path
-import urllib
-from urllib.error import URLError
+from hed.schema.schema_io.schema_util import make_url_request, url_to_file
 
 # From https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 HED_VERSION_P1 = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)"
@@ -86,7 +83,7 @@ def get_cache_directory(cache_folder=None) -> str:
     return HED_CACHE_DIRECTORY
 
 
-def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelease=False) -> Union[list, dict]:
+def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelease=False) -> list | dict:
     """Get the HED versions in the HED directory.
 
     Parameters:
@@ -145,7 +142,7 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
     return []
 
 
-def get_hed_version_path(xml_version, library_name=None, local_hed_directory=None) -> Union[str, None]:
+def get_hed_version_path(xml_version, library_name=None, local_hed_directory=None) -> str | None:
     """Get the HED XML file path for a given version.
 
     Searches the local cache first (including the bundled schemas that are always present).
@@ -206,7 +203,7 @@ def _find_hed_version_path(xml_version, library_name, local_hed_directory):
     return None
 
 
-def cache_local_versions(cache_folder) -> Union[int, None]:
+def cache_local_versions(cache_folder) -> int | None:
     """Cache all schemas included with the HED installation.
 
     Parameters:
@@ -293,7 +290,7 @@ def get_available_hed_versions(
     cache_folder=None,
     force_refresh=False,
     cache_time_threshold=AVAILABLE_VERSIONS_TIME_THRESHOLD,
-) -> Union[list, dict]:
+) -> list | dict:
     """List HED schema versions available on GitHub, without downloading or caching their content.
 
     For the canonical hed-schemas URLs this reads a single repository-level manifest
@@ -531,7 +528,7 @@ def _read_available_versions_cache(cache_folder):
     """
     cache_filename = os.path.join(cache_folder, AVAILABLE_VERSIONS_CACHE_FILENAME)
     try:
-        with open(cache_filename, "r") as f:
+        with open(cache_filename) as f:
             data = json.load(f)
     except (FileNotFoundError, ValueError, OSError):
         return {}
@@ -822,7 +819,7 @@ def _get_hed_xml_versions_from_url_all_libraries(
     etag_cache=None,
     force_refresh=False,
     cache_time_threshold=0,
-) -> Union[list, dict]:
+) -> list | dict:
     """Get all available schemas and their hash values
 
     Parameters:
@@ -883,7 +880,7 @@ def _calculate_sha1(filename):
         with open(filename, "rb") as f:
             data = f.read()
             githash = sha1()
-            githash.update(f"blob {len(data)}\0".encode("utf-8"))
+            githash.update(f"blob {len(data)}\0".encode())
             githash.update(data)
             return githash.hexdigest()
     except FileNotFoundError:

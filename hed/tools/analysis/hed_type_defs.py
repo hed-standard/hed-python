@@ -1,7 +1,7 @@
 """Manager for definitions associated with a type such as condition-variable."""
 
-from hed.models.hed_tag import HedTag
 from hed.models.definition_dict import DefinitionDict
+from hed.models.hed_tag import HedTag
 
 
 class HedTypeDefs:

@@ -1,10 +1,11 @@
+import json
 import os
 import unittest
-import json
+
 from hed.models.sidecar import Sidecar
-from hed.tools.bids.bids_tabular_file import BidsTabularFile
 from hed.tools.bids.bids_file import BidsFile
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
+from hed.tools.bids.bids_tabular_file import BidsTabularFile
 
 
 class Test(unittest.TestCase):
@@ -94,7 +95,7 @@ class Test(unittest.TestCase):
         bids_upper.set_contents()
         self.assertTrue(bids_upper.contents)
         bids_upper2 = BidsSidecarFile(self.sidecar_path_upper)
-        with open(self.sidecar_path_upper, "r", encoding="utf-8") as file:
+        with open(self.sidecar_path_upper, encoding="utf-8") as file:
             data_upper = json.load(file)  # Parses the JSON file into a Python dictionary
         bids_upper2.set_contents(data_upper)
         self.assertEqual(bids_upper2.contents.loaded_dict, data_upper)

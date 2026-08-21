@@ -5,13 +5,13 @@ Add new errors here, or any other file imported after error_reporter.py.
 
 from hed.errors.error_reporter import hed_error, hed_tag_error
 from hed.errors.error_types import (
-    ValidationErrors,
-    SidecarErrors,
-    ErrorSeverity,
-    DefinitionErrors,
-    TemporalErrors,
     ColumnErrors,
+    DefinitionErrors,
+    ErrorSeverity,
+    SidecarErrors,
     TagQualityErrors,
+    TemporalErrors,
+    ValidationErrors,
 )
 
 

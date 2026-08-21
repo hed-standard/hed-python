@@ -1,13 +1,13 @@
-import unittest
 import os
-
-from hed.errors import error_reporter
-from hed import schema
-from hed.errors.error_types import ValidationErrors, DefinitionErrors
-from hed.schema.hed_schema_group import HedSchemaGroup
-from hed.errors.exceptions import HedFileError
-from tests.validator.test_tag_validator_base import TestValidatorBase
+import unittest
 from functools import partial
+
+from hed import schema
+from hed.errors import error_reporter
+from hed.errors.error_types import DefinitionErrors, ValidationErrors
+from hed.errors.exceptions import HedFileError
+from hed.schema.hed_schema_group import HedSchemaGroup
+from tests.validator.test_tag_validator_base import TestValidatorBase
 
 
 class TestHed3(TestValidatorBase):

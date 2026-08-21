@@ -1,7 +1,8 @@
-from hed.models import HedString
-import unittest
-from hed import load_schema_version
 import copy
+import unittest
+
+from hed import load_schema_version
+from hed.models import HedString
 
 
 class TestHedStrings(unittest.TestCase):

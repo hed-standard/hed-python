@@ -1,7 +1,8 @@
 import unittest
+
 from hed.errors.error_types import TagQualityErrors
-from hed.schema import load_schema_version
 from hed.models.hed_string import HedString
+from hed.schema import load_schema_version
 from hed.tools.analysis.event_checker import EventChecker
 
 

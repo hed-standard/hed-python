@@ -11,7 +11,7 @@ import os
 import tempfile
 import unittest
 
-from hed.models.schema_lookup import generate_schema_lookup, save_schema_lookup, load_schema_lookup
+from hed.models.schema_lookup import generate_schema_lookup, load_schema_lookup, save_schema_lookup
 
 
 class TestSchemaLookupBase(unittest.TestCase):

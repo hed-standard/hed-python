@@ -1,9 +1,10 @@
 """CLI script to validate HED schema files for compliance and format consistency."""
 
-import sys
-from hed.scripts.schema_script_util import validate_all_schemas, sort_base_schemas
-from hed.errors import get_printable_issue_string
 import argparse
+import sys
+
+from hed.errors import get_printable_issue_string
+from hed.scripts.schema_script_util import sort_base_schemas, validate_all_schemas
 
 
 def get_parser():

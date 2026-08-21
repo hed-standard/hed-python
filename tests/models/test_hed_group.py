@@ -1,9 +1,9 @@
-import unittest
+import copy
 import os
+import unittest
 
 from hed import schema
 from hed.models import HedString
-import copy
 
 
 class Test(unittest.TestCase):

@@ -2,8 +2,9 @@
 
 import os.path
 from collections import defaultdict
-from hed.schema import from_string, load_schema, from_dataframes
-from hed.errors import get_printable_issue_string, separate_issues, HedFileError
+
+from hed.errors import HedFileError, get_printable_issue_string, separate_issues
+from hed.schema import from_dataframes, from_string, load_schema
 from hed.schema.schema_comparer import SchemaComparer
 
 all_extensions = [".tsv", ".mediawiki", ".xml", ".json"]

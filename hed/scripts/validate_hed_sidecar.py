@@ -7,12 +7,13 @@ against a specified HED schema version.
 """
 
 import argparse
-import sys
 import os
-from hed.models import Sidecar
+import sys
+
 from hed.errors import ErrorHandler
+from hed.models import Sidecar
 from hed.schema import load_schema_version
-from hed.scripts.script_utils import setup_logging, format_validation_results
+from hed.scripts.script_utils import format_validation_results, setup_logging
 
 
 def get_parser():

@@ -1,8 +1,8 @@
 import os
 import unittest
 
-from hed.tools import BidsDataset
 from hed.errors import get_printable_issue_string
+from hed.tools import BidsDataset
 
 
 class MyTestCase(unittest.TestCase):

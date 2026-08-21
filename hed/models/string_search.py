@@ -38,8 +38,8 @@ from __future__ import annotations
 
 from collections import deque
 
-from hed.models.query_handler import QueryHandler
 from hed.models.hed_string import HedString
+from hed.models.query_handler import QueryHandler
 
 
 class StringNode:

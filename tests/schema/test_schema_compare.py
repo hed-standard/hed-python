@@ -1,15 +1,14 @@
-import unittest
 import copy
+import os
+import unittest
 
 import pandas as pd
 
+from hed import load_schema, load_schema_version
 from hed.schema import HedKey, HedSectionKey
 from hed.schema.schema_comparer import SchemaComparer
-from hed import load_schema_version, load_schema
-from hed.schema.schema_io.df_constants import SOURCES_KEY, PREFIXES_KEY, EXTERNAL_ANNOTATION_KEY
-
+from hed.schema.schema_io.df_constants import EXTERNAL_ANNOTATION_KEY, PREFIXES_KEY, SOURCES_KEY
 from tests.schema import util_create_schemas
-import os
 
 
 class TestSchemaComparerConstants(unittest.TestCase):

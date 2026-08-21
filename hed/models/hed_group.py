@@ -1,11 +1,13 @@
 """A single parenthesized HED string."""
 
 from __future__ import annotations
+
+import copy
 from collections import deque
+from collections.abc import Iterable
+
 from hed.models.hed_tag import HedTag
 from hed.models.model_constants import DefTagNames
-import copy
-from typing import Iterable, Union
 
 
 class HedGroup:
@@ -103,7 +105,7 @@ class HedGroup:
 
         raise KeyError(f"The tag {item_to_replace} not found in the group.")
 
-    def remove(self, items_to_remove: Iterable[Union[HedTag, "HedGroup"]]):
+    def remove(self, items_to_remove: Iterable[HedTag | HedGroup]):
         """Remove any tags/groups in items_to_remove.
 
         Parameters:
@@ -139,7 +141,7 @@ class HedGroup:
             "Use .copy() for a deep copy."
         )
 
-    def copy(self) -> "HedGroup":
+    def copy(self) -> HedGroup:
         """Return a deep copy of this group.
 
         Returns:
@@ -156,7 +158,7 @@ class HedGroup:
         """Sort the tags and groups in this HedString in a consistent order."""
         self._sorted(update_self=True)
 
-    def sorted(self) -> "HedGroup":
+    def sorted(self) -> HedGroup:
         """Return a sorted copy of this HED group
 
         Returns:
@@ -396,7 +398,7 @@ class HedGroup:
 
         return indented
 
-    def find_placeholder_tag(self) -> Union[HedTag, None]:
+    def find_placeholder_tag(self) -> HedTag | None:
         """Return a placeholder tag, if present in this group.
 
         Returns:

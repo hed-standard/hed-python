@@ -1,8 +1,9 @@
 import os
 import unittest
-import numpy as np
 
-from pandas import DataFrame, Categorical
+import numpy as np
+from pandas import Categorical, DataFrame
+
 from hed.errors.exceptions import HedFileError
 from hed.tools.util.data_util import (
     add_columns,

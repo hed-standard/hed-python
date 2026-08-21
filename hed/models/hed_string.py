@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+
 from hed.models.hed_group import HedGroup
 from hed.models.hed_tag import HedTag
 from hed.models.model_constants import DefTagNames, TopTagReturnType
@@ -113,7 +114,7 @@ class HedString(HedGroup):
 
         return new_string
 
-    def copy(self) -> "HedString":
+    def copy(self) -> HedString:
         """Return a deep copy of this string.
 
         Returns:
@@ -134,7 +135,7 @@ class HedString(HedGroup):
         if definition_groups:
             self.remove(definition_groups)
 
-    def shrink_defs(self) -> "HedString":
+    def shrink_defs(self) -> HedString:
         """Replace def-expand tags with def tags.
 
             This does not validate them and will blindly shrink invalid ones as well.
@@ -151,7 +152,7 @@ class HedString(HedGroup):
 
         return self
 
-    def expand_defs(self) -> "HedString":
+    def expand_defs(self) -> HedString:
         """Replace def tags with def-expand tags.
 
             This does very minimal validation.

@@ -1,9 +1,9 @@
 import unittest
+
+from hed import HedTag, load_schema_version
+from hed.errors import DefinitionErrors, ErrorHandler, ErrorSeverity, ValidationErrors
 from hed.models.definition_dict import DefinitionDict
-from hed.errors import ErrorHandler, DefinitionErrors, ValidationErrors, ErrorSeverity
 from hed.models.hed_string import HedString
-from hed import HedTag
-from hed import load_schema_version
 from tests.validator.test_tag_validator_base import TestHedBase
 
 

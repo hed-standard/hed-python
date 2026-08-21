@@ -1,6 +1,7 @@
 """A file dictionary keyed by entity indices."""
 
 import os
+
 from hed.errors.exceptions import HedFileError
 
 
@@ -89,8 +90,7 @@ class FileDictionary:
             - file: File path.
 
         """
-        for key, file in self._file_dict.items():
-            yield key, file
+        yield from self._file_dict.items()
 
     def key_diffs(self, other_dict):
         """Return symmetric key difference with another dict.

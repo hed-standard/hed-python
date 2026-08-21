@@ -1,15 +1,16 @@
-import os
 import io
 import json
+import os
 import unittest
+
 import numpy as np
 from pandas import DataFrame, Series
+
 from hed import schema as hedschema
 from hed.errors.exceptions import HedFileError
-from hed.models.sidecar import Sidecar
 from hed.models.hed_string import HedString
+from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
-
 from hed.tools.analysis import annotation_util
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.util import io_util
@@ -353,7 +354,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len(hed_objs2), 2)
 
     def test_strs_to_sidecar(self):
-        with open(self.json_path, "r") as fp:
+        with open(self.json_path) as fp:
             sidecar_dict = json.load(fp)
         self.assertIsInstance(sidecar_dict, dict)
         sidecar_str = json.dumps(sidecar_dict)
@@ -362,7 +363,7 @@ class Test(unittest.TestCase):
         self.assertIsInstance(sidecar_obj, Sidecar)
 
     def test_strs_to_tabular(self):
-        with open(self.events_path, "r") as file:
+        with open(self.events_path) as file:
             events_contents = file.read()
         tab_in = annotation_util.str_to_tabular(events_contents, sidecar=self.json_path)
         self.assertIsInstance(tab_in, TabularInput)

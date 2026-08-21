@@ -4,10 +4,11 @@ import io
 import os
 import shutil
 import unittest
+
 from hed import load_schema, load_schema_version
-from hed.schema import HedSectionKey, HedKey
-from hed.scripts.schema_script_util import add_extension
+from hed.schema import HedKey, HedSectionKey
 from hed.scripts.hed_convert_schema import convert_and_update
+from hed.scripts.schema_script_util import add_extension
 
 
 class TestConvertAndUpdate(unittest.TestCase):

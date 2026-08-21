@@ -27,11 +27,11 @@ from hed.errors.error_types import (
     SchemaWarnings,
 )
 from hed.schema import hed_cache
-from hed.schema.schema_validation import attribute_validators
-from hed.schema.hed_schema import HedSchema, HedKey, HedSectionKey
+from hed.schema.hed_schema import HedKey, HedSchema, HedSectionKey
 from hed.schema.schema_io import df_constants
-from hed.schema.schema_validation.hed_id_validator import HedIDValidator
+from hed.schema.schema_validation import attribute_validators
 from hed.schema.schema_validation.compliance_summary import ComplianceSummary
+from hed.schema.schema_validation.hed_id_validator import HedIDValidator
 from hed.schema.schema_validation.validation_util import (
     get_allowed_characters_by_name,
     get_problem_indexes,

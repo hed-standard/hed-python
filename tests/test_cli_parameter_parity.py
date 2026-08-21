@@ -1,17 +1,18 @@
 """Test that CLI wrapper parameters match original script parsers."""
 
 import unittest
+
 import click.core
 from click.testing import CliRunner
 
 from hed.cli.cli import cli
-from hed.scripts.validate_bids import get_parser as get_validate_bids_parser
-from hed.scripts.validate_hed_string import get_parser as get_validate_hed_string_parser
-from hed.scripts.hed_extract_bids_sidecar import get_parser as get_extract_sidecar_parser
 from hed.scripts.extract_tabular_summary import get_parser as get_extract_summary_parser
-from hed.scripts.validate_schemas import get_parser as get_validate_schemas_parser
+from hed.scripts.hed_extract_bids_sidecar import get_parser as get_extract_sidecar_parser
+from hed.scripts.validate_bids import get_parser as get_validate_bids_parser
 from hed.scripts.validate_hed_sidecar import get_parser as get_validate_sidecar_parser
+from hed.scripts.validate_hed_string import get_parser as get_validate_hed_string_parser
 from hed.scripts.validate_hed_tabular import get_parser as get_validate_tabular_parser
+from hed.scripts.validate_schemas import get_parser as get_validate_schemas_parser
 
 
 class TestCLIParameterParity(unittest.TestCase):

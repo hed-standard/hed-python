@@ -1,7 +1,7 @@
 """Manager for HED tags from a columnar file."""
 
-from hed.models.hed_string import HedString
 from hed.models import string_util
+from hed.models.hed_string import HedString
 
 
 class HedTagManager:

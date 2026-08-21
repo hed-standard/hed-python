@@ -1,10 +1,12 @@
 import os
 import unittest
+
+import pandas as pd
+
 from hed import schema as hedschema
-from hed.models import Sidecar, TabularInput, HedString
+from hed.models import HedString, Sidecar, TabularInput
 from hed.models.df_util import expand_defs
 from hed.tools.analysis.hed_tag_counts import HedTagCounts
-import pandas as pd
 
 
 # noinspection PyBroadException

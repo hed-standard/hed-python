@@ -1,10 +1,10 @@
-import unittest
 import os
+import unittest
+
+from hed import schema
+from hed.errors import ErrorContext, ErrorHandler, error_reporter
 from hed.models.hed_string import HedString
 from hed.validator.hed_validator import HedValidator
-from hed.errors import error_reporter
-from hed.errors import ErrorHandler, ErrorContext
-from hed import schema
 
 
 # todo: update these tests(TagValidator no longer exists)

@@ -1,14 +1,11 @@
-from hed.errors import HedFileError
-from hed.schema import load_schema_version
-
-import unittest
-import os
 import itertools
-
-from hed.schema import hed_cache
-from hed import schema
+import os
 import shutil
-from hed.errors import HedExceptions
+import unittest
+
+from hed import schema
+from hed.errors import HedExceptions, HedFileError
+from hed.schema import hed_cache, load_schema_version
 
 
 class Test(unittest.TestCase):
@@ -48,6 +45,7 @@ class Test(unittest.TestCase):
         # throttle timestamp is only written on a fully successful refresh, the next call would then
         # not be throttled and this assertion would flake.
         import time
+
         from hed.schema.hed_cache_lock import _write_last_cached_time
 
         _write_last_cached_time(time.time(), self.hed_cache_dir)

@@ -1,18 +1,18 @@
 """Validates sidecars."""
 
 from __future__ import annotations
-import copy
-import re
-import itertools
 
-from hed.errors import ErrorHandler, ErrorContext, SidecarErrors, DefinitionErrors, ColumnErrors
-from hed.models.column_mapper import ColumnType
-from hed.models.hed_string import HedString
-from hed.models.column_metadata import ColumnMetadata
-from hed.errors.error_reporter import sort_issues
-from hed.models.model_constants import DefTagNames
-from hed.errors.error_reporter import check_for_any_errors
+import copy
+import itertools
+import re
+
+from hed.errors import ColumnErrors, DefinitionErrors, ErrorContext, ErrorHandler, SidecarErrors
+from hed.errors.error_reporter import check_for_any_errors, sort_issues
 from hed.models import df_util
+from hed.models.column_mapper import ColumnType
+from hed.models.column_metadata import ColumnMetadata
+from hed.models.hed_string import HedString
+from hed.models.model_constants import DefTagNames
 
 COLUMN_REF_PATTERN = re.compile(r"\{([a-z_\-0-9]+)\}", re.IGNORECASE)
 

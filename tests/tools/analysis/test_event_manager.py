@@ -1,12 +1,13 @@
+import io
+import json
 import os
 import unittest
-import json
-import io
+
 import numpy as np
 import pandas as pd
 
 from hed.errors import HedFileError
-from hed.models.sidecar import Sidecar, HedString
+from hed.models.sidecar import HedString, Sidecar
 from hed.models.tabular_input import TabularInput
 from hed.schema.hed_schema_io import load_schema_version
 from hed.tools.analysis.event_manager import EventManager

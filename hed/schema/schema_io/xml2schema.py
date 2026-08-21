@@ -2,15 +2,16 @@
 This module is used to create a HedSchema object from an XML file or tree.
 """
 
-from defusedxml import ElementTree
 import xml
-import pandas as pd
-
-from hed.errors.exceptions import HedFileError, HedExceptions
-from hed.schema.hed_schema_constants import HedSectionKey, HedKey, NS_ATTRIB, NO_LOC_ATTRIB
-from hed.schema.schema_io import xml_constants, df_constants, df_util
-from hed.schema.schema_io.base2schema import SchemaLoader
 from functools import partial
+
+import pandas as pd
+from defusedxml import ElementTree
+
+from hed.errors.exceptions import HedExceptions, HedFileError
+from hed.schema.hed_schema_constants import NO_LOC_ATTRIB, NS_ATTRIB, HedKey, HedSectionKey
+from hed.schema.schema_io import df_constants, df_util, xml_constants
+from hed.schema.schema_io.base2schema import SchemaLoader
 
 
 class SchemaLoaderXML(SchemaLoader):
@@ -389,9 +390,9 @@ class SchemaLoaderXML(SchemaLoader):
 
         """
         if parent_element is None:
-            elements = self._root_element.findall(".//%s" % element_name)
+            elements = self._root_element.findall(f".//{element_name}")
         else:
-            elements = parent_element.findall(".//%s" % element_name)
+            elements = parent_element.findall(f".//{element_name}")
         return elements
 
     def _add_to_dict(self, entry, key_class):

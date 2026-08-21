@@ -1,10 +1,11 @@
-import os
 import io
 import json
+import os
 import tempfile
 import unittest
 from unittest.mock import patch
-from hed.scripts.extract_tabular_summary import main, get_parser, extract_summary
+
+from hed.scripts.extract_tabular_summary import extract_summary, get_parser, main
 
 
 class TestExtractTabularSummary(unittest.TestCase):
@@ -148,7 +149,7 @@ class TestExtractTabularSummary(unittest.TestCase):
 
             # Verify the file was created and contains valid JSON
             self.assertTrue(os.path.exists(output_path))
-            with open(output_path, "r", encoding="utf-8") as f:
+            with open(output_path, encoding="utf-8") as f:
                 output_dict = json.load(f)
 
             summary_dict = self._get_summary_dict(output_dict)
@@ -174,7 +175,7 @@ class TestExtractTabularSummary(unittest.TestCase):
 
             # Verify the file was created and contains text
             self.assertTrue(os.path.exists(output_path))
-            with open(output_path, "r", encoding="utf-8") as f:
+            with open(output_path, encoding="utf-8") as f:
                 output = f.read()
 
             self.assertIn("Summary for column dictionary", output)

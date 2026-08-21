@@ -1,8 +1,9 @@
-import unittest
 import os
-from hed.schema import load_schema_version
+import unittest
+
 from hed.models.definition_entry import DefinitionEntry
 from hed.models.hed_string import HedString
+from hed.schema import load_schema_version
 
 
 class Test(unittest.TestCase):

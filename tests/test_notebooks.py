@@ -13,10 +13,10 @@ TestNotebookExecution requires the optional 'examples' dependencies:
 
 import json
 import os
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
-import tempfile
-import shutil
 
 
 class TestNotebooks(unittest.TestCase):
@@ -41,7 +41,7 @@ class TestNotebooks(unittest.TestCase):
         Returns:
             dict: The parsed notebook JSON.
         """
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
 
     @staticmethod
@@ -295,7 +295,7 @@ class TestNotebookExecution(unittest.TestCase):
         if mock_paths is None:
             mock_paths = {}
 
-        with open(notebook_path, "r", encoding="utf-8") as f:
+        with open(notebook_path, encoding="utf-8") as f:
             nb = self.nbformat.read(f, as_version=4)
 
         # Find code cells that set paths and modify them
@@ -341,7 +341,7 @@ class TestNotebookExecution(unittest.TestCase):
                 continue
 
             with self.subTest(notebook=notebook_name):
-                with open(notebook_path, "r", encoding="utf-8") as f:
+                with open(notebook_path, encoding="utf-8") as f:
                     self.nbformat.read(f, as_version=4)
 
                 # Create executor (doesn't actually execute)

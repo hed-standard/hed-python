@@ -2,16 +2,15 @@
 
 import io
 import re
-from typing import Union
 
 import pandas as pd
 from pandas import DataFrame, Series
-from hed.models.sidecar import Sidecar
-from hed.models.hed_string import HedString
-from hed.models.tabular_input import TabularInput
 
 from hed.errors.exceptions import HedFileError
 from hed.models import df_util
+from hed.models.hed_string import HedString
+from hed.models.sidecar import Sidecar
+from hed.models.tabular_input import TabularInput
 
 
 def check_df_columns(df, required_cols=("column_name", "column_value", "description", "HED")) -> list[str]:
@@ -216,7 +215,7 @@ def str_to_tabular(tsv_str, sidecar=None) -> TabularInput:
     return TabularInput(file=io.StringIO(tsv_str), sidecar=sidecar)
 
 
-def strs_to_hed_objs(hed_strings, hed_schema) -> Union[list[HedString], None]:
+def strs_to_hed_objs(hed_strings, hed_schema) -> list[HedString] | None:
     """Returns a list of HedString objects from a list of strings.
 
     Parameters:
@@ -237,7 +236,7 @@ def strs_to_hed_objs(hed_strings, hed_schema) -> Union[list[HedString], None]:
         return None
 
 
-def strs_to_sidecar(sidecar_strings) -> Union[Sidecar, None]:
+def strs_to_sidecar(sidecar_strings) -> Sidecar | None:
     """Return a Sidecar from a sidecar as string or as a list of sidecars as strings.
 
     Parameters:
