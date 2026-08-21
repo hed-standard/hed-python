@@ -189,6 +189,7 @@ ignore = [
 
 [tool.ruff.lint.isort]
 known-first-party = ["hed"]
+combine-as-imports = true
 
 [tool.ruff.format]
 # Ruff format settings

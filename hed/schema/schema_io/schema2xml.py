@@ -5,8 +5,7 @@ from xml.etree.ElementTree import Element, SubElement
 import pandas as pd
 
 from hed.schema.hed_schema_constants import HedSectionKey
-from hed.schema.schema_io import df_constants as df_constants
-from hed.schema.schema_io import xml_constants
+from hed.schema.schema_io import df_constants, xml_constants
 from hed.schema.schema_io.schema2base import Schema2Base
 
 

@@ -3,8 +3,7 @@ import unittest
 import pandas as pd
 
 from hed import HedFileError, load_schema_version
-from hed.schema.schema_io import df_constants as constants
-from hed.schema.schema_io import df_util, hed_id_util
+from hed.schema.schema_io import df_constants as constants, df_util, hed_id_util
 from hed.schema.schema_io.df_util import get_library_name_and_id
 from hed.schema.schema_io.hed_id_util import (
     _verify_hedid_matches,

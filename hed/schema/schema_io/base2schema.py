@@ -4,8 +4,7 @@ import copy
 from abc import ABC, abstractmethod
 
 from hed.errors.exceptions import HedExceptions, HedFileError
-from hed.schema import hed_schema_constants, schema_header_util
-from hed.schema import hed_schema_constants as constants
+from hed.schema import hed_schema_constants, hed_schema_constants as constants, schema_header_util
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_constants import HedKey
 from hed.schema.schema_io import df_constants, schema_util

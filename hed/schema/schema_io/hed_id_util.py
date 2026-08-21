@@ -9,8 +9,7 @@ import pandas as pd
 from hed.errors.exceptions import HedFileError
 from hed.schema.hed_cache import get_library_data
 from hed.schema.hed_schema_constants import HedKey
-from hed.schema.schema_io import df_constants as constants
-from hed.schema.schema_io import schema_util
+from hed.schema.schema_io import df_constants as constants, schema_util
 
 object_type_id_offset = {
     constants.OBJECT_KEY: (100, 300),

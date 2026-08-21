@@ -34,8 +34,6 @@ from hed.schema.schema_io.df_constants import (
     PREFIXES_KEY,
     SOURCES_KEY,
     UNIQUE_EXTRAS_KEYS,
-)
-from hed.schema.schema_io.df_constants import (
     in_library as _in_library,
 )
 
