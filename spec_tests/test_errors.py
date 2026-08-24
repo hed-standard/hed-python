@@ -14,8 +14,43 @@ skip_tests = {
     # "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
     # "curly-braces-has-no-hed": "Need to fix issue #1006",
     # "character-invalid-non-printing appears": "Need to recheck how this is verified for textClass",
-    "invalid-character-name-value-class-deprecated": "Removing support for 8.2.0 or earlier name classes"
+    "invalid-character-name-value-class-deprecated": "Removing support for 8.2.0 or earlier name classes",
+    "nonexistent-schema-version-in-group": "Raises FILE_NOT_FOUND until the #1382 schema loading rewrite reports SCHEMA_LOAD_FAILED",
 }
+
+# These cases exercise the element compatibility rules of spec 3.1.2.2. hed-python has
+# no element compatibility logic yet - any tag name shared between merge-group schemas
+# raises the internal SCHEMA_DUPLICATE_NAMES, failing pass-per-spec cases outright and
+# giving fail cases the wrong code - so they are skipped until the #1382 schema loading
+# rewrite (which retires SCHEMA_DUPLICATE_NAMES) implements the rules.
+skip_tests.update(
+    dict.fromkeys(
+        [
+            "same-library-two-compatible-versions",
+            "multiple-libraries-with-same-partner",
+            "shared-element-compatible-across-libraries",
+            "shared-rooted-hierarchy-different-children",
+            "shared-rooted-tag-disjoint-children",
+            "shared-hierarchy-diverges-at-grandchild",
+            "same-library-two-incompatible-versions",
+            "element-conflict-attribute-value",
+            "element-conflict-description",
+            "element-conflict-ancestor-path",
+            "element-conflict-placeholder-child",
+            "element-conflict-rooted-vs-top-level",
+            "element-conflict-rooted-different-anchors",
+            "element-conflict-in-shared-child",
+            "element-conflict-in-shared-grandchild",
+        ],
+        "Needs element compatibility from the #1382 schema loading rewrite",
+    )
+)
+
+
+# Test-only libraries resolved against hed-tests json_test_data/test_schemas/hedxml
+# (the loading convention documented in that folder's README).
+TEST_SCHEMA_LIBRARIES = ("testconflict", "testclash", "testminimal")
+TEST_SCHEMA_STANDARD_VERSIONS = ("8.5.0",)
 
 
 class MyTestCase(unittest.TestCase):
@@ -29,6 +64,7 @@ class MyTestCase(unittest.TestCase):
         validation_test_dir = os.path.join(test_base_dir, "validation_test_data")
 
         cls.test_base_dir = test_base_dir
+        cls.test_schemas_dir = os.path.join(test_base_dir, "test_schemas", "hedxml")
         cls.fail_count = []
         cls.current_test_file = None
         cls.test_counter = {"total": 0, "passed": 0, "failed": 0, "skipped": 0}
@@ -106,7 +142,7 @@ class MyTestCase(unittest.TestCase):
 
             if schema:
                 try:
-                    schema = load_schema_version(schema)
+                    schema = load_schema_version(schema, xml_folder=self._xml_folder_for(schema))
                 except HedFileError as e:
                     issues = e.issues
                     if not issues:
@@ -200,6 +236,21 @@ class MyTestCase(unittest.TestCase):
                     self._run_single_schema_test(
                         section, error_code, all_codes, description, name, error_handler, file_basename, test_index
                     )
+
+    def _xml_folder_for(self, versions):
+        """Return the vendored test-schemas folder when the spec references it, else None.
+
+        Versions naming a test-only library or its vendored standard partner resolve
+        against hed-tests test_schemas/hedxml (no cache, no network); everything else
+        uses the normal cache so released-schema tests are unaffected.
+        """
+        if isinstance(versions, str):
+            versions = versions.split(",")
+        for version in versions:
+            name = version.strip().split(":", 1)[-1]  # drop any namespace prefix
+            if name.startswith(TEST_SCHEMA_LIBRARIES) or name in TEST_SCHEMA_STANDARD_VERSIONS:
+                return self.test_schemas_dir
+        return None
 
     def report_result(
         self, expected_result, issues, error_code, all_codes, description, name, test, test_type, test_file, test_index
