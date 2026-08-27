@@ -46,6 +46,16 @@ skip_tests.update(
     )
 )
 
+# Added to hed-tests 2026-08-25/27 (order-independence cases; duplicate versions in a
+# group are now ignored per spec 3.1.2.4 instead of failing). Same #1382 dependency.
+skip_tests.update(
+    {
+        "merge-order-independent-loads": "Needs element compatibility from the #1382 schema loading rewrite",
+        "element-conflict-order-independent": "Needs element compatibility from the #1382 schema loading rewrite",
+        "duplicate-schema-in-merge-group": "Duplicate versions must be ignored, not rejected - #1382 rewrite",
+    }
+)
+
 
 # Test-only libraries resolved against hed-tests json_test_data/test_schemas/hedxml
 # (the loading convention documented in that folder's README).
