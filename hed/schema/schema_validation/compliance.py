@@ -403,7 +403,7 @@ class SchemaValidator:
                 mask = df[col].isna() | df[col].astype(str).str.strip().eq("")
                 for row_idx in mask[mask].index:
                     issues += ErrorHandler.format_error(
-                        SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE,
+                        SchemaAttributeErrors.SCHEMA_MISSING_EXTRA,
                         section_name=section_name,
                         column_name=col,
                         row_index=row_idx,

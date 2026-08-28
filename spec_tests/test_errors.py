@@ -26,7 +26,7 @@ skip_tests = {
 skip_tests.update(
     dict.fromkeys(
         [
-            "same-library-two-compatible-versions",
+            "same-library-two-versions-in-group",
             "multiple-libraries-with-same-partner",
             "shared-element-compatible-across-libraries",
             "shared-rooted-hierarchy-different-children",
@@ -44,6 +44,16 @@ skip_tests.update(
         ],
         "Needs element compatibility from the #1382 schema loading rewrite",
     )
+)
+
+# Added to hed-tests 2026-08-25/27 (order-independence cases; duplicate versions in a
+# group are now ignored per spec 3.1.2.4 instead of failing). Same #1382 dependency.
+skip_tests.update(
+    {
+        "merge-order-independent-loads": "Needs element compatibility from the #1382 schema loading rewrite",
+        "element-conflict-order-independent": "Needs element compatibility from the #1382 schema loading rewrite",
+        "duplicate-schema-in-merge-group": "Duplicate versions must be ignored, not rejected - #1382 rewrite",
+    }
 )
 
 
