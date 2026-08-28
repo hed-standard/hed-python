@@ -26,7 +26,7 @@ skip_tests = {
 skip_tests.update(
     dict.fromkeys(
         [
-            "same-library-two-compatible-versions",
+            "same-library-two-versions-in-group",
             "multiple-libraries-with-same-partner",
             "shared-element-compatible-across-libraries",
             "shared-rooted-hierarchy-different-children",

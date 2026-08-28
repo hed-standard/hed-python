@@ -357,7 +357,7 @@ class TestExtrasColumnsCompliance(unittest.TestCase):
 
         sv = SchemaValidator(self.schema_84, ErrorHandler())
         issues = sv.check_extras_columns()
-        val_issues = [i for i in issues if i["code"] == "SCHEMA_MISSING_EXTRA_VALUE"]
+        val_issues = [i for i in issues if i["code"] == "SCHEMA_MISSING_EXTRA"]
         self.assertEqual(len(val_issues), 0, f"Empty values: {val_issues}")
 
     def test_no_missing_values_testlib(self):
@@ -367,7 +367,7 @@ class TestExtrasColumnsCompliance(unittest.TestCase):
 
         sv = SchemaValidator(self.testlib_schema, ErrorHandler())
         issues = sv.check_extras_columns()
-        val_issues = [i for i in issues if i["code"] == "SCHEMA_MISSING_EXTRA_VALUE"]
+        val_issues = [i for i in issues if i["code"] == "SCHEMA_MISSING_EXTRA"]
         self.assertEqual(len(val_issues), 0, f"Empty values: {val_issues}")
 
     def test_detects_empty_value(self):
@@ -391,7 +391,7 @@ class TestExtrasColumnsCompliance(unittest.TestCase):
         )
         sv = SchemaValidator(test_schema, ErrorHandler())
         issues = sv.check_extras_columns()
-        val_issues = [i for i in issues if i["code"] == "SCHEMA_MISSING_EXTRA_VALUE"]
+        val_issues = [i for i in issues if i["code"] == "SCHEMA_MISSING_EXTRA"]
         self.assertGreater(len(val_issues), 0, "Should detect empty source name")
 
     def test_detects_nan_value(self):
@@ -416,7 +416,7 @@ class TestExtrasColumnsCompliance(unittest.TestCase):
         )
         sv = SchemaValidator(test_schema, ErrorHandler())
         issues = sv.check_extras_columns()
-        val_issues = [i for i in issues if i["code"] == "SCHEMA_MISSING_EXTRA_VALUE"]
+        val_issues = [i for i in issues if i["code"] == "SCHEMA_MISSING_EXTRA"]
         self.assertEqual(len(val_issues), 1)
         self.assertIn("namespace", val_issues[0]["message"])
 

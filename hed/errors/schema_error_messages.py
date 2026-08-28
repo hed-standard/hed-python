@@ -209,8 +209,8 @@ def schema_error_SCHEMA_IN_LIBRARY_INVALID(tag, bad_library):
     return f"Tag '{tag}' has an invalid inLibrary: '{bad_library}'. "
 
 
-@hed_error(SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE, default_severity=ErrorSeverity.WARNING)
-def schema_error_SCHEMA_MISSING_EXTRA_VALUE(section_name, column_name, row_index):
+@hed_error(SchemaAttributeErrors.SCHEMA_MISSING_EXTRA, default_severity=ErrorSeverity.WARNING)
+def schema_error_SCHEMA_MISSING_EXTRA(section_name, column_name, row_index):
     return f"Extras section '{section_name}' has an empty value in column '{column_name}' at row {row_index}."
 
 
