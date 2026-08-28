@@ -1,6 +1,5 @@
 """Abstract base class for loading HED schema files into HedSchema objects."""
 
-import copy
 from abc import ABC, abstractmethod
 
 from hed.errors.exceptions import HedExceptions, HedFileError
@@ -104,34 +103,18 @@ class SchemaLoader(ABC):
         return loader._load()
 
     def _load(self):
-        """Parses the previously loaded data, including loading a partnered schema if needed.
+        """Parses the previously loaded data into a schema holding exactly what the file declares.
+
+        An unmerged partnered library file yields a library-only schema: its own elements with
+        ``inLibrary`` stamped and rooted tags left at the root. The standard partner is never
+        loaded here; ``hed.schema.hed_schema_io`` combines the result with its partner through
+        ``schema_io.schema_merge.merge_group``.
 
         Returns:
             schema(HedSchema): The new schema
         """
-        self._loading_merged = True
-        # Do a full load of the standard schema if this is a partnered schema
-        if not self.appending_to_schema and self._schema.with_standard and not self._schema.merged:
-            from hed.schema.hed_schema_io import load_schema_version
-
-            saved_attr = self._schema.header_attributes
-            saved_format = self._schema.source_format
-            try:
-                base_version = load_schema_version(self._schema.with_standard)
-            except HedFileError as e:
-                raise HedFileError(
-                    HedExceptions.SCHEMA_LIBRARY_INVALID,
-                    message=f"Cannot load withStandard schema '{self._schema.with_standard}'",
-                    filename=e.filename,
-                ) from e
-            # Copy the non-alterable cached schema
-            self._schema = copy.deepcopy(base_version)
-            self._schema.filename = self.filename
-            self._schema.name = self.name  # Manually set name here as we don't want to pass it to load_schema_version
-            self._schema.header_attributes = saved_attr
-            self._schema.source_format = saved_format
-            self._loading_merged = False
-
+        # When appending into an existing schema the base is already complete, so parse as merged.
+        self._loading_merged = True if self.appending_to_schema else self._schema.merged
         self._parse_data()
         self._schema.finalize_dictionaries()
         self.fix_extras()
@@ -214,6 +197,11 @@ class SchemaLoader(ABC):
                     f"Found rooted tag '{tag_entry.short_tag_name}' as a root node in a merged schema.",
                     schema.name,
                 )
+
+            if not loading_merged and schema.with_standard and not schema.merged:
+                # Library-only load of an unmerged file: the partner is not present, so the anchor is
+                # resolved when the library is merged with its partner (schema_merge._target_tag_name).
+                return None
 
             rooted_entry = schema.tags.get(rooted_tag)
             if not rooted_entry or rooted_entry.has_attribute(constants.HedKey.InLibrary):

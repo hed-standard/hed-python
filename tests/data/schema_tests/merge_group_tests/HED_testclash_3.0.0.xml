@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<HED version="3.0.0" library="testclash" withStandard="8.5.0" unmerged="True">
+   <prologue>testclash 3.0.0 partners with standard schema 8.5.0. Change from 2.0.0: deletes the Attribute-item probe and adds the Description-item probe (major bump: tag deleted). Probe difference vs testconflict 2.x: the description text.</prologue>
+   <schema>
+      <node>
+         <name>Clash-tag</name>
+         <description>The constant testclash scaffold tag.</description>
+         <node>
+            <name>Clash-one</name>
+            <description>The first scaffold child of Clash-tag.</description>
+         </node>
+         <node>
+            <name>Clash-two</name>
+            <description>The second scaffold child of Clash-tag.</description>
+         </node>
+      </node>
+      <node>
+         <name>Description-item</name>
+         <description>An item whose description text is the controlled difference between libraries. This is the testclash wording.</description>
+      </node>
+   </schema>
+   <unitClassDefinitions/>
+   <unitModifierDefinitions/>
+   <valueClassDefinitions/>
+   <schemaAttributeDefinitions/>
+   <propertyDefinitions/>
+   <epilogue>Part of the hed-tests test schema set. See json_test_data/test_schemas/README.md for the loading convention.</epilogue>
+</HED>

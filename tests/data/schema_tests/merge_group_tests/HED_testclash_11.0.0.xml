@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<HED version="11.0.0" library="testclash" withStandard="8.5.0" unmerged="True">
+   <prologue>testclash 11.0.0 partners with standard schema 8.5.0. Change from 10.0.0: the Rooted-tag probe has Rooted-one identical to testconflict's, whose child is the testclash-only Deep-two (major bump: previous probe deleted). Element-compatible with testconflict 2.x: the shared chain is identical and the hierarchies diverge only at the grandchild level.</prologue>
+   <schema>
+      <node>
+         <name>Clash-tag</name>
+         <description>The constant testclash scaffold tag.</description>
+         <node>
+            <name>Clash-one</name>
+            <description>The first scaffold child of Clash-tag.</description>
+         </node>
+         <node>
+            <name>Clash-two</name>
+            <description>The second scaffold child of Clash-tag.</description>
+         </node>
+      </node>
+      <node>
+         <name>Rooted-tag</name>
+         <description>The target subtree of the rooted and shared-hierarchy load cases.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Event</value>
+         </attribute>
+         <node>
+            <name>Rooted-one</name>
+            <description>The first child of Rooted-tag, shared across libraries in the hierarchy cases.</description>
+            <node>
+               <name>Deep-two</name>
+               <description>A child of Rooted-one specific to testclash.</description>
+            </node>
+         </node>
+      </node>
+   </schema>
+   <unitClassDefinitions/>
+   <unitModifierDefinitions/>
+   <valueClassDefinitions/>
+   <schemaAttributeDefinitions/>
+   <propertyDefinitions/>
+   <epilogue>Part of the hed-tests test schema set. See json_test_data/test_schemas/README.md for the loading convention.</epilogue>
+</HED>

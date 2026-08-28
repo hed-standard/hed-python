@@ -286,8 +286,13 @@ def in_library_check(hed_schema, tag_entry, attribute_name) -> list:
     issues = []
 
     library = tag_entry.attributes.get(attribute_name, "")
-    if library not in hed_schema.library.split(","):
-        issues += ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_IN_LIBRARY_INVALID, tag_entry.name, library)
+    # An element shared by several libraries of a merge group carries one inLibrary value per library.
+    known_libraries = set(hed_schema.library.split(","))
+    for library_name in library.split(","):
+        if library_name not in known_libraries:
+            issues += ErrorHandler.format_error(
+                SchemaAttributeErrors.SCHEMA_IN_LIBRARY_INVALID, tag_entry.name, library_name
+            )
     return issues
 
 

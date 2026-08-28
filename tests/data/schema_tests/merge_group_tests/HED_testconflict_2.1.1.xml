@@ -1,0 +1,98 @@
+<?xml version="1.0" ?>
+<HED version="2.1.1" library="testconflict" withStandard="8.5.0" unmerged="True">
+   <prologue>testconflict 2.1.1 partners with standard schema 8.5.0. Change from 2.1.0: revises the description of Measure-tag (patch bump: description revision). Not element-compatible with 2.1.0 because the shared Measure-tag descriptions differ.</prologue>
+   <schema>
+      <node>
+         <name>Object-tag</name>
+         <description>An ordinary hierarchy of items used for annotations in schema load tests.</description>
+         <node>
+            <name>Object-one</name>
+            <description>The first object item.</description>
+         </node>
+         <node>
+            <name>Object-two</name>
+            <description>The second object item.</description>
+         </node>
+         <node>
+            <name>Object-three</name>
+            <description>The third object item.</description>
+         </node>
+         <node>
+            <name>Object-four</name>
+            <description>The fourth object item.</description>
+         </node>
+      </node>
+      <node>
+         <name>Measure-tag</name>
+         <description>A tag that takes a measured value in schema load tests.</description>
+         <node>
+            <name>#</name>
+            <description>Value of Measure-tag.</description>
+            <attribute>
+               <name>takesValue</name>
+            </attribute>
+         </node>
+      </node>
+      <node>
+         <name>Shared-item</name>
+         <description>An item identical in every library that shares it.</description>
+      </node>
+      <node>
+         <name>Attribute-item</name>
+         <description>An item whose suggestedTag value is the controlled difference between libraries.</description>
+         <attribute>
+            <name>suggestedTag</name>
+            <value>Object-one</value>
+         </attribute>
+      </node>
+      <node>
+         <name>Description-item</name>
+         <description>An item whose description text is the controlled difference between libraries. This is the testconflict wording.</description>
+      </node>
+      <node>
+         <name>Anchor-item</name>
+         <description>The testconflict parent of Nested-item.</description>
+         <node>
+            <name>Nested-item</name>
+            <description>An item whose position in the hierarchy is the controlled difference between libraries.</description>
+         </node>
+      </node>
+      <node>
+         <name>Placeholder-item</name>
+         <description>An item whose placeholder child presence is the controlled difference between libraries.</description>
+         <node>
+            <name>#</name>
+            <description>Value of Placeholder-item.</description>
+            <attribute>
+               <name>takesValue</name>
+            </attribute>
+         </node>
+      </node>
+      <node>
+         <name>Rooted-tag</name>
+         <description>The target subtree of the rooted and shared-hierarchy load cases.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Event</value>
+         </attribute>
+         <node>
+            <name>Rooted-one</name>
+            <description>The first child of Rooted-tag, shared across libraries in the hierarchy cases.</description>
+            <node>
+               <name>Deep-one</name>
+               <description>The grandchild of Rooted-tag through Rooted-one.</description>
+            </node>
+         </node>
+         <node>
+            <name>Rooted-two</name>
+            <description>The second child of Rooted-tag, specific to testconflict.</description>
+         </node>
+      </node>
+   </schema>
+   <unitClassDefinitions/>
+   <unitModifierDefinitions/>
+   <valueClassDefinitions/>
+   <schemaAttributeDefinitions/>
+   <propertyDefinitions/>
+   <epilogue>Part of the hed-tests test schema set. See json_test_data/test_schemas/README.md for the loading convention.</epilogue>
+</HED>
