@@ -23,8 +23,9 @@ class SchemaLoader(ABC):
         Parameters:
             filename(str or None): A valid filepath or None
             schema_as_string(str or None): A full schema as text or None
-            schema(HedSchema or None): A HED schema to merge this new file into
-                                       It must be a with-standard schema with the same value.
+            schema(HedSchema or None): Deprecated; removal scheduled for 2.0.0 (tests/test_deprecations.py).
+                                       A HED schema to parse this file into; it must be a with-standard
+                                       schema with the same value.
             file_format(str or None): The format of this file if needed(only for owl currently)
             name(str or None): Optional user supplied identifier, by default uses filename
         """

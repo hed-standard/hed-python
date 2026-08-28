@@ -5,6 +5,7 @@ from __future__ import annotations
 import functools
 import json
 import os
+import warnings
 from collections import defaultdict
 from urllib.error import URLError
 
@@ -71,8 +72,9 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None, xml_fol
             Template: basename.tsv, where files are named basename_Struct.tsv, basename_Tag.tsv, etc.
             Alternatively, you can point to a directory containing the .tsv files.
         schema_namespace (str or None): The name_prefix all tags in this schema will accept.
-        schema (HedSchema or None): A HED schema to merge this new file into
-                                   It must be a with-standard schema with the same value.
+        schema (HedSchema or None): Deprecated; removal scheduled for 2.0.0. A HED schema to parse
+            this file into (it must be a with-standard schema with the same value). Combine
+            schemas with a version list in load_schema_version instead.
         name (str or None): User supplied identifier for this schema
         xml_folder (str or None): Folder searched first for the standard schema partner of an
             unmerged partnered library; the normal cache is used when the partner is not there.
@@ -92,6 +94,7 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None, xml_fol
             HedExceptions.FILE_NOT_FOUND, "Empty file path passed to HedSchema.load_file", filename=hed_path
         )
 
+    _warn_if_schema_parameter(schema)
     is_url = hed_cache._check_if_url(hed_path)
     if is_url:
         try:
@@ -138,8 +141,9 @@ def from_string(
         schema_format (str):         The schema format of the source schema string.
             Allowed normal values: .mediawiki, .xml, .json
         schema_namespace (str, None):  The name_prefix all tags in this schema will accept.
-        schema (HedSchema or None): A HED schema to merge this new file into
-                                   It must be a with-standard schema with the same value.
+        schema (HedSchema or None): Deprecated; removal scheduled for 2.0.0. A HED schema to parse
+            this file into (it must be a with-standard schema with the same value). Combine
+            schemas with a version list in load_schema_version instead.
         name (str or None): User supplied identifier for this schema
         xml_folder (str or None): Folder searched first for the standard schema partner of an
             unmerged partnered library; the normal cache is used when the partner is not there.
@@ -159,6 +163,7 @@ def from_string(
     if not schema_string:
         raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty string passed to HedSchema.from_string", filename=name)
 
+    _warn_if_schema_parameter(schema)
     if isinstance(schema_string, str):
         # Replace carriage returns with new lines since this might not be done by the caller
         schema_string = schema_string.replace("\r\n", "\n")
@@ -202,6 +207,17 @@ def from_dataframes(schema_data, schema_namespace=None, name=None) -> HedSchema:
         hed_schema.set_schema_prefix(schema_namespace=schema_namespace)
 
     return hed_schema
+
+
+def _warn_if_schema_parameter(schema):
+    """Warn once per call site that the schema= parameter is deprecated (removal scheduled for 2.0.0)."""
+    if schema is not None:
+        warnings.warn(
+            "The schema= parameter of load_schema and from_string is deprecated and will be removed in "
+            "hedtools 2.0.0; combine schemas with a version list in load_schema_version instead.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
 
 
 def _open_schema_loader(schema_format, filename=None, schema_as_string=None, schema=None, name=None):
