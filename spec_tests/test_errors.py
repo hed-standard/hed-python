@@ -15,7 +15,6 @@ skip_tests = {
     # "curly-braces-has-no-hed": "Need to fix issue #1006",
     # "character-invalid-non-printing appears": "Need to recheck how this is verified for textClass",
     "invalid-character-name-value-class-deprecated": "Removing support for 8.2.0 or earlier name classes",
-    "nonexistent-schema-version-in-group": "Raises FILE_NOT_FOUND until the #1382 schema loading rewrite reports SCHEMA_LOAD_FAILED",
 }
 
 # These cases exercise the element compatibility rules of spec 3.1.2.2. hed-python has
