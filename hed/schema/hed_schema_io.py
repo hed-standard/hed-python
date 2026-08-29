@@ -94,7 +94,6 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None, xml_fol
             HedExceptions.FILE_NOT_FOUND, "Empty file path passed to HedSchema.load_file", filename=hed_path
         )
 
-    _warn_if_schema_parameter(schema)
     is_url = hed_cache._check_if_url(hed_path)
     if is_url:
         try:
@@ -110,6 +109,8 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None, xml_fol
             xml_folder=xml_folder,
         )
 
+    # The URL branch above returns through from_string, which warns once itself.
+    _warn_if_schema_parameter(schema)
     lower_path = hed_path.lower()
     if lower_path.endswith(".tsv") or os.path.isdir(hed_path):
         if schema is not None:
