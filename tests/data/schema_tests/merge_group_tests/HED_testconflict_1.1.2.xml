@@ -1,0 +1,95 @@
+<?xml version="1.0" ?>
+<HED version="1.1.2" library="testconflict">
+   <prologue>testconflict 1.1.2 is unpartnered. Change from 1.1.0: revises the description of Object-tag (patch bump: description revision). Version 1.1.1 was deliberately never released, showing that version strings need not be dense.</prologue>
+   <schema>
+      <node>
+         <name>Object-tag</name>
+         <description>An ordinary hierarchy of items used for annotations in schema load tests.</description>
+         <node>
+            <name>Object-one</name>
+            <description>The first object item.</description>
+         </node>
+         <node>
+            <name>Object-two</name>
+            <description>The second object item.</description>
+         </node>
+         <node>
+            <name>Object-three</name>
+            <description>The third object item.</description>
+         </node>
+      </node>
+      <node>
+         <name>Measure-tag</name>
+         <description>A tag that takes a measurement value in load tests.</description>
+         <node>
+            <name>#</name>
+            <description>Value of Measure-tag.</description>
+            <attribute>
+               <name>takesValue</name>
+            </attribute>
+         </node>
+      </node>
+      <node>
+         <name>Legacy-tag</name>
+         <description>An obsolete tag present only in the 1.x versions of testconflict.</description>
+      </node>
+      <node>
+         <name>Shared-item</name>
+         <description>An item identical in every library that shares it.</description>
+      </node>
+      <node>
+         <name>Attribute-item</name>
+         <description>An item whose suggestedTag value is the controlled difference between libraries.</description>
+         <attribute>
+            <name>suggestedTag</name>
+            <value>Object-one</value>
+         </attribute>
+      </node>
+      <node>
+         <name>Description-item</name>
+         <description>An item whose description text is the controlled difference between libraries. This is the testconflict wording.</description>
+      </node>
+      <node>
+         <name>Anchor-item</name>
+         <description>The testconflict parent of Nested-item.</description>
+         <node>
+            <name>Nested-item</name>
+            <description>An item whose position in the hierarchy is the controlled difference between libraries.</description>
+         </node>
+      </node>
+      <node>
+         <name>Placeholder-item</name>
+         <description>An item whose placeholder child presence is the controlled difference between libraries.</description>
+         <node>
+            <name>#</name>
+            <description>Value of Placeholder-item.</description>
+            <attribute>
+               <name>takesValue</name>
+            </attribute>
+         </node>
+      </node>
+   </schema>
+   <unitClassDefinitions/>
+   <unitModifierDefinitions/>
+   <valueClassDefinitions/>
+   <schemaAttributeDefinitions>
+      <schemaAttributeDefinition>
+         <name>suggestedTag</name>
+         <description>A schema attribute that indicates another tag that is often associated with this tag. This attribute is used by tagging tools to provide tagging suggestions.</description>
+      </schemaAttributeDefinition>
+      <schemaAttributeDefinition>
+         <name>takesValue</name>
+         <description>A schema attribute indicating the tag is a hashtag placeholder that is expected to be replaced with a user-defined value.</description>
+         <property>
+            <name>boolProperty</name>
+         </property>
+      </schemaAttributeDefinition>
+   </schemaAttributeDefinitions>
+   <propertyDefinitions>
+      <propertyDefinition>
+         <name>boolProperty</name>
+         <description>Indicates that the schema attribute represents something that is either true or false and does not have a value. Attributes without this value are assumed to have string values.</description>
+      </propertyDefinition>
+   </propertyDefinitions>
+   <epilogue>Part of the hed-tests test schema set. See json_test_data/test_schemas/README.md for the loading convention.</epilogue>
+</HED>

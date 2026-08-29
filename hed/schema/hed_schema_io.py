@@ -5,6 +5,7 @@ from __future__ import annotations
 import functools
 import json
 import os
+import warnings
 from collections import defaultdict
 from urllib.error import URLError
 
@@ -16,6 +17,7 @@ from hed.schema.schema_header_util import validate_version_string
 from hed.schema.schema_io import schema_util
 from hed.schema.schema_io.df2schema import SchemaLoaderDF
 from hed.schema.schema_io.json2schema import SchemaLoaderJSON
+from hed.schema.schema_io.schema_merge import GroupSpec, merge_group, resolve_group
 from hed.schema.schema_io.wiki2schema import SchemaLoaderWiki
 from hed.schema.schema_io.xml2schema import SchemaLoaderXML
 
@@ -61,7 +63,7 @@ def load_schema_version(xml_version=None, xml_folder=None) -> HedSchema | HedSch
         return _load_schema_version(xml_version=xml_version, xml_folder=xml_folder)
 
 
-def load_schema(hed_path, schema_namespace=None, schema=None, name=None) -> HedSchema:
+def load_schema(hed_path, schema_namespace=None, schema=None, name=None, xml_folder=None) -> HedSchema:
     """Load a schema from the given file or URL path.
 
     Parameters:
@@ -70,12 +72,16 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None) -> HedS
             Template: basename.tsv, where files are named basename_Struct.tsv, basename_Tag.tsv, etc.
             Alternatively, you can point to a directory containing the .tsv files.
         schema_namespace (str or None): The name_prefix all tags in this schema will accept.
-        schema (HedSchema or None): A HED schema to merge this new file into
-                                   It must be a with-standard schema with the same value.
+        schema (HedSchema or None): Deprecated; removal scheduled for 2.0.0. A HED schema to parse
+            this file into (it must be a with-standard schema with the same value). Combine
+            schemas with a version list in load_schema_version instead.
         name (str or None): User supplied identifier for this schema
+        xml_folder (str or None): Folder searched first for the standard schema partner of an
+            unmerged partnered library; the normal cache is used when the partner is not there.
 
     Returns:
-        HedSchema: The loaded schema.
+        HedSchema: The loaded schema. An unmerged partnered library is returned combined with its
+            standard schema partner.
 
     Raises:
         HedFileError: Empty path passed.
@@ -94,35 +100,41 @@ def load_schema(hed_path, schema_namespace=None, schema=None, name=None) -> HedS
             file_as_string = schema_util.url_to_string(hed_path)
         except URLError as e:
             raise HedFileError(HedExceptions.URL_ERROR, str(e), hed_path) from e
-        hed_schema = from_string(
+        return from_string(
             file_as_string,
             schema_format=os.path.splitext(hed_path.lower())[1],
+            schema_namespace=schema_namespace,
+            schema=schema,
             name=name,
+            xml_folder=xml_folder,
         )
-    elif hed_path.lower().endswith(".xml"):
-        hed_schema = SchemaLoaderXML.load(hed_path, schema=schema, name=name)
-    elif hed_path.lower().endswith(".mediawiki"):
-        hed_schema = SchemaLoaderWiki.load(hed_path, schema=schema, name=name)
-    elif hed_path.lower().endswith(".json"):
-        hed_schema = SchemaLoaderJSON.load(hed_path, schema=schema, name=name)
-    elif hed_path.lower().endswith(".tsv") or os.path.isdir(hed_path):
+
+    # The URL branch above returns through from_string, which warns once itself.
+    _warn_if_schema_parameter(schema)
+    lower_path = hed_path.lower()
+    if lower_path.endswith(".tsv") or os.path.isdir(hed_path):
         if schema is not None:
             raise HedFileError(
                 HedExceptions.INVALID_HED_FORMAT,
                 "Cannot pass a schema to merge into spreadsheet loading currently.",
                 filename=name,
             )
-        hed_schema = SchemaLoaderDF.load_spreadsheet(filenames=hed_path, name=name)
+        loader = SchemaLoaderDF(hed_path, None, name=name or "")
+    elif lower_path.endswith((".xml", ".mediawiki", ".json")):
+        loader = _open_schema_loader(os.path.splitext(lower_path)[1], filename=hed_path, schema=schema, name=name)
     else:
         raise HedFileError(HedExceptions.INVALID_EXTENSION, "Unknown schema extension", filename=hed_path)
 
+    hed_schema = _finish_load(loader, xml_folder)
     if schema_namespace:
         hed_schema.set_schema_prefix(schema_namespace=schema_namespace)
 
     return hed_schema
 
 
-def from_string(schema_string, schema_format=".xml", schema_namespace=None, schema=None, name=None) -> HedSchema:
+def from_string(
+    schema_string, schema_format=".xml", schema_namespace=None, schema=None, name=None, xml_folder=None
+) -> HedSchema:
     """Create a schema from the given string.
 
     Parameters:
@@ -130,12 +142,16 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
         schema_format (str):         The schema format of the source schema string.
             Allowed normal values: .mediawiki, .xml, .json
         schema_namespace (str, None):  The name_prefix all tags in this schema will accept.
-        schema (HedSchema or None): A HED schema to merge this new file into
-                                   It must be a with-standard schema with the same value.
+        schema (HedSchema or None): Deprecated; removal scheduled for 2.0.0. A HED schema to parse
+            this file into (it must be a with-standard schema with the same value). Combine
+            schemas with a version list in load_schema_version instead.
         name (str or None): User supplied identifier for this schema
+        xml_folder (str or None): Folder searched first for the standard schema partner of an
+            unmerged partnered library; the normal cache is used when the partner is not there.
 
     Returns:
-        HedSchema: The loaded schema.
+        HedSchema: The loaded schema. An unmerged partnered library is returned combined with its
+            standard schema partner.
 
     :raises HedFileError:
         - If empty string or invalid extension is passed.
@@ -148,19 +164,13 @@ def from_string(schema_string, schema_format=".xml", schema_namespace=None, sche
     if not schema_string:
         raise HedFileError(HedExceptions.BAD_PARAMETERS, "Empty string passed to HedSchema.from_string", filename=name)
 
+    _warn_if_schema_parameter(schema)
     if isinstance(schema_string, str):
         # Replace carriage returns with new lines since this might not be done by the caller
         schema_string = schema_string.replace("\r\n", "\n")
 
-    if schema_format.endswith(".xml"):
-        hed_schema = SchemaLoaderXML.load(schema_as_string=schema_string, schema=schema, name=name)
-    elif schema_format.endswith(".mediawiki"):
-        hed_schema = SchemaLoaderWiki.load(schema_as_string=schema_string, schema=schema, name=name)
-    elif schema_format.endswith(".json"):
-        hed_schema = SchemaLoaderJSON.load(schema_as_string=schema_string, schema=schema, name=name)
-    else:
-        raise HedFileError(HedExceptions.INVALID_EXTENSION, f"Unknown schema extension {schema_format}", filename=name)
-
+    loader = _open_schema_loader(schema_format, schema_as_string=schema_string, schema=schema, name=name)
+    hed_schema = _finish_load(loader, xml_folder)
     if schema_namespace:
         hed_schema.set_schema_prefix(schema_namespace=schema_namespace)
     return hed_schema
@@ -191,12 +201,105 @@ def from_dataframes(schema_data, schema_namespace=None, name=None) -> HedSchema:
             HedExceptions.BAD_PARAMETERS, "Empty or non dict value passed to HedSchema.from_dataframes", filename=name
         )
 
-    hed_schema = SchemaLoaderDF.load_spreadsheet(schema_as_strings_or_df=schema_data, name=name)
+    loader = SchemaLoaderDF(None, schema_data, name=name or "")
+    hed_schema = _finish_load(loader, None)
 
     if schema_namespace:
         hed_schema.set_schema_prefix(schema_namespace=schema_namespace)
 
     return hed_schema
+
+
+def _warn_if_schema_parameter(schema):
+    """Warn once per call site that the schema= parameter is deprecated (removal scheduled for 2.0.0)."""
+    if schema is not None:
+        warnings.warn(
+            "The schema= parameter of load_schema and from_string is deprecated and will be removed in "
+            "hedtools 2.0.0; combine schemas with a version list in load_schema_version instead.",
+            DeprecationWarning,
+            stacklevel=3,
+        )
+
+
+def _open_schema_loader(schema_format, filename=None, schema_as_string=None, schema=None, name=None):
+    """Construct the loader for a format; construction reads only the header attributes.
+
+    Parameters:
+        schema_format (str): ".xml", ".mediawiki" or ".json" (a file extension).
+        filename (str or None): Path to load from, or None when loading from a string.
+        schema_as_string (str or None): The whole file as a string, or None when loading from a file.
+        schema (HedSchema or None): Existing schema to append into (deprecated path).
+        name (str or None): User supplied identifier.
+
+    Returns:
+        SchemaLoader: A loader whose ``.schema`` carries the header attributes; call ``_load()``
+            to parse the body.
+
+    Raises:
+        HedFileError: INVALID_EXTENSION for any other format.
+    """
+    loaders = {".xml": SchemaLoaderXML, ".mediawiki": SchemaLoaderWiki, ".json": SchemaLoaderJSON}
+    for extension, loader_class in loaders.items():
+        if schema_format.endswith(extension):
+            return loader_class(filename, schema_as_string, schema, None, name or "")
+    raise HedFileError(
+        HedExceptions.INVALID_EXTENSION, f"Unknown schema extension {schema_format}", filename=filename or name
+    )
+
+
+def _finish_load(loader, xml_folder):
+    """Parse a header-read loader into a complete schema, combining an unmerged library with its partner.
+
+    Loaders return exactly what a file declares; for an unmerged partnered library that is the
+    library's own elements only. Such a file is the one-member merge group: the partner is loaded
+    once through the cache and copied, and the library is inserted into that copy (spec 3.1.2.2).
+    Standard schemas, unpartnered libraries, merged library files, and appends into an existing
+    schema are simply parsed.
+
+    Parameters:
+        loader (SchemaLoader): A constructed loader (header attributes read, body not yet parsed).
+        xml_folder (str or None): Folder searched first for the partner; falls back to the cache.
+
+    Returns:
+        HedSchema: The complete schema.
+
+    Raises:
+        HedFileError: SCHEMA_LIBRARY_INVALID if the partner cannot be loaded.
+    """
+    header = loader.schema
+    if loader.appending_to_schema or not header.with_standard or header.merged:
+        return loader._load()
+    spec = GroupSpec(partner=header.with_standard, members=[loader], base=None, name=loader.name)
+    return merge_group(spec, functools.partial(_load_partner, xml_folder=xml_folder))
+
+
+def _load_partner(with_standard, xml_folder=None):
+    """Load a standard schema partner: from xml_folder if present there, else from the cache.
+
+    Parameters:
+        with_standard (str): The standard schema version.
+        xml_folder (str or None): Folder to search first.
+
+    Returns:
+        HedSchema: The shared cached standard schema (callers must copy before modifying).
+
+    Raises:
+        HedFileError: SCHEMA_LIBRARY_INVALID wrapping the underlying failure.
+    """
+    try:
+        return _load_schema_version(xml_version=with_standard, xml_folder=xml_folder)
+    except HedFileError as e:
+        error = e
+        if xml_folder and e.code == HedExceptions.FILE_NOT_FOUND:
+            try:
+                return _load_schema_version(xml_version=with_standard, xml_folder=None)
+            except HedFileError as e2:
+                error = e2
+        raise HedFileError(
+            HedExceptions.SCHEMA_LIBRARY_INVALID,
+            message=f"Cannot load withStandard schema '{with_standard}'",
+            filename=error.filename,
+        ) from error
 
 
 # If this is actually used, we could easily add other versions/update this one
@@ -240,13 +343,9 @@ def parse_version_list(xml_version_list) -> dict:
                 f"Must specify schema version by number, found no version on {xml_version_list} schema.",
                 filename=None,
             )
-        if version in out_versions[schema_namespace]:
-            raise HedFileError(
-                HedExceptions.SCHEMA_DUPLICATE_LIBRARY,
-                f"Attempting to load same library '{version}' twice: {out_versions[schema_namespace]}",
-                filename=None,
-            )
-        out_versions[schema_namespace].append(version)
+        # Duplicate versions in one merge group are ignored (spec 3.1.2.4).
+        if version not in out_versions[schema_namespace]:
+            out_versions[schema_namespace].append(version)
 
     out_versions = {
         key: ",".join(value) if not key else f"{key}:" + ",".join(value) for key, value in out_versions.items()
@@ -268,12 +367,12 @@ def _load_schema_version(xml_version=None, xml_folder=None):
         xml_folder (str): Path to a folder containing schema.
 
     Returns:
-        Union[HedSchema, HedSchemaGroup]: The requested HedSchema object.
+        HedSchema: The requested HedSchema object.
 
     Raises:
         HedFileError: The xml_version is not valid.
         HedFileError: The specified version cannot be found or loaded.
-        HedFileError: Multiple schemas are being loaded with the same prefix, and they have duplicate tags.
+        HedFileError: SCHEMA_LOAD_FAILED - the versions in the namespace cannot be combined (spec 3.1.2.4).
         HedFileError: Other fatal errors loading the schema (These are unlikely if you are not editing them locally).
         HedFileError: The prefix is invalid.
     """
@@ -289,50 +388,19 @@ def _load_schema_version(xml_version=None, xml_folder=None):
     else:
         xml_versions = [""]
 
-    first_schema = _load_schema_version_sub(xml_versions[0], schema_namespace, xml_folder=xml_folder, name=name)
-    filenames = [os.path.basename(first_schema.filename)]
+    if len(xml_versions) == 1:
+        return _load_schema_version_sub(xml_versions[0], schema_namespace, xml_folder=xml_folder, name=name)
 
-    # Collect all duplicate issues for proper error reporting
-    all_duplicate_issues = []
-
-    for version in xml_versions[1:]:
-        _load_schema_version_sub(
-            version,
-            schema_namespace,
-            xml_folder=xml_folder,
-            schema=first_schema,
-            name=name,
-        )
-
-        # Collect duplicate errors when merging schemas in the same namespace
-        current_filename = os.path.basename(first_schema.filename)
-        duplicate_name = first_schema.has_duplicates()
-        if duplicate_name:
-            # Collect all duplicate issues rather than raising immediately
-            for section in first_schema._sections.values():
-                if hasattr(section, "duplicate_names") and section.duplicate_names:
-                    for dup_name in section.duplicate_names.keys():
-                        issue = {
-                            "code": HedExceptions.SCHEMA_DUPLICATE_NAMES,
-                            "message": f"Duplicate tag {dup_name} found when merging schemas: {filenames}",
-                            "filename": name,
-                        }
-                        all_duplicate_issues.append(issue)
-        filenames.append(current_filename)
-
-    # If we found duplicates, raise error with all issues
-    if all_duplicate_issues:
-        raise HedFileError(
-            HedExceptions.SCHEMA_DUPLICATE_NAMES,
-            f"Found {len(all_duplicate_issues)} duplicate tags when merging schemas: {filenames}",
-            filename=name,
-            issues=all_duplicate_issues,
-        )
-
-    if first_schema._namespace:
-        first_schema.set_schema_prefix(first_schema._namespace)
-
-    return first_schema
+    # A merge group: read every header first, decide the rules and the load order, then parse.
+    loaders = [
+        _open_schema_loader(".xml", filename=_resolve_version_path(version, xml_folder), name=name)
+        for version in xml_versions
+    ]
+    spec = resolve_group(loaders, name=name)
+    hed_schema = merge_group(spec, functools.partial(_load_partner, xml_folder=xml_folder))
+    if schema_namespace:
+        hed_schema.set_schema_prefix(schema_namespace)
+    return hed_schema
 
 
 def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, schema=None, name=""):
@@ -355,6 +423,26 @@ def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, 
         - The specified version cannot be found or loaded
         - Other fatal errors loading the schema (These are unlikely if you are not editing them locally)
         - The prefix is invalid
+    """
+    hed_file_path = _resolve_version_path(xml_version, xml_folder)
+    return load_schema(
+        hed_file_path, schema_namespace=schema_namespace, schema=schema, name=name, xml_folder=xml_folder
+    )
+
+
+def _resolve_version_path(xml_version, xml_folder=None):
+    """Return the path of the cached (or xml_folder) file for one version string.
+
+    Parameters:
+        xml_version (str): '[library_name_]X.Y.Z'; empty means the latest released standard version.
+        xml_folder (str or None): Folder to search instead of the cache.
+
+    Returns:
+        str: Path to the schema file.
+
+    Raises:
+        HedFileError: SCHEMA_VERSION_INVALID for a malformed version, FILE_NOT_FOUND when no file exists,
+            BAD_PARAMETERS when no version is given and the cache is empty.
     """
     if not xml_version:
         versions = hed_cache.get_hed_versions(xml_folder, check_prerelease=False)
@@ -390,17 +478,15 @@ def _load_schema_version_sub(xml_version, schema_namespace="", xml_folder=None, 
     )
 
     if hed_file_path:
-        hed_schema = load_schema(hed_file_path, schema_namespace=schema_namespace, schema=schema, name=name)
-    else:
-        library_string = f"for library '{library_name}'" if library_name else ""
-        known_versions = hed_cache.get_hed_versions(
-            xml_folder, library_name=library_name if library_name else "all", check_prerelease=True
-        )
-        raise HedFileError(
-            HedExceptions.FILE_NOT_FOUND,
-            f"HED version {library_string}: '{version_to_validate}' not found. Check {hed_cache.get_cache_directory(xml_folder)} for cache or https://github.com/hed-standard/hed-schemas/tree/main/library_schemas. "
-            f"Known versions {library_string}: {known_versions}.",
-            "",
-        )
+        return hed_file_path
 
-    return hed_schema
+    library_string = f"for library '{library_name}'" if library_name else ""
+    known_versions = hed_cache.get_hed_versions(
+        xml_folder, library_name=library_name if library_name else "all", check_prerelease=True
+    )
+    raise HedFileError(
+        HedExceptions.FILE_NOT_FOUND,
+        f"HED version {library_string}: '{version_to_validate}' not found. Check {hed_cache.get_cache_directory(xml_folder)} for cache or https://github.com/hed-standard/hed-schemas/tree/main/library_schemas. "
+        f"Known versions {library_string}: {known_versions}.",
+        "",
+    )

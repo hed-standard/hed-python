@@ -17,44 +17,6 @@ skip_tests = {
     "invalid-character-name-value-class-deprecated": "Removing support for 8.2.0 or earlier name classes",
 }
 
-# These cases exercise the element compatibility rules of spec 3.1.2.2. hed-python has
-# no element compatibility logic yet - any tag name shared between merge-group schemas
-# raises the internal SCHEMA_DUPLICATE_NAMES, failing pass-per-spec cases outright and
-# giving fail cases the wrong code - so they are skipped until the #1382 schema loading
-# rewrite (which retires SCHEMA_DUPLICATE_NAMES) implements the rules.
-skip_tests.update(
-    dict.fromkeys(
-        [
-            "same-library-two-versions-in-group",
-            "multiple-libraries-with-same-partner",
-            "shared-element-compatible-across-libraries",
-            "shared-rooted-hierarchy-different-children",
-            "shared-rooted-tag-disjoint-children",
-            "shared-hierarchy-diverges-at-grandchild",
-            "same-library-two-incompatible-versions",
-            "element-conflict-attribute-value",
-            "element-conflict-description",
-            "element-conflict-ancestor-path",
-            "element-conflict-placeholder-child",
-            "element-conflict-rooted-vs-top-level",
-            "element-conflict-rooted-different-anchors",
-            "element-conflict-in-shared-child",
-            "element-conflict-in-shared-grandchild",
-        ],
-        "Needs element compatibility from the #1382 schema loading rewrite",
-    )
-)
-
-# Added to hed-tests 2026-08-25/27 (order-independence cases; duplicate versions in a
-# group are now ignored per spec 3.1.2.4 instead of failing). Same #1382 dependency.
-skip_tests.update(
-    {
-        "merge-order-independent-loads": "Needs element compatibility from the #1382 schema loading rewrite",
-        "element-conflict-order-independent": "Needs element compatibility from the #1382 schema loading rewrite",
-        "duplicate-schema-in-merge-group": "Duplicate versions must be ignored, not rejected - #1382 rewrite",
-    }
-)
-
 
 # Test-only libraries resolved against hed-tests json_test_data/test_schemas/hedxml
 # (the loading convention documented in that folder's README).

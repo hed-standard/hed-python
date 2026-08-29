@@ -91,7 +91,11 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(schemas3.name, "testlib_2.1.0,score_2.1.0")
         self.assertEqual(schemas3.version, "testlib_2.1.0,score_2.1.0")
         # Deprecated tag warnings + character issues from SCORE prologue/epilogue
-        self.assertEqual(len(issues), 31)
+        # A group vocabulary is about the tags, units, classes and attributes of its libraries; the
+        # extras sections (links to the outside) play no part in forming it, so annotation issues that
+        # only reflect extras rows are not meaningful here. Everything else must be clean.
+        extras_codes = {"SCHEMA_ANNOTATION_SOURCE_MISSING", "SCHEMA_ANNOTATION_EXTERNAL_MISSING"}
+        self.assertEqual([issue["code"] for issue in issues if issue["code"] not in extras_codes], [])
 
         # Verify this cannot be saved
         with self.assertRaises(HedFileError):
@@ -688,13 +692,20 @@ class TestHedSchemaUnmerged(unittest.TestCase):
         self.assertIsInstance(schemas3, HedSchema, "load_schema_version returns HedSchema version+namespace")
         self.assertTrue(schemas3.version_number, "load_schema_version has the right version with namespace")
         self.assertEqual(schemas3._namespace, "", "load_schema_version has the right version with namespace")
-        self.assertEqual(len(issues), 31)
+        # A group vocabulary is about the tags, units, classes and attributes of its libraries; the
+        # extras sections (links to the outside) play no part in forming it, so annotation issues that
+        # only reflect extras rows are not meaningful here. Everything else must be clean.
+        extras_codes = {"SCHEMA_ANNOTATION_SOURCE_MISSING", "SCHEMA_ANNOTATION_EXTERNAL_MISSING"}
+        self.assertEqual([issue["code"] for issue in issues if issue["code"] not in extras_codes], [])
 
     def test_load_schema_version_merged_duplicates(self):
+        # testscoredupe_1.1.0 is score_1.1.0 under another file name: its header says library=score,
+        # version=1.1.0, so the group treats it as a duplicate and ignores it (spec 3.1.2.4).
         ver4 = ["score_1.1.0", "testscoredupe_1.1.0"]
-        with self.assertRaises(HedFileError) as context:
-            load_schema_version(ver4)
-        self.assertEqual(len(context.exception.issues), 597)
+        schemas = load_schema_version(ver4)
+        self.assertIsInstance(schemas, HedSchema)
+        self.assertEqual(schemas.version, "score_1.1.0")
+        self.assertEqual(schemas, load_schema_version("score_1.1.0"))
 
     def test_load_and_verify_tags(self):
         # Load 'testlib' by itself
@@ -1061,12 +1072,11 @@ class TestParseVersionList(unittest.TestCase):
             {"": "score", "ol": "ol:otherlib", "ul": "ul:anotherlib"},
         )
 
-    def test_duplicate_library_raises_error(self):
-        """Test that duplicate libraries raise the correct error."""
-        with self.assertRaises(HedFileError):
-            parse_version_list(["score", "score"])
-        with self.assertRaises(HedFileError):
-            parse_version_list(["ol:otherlib", "ol:otherlib"])
+    def test_duplicate_library_is_ignored(self):
+        """Duplicate versions in one merge group are ignored, not an error (spec 3.1.2.4)."""
+        self.assertEqual(parse_version_list(["score", "score"]), {"": "score"})
+        self.assertEqual(parse_version_list(["ol:otherlib", "ol:otherlib"]), {"ol": "ol:otherlib"})
+        self.assertEqual(parse_version_list(["score", "testlib", "score"]), {"": "score,testlib"})
 
     def test_triple_prefixes(self):
         """Test that libraries with triple prefixes are handled correctly."""

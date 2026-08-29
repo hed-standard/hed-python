@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+<HED version="2.0.0" library="testclash" withStandard="8.5.0" unmerged="True">
+   <prologue>testclash 2.0.0 partners with standard schema 8.5.0. Change from 1.0.0: deletes the Shared-item probe and adds the Attribute-item probe (major bump: tag deleted). Probe difference vs testconflict 2.x: the suggestedTag value (Clash-one here, Object-one there).</prologue>
+   <schema>
+      <node>
+         <name>Clash-tag</name>
+         <description>The constant testclash scaffold tag.</description>
+         <node>
+            <name>Clash-one</name>
+            <description>The first scaffold child of Clash-tag.</description>
+         </node>
+         <node>
+            <name>Clash-two</name>
+            <description>The second scaffold child of Clash-tag.</description>
+         </node>
+      </node>
+      <node>
+         <name>Attribute-item</name>
+         <description>An item whose suggestedTag value is the controlled difference between libraries.</description>
+         <attribute>
+            <name>suggestedTag</name>
+            <value>Clash-one</value>
+         </attribute>
+      </node>
+   </schema>
+   <unitClassDefinitions/>
+   <unitModifierDefinitions/>
+   <valueClassDefinitions/>
+   <schemaAttributeDefinitions/>
+   <propertyDefinitions/>
+   <epilogue>Part of the hed-tests test schema set. See json_test_data/test_schemas/README.md for the loading convention.</epilogue>
+</HED>

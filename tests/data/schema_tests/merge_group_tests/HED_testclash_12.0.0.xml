@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+<HED version="12.0.0" library="testclash" withStandard="8.5.0" unmerged="True">
+   <prologue>testclash 12.0.0 partners with standard schema 8.5.0. Change from 11.0.0: the shared grandchild Deep-one now carries a different description while the chain above it is identical (major bump: previous probe deleted). Probe difference vs testconflict 2.x: the description of the shared grandchild Deep-one.</prologue>
+   <schema>
+      <node>
+         <name>Clash-tag</name>
+         <description>The constant testclash scaffold tag.</description>
+         <node>
+            <name>Clash-one</name>
+            <description>The first scaffold child of Clash-tag.</description>
+         </node>
+         <node>
+            <name>Clash-two</name>
+            <description>The second scaffold child of Clash-tag.</description>
+         </node>
+      </node>
+      <node>
+         <name>Rooted-tag</name>
+         <description>The target subtree of the rooted and shared-hierarchy load cases.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Event</value>
+         </attribute>
+         <node>
+            <name>Rooted-one</name>
+            <description>The first child of Rooted-tag, shared across libraries in the hierarchy cases.</description>
+            <node>
+               <name>Deep-one</name>
+               <description>The grandchild of Rooted-tag through Rooted-one, with the testclash wording.</description>
+            </node>
+         </node>
+      </node>
+   </schema>
+   <unitClassDefinitions/>
+   <unitModifierDefinitions/>
+   <valueClassDefinitions/>
+   <schemaAttributeDefinitions/>
+   <propertyDefinitions/>
+   <epilogue>Part of the hed-tests test schema set. See json_test_data/test_schemas/README.md for the loading convention.</epilogue>
+</HED>
