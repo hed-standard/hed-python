@@ -17,7 +17,8 @@ skip_tests = {
     # Added to hed-tests 2026-09-01 (spec Appendix B SCHEMA_LIBRARY_INVALID reasons j-l). Two gaps:
     # reasons k (merged Properties must equal the partner's) and l (reserved in unmerged) are not
     # implemented, and compliance flags the tool-stamped inLibrary attribute as unknown in an
-    # unpartnered library that defines its own attributes. See .status plan library_compliance_rules.
+    # unpartnered library that defines its own attributes (base2schema._add_to_dict_base stamps it;
+    # schema_validation flags it because such a library defines no inLibrary attribute).
     "library-invalid-unpartnered-properties-allowed": "inLibrary stamp flagged as unknown attribute",
     "library-invalid-merged-properties-mismatch": "Reason k (Properties must match partner) not implemented",
     "library-invalid-reserved-in-unmerged": "Reason l (reserved in unmerged) not implemented",
