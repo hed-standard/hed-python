@@ -1,6 +1,6 @@
 # hed-python (hedtools)
 
-Purpose: core Python library for HED (Hierarchical Event Descriptors) validation, summary, and analysis of event annotations in neuroscience datasets (BIDS compatible). Distributed on PyPI as `hedtools`. Not in scope: the web tools (repo `hed-web`) and the schema vocabularies themselves (repo `hed-schemas`).
+Purpose: core Python library for HED (Hierarchical Event Descriptors) validation, summary, and analysis of event annotations in neuroscience datasets (BIDS compatible). Distributed on PyPI as `hedtools`. Not in scope: the online tools server (repo `hed-server`, package `hedweb`), the browser-based tools (repo `hed-web`, JavaScript), and the schema vocabularies themselves (repo `hed-schemas`).
 
 ## Commands
 
@@ -56,7 +56,8 @@ Hosted at hed-standard; `origin` is the VisLab fork and `upstream` is hed-standa
 - `hed-schemas` - the HED vocabularies (XML/MediaWiki/OWL); also a submodule under `spec_tests/`
 - `hed-specification` - the formal spec; error codes here reference it
 - `hed-examples` - example datasets; submodule used by `spec_tests/`
-- `hed-web` - the online tools at hedtools.org, a consumer of this package
+- `hed-server` - the online tools at hedtools.org (Python package `hedweb`), the main consumer of this package
+- `hed-web` - the browser-based tools at hedtags.org/hed-web (JavaScript; does not use this package)
 
 ## Where the thinking lives
 

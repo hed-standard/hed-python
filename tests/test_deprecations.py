@@ -5,6 +5,8 @@ it still exists. The first test fails as soon as the package's major version rea
 removal release while the item is still present, so a scheduled removal cannot be forgotten. The
 other tests keep the registry honest (the items exist before their removal) and confirm that the
 deprecated schema= parameter still warns.
+
+The 2.0.0 removals are tracked in https://github.com/hed-standard/hed-python/issues/1391.
 """
 
 import inspect
