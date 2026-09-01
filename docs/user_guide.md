@@ -122,23 +122,42 @@ schema = load_schema(
 
 ### Working with library schemas
 
-```{index} schema; library, library schema, score library, lang library
+```{index} schema; library, library schema, score library, lang library, merge group, schema; namespace
 ```
 
-HED supports library schemas that extend the base vocabulary.
+HED supports library schemas that extend the base vocabulary. A modern library schema is *partnered* with a specific standard schema version (recorded in its `withStandard` header attribute), and loading the library automatically includes that partner - you do not need to list the standard schema separately:
 
 ```python
 from hed import load_schema_version
 
 
-# Load base schema with a library
+# Load one library; its standard partner (8.4.0 for score 2.1.0) is included automatically
 schema = load_schema_version("score_2.1.0")
+```
 
-# For multiple libraries
+Listing several versions merges them into a single vocabulary - a *merge group* - following the rules in section 3.1.2.4 (Rules for partnered combination) of the [HED specification](https://www.hedtags.org/hed-specification):
+
+```python
+# score and lang are both partnered with 8.4.0, so they merge into one vocabulary
 schema = load_schema_version(["score_2.1.0", "lang_1.1.0"])
 ```
 
-Note: It is now standard for a library schema to be partnered with a standard schema. In general, you should not use an earlier, non-partnered versions of a library schema.
+- All libraries in a merge group must be partnered with the **same** standard schema version. Listing that standard version as well is allowed and adds nothing; listing a different one fails.
+- Duplicate versions in the list are ignored, but two *different* versions of the same schema cannot be combined.
+- An element (tag, unit class, unit, value class, or schema attribute) declared by more than one library must be declared identically - same attributes, description, position in the hierarchy, and placeholder (`#`) child. Any conflict makes the load raise a `HedFileError` with code `SCHEMA_LOAD_FAILED` whose `issues` list names each conflicting element.
+
+Schemas that cannot be merged can still be used side by side by giving them *namespace prefixes*. Each prefix forms its own merge group, resolved independently, and tags from a prefixed schema are written with the prefix in annotations:
+
+```python
+# Two merge groups: the default group (score plus its 8.4.0 partner)
+# and "old:", holding an older, unpartnered score version by itself
+schemas = load_schema_version(["score_2.1.0", "old:score_1.0.0"])
+# Tags from the prefixed schema are used as "old:Tag-name" in annotations
+```
+
+Note: It is now standard for a library schema to be partnered with a standard schema. In general, you should not use an earlier, non-partnered version of a library schema; an unpartnered library must be alone in its namespace.
+
+When a library file is stored in *unmerged* form (its header has `unmerged="True"` and it contains only the library's own elements), loading it fetches the standard partner from the local cache automatically. Pass `xml_folder="..."` to `load_schema` or `load_schema_version` to resolve schemas from a folder of your own - if the folder holds both the library and its partner, no cache or network access is needed.
 
 ### Validating HED strings
 
@@ -294,7 +313,7 @@ issues = schema.check_compliance()
 print(issues.compliance_summary.get_summary())
 ```
 
-The summary shows each of the five checks (prerelease version, prologue/epilogue, invalid characters, attributes, and duplicate names) with pass/fail status, entry counts, and sub-check details.
+The summary shows each of the eight checks (prerelease version, prologue/epilogue, invalid characters, attributes, duplicate names, duplicate HED IDs, extras columns, and annotation attribute values) with pass/fail status, entry counts, and sub-check details.
 
 #### Using SchemaValidator directly
 
@@ -313,15 +332,18 @@ issues = sv.check_attributes()
 issues += sv.check_invalid_characters()
 ```
 
-The five available checks are:
+The eight available checks are:
 
-| Method                          | What it validates                                        |
-| ------------------------------- | -------------------------------------------------------- |
-| `check_if_prerelease_version()` | Warns if the version is newer than all known releases    |
-| `check_prologue_epilogue()`     | Validates characters in prologue and epilogue text       |
-| `check_invalid_characters()`    | Validates entry names and descriptions for illegal chars |
-| `check_attributes()`            | Domain, range, and semantic validation of all attributes |
-| `check_duplicate_names()`       | Detects duplicate entry names within or across libraries |
+| Method                                | What it validates                                                          |
+| ------------------------------------- | -------------------------------------------------------------------------- |
+| `check_if_prerelease_version()`       | Warns if the version is newer than all known releases                      |
+| `check_prologue_epilogue()`           | Validates characters in prologue and epilogue text                         |
+| `check_invalid_characters()`          | Validates entry names and descriptions for illegal chars                   |
+| `check_attributes()`                  | Domain, range, and semantic validation of all attributes                   |
+| `check_duplicate_names()`             | Detects duplicate entry names within or across libraries                   |
+| `check_duplicate_hed_ids()`           | Detects `hedId` values assigned to more than one entry                     |
+| `check_extras_columns()`              | Checks required columns of the extras sections have non-empty values       |
+| `check_annotation_attribute_values()` | Checks annotations reference defined prefixes, sources, and external items |
 
 Each method returns a list of issue dictionaries and updates `sv.summary` (a `ComplianceSummary` instance) with what was checked.
 
