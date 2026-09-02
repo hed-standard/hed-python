@@ -179,7 +179,7 @@ See [`examples/README.md`](examples/README.md) for more details.
 > from hed.models.schema_lookup import generate_schema_lookup
 > ```
 
-See the [search details documentation](https://www.hedtags.org/hed-python/search_details.html) for a full comparison of all three search implementations and performance benchmarks.
+See the [search details documentation](https://www.hedtags.org/hed-python/search_details.html) for a full comparison of all three search implementations and performance benchmarks. The benchmark harness itself now lives in the [hed-benchmarks](https://github.com/hed-standard/hed-benchmarks) repository.
 
 ## Documentation
 
