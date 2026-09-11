@@ -61,6 +61,8 @@ class TestComplianceSummary(unittest.TestCase):
             "attributes",
             "duplicate_names",
             "redundant_units",
+            "any_units_class",
+            "units_unique_across_classes",
             "duplicate_hed_ids",
             "extras_columns",
             "annotation_attributes",

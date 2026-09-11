@@ -6,7 +6,7 @@ import copy
 from typing import TYPE_CHECKING
 
 from hed.models.model_constants import DefTagNames
-from hed.schema.hed_schema_constants import HedKey
+from hed.schema.hed_schema_constants import ANY_UNITS_CLASS, HedKey
 
 if TYPE_CHECKING:
     from hed.models.hed_group import HedGroup
@@ -544,6 +544,9 @@ class HedTag:
             HED 8.4.0 still returns its own uV entry rather than V.
         """
         # todo: Make this cached
+        if self._schema_entry and self._schema_entry.attributes.get(HedKey.UnitClass) == ANY_UNITS_CLASS:
+            # unitClass=anyUnits: a value without a unit is valid but has no default unit (specification 4.0.0).
+            return None
         unit_classes = self.unit_classes.values()
         if len(unit_classes) == 1:
             first_unit_class_entry = list(unit_classes)[0]
@@ -613,11 +616,19 @@ class HedTag:
             value, units, unitEntry -- value portion has value and valid units.
             value, units, None -- value portion has a value and invalid units.
 
+            A placeholder normally has one unit class. With unitClass=anyUnits it has every class of the schema,
+            and a string that resolves in more than one class is taken from the class that lists it outright
+            rather than one that only derives it: 'dB' is the listed decibel, not 'd' + 'B' (specification 4.0.0).
+
         """
         value, _, units = extension_text.partition(" ")
         if not units:
             return value, None, None
 
+        for unit_class_entry in tag_unit_classes.values():
+            listed_match = unit_class_entry.units.get(units)
+            if listed_match:
+                return value, units, listed_match
         for unit_class_entry in tag_unit_classes.values():
             possible_match = unit_class_entry.get_derivative_unit_entry(units)
             if possible_match:

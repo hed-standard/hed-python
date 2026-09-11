@@ -13,6 +13,7 @@ is data-driven by that metadata rather than hard-coding parallel validator
 dictionaries.
 """
 
+from collections import defaultdict
 from functools import partial
 
 import pandas as pd
@@ -28,6 +29,7 @@ from hed.errors.error_types import (
 )
 from hed.schema import hed_cache
 from hed.schema.hed_schema import HedKey, HedSchema, HedSectionKey
+from hed.schema.hed_schema_constants import ANY_UNITS_CLASS
 from hed.schema.schema_io import df_constants
 from hed.schema.schema_validation import attribute_validators
 from hed.schema.schema_validation.compliance_summary import ComplianceSummary
@@ -81,6 +83,8 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
     issues += validator.check_attributes()
     issues += validator.check_duplicate_names()
     issues += validator.check_redundant_units()
+    issues += validator.check_any_units_class()
+    issues += validator.check_units_unique_across_classes()
     issues += validator.check_duplicate_hed_ids()
     issues += validator.check_extras_columns()
     issues += validator.check_annotation_attribute_values()
@@ -160,7 +164,11 @@ class SchemaValidator:
     # Extra checks for specific attributes, beyond what range covers.
     _semantic_validators = {
         HedKey.TakesValue: [attribute_validators.tag_is_placeholder_check],
-        HedKey.UnitClass: [attribute_validators.tag_is_placeholder_check],
+        HedKey.UnitClass: [
+            attribute_validators.tag_is_placeholder_check,
+            attribute_validators.single_unit_class_check,
+            attribute_validators.unit_class_requires_numeric_check,
+        ],
         HedKey.ValueClass: [attribute_validators.tag_is_placeholder_check],
         HedKey.DeprecatedFrom: [attribute_validators.tag_is_deprecated_check],
         HedKey.ConversionFactor: [attribute_validators.conversion_factor],
@@ -409,6 +417,95 @@ class SchemaValidator:
                     unit_name,
                     unit_class_name=unit_class_entry.name,
                     derivations=derivations,
+                )
+                self.error_handler.pop_error_context()
+                self.error_handler.pop_error_context()
+        self.summary.record_issues(len(issues))
+        return issues
+
+    def check_any_units_class(self):
+        """Check that the anyUnits pseudo unit class, when present, lists no units and has no defaultUnits.
+
+        Specification 4.0.0: a placeholder with unitClass=anyUnits accepts a unit from every unit class of the
+        schema, so the class itself is empty and has no default. Violations are SCHEMA_ATTRIBUTE_INVALID.
+        """
+        self.summary.start_check(
+            "any_units_class", "Check that the anyUnits pseudo unit class lists no units and has no defaultUnits."
+        )
+        issues = []
+        unit_class_entry = self.hed_schema[HedSectionKey.UnitClasses].get(ANY_UNITS_CLASS)
+        self.summary.record_section(HedSectionKey.UnitClasses, 1 if unit_class_entry else 0)
+        if unit_class_entry is not None:
+            self.error_handler.push_error_context(ErrorContext.SCHEMA_SECTION, str(HedSectionKey.UnitClasses))
+            self.error_handler.push_error_context(ErrorContext.SCHEMA_TAG, ANY_UNITS_CLASS)
+            if unit_class_entry.units:
+                issues += self.error_handler.format_error_with_context(
+                    SchemaAttributeErrors.SCHEMA_ANY_UNITS_HAS_UNITS,
+                    ANY_UNITS_CLASS,
+                    ", ".join(unit_class_entry.units),
+                )
+            default_units = unit_class_entry.attributes.get(HedKey.DefaultUnits)
+            if default_units:
+                issues += self.error_handler.format_error_with_context(
+                    SchemaAttributeErrors.SCHEMA_ANY_UNITS_HAS_DEFAULT, ANY_UNITS_CLASS, default_units
+                )
+            self.error_handler.pop_error_context()
+            self.error_handler.pop_error_context()
+        self.summary.record_issues(len(issues))
+        return issues
+
+    def check_units_unique_across_classes(self):
+        """Check that no unit string is derived by two unit classes without being listed by either.
+
+        Specification 4.0.0: a placeholder with unitClass=anyUnits resolves a unit against every class, and a
+        string that two classes derive (modifier + unit, plural) but neither lists would be ambiguous. A string
+        listed in one class and derived in another is fine: the listed unit wins (dB is the decibel, not d + B).
+        Two separate entries with the same name are a duplicate name, reported by check_duplicate_names; one entry
+        listed by two classes (possible through the JSON loader) is reported here. Violations are
+        SCHEMA_DUPLICATE_NODE.
+        """
+        self.summary.start_check(
+            "units_unique_across_classes",
+            "Check that no unit string is derived by two unit classes and listed by none.",
+        )
+        issues = []
+        listed_in = defaultdict(set)  # unit name -> classes listing it
+        derived_in = defaultdict(set)  # form -> classes deriving it
+        derived_from = defaultdict(set)  # form -> listed units it derives from
+        unit_classes = self.hed_schema[HedSectionKey.UnitClasses]
+        for unit_class_name, unit_class_entry in unit_classes.items():
+            for unit_name, unit_entry in unit_class_entry.units.items():
+                listed_in[unit_name].add(unit_class_name)
+                for form in unit_entry.derivative_units:
+                    derived_in[form].add(unit_class_name)
+                    derived_from[form].add(unit_name)
+        listed = set(listed_in)
+        self.summary.record_section(HedSectionKey.UnitClasses, len(unit_classes))
+        # A unit listed by two classes through one shared entry (the JSON loader reuses entries by name) is
+        # not a duplicate name, so check_duplicate_names does not see it; report the listing itself here.
+        # Two separate entries with the same name are left to check_duplicate_names.
+        unit_entry_counts = defaultdict(int)
+        for unit_entry in self.hed_schema[HedSectionKey.Units].all_entries:
+            unit_entry_counts[unit_entry.name] += 1
+        for unit_name in sorted(listed_in):
+            class_names = listed_in[unit_name]
+            if len(class_names) > 1 and unit_entry_counts[unit_name] == 1:
+                self.error_handler.push_error_context(ErrorContext.SCHEMA_SECTION, str(HedSectionKey.Units))
+                self.error_handler.push_error_context(ErrorContext.SCHEMA_TAG, unit_name)
+                issues += self.error_handler.format_error_with_context(
+                    SchemaAttributeErrors.SCHEMA_UNIT_IN_TWO_CLASSES, unit_name, ", ".join(sorted(class_names))
+                )
+                self.error_handler.pop_error_context()
+                self.error_handler.pop_error_context()
+        for form in sorted(derived_in):
+            class_names = derived_in[form]
+            # Forms of one unit listed under two classes are the same collision as the duplicate name itself,
+            # which check_duplicate_names already reports; only forms of two different units are reported here.
+            if len(class_names) > 1 and len(derived_from[form]) > 1 and form not in listed:
+                self.error_handler.push_error_context(ErrorContext.SCHEMA_SECTION, str(HedSectionKey.Units))
+                self.error_handler.push_error_context(ErrorContext.SCHEMA_TAG, form)
+                issues += self.error_handler.format_error_with_context(
+                    SchemaAttributeErrors.SCHEMA_UNIT_DERIVED_IN_TWO_CLASSES, form, ", ".join(sorted(class_names))
                 )
                 self.error_handler.pop_error_context()
                 self.error_handler.pop_error_context()

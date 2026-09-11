@@ -8,7 +8,7 @@ from typing import Any
 
 import inflect
 
-from hed.schema.hed_schema_constants import HedKey, HedSectionKey
+from hed.schema.hed_schema_constants import ANY_UNITS_CLASS, HedKey, HedSectionKey
 
 pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
@@ -545,6 +545,12 @@ class HedTagEntry(HedSchemaEntry):
     def _finalize_takes_value_tag(self, schema):
         if self.name.endswith("/#"):
             self.unit_classes = self._finalize_classes(schema, HedKey.UnitClass, HedSectionKey.UnitClasses)
+            if ANY_UNITS_CLASS in self.unit_classes:
+                # unitClass=anyUnits (specification 4.0.0): the placeholder accepts a unit from every unit class
+                # of the schema, so it resolves units against all of them. The attribute itself is unchanged.
+                self.unit_classes = {
+                    name: entry for name, entry in schema.unit_classes.items() if name != ANY_UNITS_CLASS
+                }
             self.value_classes = self._finalize_classes(schema, HedKey.ValueClass, HedSectionKey.ValueClasses)
 
     def _finalize_inherited_attributes(self):

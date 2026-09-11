@@ -170,3 +170,7 @@ character_types["name"] = (
     | character_types["underscore"]
 )
 character_types["name"].add("nonascii")
+
+# The pseudo unit class that lets a placeholder accept a unit from any unit class of the schema
+# (specification 4.0.0, HED 8.5.0). It lists no units and has no defaultUnits.
+ANY_UNITS_CLASS = "anyUnits"

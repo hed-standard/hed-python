@@ -127,6 +127,61 @@ def item_exists_check(hed_schema, tag_entry, attribute_name, section_key) -> lis
     return issues
 
 
+def single_unit_class_check(hed_schema, tag_entry, attribute_name) -> list:
+    """Check that a placeholder lists at most one unit class.
+
+    Specification 4.0.0, 3.1.4.4: a `#` placeholder MUST NOT have more than one unit class, so a unit
+    string is always checked against exactly one class and conversion to default units is unambiguous.
+
+    Parameters:
+        hed_schema (HedSchema): The schema to use for validation (unused, kept for the validator signature).
+        tag_entry (HedSchemaEntry): The placeholder entry carrying the unitClass attribute.
+        attribute_name (str): The name of this attribute.
+
+    Returns:
+        list[dict]: One SCHEMA_ATTRIBUTE_VALUE_INVALID issue when several unit classes are listed, else empty.
+    """
+    if not tag_entry.name.endswith("/#"):
+        return []  # tag_is_placeholder_check reports unitClass on a non-placeholder
+    unit_classes = tag_entry.attributes.get(attribute_name, "")
+    if isinstance(unit_classes, str) and len([item for item in unit_classes.split(",") if item.strip()]) > 1:
+        return ErrorHandler.format_error(SchemaAttributeErrors.SCHEMA_UNIT_CLASS_MULTIPLE, tag_entry.name, unit_classes)
+    return []
+
+
+def unit_class_requires_numeric_check(hed_schema, tag_entry, attribute_name) -> list:
+    """Check that a placeholder with a unit class has valueClass=numericClass.
+
+    Specification 4.0.0, 3.1.4.4: a value with units is a number to be converted, so a `#` placeholder
+    that carries a unit class MUST have `valueClass=numericClass`. Standard schemas before 8.5.0 (and
+    libraries partnered with them) are not checked: 8.3.0 and earlier have `Sampling-rate/#` with a unit
+    class and no value class. An unpartnered library has no standard version and is not checked either
+    (testlib 1.0.2 and the testunpart fixture carry the same historical omission).
+
+    Parameters:
+        hed_schema (HedSchema): The schema to use for validation.
+        tag_entry (HedSchemaEntry): The placeholder entry carrying the unitClass attribute.
+        attribute_name (str): The name of this attribute.
+
+    Returns:
+        list[dict]: One SCHEMA_ATTRIBUTE_VALUE_INVALID issue when the value class is missing or not numericClass.
+    """
+    if not tag_entry.name.endswith("/#"):
+        return []  # tag_is_placeholder_check reports unitClass on a non-placeholder
+    standard_version = schema_version_for_library(hed_schema, "")
+    if standard_version is None or Version(standard_version) < Version("8.5.0"):
+        return []
+    value_class = tag_entry.attributes.get(HedKey.ValueClass, "")
+    if value_class == "numericClass":
+        return []
+    return ErrorHandler.format_error(
+        SchemaAttributeErrors.SCHEMA_UNIT_CLASS_NOT_NUMERIC,
+        tag_entry.name,
+        tag_entry.attributes.get(attribute_name, ""),
+        f"valueClass '{value_class}'" if value_class else "",
+    )
+
+
 def unit_exists(hed_schema, tag_entry, attribute_name) -> list:
     """Check the given unit is valid, and not deprecated.
 

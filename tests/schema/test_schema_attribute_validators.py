@@ -2,8 +2,11 @@ import copy
 import unittest
 
 from hed import load_schema_version
-from hed.schema import HedSectionKey
+from hed.errors import ErrorHandler
+from hed.models import HedString
+from hed.schema import HedSectionKey, from_string
 from hed.schema.schema_validation import attribute_validators as schema_attribute_validators
+from hed.validator import HedValidator
 from tests.schema import util_create_schemas
 
 
@@ -124,6 +127,186 @@ class Test(unittest.TestCase):
             self.assertEqual(len(issues), 1, bad_default)
             self.assertEqual(issues[0]["code"], "SCHEMA_ATTRIBUTE_VALUE_INVALID", bad_default)
             self.assertIn(f"invalid defaultUnit '{bad_default}'", issues[0]["message"], bad_default)
+
+    def test_single_unit_class_check(self):
+        # A placeholder has at most one unit class (spec 4.0.0, 3.1.4.4).
+        tag_entry = self.hed_schema.tags["Duration/#"]
+        self.assertEqual(tag_entry.attributes["unitClass"], "timeUnits")
+        self.assertEqual(
+            schema_attribute_validators.single_unit_class_check(self.hed_schema, tag_entry, "unitClass"), []
+        )
+
+        tag_entry = copy.deepcopy(tag_entry)
+        tag_entry.attributes["unitClass"] = "timeUnits,physicalLengthUnits"
+        issues = schema_attribute_validators.single_unit_class_check(self.hed_schema, tag_entry, "unitClass")
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues[0]["code"], "SCHEMA_ATTRIBUTE_VALUE_INVALID")
+        self.assertIn("more than one unit class", issues[0]["message"])
+
+    def test_multiple_unit_classes_reported_by_compliance(self):
+        # End to end through check_compliance on an unmerged library, the shape hed-tests uses.
+        lines = [
+            'HED version="1.0.0" library="score" withStandard="8.4.0" unmerged="True"',
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-two-classes'''",
+            "* # {unitClass=%s}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed",
+        ]
+        bad = from_string("\n".join(lines) % "timeUnits, unitClass=physicalLengthUnits", schema_format=".mediawiki")
+        codes = [issue["code"] for issue in bad.check_compliance()]
+        self.assertIn("SCHEMA_ATTRIBUTE_VALUE_INVALID", codes)
+        good = from_string("\n".join(lines) % "physicalLengthUnits", schema_format=".mediawiki")
+        codes = [issue["code"] for issue in good.check_compliance()]
+        self.assertNotIn("SCHEMA_ATTRIBUTE_VALUE_INVALID", codes)
+
+    def test_unit_class_requires_numeric_check(self):
+        # Spec 4.0.0, 3.1.4.4: a placeholder with a unit class must have valueClass=numericClass. The check is
+        # gated to standard schemas >= 8.5.0 (8.3.0 has Sampling-rate/# with a unit class and no value class).
+        lines = [
+            'HED version="1.0.0" library="score" withStandard="%s" unmerged="True"',
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Tag-with-units'''",
+            "* # {%s}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed",
+        ]
+
+        def codes(standard, attributes):
+            schema = from_string("\n".join(lines) % (standard, attributes), schema_format=".mediawiki")
+            return [
+                issue["message"]
+                for issue in schema.check_compliance()
+                if issue["code"] == "SCHEMA_ATTRIBUTE_VALUE_INVALID"
+            ]
+
+        self.assertEqual(codes("8.5.0", "unitClass=timeUnits, valueClass=numericClass"), [])
+        text_issues = codes("8.5.0", "unitClass=timeUnits, valueClass=textClass")
+        self.assertEqual(len(text_issues), 1)
+        self.assertIn("valueClass 'textClass'", text_issues[0])
+        none_issues = codes("8.5.0", "unitClass=timeUnits")
+        self.assertEqual(len(none_issues), 1)
+        self.assertIn("no valueClass", none_issues[0])
+        # Partnered with 8.4.0: not checked.
+        self.assertEqual(codes("8.4.0", "unitClass=timeUnits, valueClass=textClass"), [])
+        # Released 8.3.0 itself is not flagged for Sampling-rate/#.
+        old = load_schema_version("8.3.0")
+        self.assertEqual(old.tags["Sampling-rate/#"].attributes.get("valueClass"), None)
+        self.assertEqual(
+            [issue for issue in old.check_compliance() if "must have valueClass=numericClass" in issue["message"]], []
+        )
+
+    def test_any_units_validation(self):
+        schema = util_create_schemas.load_schema_any_units()
+        validator = HedValidator(schema)
+
+        def codes(text):
+            return [issue["code"] for issue in validator.validate(HedString(text, schema), allow_placeholders=False)]
+
+        for good in (
+            "Quantity/3 ms",
+            "Quantity/3 cm-per-us",
+            "Quantity/3 dB",
+            "Quantity/2 kV",
+            "Quantity/5 dollars",
+            "Quantity/7",
+        ):
+            self.assertEqual(codes(good), [], good)
+        for bad in ("Quantity/3 foo", "Quantity/3 MS", "Quantity/3 kmm-per-s"):
+            self.assertIn("UNITS_INVALID", codes(bad), bad)
+
+    def test_any_units_compliance(self):
+        def compliance_codes(schema):
+            return [
+                issue["code"]
+                for issue in schema.check_compliance(error_handler=ErrorHandler(False))
+                if "ANNOTATION" not in issue["code"]
+            ]
+
+        clean = util_create_schemas.load_schema_any_units()
+        self.assertNotIn("SCHEMA_ATTRIBUTE_INVALID", compliance_codes(clean))
+        self.assertNotIn("SCHEMA_DUPLICATE_NODE", compliance_codes(clean))
+
+        with_unit = util_create_schemas.load_schema_any_units(("** foo <nowiki>{conversionFactor=1.0}</nowiki>",))
+        issues = with_unit.check_compliance(error_handler=ErrorHandler(False))
+        messages = [issue["message"] for issue in issues if issue["code"] == "SCHEMA_ATTRIBUTE_INVALID"]
+        self.assertEqual(len(messages), 1)
+        self.assertIn("must not list units", messages[0])
+
+        with_default = util_create_schemas.load_schema_any_units(any_units_attributes="{defaultUnits=s}")
+        issues = with_default.check_compliance(error_handler=ErrorHandler(False))
+        messages = [issue["message"] for issue in issues if issue["code"] == "SCHEMA_ATTRIBUTE_INVALID"]
+        self.assertEqual(len(messages), 1)
+        self.assertIn("must not have defaultUnits", messages[0])
+
+        # One unit entry shared by two classes (as the JSON loader can produce) is a listing collision that
+        # check_duplicate_names cannot see; the derived forms of that one unit are not reported a second time.
+        shared = util_create_schemas.load_schema_any_units(
+            (
+                "* qUnits <nowiki>{defaultUnits=Q}</nowiki>",
+                "** Q <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0}</nowiki>",
+            )
+        )
+        shared.unit_classes["timeUnits"].units["Q"] = shared.unit_classes["qUnits"].units["Q"]
+        messages = [
+            issue["message"]
+            for issue in shared.check_compliance(error_handler=ErrorHandler(False))
+            if issue["code"] == "SCHEMA_DUPLICATE_NODE"
+        ]
+        self.assertEqual(len(messages), 1, messages)
+        self.assertIn("Unit 'Q' is listed by more than one unit class (qUnits, timeUnits)", messages[0])
+
+        # A derived form shared by two classes and listed by neither: daQ is da + Q and also d + aQ.
+        collision = util_create_schemas.load_schema_any_units(
+            (
+                "* qUnits <nowiki>{defaultUnits=Q}</nowiki>",
+                "** Q <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0}</nowiki>",
+                "* aqUnits <nowiki>{defaultUnits=aQ}</nowiki>",
+                "** aQ <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0}</nowiki>",
+            )
+        )
+        issues = collision.check_compliance(error_handler=ErrorHandler(False))
+        messages = [issue["message"] for issue in issues if issue["code"] == "SCHEMA_DUPLICATE_NODE"]
+        self.assertTrue(any("'daQ'" in message for message in messages), messages)
+        # Released 8.3.0: dB is listed in intensityUnits, so its derivation in memorySizeUnits is not an error.
+        self.assertNotIn("SCHEMA_DUPLICATE_NODE", compliance_codes(load_schema_version("8.3.0")))
+
+    def test_unit_class_checks_skip_non_placeholders(self):
+        # unitClass on a non-placeholder is the existing SCHEMA_NON_PLACEHOLDER_HAS_CLASS warning, nothing more.
+        lines = [
+            'HED version="1.0.0" library="score" withStandard="8.5.0" unmerged="True"',
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Not-a-placeholder''' {unitClass=timeUnits, unitClass=physicalLengthUnits}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "'''Unit modifiers'''",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "'''Properties'''",
+            "'''Epilogue'''",
+            "!# end hed",
+        ]
+        schema = from_string("\n".join(lines), schema_format=".mediawiki")
+        issues = [issue for issue in schema.check_compliance() if issue["code"] == "SCHEMA_ATTRIBUTE_VALUE_INVALID"]
+        self.assertEqual(len(issues), 1, issues)
+        self.assertIn("Only placeholder nodes", issues[0]["message"])
+        for own_message in ("more than one unit class", "must have valueClass=numericClass"):
+            self.assertNotIn(own_message, issues[0]["message"])
 
     def test_deprecatedFrom(self):
         tag_entry = self.hed_schema.tags["Event/Measurement-event"]

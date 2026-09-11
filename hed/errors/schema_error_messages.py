@@ -145,6 +145,59 @@ def schema_error_GENERIC_ATTRIBUTE_VALUE_INVALID(tag, invalid_value, attribute_n
 
 
 @hed_error(
+    SchemaAttributeErrors.SCHEMA_UNIT_CLASS_MULTIPLE, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID
+)
+def schema_error_SCHEMA_UNIT_CLASS_MULTIPLE(tag, unit_classes):
+    return (
+        f"Placeholder '{tag}' lists more than one unit class: '{unit_classes}'. "
+        f"A placeholder has at most one unit class (specification 4.0.0)."
+    )
+
+
+@hed_error(
+    SchemaAttributeErrors.SCHEMA_UNIT_CLASS_NOT_NUMERIC,
+    actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID,
+)
+def schema_error_SCHEMA_UNIT_CLASS_NOT_NUMERIC(tag, unit_class, value_class):
+    value_class = value_class or "no valueClass"
+    return (
+        f"Placeholder '{tag}' has unitClass '{unit_class}' but {value_class}; "
+        f"a placeholder with a unit class must have valueClass=numericClass (specification 4.0.0)."
+    )
+
+
+@hed_error(SchemaAttributeErrors.SCHEMA_ANY_UNITS_HAS_UNITS, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID)
+def schema_error_SCHEMA_ANY_UNITS_HAS_UNITS(unit_class, units):
+    return (
+        f"Pseudo unit class '{unit_class}' must not list units; it lists: '{units}'. "
+        f"It stands for every unit class of the schema (specification 4.0.0)."
+    )
+
+
+@hed_error(
+    SchemaAttributeErrors.SCHEMA_ANY_UNITS_HAS_DEFAULT, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID
+)
+def schema_error_SCHEMA_ANY_UNITS_HAS_DEFAULT(unit_class, default_units):
+    return (
+        f"Pseudo unit class '{unit_class}' must not have defaultUnits (found '{default_units}'); "
+        f"a value without a unit on such a placeholder is valid but has no default unit (specification 4.0.0)."
+    )
+
+
+@hed_error(SchemaAttributeErrors.SCHEMA_UNIT_IN_TWO_CLASSES, actual_code=SchemaErrors.SCHEMA_DUPLICATE_NODE)
+def schema_error_SCHEMA_UNIT_IN_TWO_CLASSES(unit_name, unit_classes):
+    return f"Unit '{unit_name}' is listed by more than one unit class ({unit_classes}); a unit belongs to one class."
+
+
+@hed_error(SchemaAttributeErrors.SCHEMA_UNIT_DERIVED_IN_TWO_CLASSES, actual_code=SchemaErrors.SCHEMA_DUPLICATE_NODE)
+def schema_error_SCHEMA_UNIT_DERIVED_IN_TWO_CLASSES(unit_string, unit_classes):
+    return (
+        f"Unit string '{unit_string}' is derived by more than one unit class ({unit_classes}) and listed by none, "
+        f"so it would be ambiguous on a placeholder that accepts any unit (specification 4.0.0)."
+    )
+
+
+@hed_error(
     SchemaAttributeErrors.SCHEMA_ATTRIBUTE_NUMERIC_INVALID,
     actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID,
 )

@@ -1,6 +1,6 @@
 from hed import load_schema_version
 from hed.models.hed_tag import HedTag
-from hed.schema import HedKey
+from hed.schema import HedKey, from_string
 from tests.schema import util_create_schemas
 from tests.validator.test_tag_validator_base import TestHedBase
 
@@ -223,6 +223,88 @@ class TestSchemaUtilityFunctions(TestHedBase):
         # An explicitly listed default still returns its own entry.
         duration_default = HedTag("Duration/3 s", hed_schema=self.hed_schema).default_unit
         self.assertEqual(duration_default.name, "s")
+        # Conversion goes to the derived default: the listed unit's factor is against that default (1 V = 1000 mV).
+        self.assertAlmostEqual(3000.0, HedTag("VoltageTakesValue/3 V", hed_schema=schema).value_as_default_unit())
+        self.assertAlmostEqual(3.0, HedTag("VoltageTakesValue/3 mV", hed_schema=schema).value_as_default_unit())
+        self.assertAlmostEqual(3.0, HedTag("VoltageTakesValue/3", hed_schema=schema).value_as_default_unit())
+
+    def test_any_units_placeholder(self):
+        # unitClass=anyUnits: the placeholder resolves a unit against every unit class of the schema.
+        schema = util_create_schemas.load_schema_any_units()
+        placeholder = schema.tags["Quantity/#"]
+        self.assertEqual(placeholder.attributes["unitClass"], "anyUnits")
+        self.assertNotIn("anyUnits", placeholder.unit_classes)
+        self.assertIn("timeUnits", placeholder.unit_classes)
+        self.assertIn("physicalLengthUnits", placeholder.unit_classes)
+        # Conversion goes to the default of the class the unit belongs to.
+        self.assertAlmostEqual(0.5, HedTag("Quantity/500 ms", hed_schema=schema).value_as_default_unit())
+        self.assertAlmostEqual(3000.0, HedTag("Quantity/3 km", hed_schema=schema).value_as_default_unit())
+        self.assertAlmostEqual(3.0, HedTag("Quantity/3 dB", hed_schema=schema).value_as_default_unit())
+        self.assertIsNotNone(HedTag("Quantity/3 cm-per-us", hed_schema=schema).value_as_default_unit())
+        # Listed wins over derived: dB is the decibel of intensityUnits, not d + B of memorySizeUnits.
+        _, _, entry = HedTag._get_tag_units_portion("3 dB", placeholder.unit_classes)
+        self.assertEqual(entry.unit_class_entry.name, "intensityUnits")
+        _, _, entry = HedTag._get_tag_units_portion("3 dam", placeholder.unit_classes)
+        self.assertEqual(entry.name, "m")
+        # No unit: a plain number with no default unit.
+        self.assertIsNone(HedTag("Quantity/7", hed_schema=schema).default_unit)
+        self.assertEqual(7.0, HedTag("Quantity/7", hed_schema=schema).value_as_default_unit())
+        # Invalid strings stay invalid.
+        for bad in ("Quantity/3 foo", "Quantity/3 MS", "Quantity/3 kmm-per-s", "Quantity/3 Feet"):
+            self.assertIsNone(HedTag(bad, hed_schema=schema).value_as_default_unit(), bad)
+
+    def test_any_units_with_derived_default_class(self):
+        # A class whose default is a derived form (mQ) converts through the listed unit's factor (1 Q = 1000 mQ).
+        schema = util_create_schemas.load_schema_any_units(
+            (
+                "* qUnits <nowiki>{defaultUnits=mQ}</nowiki>",
+                "** Q <nowiki>{SIUnit, unitSymbol, conversionFactor=1000}</nowiki>",
+            )
+        )
+        self.assertAlmostEqual(3000.0, HedTag("Quantity/3 Q", hed_schema=schema).value_as_default_unit())
+        self.assertAlmostEqual(3.0, HedTag("Quantity/3 mQ", hed_schema=schema).value_as_default_unit())
+        self.assertAlmostEqual(3e6, HedTag("Quantity/3 kQ", hed_schema=schema).value_as_default_unit())
+
+    def test_any_units_has_no_default_even_with_one_class(self):
+        # A standalone schema with anyUnits and exactly one real class: the placeholder still has no default unit.
+        lines = [
+            'HED version="1.0.0"',
+            "'''Prologue'''",
+            "!# start schema",
+            "'''Quantity'''",
+            "* # {takesValue, unitClass=anyUnits}",
+            "'''Duration'''",
+            "* # {takesValue, unitClass=timeUnits}",
+            "!# end schema",
+            "'''Unit classes'''",
+            "* anyUnits",
+            "* timeUnits {defaultUnits=s}",
+            "** s {SIUnit, unitSymbol, conversionFactor=1.0}",
+            "'''Unit modifiers'''",
+            "* m {SIUnitSymbolModifier, conversionFactor=0.001}",
+            "'''Value classes'''",
+            "'''Schema attributes'''",
+            "* takesValue {tagProperty}",
+            "* unitClass {tagProperty}",
+            "* defaultUnits {unitClassProperty}",
+            "* SIUnit {unitProperty}",
+            "* unitSymbol {unitProperty}",
+            "* conversionFactor {unitProperty, unitModifierProperty}",
+            "* SIUnitSymbolModifier {unitModifierProperty}",
+            "'''Properties'''",
+            "* tagProperty",
+            "* unitClassProperty",
+            "* unitProperty",
+            "* unitModifierProperty",
+            "'''Epilogue'''",
+            "!# end hed",
+        ]
+        schema = from_string("\n".join(lines), schema_format=".mediawiki")
+        self.assertEqual(list(schema.tags["Quantity/#"].unit_classes), ["timeUnits"])
+        self.assertIsNone(HedTag("Quantity/7", hed_schema=schema).default_unit)
+        self.assertEqual(7.0, HedTag("Quantity/7", hed_schema=schema).value_as_default_unit())
+        self.assertAlmostEqual(0.003, HedTag("Quantity/3 ms", hed_schema=schema).value_as_default_unit())
+        self.assertEqual("s", HedTag("Duration/7", hed_schema=schema).default_unit.name)
 
     def test_compound_unit_conversion_factors(self):
         # A compound SI unit takes one modifier per component; the exponent applies to the prefixed component
