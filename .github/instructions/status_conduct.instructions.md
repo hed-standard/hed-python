@@ -9,10 +9,14 @@ applyTo: ".status/**"
 - Every markdown file written here opens with a `For humans:` summary - three
   or four sentences at the very top: what the file is and what a person needs
   to take from it.
-- Nothing new is created at the `.status/` root. New material goes in
-  `plans/`, `prompts/`, `notes/`, or `scratch/`.
-- Only `plans/` and `prompts/` are edited in place. `notes/` is write-once.
-  `decisions.md` is append-only - never rewrite an entry.
+- The root holds only `README.md`, `decisions.md`, `development_history.md`,
+  and `local-environment.md`. New material goes in `plans/`, `prompts/`,
+  `notes/`, or `scratch/`.
+- `README.md`, `plans/`, and `prompts/` are freely revised. `notes/` is
+  write-once. `decisions.md` and `development_history.md` are append-only:
+  add an entry, never rewrite or delete one.
+- A finished plan moves to `archive/completed_plans/` (split still-open boxes
+  into a new plan first) and gets an entry in `development_history.md`.
 - Temporary scripts, experiments, and one-off test files go in
   `.status/scratch/` - never the repository root. `scratch/` may hold any
   file type and is deleted unread; everywhere else is markdown only.
