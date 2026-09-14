@@ -40,13 +40,13 @@ class Schema2Wiki(Schema2Base):
         pass
 
     def _output_extras(self, hed_schema):
-        """Add additional sections if needed.
+        """Write the Sources, Prefixes, and External annotations sections, in that order.
 
         Parameters:
-            hed_schema (H: The schema object to output.
-        This is a placeholder for any additional output that needs to be done after the main sections.
+            hed_schema (HedSchema): The schema object to output.
+
+        Every section is written, with its header alone when the schema has no rows for it.
         """
-        # In the base class, we do nothing, but subclasses can override this method.
         self._output_extra(hed_schema, df_constants.SOURCES_KEY, wiki_constants.SOURCES_SECTION_ELEMENT)
         self._output_extra(hed_schema, df_constants.PREFIXES_KEY, wiki_constants.PREFIXES_SECTION_ELEMENT)
         self._output_extra(
@@ -54,7 +54,7 @@ class Schema2Wiki(Schema2Base):
         )
 
     def _output_extra(self, hed_schema, section_key, wiki_key):
-        """Add additional section if needed.
+        """Write one extras section: the header, then one line per row (none when the section is empty).
 
         Parameters:
             hed_schema (HedSchema): The schema object to output.
@@ -63,12 +63,11 @@ class Schema2Wiki(Schema2Base):
 
         """
         extra = self._get_merged_extras(section_key)
-        if extra is None or extra.empty:
-            return
-
         self._add_blank_line()
         self.current_tag_string = wiki_key
         self._flush_current_tag()
+        if extra is None or extra.empty:
+            return
         for _, row in extra.iterrows():
             self.current_tag_string += "*"
             # Emit inLibrary as a schema attribute in {}, consistent with node format

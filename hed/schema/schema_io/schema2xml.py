@@ -38,21 +38,20 @@ class Schema2XML(Schema2Base):
         pass
 
     def _output_extras(self, hed_schema):
+        """Write the schemaSources, schemaPrefixes, and externalAnnotations elements, in that order.
+
+        Every element is written, with no children when the schema has no rows for it, like the
+        empty core sections.
         """
-        Allow subclasses to add additional sections if needed.
-        This is a placeholder for any additional output that needs to be done after the main sections.
-        """
-        # In the base class, we do nothing, but subclasses can override this method.
         self._output_sources(hed_schema)
         self._output_prefixes(hed_schema)
         self._output_external_annotations(hed_schema)
 
     def _output_sources(self, hed_schema):
         sources = self._get_merged_extras(df_constants.SOURCES_KEY)
+        sources_node = SubElement(self.hed_node, xml_constants.SCHEMA_SOURCE_SECTION_ELEMENT)
         if sources is None or sources.empty:
             return
-
-        sources_node = SubElement(self.hed_node, xml_constants.SCHEMA_SOURCE_SECTION_ELEMENT)
         for _, row in sources.iterrows():
             source_node = SubElement(sources_node, xml_constants.SCHEMA_SOURCE_DEF_ELEMENT)
             source_name_node = SubElement(source_node, xml_constants.NAME_ELEMENT)
@@ -80,10 +79,9 @@ class Schema2XML(Schema2Base):
 
     def _output_prefixes(self, hed_schema):
         prefixes = self._get_merged_extras(df_constants.PREFIXES_KEY)
+        prefixes_node = SubElement(self.hed_node, xml_constants.SCHEMA_PREFIX_SECTION_ELEMENT)
         if prefixes is None or prefixes.empty:
             return
-
-        prefixes_node = SubElement(self.hed_node, xml_constants.SCHEMA_PREFIX_SECTION_ELEMENT)
         for _, row in prefixes.iterrows():
             prefix_node = SubElement(prefixes_node, xml_constants.SCHEMA_PREFIX_DEF_ELEMENT)
             prefix_name_node = SubElement(prefix_node, xml_constants.NAME_ELEMENT)
@@ -98,10 +96,9 @@ class Schema2XML(Schema2Base):
 
     def _output_external_annotations(self, hed_schema):
         externals = self._get_merged_extras(df_constants.EXTERNAL_ANNOTATION_KEY)
+        externals_node = SubElement(self.hed_node, xml_constants.SCHEMA_EXTERNAL_SECTION_ELEMENT)
         if externals is None or externals.empty:
             return
-
-        externals_node = SubElement(self.hed_node, xml_constants.SCHEMA_EXTERNAL_SECTION_ELEMENT)
         for _, row in externals.iterrows():
             external_node = SubElement(externals_node, xml_constants.SCHEMA_EXTERNAL_DEF_ELEMENT)
             external_name_node = SubElement(external_node, xml_constants.NAME_ELEMENT)
