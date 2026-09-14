@@ -12,9 +12,9 @@ applyTo: ".status/**"
 - The root holds only `README.md`, `decisions.md`, `development_history.md`,
   and `local-environment.md`. New material goes in `plans/`, `prompts/`,
   `notes/`, or `scratch/`.
-- Only `README.md`, `plans/`, and `prompts/` are edited in place. `notes/` is
-  write-once. `decisions.md` and `development_history.md` are append-only -
-  never rewrite an entry.
+- `README.md`, `plans/`, and `prompts/` are freely revised. `notes/` is
+  write-once. `decisions.md` and `development_history.md` are append-only:
+  add an entry, never rewrite or delete one.
 - A finished plan moves to `archive/completed_plans/` (split still-open boxes
   into a new plan first) and gets an entry in `development_history.md`.
 - Temporary scripts, experiments, and one-off test files go in
