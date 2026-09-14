@@ -1,0 +1,19 @@
+hedId	Level	rdfs:label	omn:SubClassOf	Attributes	dc:description
+	0	Lick	Move-face	rooted=Move-face	Touch tongue to an object.
+	0	Move-whiskers	Move-face	rooted=Move-face	Move the whiskers.
+	0	Groom	Perform	rooted=Perform	Engage in self-hygiene.
+	0	Nose-poke	Perform	rooted=Perform	Nose enters or occupies a defined port/aperture location.
+	0	Report	Perform	rooted=Perform	Register a response
+	0	Fore-limb	Body-part	rooted=Body-part	Either of the front pair of limbs in a quadruped.
+	0	Fore-limb-part	Body-part	rooted=Body-part	A part of the fore-limb.
+	1	Manus	Fore-limb-part		The distal segment of the fore-limb, homologous to the hand.
+	0	Whiskers	Face-part	rooted=Face-part	Long, stiff, specialized hairs on the face used for tactile sensing.
+	0	Hind-limb	Body-part	rooted=Body-part	Either of the rear pair of limbs in a quadruped.
+	0	Hind-limb-part	Body-part	rooted=Body-part	A part of the hind-limb.
+	1	Pes	Hind-limb-part		The distal segment of the hind-limb, homologous to the foot.
+	0	Tail	Body-part	rooted=Body-part	The posterior appendage extending from the base of the spine.
+	0	Cell	Anatomical-item	rooted=Anatomical-item, annotation=dc:source Wikipedia https://en.wikipedia.org/wiki/Cell_(biology)	The smallest basic structural and functional unit of all living organisms, capable of independent existence and self-replication.
+	1	Neuron	Cell	annotation=dc:source Wikipedia https://en.wikipedia.org/wiki/Neuron	An electrically excitable cell specialized for the initiation, conduction, and transmission of information throughout the body.
+	0	Lick-spout	Measurement-device	rooted=Measurement-device	Device that delivers reward
+	0	Aborted-trial	Task-action-type	rooted=Task-action-type	A trial outcome in which the trial is terminated early based on conditions set in the task logic.
+	0	Correct-reject	Task-action-type	rooted=Task-action-type	A trial outcome in which the lack of response matches the task's expected behavior.

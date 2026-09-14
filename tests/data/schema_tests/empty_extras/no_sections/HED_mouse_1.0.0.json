@@ -1,0 +1,272 @@
+{
+  "version": "1.0.0",
+  "library": "mouse",
+  "withStandard": "8.5.0",
+  "unmerged": "True",
+  "prologue": "The HED MOUSE HED library schema is designed to standardize the annotation of rodent behavioral experiments.",
+  "tags": {
+    "Lick": {
+      "short_form": "Lick",
+      "long_form": "Action/Move/Move-body-part/Move-face/Lick",
+      "description": "Touch tongue to an object.",
+      "parent": "Move-face",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Move-face"
+      },
+      "explicitAttributes": {
+        "rooted": "Move-face"
+      }
+    },
+    "Move-whiskers": {
+      "short_form": "Move-whiskers",
+      "long_form": "Action/Move/Move-body-part/Move-face/Move-whiskers",
+      "description": "Move the whiskers.",
+      "parent": "Move-face",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Move-face"
+      },
+      "explicitAttributes": {
+        "rooted": "Move-face"
+      }
+    },
+    "Groom": {
+      "short_form": "Groom",
+      "long_form": "Action/Perform/Groom",
+      "description": "Engage in self-hygiene.",
+      "parent": "Perform",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Perform"
+      },
+      "explicitAttributes": {
+        "rooted": "Perform"
+      }
+    },
+    "Nose-poke": {
+      "short_form": "Nose-poke",
+      "long_form": "Action/Perform/Nose-poke",
+      "description": "Nose enters or occupies a defined port/aperture location.",
+      "parent": "Perform",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Perform"
+      },
+      "explicitAttributes": {
+        "rooted": "Perform"
+      }
+    },
+    "Report": {
+      "short_form": "Report",
+      "long_form": "Action/Perform/Report",
+      "description": "Register a response",
+      "parent": "Perform",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Perform"
+      },
+      "explicitAttributes": {
+        "rooted": "Perform"
+      }
+    },
+    "Fore-limb": {
+      "short_form": "Fore-limb",
+      "long_form": "Item/Biological-item/Anatomical-item/Body-part/Fore-limb",
+      "description": "Either of the front pair of limbs in a quadruped.",
+      "parent": "Body-part",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Body-part"
+      },
+      "explicitAttributes": {
+        "rooted": "Body-part"
+      }
+    },
+    "Fore-limb-part": {
+      "short_form": "Fore-limb-part",
+      "long_form": "Item/Biological-item/Anatomical-item/Body-part/Fore-limb-part",
+      "description": "A part of the fore-limb.",
+      "parent": "Body-part",
+      "children": [
+        "Manus"
+      ],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Body-part"
+      },
+      "explicitAttributes": {
+        "rooted": "Body-part"
+      }
+    },
+    "Manus": {
+      "short_form": "Manus",
+      "long_form": "Item/Biological-item/Anatomical-item/Body-part/Fore-limb-part/Manus",
+      "description": "The distal segment of the fore-limb, homologous to the hand.",
+      "parent": "Fore-limb-part",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true
+      },
+      "explicitAttributes": {}
+    },
+    "Whiskers": {
+      "short_form": "Whiskers",
+      "long_form": "Item/Biological-item/Anatomical-item/Body-part/Head-part/Face-part/Whiskers",
+      "description": "Long, stiff, specialized hairs on the face used for tactile sensing.",
+      "parent": "Face-part",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Face-part"
+      },
+      "explicitAttributes": {
+        "rooted": "Face-part"
+      }
+    },
+    "Hind-limb": {
+      "short_form": "Hind-limb",
+      "long_form": "Item/Biological-item/Anatomical-item/Body-part/Hind-limb",
+      "description": "Either of the rear pair of limbs in a quadruped.",
+      "parent": "Body-part",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Body-part"
+      },
+      "explicitAttributes": {
+        "rooted": "Body-part"
+      }
+    },
+    "Hind-limb-part": {
+      "short_form": "Hind-limb-part",
+      "long_form": "Item/Biological-item/Anatomical-item/Body-part/Hind-limb-part",
+      "description": "A part of the hind-limb.",
+      "parent": "Body-part",
+      "children": [
+        "Pes"
+      ],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Body-part"
+      },
+      "explicitAttributes": {
+        "rooted": "Body-part"
+      }
+    },
+    "Pes": {
+      "short_form": "Pes",
+      "long_form": "Item/Biological-item/Anatomical-item/Body-part/Hind-limb-part/Pes",
+      "description": "The distal segment of the hind-limb, homologous to the foot.",
+      "parent": "Hind-limb-part",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true
+      },
+      "explicitAttributes": {}
+    },
+    "Tail": {
+      "short_form": "Tail",
+      "long_form": "Item/Biological-item/Anatomical-item/Body-part/Tail",
+      "description": "The posterior appendage extending from the base of the spine.",
+      "parent": "Body-part",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Body-part"
+      },
+      "explicitAttributes": {
+        "rooted": "Body-part"
+      }
+    },
+    "Cell": {
+      "short_form": "Cell",
+      "long_form": "Item/Biological-item/Anatomical-item/Cell",
+      "description": "The smallest basic structural and functional unit of all living organisms, capable of independent existence and self-replication.",
+      "parent": "Anatomical-item",
+      "children": [
+        "Neuron"
+      ],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Anatomical-item",
+        "annotation": "dc:source Wikipedia https://en.wikipedia.org/wiki/Cell_(biology)"
+      },
+      "explicitAttributes": {
+        "rooted": "Anatomical-item",
+        "annotation": "dc:source Wikipedia https://en.wikipedia.org/wiki/Cell_(biology)"
+      }
+    },
+    "Neuron": {
+      "short_form": "Neuron",
+      "long_form": "Item/Biological-item/Anatomical-item/Cell/Neuron",
+      "description": "An electrically excitable cell specialized for the initiation, conduction, and transmission of information throughout the body.",
+      "parent": "Cell",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true,
+        "annotation": "dc:source Wikipedia https://en.wikipedia.org/wiki/Neuron"
+      },
+      "explicitAttributes": {
+        "annotation": "dc:source Wikipedia https://en.wikipedia.org/wiki/Neuron"
+      }
+    },
+    "Lick-spout": {
+      "short_form": "Lick-spout",
+      "long_form": "Item/Object/Man-made-object/Device/Measurement-device/Lick-spout",
+      "description": "Device that delivers reward",
+      "parent": "Measurement-device",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true,
+        "suggestedTag": [
+          "Sensory-presentation"
+        ],
+        "rooted": "Measurement-device"
+      },
+      "explicitAttributes": {
+        "rooted": "Measurement-device"
+      }
+    },
+    "Aborted-trial": {
+      "short_form": "Aborted-trial",
+      "long_form": "Property/Task-property/Task-action-type/Aborted-trial",
+      "description": "A trial outcome in which the trial is terminated early based on conditions set in the task logic.",
+      "parent": "Task-action-type",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Task-action-type"
+      },
+      "explicitAttributes": {
+        "rooted": "Task-action-type"
+      }
+    },
+    "Correct-reject": {
+      "short_form": "Correct-reject",
+      "long_form": "Property/Task-property/Task-action-type/Correct-reject",
+      "description": "A trial outcome in which the lack of response matches the task's expected behavior.",
+      "parent": "Task-action-type",
+      "children": [],
+      "attributes": {
+        "extensionAllowed": true,
+        "rooted": "Task-action-type"
+      },
+      "explicitAttributes": {
+        "rooted": "Task-action-type"
+      }
+    }
+  },
+  "units": {},
+  "unit_classes": {},
+  "unit_modifiers": {},
+  "value_classes": {},
+  "schema_attributes": {},
+  "properties": {}
+}
