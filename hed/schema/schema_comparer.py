@@ -762,6 +762,10 @@ class SchemaComparer:
         for key in all_keys:
             df1 = extras1.get(key)
             df2 = extras2.get(key)
+            # An absent section and one present with no rows are the same thing: writers always
+            # emit the section and readers create an empty one when a file lacks it.
+            if (df1 is None or df1.empty) and (df2 is None or df2.empty):
+                continue
             if df1 is None and df2 is not None:
                 change_dict[key].append(
                     {"change_type": "Minor", "change": f"Entire {key} section missing in first schema", "tag": key}

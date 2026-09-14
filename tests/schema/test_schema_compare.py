@@ -594,3 +594,56 @@ class TestPrettyPrintChangeDict(unittest.TestCase):
             self.assertIn(item, diff_string)
         for item in not_in_2[HedSectionKey.Tags]:
             self.assertIn(item, diff_string)
+
+
+class TestSchemaComparerEmptyExtras(unittest.TestCase):
+    """An absent extras section and one present with no rows compare as equal (plan empty_extra_sections T2)."""
+
+    @staticmethod
+    def _make_schema(extras_dict):
+        schema = copy.deepcopy(util_create_schemas.load_schema1())
+        schema.extras = extras_dict
+        return schema
+
+    @staticmethod
+    def _extras_changes(schema1, schema2):
+        result = SchemaComparer(schema1, schema2).gather_schema_changes()
+        return {k: v for k, v in result.items() if k in {SOURCES_KEY, PREFIXES_KEY, EXTERNAL_ANNOTATION_KEY}}
+
+    def test_absent_key_equals_empty_frame(self):
+        """No key in one schema, an empty DataFrame in the other: no change either way."""
+        empty = pd.DataFrame(columns=["source", "link", "description"])
+        schema1 = self._make_schema({})
+        schema2 = self._make_schema({SOURCES_KEY: empty})
+        self.assertEqual(self._extras_changes(schema1, schema2), {})
+        self.assertEqual(self._extras_changes(schema2, schema1), {})
+
+    def test_none_value_equals_empty_frame(self):
+        """A key mapped to None and a key mapped to an empty DataFrame: no change."""
+        empty = pd.DataFrame(columns=["prefix", "namespace", "description"])
+        schema1 = self._make_schema({PREFIXES_KEY: None})
+        schema2 = self._make_schema({PREFIXES_KEY: empty})
+        self.assertEqual(self._extras_changes(schema1, schema2), {})
+        self.assertEqual(self._extras_changes(schema2, schema1), {})
+
+    def test_empty_frame_versus_rows_still_reported(self):
+        """Emptiness is only equal to emptiness: rows on one side are still a Minor change."""
+        empty = pd.DataFrame(columns=["source", "link", "description"])
+        rows = pd.DataFrame({"source": ["s1"], "link": ["http://a.org"], "description": ["d"]})
+        schema1 = self._make_schema({SOURCES_KEY: empty})
+        schema2 = self._make_schema({SOURCES_KEY: rows})
+        changes = self._extras_changes(schema1, schema2)
+        self.assertEqual(len(changes[SOURCES_KEY]), 1)
+        self.assertEqual(changes[SOURCES_KEY][0]["change_type"], "Minor")
+        self.assertIn("missing in first schema", changes[SOURCES_KEY][0]["change"])
+
+    def test_regenerated_library_file_shows_no_extras_differences(self):
+        """The mouse file without the sections and its regenerated form with empty sections compare equal."""
+        base = os.path.normpath(os.path.join(os.path.dirname(__file__), "../data/schema_tests/empty_extras"))
+        for ext in (".mediawiki", ".xml", ".json", ""):
+            with self.subTest(format=ext or "tsv"):
+                old = load_schema(os.path.join(base, "no_sections", "HED_mouse_1.0.0" + ext))
+                new = load_schema(os.path.join(base, "empty_sections", "HED_mouse_1.0.0" + ext))
+                comp = SchemaComparer(old, new)
+                self.assertEqual(self._extras_changes(old, new), {})
+                self.assertEqual(comp.compare_differences(attribute_filter=None), "")
