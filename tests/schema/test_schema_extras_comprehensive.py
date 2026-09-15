@@ -16,7 +16,7 @@ import unittest
 
 import pandas as pd
 
-from hed.schema import load_schema, load_schema_version
+from hed.schema import from_string, load_schema, load_schema_version
 from hed.schema.schema_io import df_constants
 
 
@@ -164,20 +164,35 @@ class TestSchemaExtrasAllFormats(unittest.TestCase):
                     pd.testing.assert_frame_equal(df1, df2, check_dtype=False, obj=f"{label}: {fmt1} vs {fmt2}")
 
     def _check_unmerged_roundtrip(self, original_schema, reloaded_schema):
-        """After saving merged→unmerged and reloading, only library entries survive."""
+        """After saving merged -> unmerged and reloading, the library rows are the same and the partner's are back.
+
+        The unmerged file holds only the library's rows; loading it combines them with the partner's
+        again (schema_merge._merge_extras), so the reloaded schema has the same rows as the original,
+        with the library's still stamped and the partner's carrying an empty stamp.
+        """
         for key, label in [
             (df_constants.SOURCES_KEY, "Sources"),
             (df_constants.PREFIXES_KEY, "Prefixes"),
             (df_constants.EXTERNAL_ANNOTATION_KEY, "ExternalAnnotations"),
         ]:
             lib_only = self._library_extras_only(original_schema.get_extras(key), self.library_name)
-            reloaded = self._extras_without_in_library(reloaded_schema.get_extras(key))
+            reloaded_lib_only = self._library_extras_only(reloaded_schema.get_extras(key), self.library_name)
             pd.testing.assert_frame_equal(
-                lib_only, reloaded, check_dtype=False, obj=f"{label}: library_only vs reloaded"
+                lib_only, reloaded_lib_only, check_dtype=False, obj=f"{label}: library_only vs reloaded library_only"
+            )
+            all_rows = self._extras_without_in_library(original_schema.get_extras(key))
+            reloaded_all = self._extras_without_in_library(reloaded_schema.get_extras(key))
+            pd.testing.assert_frame_equal(
+                all_rows, reloaded_all, check_dtype=False, obj=f"{label}: all rows vs reloaded"
+            )
+            reloaded_df = reloaded_schema.get_extras(key)
+            partner_rows = (reloaded_df[df_constants.in_library] == "").sum()
+            self.assertEqual(
+                partner_rows, len(reloaded_df) - len(lib_only), f"{label}: partner rows carry an empty stamp"
             )
 
     def test_03_xml_roundtrip_unmerged(self):
-        """Load merged XML → save unmerged → reload: only library extras survive."""
+        """Load merged XML -> save unmerged -> reload: library rows survive and the partner's come back."""
         schema = load_schema(self.xml_path)
         temp_xml = os.path.join(self.temp_dir, "roundtrip_unmerged.xml")
         schema.save_as_xml(temp_xml, save_merged=False)
@@ -185,7 +200,7 @@ class TestSchemaExtrasAllFormats(unittest.TestCase):
         self._check_unmerged_roundtrip(schema, schema_reloaded)
 
     def test_04_json_roundtrip_unmerged(self):
-        """Load merged JSON → save unmerged → reload: only library extras survive."""
+        """Load merged JSON -> save unmerged -> reload: library rows survive and the partner's come back."""
         schema = load_schema(self.json_path)
         temp_json = os.path.join(self.temp_dir, "roundtrip_unmerged.json")
         schema.save_as_json(temp_json, save_merged=False)
@@ -193,7 +208,7 @@ class TestSchemaExtrasAllFormats(unittest.TestCase):
         self._check_unmerged_roundtrip(schema, schema_reloaded)
 
     def test_05_mediawiki_roundtrip_unmerged(self):
-        """Load merged MediaWiki → save unmerged → reload: only library extras survive."""
+        """Load merged MediaWiki -> save unmerged -> reload: library rows survive and the partner's come back."""
         schema = load_schema(self.wiki_path)
         temp_wiki = os.path.join(self.temp_dir, "roundtrip_unmerged.mediawiki")
         schema.save_as_mediawiki(temp_wiki, save_merged=False)
@@ -201,7 +216,7 @@ class TestSchemaExtrasAllFormats(unittest.TestCase):
         self._check_unmerged_roundtrip(schema, schema_reloaded)
 
     def test_06_tsv_roundtrip_unmerged(self):
-        """Load merged TSV → save unmerged → reload: only library extras survive."""
+        """Load merged TSV -> save unmerged -> reload: library rows survive and the partner's come back."""
         schema = load_schema(self.tsv_path)
         temp_tsv_dir = os.path.join(self.temp_dir, "roundtrip_unmerged_tsv")
         schema.save_as_dataframes(temp_tsv_dir, save_merged=False)
@@ -326,17 +341,24 @@ class TestSchemaExtrasAllFormats(unittest.TestCase):
                     f"{label}: total rows should match expected count",
                 )
 
-                # Verify unmerge behavior: save unmerged should only have library rows
+                # Verify unmerge behavior: the unmerged file holds only the library's row, and loading it
+                # brings the partner's rows back with an empty stamp.
                 temp_xml_unmerged = os.path.join(self.temp_dir, f"check_unmerge_{label}.xml")
                 schema_reloaded.save_as_xml(temp_xml_unmerged, save_merged=False)
+                with open(temp_xml_unmerged, encoding="utf-8") as fp:
+                    xml_text = fp.read()
+                element = {
+                    "Sources": "schemaSource",
+                    "Prefixes": "schemaPrefix",
+                    "ExternalAnnotations": "externalAnnotation",
+                }
+                self.assertEqual(xml_text.count(f"<{element[label]}>"), 1, f"{label}: unmerged file has one row")
                 schema_unmerged = load_schema(temp_xml_unmerged)
 
                 df_unmerged = schema_unmerged.get_extras(key)
-                if df_unmerged is not None and not df_unmerged.empty:
-                    # After unmerge, only library rows should remain (base rows dropped)
-                    self.assertEqual(
-                        len(df_unmerged), 1, f"{label}: unmerged should only have library row, not base rows"
-                    )
+                self.assertEqual((df_unmerged[df_constants.in_library] == self.library_name).sum(), 1, label)
+                self.assertEqual((df_unmerged[df_constants.in_library] == "").sum(), expected_base_count, label)
+                self.assertEqual(len(df_unmerged), len(df), f"{label}: reloaded unmerged has library + partner rows")
 
     def test_10_json_loader_normalizes_in_library_column(self):
         """JSON loader normalizes in_library to string (NaN → empty string) for all extras sections.
@@ -586,6 +608,96 @@ class TestEmptyExtrasSections(unittest.TestCase):
                     reloaded_df = reloaded.get_extras(key)
                     self.assertEqual(0 if reloaded_df is None else len(reloaded_df), expected, f"{format_name} {key}")
                     self.assertEqual(self._library_rows(reloaded, key), 0, f"{format_name} {key}")
+
+
+class TestPartnerExtrasAvailableToLibrary(unittest.TestCase):
+    """An unmerged partnered library may use everything its partner defines, the extras rows included.
+
+    Loading an unmerged file combines the library's Sources, Prefixes, and External annotations rows
+    with the partner's (schema_merge._merge_extras), so annotations written with the standard's
+    prefixes (dc:, rdfs:, ...) validate without the library restating those sections.
+    """
+
+    LIBRARY = """HED library="testpartner" version="1.0.0" withStandard="8.5.0" unmerged="True"
+
+'''Prologue'''
+
+!# start schema
+
+'''Own-thing''' <nowiki>{rooted=Item, annotation=dc:source Wikipedia, annotation=rdfs:comment A comment.} [A tag.]</nowiki>
+* Own-child <nowiki>{annotation=own:C1} [A child tag.]</nowiki>
+
+!# end schema
+
+'''Unit classes'''
+
+'''Unit modifiers'''
+
+'''Value classes'''
+
+'''Schema attributes'''
+
+'''Properties'''
+
+'''Epilogue'''
+
+'''Sources'''
+
+'''Prefixes'''
+* <nowiki>prefix=own:,namespace=https://example.org/own/#,description=The library's own prefix.</nowiki>
+
+'''External annotations'''
+* <nowiki>prefix=own:,id=C1,iri=https://example.org/own/#C1,description=A term of the library's own.</nowiki>
+
+!# end hed
+"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.schema = from_string(cls.LIBRARY, ".mediawiki")
+        cls.partner = load_schema_version("8.5.0")
+
+    def test_partner_rows_are_present_and_unstamped(self):
+        """Every partner row is loaded with an empty in_library stamp; the library's rows keep theirs."""
+        for key, own_rows in (
+            (df_constants.SOURCES_KEY, 0),
+            (df_constants.PREFIXES_KEY, 1),
+            (df_constants.EXTERNAL_ANNOTATION_KEY, 1),
+        ):
+            with self.subTest(section=key):
+                df = self.schema.get_extras(key)
+                partner_df = self.partner.get_extras(key)
+                self.assertEqual(len(df), len(partner_df) + own_rows, key)
+                self.assertEqual((df[df_constants.in_library] == "testpartner").sum(), own_rows, key)
+                self.assertEqual((df[df_constants.in_library] == "").sum(), len(partner_df), key)
+        prefixes = set(self.schema.get_extras(df_constants.PREFIXES_KEY)[df_constants.prefix])
+        self.assertIn("dc:", prefixes)
+        self.assertIn("own:", prefixes)
+
+    def test_annotations_with_partner_prefixes_are_compliant(self):
+        """dc:source and rdfs:comment resolve through the partner's rows; own: through the library's."""
+        issues = self.schema.check_compliance()
+        annotation_issues = [issue for issue in issues if issue["code"].startswith("SCHEMA_ANNOTATION")]
+        self.assertEqual(annotation_issues, [])
+        self.assertEqual({issue["code"] for issue in issues}, {"SCHEMA_PRERELEASE_VERSION_USED"})
+
+    def test_unmerged_save_writes_only_the_library_rows(self):
+        """The partner's rows never leak into an unmerged save."""
+        temp_dir = tempfile.mkdtemp(prefix="hed_partner_extras_")
+        try:
+            path = os.path.join(temp_dir, "HED_testpartner_1.0.0.mediawiki")
+            self.schema.save_as_mediawiki(path, save_merged=False)
+            with open(path, encoding="utf-8") as fp:
+                text = fp.read()
+            self.assertEqual(text.count("prefix="), 2, "one Prefixes row and one External annotations row")
+            self.assertNotIn("prefix=dc:", text)
+            reloaded = load_schema(path)
+            self.assertEqual(
+                len(reloaded.get_extras(df_constants.PREFIXES_KEY)),
+                len(self.partner.get_extras(df_constants.PREFIXES_KEY)) + 1,
+            )
+        finally:
+            shutil.rmtree(temp_dir)
 
 
 if __name__ == "__main__":

@@ -36,6 +36,7 @@ from hed.schema.hed_schema_constants import (
     HedSectionKey,
 )
 from hed.schema.hed_schema_entry import HedSchemaEntry
+from hed.schema.schema_io import df_constants, df_util
 from hed.schema.schema_io.base2schema import SchemaLoader
 
 # Sections merged by name, in loader order (domains before their users). Unit classes
@@ -168,11 +169,42 @@ def merge_group(spec: GroupSpec, load_partner: Callable[[str], HedSchema]) -> He
     result.prologue = first.prologue
     result.epilogue = first.epilogue
     if first is not result:
-        # Single-file loading never carried the partner's extras into an unmerged library's result;
-        # the extras_in_library item covers inLibrary bookkeeping on extras rows.
-        result.extras = {key: df.copy() for key, df in first.extras.items()}
+        # A partnered library may use everything its partner defines, the extras rows included
+        # (spec Appendix A: a library's rows "are merged with those of the standard schema").
+        result.extras = _merge_extras(first.extras, result.extras)
     result.finalize_dictionaries()
     return result
+
+
+def _merge_extras(library_extras: dict, partner_extras: dict) -> dict:
+    """Combine a library's extras rows (Sources, Prefixes, External annotations) with its partner's.
+
+    The library's rows keep the ``in_library`` stamp the loader gave them; the partner's rows get an
+    empty one, the marking a merged file gives base rows, so an unmerged save
+    (``schema2base._get_merged_extras``) still writes only the library's rows.
+
+    Parameters:
+        library_extras (dict): The library's extras, key -> DataFrame, as its loader produced them.
+        partner_extras (dict): The partner's (or merged base's) extras.
+
+    Returns:
+        dict: key -> DataFrame holding both, deduplicated by content and sorted.
+    """
+    merged = {}
+    for key in dict.fromkeys(list(library_extras) + list(partner_extras)):
+        library_df = library_extras.get(key)
+        partner_df = partner_extras.get(key)
+        if partner_df is None or partner_df.empty:
+            kept = library_df if library_df is not None else partner_df
+            merged[key] = None if kept is None else kept.copy()
+            continue
+        partner_df = partner_df.copy()
+        if df_constants.in_library not in partner_df.columns:
+            partner_df[df_constants.in_library] = ""
+        else:
+            partner_df[df_constants.in_library] = partner_df[df_constants.in_library].fillna("").astype(str)
+        merged[key] = df_util.merge_extras_dataframes(library_df, partner_df)
+    return merged
 
 
 def merge_into(result: HedSchema, library: HedSchema) -> list[dict]:
