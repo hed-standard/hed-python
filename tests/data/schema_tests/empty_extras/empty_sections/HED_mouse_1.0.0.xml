@@ -1,0 +1,154 @@
+<?xml version="1.0" ?>
+<HED version="1.0.0" library="mouse" withStandard="8.5.0" unmerged="True">
+   <prologue>The HED MOUSE HED library schema is designed to standardize the annotation of rodent behavioral experiments.</prologue>
+   <schema>
+      <node>
+         <name>Lick</name>
+         <description>Touch tongue to an object.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Move-face</value>
+         </attribute>
+      </node>
+      <node>
+         <name>Move-whiskers</name>
+         <description>Move the whiskers.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Move-face</value>
+         </attribute>
+      </node>
+      <node>
+         <name>Groom</name>
+         <description>Engage in self-hygiene.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Perform</value>
+         </attribute>
+      </node>
+      <node>
+         <name>Nose-poke</name>
+         <description>Nose enters or occupies a defined port/aperture location.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Perform</value>
+         </attribute>
+      </node>
+      <node>
+         <name>Report</name>
+         <description>Register a response</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Perform</value>
+         </attribute>
+      </node>
+      <node>
+         <name>Fore-limb</name>
+         <description>Either of the front pair of limbs in a quadruped.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Body-part</value>
+         </attribute>
+      </node>
+      <node>
+         <name>Fore-limb-part</name>
+         <description>A part of the fore-limb.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Body-part</value>
+         </attribute>
+         <node>
+            <name>Manus</name>
+            <description>The distal segment of the fore-limb, homologous to the hand.</description>
+         </node>
+      </node>
+      <node>
+         <name>Whiskers</name>
+         <description>Long, stiff, specialized hairs on the face used for tactile sensing.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Face-part</value>
+         </attribute>
+      </node>
+      <node>
+         <name>Hind-limb</name>
+         <description>Either of the rear pair of limbs in a quadruped.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Body-part</value>
+         </attribute>
+      </node>
+      <node>
+         <name>Hind-limb-part</name>
+         <description>A part of the hind-limb.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Body-part</value>
+         </attribute>
+         <node>
+            <name>Pes</name>
+            <description>The distal segment of the hind-limb, homologous to the foot.</description>
+         </node>
+      </node>
+      <node>
+         <name>Tail</name>
+         <description>The posterior appendage extending from the base of the spine.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Body-part</value>
+         </attribute>
+      </node>
+      <node>
+         <name>Cell</name>
+         <description>The smallest basic structural and functional unit of all living organisms, capable of independent existence and self-replication.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Anatomical-item</value>
+         </attribute>
+         <attribute>
+            <name>annotation</name>
+            <value>dc:source Wikipedia https://en.wikipedia.org/wiki/Cell_(biology)</value>
+         </attribute>
+         <node>
+            <name>Neuron</name>
+            <description>An electrically excitable cell specialized for the initiation, conduction, and transmission of information throughout the body.</description>
+            <attribute>
+               <name>annotation</name>
+               <value>dc:source Wikipedia https://en.wikipedia.org/wiki/Neuron</value>
+            </attribute>
+         </node>
+      </node>
+      <node>
+         <name>Lick-spout</name>
+         <description>Device that delivers reward</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Measurement-device</value>
+         </attribute>
+      </node>
+      <node>
+         <name>Aborted-trial</name>
+         <description>A trial outcome in which the trial is terminated early based on conditions set in the task logic.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Task-action-type</value>
+         </attribute>
+      </node>
+      <node>
+         <name>Correct-reject</name>
+         <description>A trial outcome in which the lack of response matches the task's expected behavior.</description>
+         <attribute>
+            <name>rooted</name>
+            <value>Task-action-type</value>
+         </attribute>
+      </node>
+   </schema>
+   <unitClassDefinitions/>
+   <unitModifierDefinitions/>
+   <valueClassDefinitions/>
+   <schemaAttributeDefinitions/>
+   <propertyDefinitions/>
+   <schemaSources/>
+   <schemaPrefixes/>
+   <externalAnnotations/>
+</HED>

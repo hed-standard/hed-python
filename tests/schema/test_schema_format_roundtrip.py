@@ -572,6 +572,22 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
                         f"Epilogue should be preserved in {format_ext} roundtrip for {schema_name}",
                     )
 
+    def test_library_without_extras_roundtrips_with_empty_sections(self):
+        """An unmerged library that adds no extras round-trips through all four formats (T1).
+
+        The writers now emit the Sources, Prefixes, and External annotations sections empty; the readers
+        must load those files to the same schema as the file that omitted them.
+        """
+        fixture = os.path.join(
+            os.path.dirname(__file__), "../data/schema_tests/empty_extras/no_sections/HED_mouse_1.0.0.mediawiki"
+        )
+        schema = load_schema(os.path.normpath(fixture))
+        self._test_format_roundtrip(schema, "mouse_no_extras", save_merged=False)
+        for key in (df_constants.SOURCES_KEY, df_constants.PREFIXES_KEY, df_constants.EXTERNAL_ANNOTATION_KEY):
+            df = schema.get_extras(key)
+            library_rows = 0 if df is None else int((df[df_constants.in_library] == "mouse").sum())
+            self.assertEqual(library_rows, 0, f"mouse adds no {key} rows")
+
 
 if __name__ == "__main__":
     unittest.main()

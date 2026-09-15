@@ -1,0 +1,62 @@
+HED version="1.0.0" library="mouse" withStandard="8.5.0" unmerged="True"
+
+'''Prologue'''
+The HED MOUSE HED library schema is designed to standardize the annotation of rodent behavioral experiments.
+
+!# start schema
+
+'''Lick''' <nowiki>{rooted=Move-face} [Touch tongue to an object.]</nowiki>
+
+'''Move-whiskers''' <nowiki>{rooted=Move-face} [Move the whiskers.]</nowiki>
+
+'''Groom''' <nowiki>{rooted=Perform} [Engage in self-hygiene.]</nowiki>
+
+'''Nose-poke''' <nowiki>{rooted=Perform} [Nose enters or occupies a defined port/aperture location.]</nowiki>
+
+'''Report''' <nowiki>{rooted=Perform} [Register a response]</nowiki>
+
+'''Fore-limb''' <nowiki>{rooted=Body-part} [Either of the front pair of limbs in a quadruped.]</nowiki>
+
+'''Fore-limb-part''' <nowiki>{rooted=Body-part} [A part of the fore-limb.]</nowiki>
+* Manus <nowiki>[The distal segment of the fore-limb, homologous to the hand.]</nowiki>
+
+'''Whiskers''' <nowiki>{rooted=Face-part} [Long, stiff, specialized hairs on the face used for tactile sensing.]</nowiki>
+
+'''Hind-limb''' <nowiki>{rooted=Body-part} [Either of the rear pair of limbs in a quadruped.]</nowiki>
+
+'''Hind-limb-part''' <nowiki>{rooted=Body-part} [A part of the hind-limb.]</nowiki>
+* Pes <nowiki>[The distal segment of the hind-limb, homologous to the foot.]</nowiki>
+
+'''Tail''' <nowiki>{rooted=Body-part} [The posterior appendage extending from the base of the spine.]</nowiki>
+
+'''Cell''' <nowiki>{rooted=Anatomical-item, annotation=dc:source Wikipedia https://en.wikipedia.org/wiki/Cell_(biology)} [The smallest basic structural and functional unit of all living organisms, capable of independent existence and self-replication.]</nowiki>
+* Neuron <nowiki>{annotation=dc:source Wikipedia https://en.wikipedia.org/wiki/Neuron} [An electrically excitable cell specialized for the initiation, conduction, and transmission of information throughout the body.]</nowiki>
+
+'''Lick-spout''' <nowiki>{rooted=Measurement-device} [Device that delivers reward]</nowiki>
+
+'''Aborted-trial''' <nowiki>{rooted=Task-action-type} [A trial outcome in which the trial is terminated early based on conditions set in the task logic.]</nowiki>
+
+'''Correct-reject''' <nowiki>{rooted=Task-action-type} [A trial outcome in which the lack of response matches the task's expected behavior.]</nowiki>
+
+
+!# end schema
+
+'''Unit classes'''
+
+'''Unit modifiers'''
+
+'''Value classes'''
+
+'''Schema attributes'''
+
+'''Properties'''
+
+'''Epilogue'''
+
+'''Sources'''
+
+'''Prefixes'''
+
+'''External annotations'''
+
+!# end hed

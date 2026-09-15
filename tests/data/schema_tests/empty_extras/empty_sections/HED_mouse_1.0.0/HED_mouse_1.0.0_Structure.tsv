@@ -1,0 +1,4 @@
+hedId	rdfs:label	Attributes	omn:SubClassOf	dc:description
+HED_0100010	MouseHeader	version="1.0.0", library="mouse", withStandard="8.5.0", unmerged="True"	HedHeader	
+HED_0100011	MousePrologue		HedPrologue	The HED MOUSE HED library schema is designed to standardize the annotation of rodent behavioral experiments.
+HED_0100012	MouseEpilogue		HedEpilogue	

@@ -47,7 +47,9 @@ class Schema2JSON(Schema2Base):
         pass
 
     def _output_extras(self, hed_schema):
-        """Output extra sections like sources, prefixes, external annotations.
+        """Output the sources, prefixes, and external_annotations sections, in that order.
+
+        Every key is written, as an empty list when the schema has no rows for it.
 
         Parameters:
             hed_schema (HedSchema): The schema being output
@@ -63,10 +65,10 @@ class Schema2JSON(Schema2Base):
             hed_schema (HedSchema): The schema being output
         """
         sources = self._get_merged_extras(df_constants.SOURCES_KEY)
+        sources_list = []
+        self.output[json_constants.SOURCES_KEY] = sources_list
         if sources is None or sources.empty:
             return
-
-        sources_list = []
         for _, row in sources.iterrows():
             source_dict = {
                 "name": row[df_constants.source],
@@ -78,8 +80,6 @@ class Schema2JSON(Schema2Base):
                 source_dict[json_constants.IN_LIBRARY_KEY] = str(in_lib)
             sources_list.append(source_dict)
 
-        self.output[json_constants.SOURCES_KEY] = sources_list
-
     def _output_prefixes(self, hed_schema):
         """Output prefixes section.
 
@@ -87,10 +87,10 @@ class Schema2JSON(Schema2Base):
             hed_schema (HedSchema): The schema being output
         """
         prefixes = self._get_merged_extras(df_constants.PREFIXES_KEY)
+        prefixes_list = []
+        self.output[json_constants.PREFIXES_KEY] = prefixes_list
         if prefixes is None or prefixes.empty:
             return
-
-        prefixes_list = []
         for _, row in prefixes.iterrows():
             prefix_dict = {
                 "name": row[df_constants.prefix],
@@ -102,8 +102,6 @@ class Schema2JSON(Schema2Base):
                 prefix_dict[json_constants.IN_LIBRARY_KEY] = str(in_lib)
             prefixes_list.append(prefix_dict)
 
-        self.output[json_constants.PREFIXES_KEY] = prefixes_list
-
     def _output_external_annotations(self, hed_schema):
         """Output external annotations section.
 
@@ -111,10 +109,10 @@ class Schema2JSON(Schema2Base):
             hed_schema (HedSchema): The schema being output
         """
         externals = self._get_merged_extras(df_constants.EXTERNAL_ANNOTATION_KEY)
+        externals_list = []
+        self.output[json_constants.EXTERNAL_ANNOTATIONS_KEY] = externals_list
         if externals is None or externals.empty:
             return
-
-        externals_list = []
         for _, row in externals.iterrows():
             external_dict = {
                 "name": row[df_constants.prefix],
@@ -126,8 +124,6 @@ class Schema2JSON(Schema2Base):
             if pd.notna(in_lib) and in_lib:
                 external_dict[json_constants.IN_LIBRARY_KEY] = str(in_lib)
             externals_list.append(external_dict)
-
-        self.output[json_constants.EXTERNAL_ANNOTATIONS_KEY] = externals_list
 
     def _output_epilogue(self, epilogue):
         """Output the epilogue.

@@ -8,6 +8,7 @@ Tests that extras (Sources, Prefixes, ExternalAnnotations) are correctly:
 4. Properly separate library-specific entries from base-schema entries
 """
 
+import json
 import os
 import shutil
 import tempfile
@@ -15,7 +16,7 @@ import unittest
 
 import pandas as pd
 
-from hed.schema import load_schema
+from hed.schema import load_schema, load_schema_version
 from hed.schema.schema_io import df_constants
 
 
@@ -435,6 +436,156 @@ class TestSchemaExtrasAllFormats(unittest.TestCase):
                                 str,
                                 f"{format_name}: {label} in_library value should be string, got {type(val).__name__}",
                             )
+
+
+class TestEmptyExtrasSections(unittest.TestCase):
+    """The Sources, Prefixes, and External annotations sections are always written and may be omitted on read.
+
+    Fixtures: tests/data/schema_tests/empty_extras/ (mouse 1.0.0, partnered with 8.5.0, no extras of its own).
+    """
+
+    EXTRAS_KEYS = (df_constants.SOURCES_KEY, df_constants.PREFIXES_KEY, df_constants.EXTERNAL_ANNOTATION_KEY)
+    WIKI_HEADERS = ("'''Sources'''", "'''Prefixes'''", "'''External annotations'''")
+    XML_ELEMENTS = ("<schemaSources/>", "<schemaPrefixes/>", "<externalAnnotations/>")
+    JSON_KEYS = ("sources", "prefixes", "external_annotations")
+    TSV_SUFFIXES = ("_Sources.tsv", "_Prefixes.tsv", "_AnnotationPropertyExternal.tsv")
+
+    @classmethod
+    def setUpClass(cls):
+        cls.temp_dir = tempfile.mkdtemp(prefix="hed_empty_extras_")
+        base = os.path.normpath(os.path.join(os.path.dirname(__file__), "../data/schema_tests/empty_extras"))
+        cls.no_sections_dir = os.path.join(base, "no_sections")
+        cls.empty_sections_dir = os.path.join(base, "empty_sections")
+        cls.library_name = "mouse"
+
+    @classmethod
+    def tearDownClass(cls):
+        if os.path.exists(cls.temp_dir):
+            shutil.rmtree(cls.temp_dir)
+
+    @staticmethod
+    def _fixture_paths(fixture_dir):
+        """Return {format_name: path} for the four formats of the mouse fixture in fixture_dir."""
+        stem = os.path.join(fixture_dir, "HED_mouse_1.0.0")
+        return {"XML": stem + ".xml", "JSON": stem + ".json", "MEDIAWIKI": stem + ".mediawiki", "TSV": stem}
+
+    def _library_rows(self, schema, key):
+        """Return the rows of one extras section that belong to the library itself (never the partner's)."""
+        df = schema.get_extras(key)
+        if df is None or df.empty:
+            return 0
+        if df_constants.in_library in df.columns:
+            return int((df[df_constants.in_library] == self.library_name).sum())
+        # Readers stamp in_library on every library-owned row (unmerged load) or keep the file's inLibrary
+        # attribute (merged load); rows without the column are the partner's.
+        return 0
+
+    @staticmethod
+    def _read_text(path):
+        with open(path, encoding="utf-8") as fp:
+            return fp.read().replace("\r\n", "\n")
+
+    def test_readers_accept_files_without_the_sections(self):
+        """A file without the three sections loads and the library adds no extras rows (R1)."""
+        for format_name, path in self._fixture_paths(self.no_sections_dir).items():
+            with self.subTest(format=format_name):
+                schema = load_schema(path)
+                self.assertEqual(schema.library, self.library_name)
+                for key in self.EXTRAS_KEYS:
+                    self.assertEqual(self._library_rows(schema, key), 0, f"{format_name} {key}")
+                extras_issues = [
+                    issue for issue in schema.check_compliance() if issue["code"].startswith("SCHEMA_MISSING_EXTRA")
+                ]
+                self.assertEqual(extras_issues, [], f"{format_name}: empty extras must not be a compliance issue")
+
+    def test_files_with_and_without_the_sections_load_identically(self):
+        """The regenerated file (sections present and empty) loads to the same schema as the old one (R1)."""
+        without = self._fixture_paths(self.no_sections_dir)
+        with_empty = self._fixture_paths(self.empty_sections_dir)
+        for format_name in without:
+            with self.subTest(format=format_name):
+                schema_without = load_schema(without[format_name])
+                schema_with = load_schema(with_empty[format_name])
+                self.assertEqual(schema_without, schema_with, f"{format_name}: schemas differ")
+                for key in self.EXTRAS_KEYS:
+                    df_without = schema_without.get_extras(key)
+                    df_with = schema_with.get_extras(key)
+                    if df_without is None or df_without.empty:
+                        # TSV: a folder without the file has no entry; a header-only file gives an empty frame.
+                        self.assertTrue(df_with is None or df_with.empty, f"{format_name} {key}")
+                        continue
+                    pd.testing.assert_frame_equal(df_without, df_with, check_dtype=False, obj=f"{format_name} {key}")
+
+    def test_unmerged_save_writes_the_empty_sections(self):
+        """Every writer emits the three sections, empty and in order, for a library with no extras (W1-W4)."""
+        schema = load_schema(self._fixture_paths(self.no_sections_dir)["MEDIAWIKI"])
+        out = os.path.join(self.temp_dir, "unmerged")
+        os.makedirs(out, exist_ok=True)
+        wiki_path = os.path.join(out, "HED_mouse_1.0.0.mediawiki")
+        xml_path = os.path.join(out, "HED_mouse_1.0.0.xml")
+        json_path = os.path.join(out, "HED_mouse_1.0.0.json")
+        tsv_dir = os.path.join(out, "HED_mouse_1.0.0")
+        schema.save_as_mediawiki(wiki_path, save_merged=False)
+        schema.save_as_xml(xml_path, save_merged=False)
+        schema.save_as_json(json_path, save_merged=False)
+        schema.save_as_dataframes(tsv_dir, save_merged=False)
+
+        wiki_text = self._read_text(wiki_path)
+        positions = [wiki_text.index(header) for header in self.WIKI_HEADERS]
+        self.assertEqual(positions, sorted(positions), "MediaWiki sections out of order")
+        self.assertGreater(positions[0], wiki_text.index("'''Epilogue'''"))
+        self.assertLess(positions[-1], wiki_text.index("!# end hed"))
+        for header in self.WIKI_HEADERS:
+            self.assertEqual(wiki_text.count(header), 1, header)
+        self.assertNotIn("\n*", wiki_text[positions[0] :], "empty MediaWiki sections must have no rows")
+
+        xml_text = self._read_text(xml_path)
+        positions = [xml_text.index(element) for element in self.XML_ELEMENTS]
+        self.assertEqual(positions, sorted(positions), "XML sections out of order")
+        self.assertGreater(positions[0], xml_text.index("<propertyDefinitions/>"))
+
+        with open(json_path, encoding="utf-8") as fp:
+            json_data = json.load(fp)
+        for key in self.JSON_KEYS:
+            self.assertEqual(json_data.get(key), [], key)
+        json_keys = list(json_data.keys())
+        self.assertEqual(json_keys[-3:], list(self.JSON_KEYS), "JSON sections must come last, in order")
+
+        for suffix in self.TSV_SUFFIXES:
+            tsv_path = os.path.join(tsv_dir, "HED_mouse_1.0.0" + suffix)
+            self.assertTrue(os.path.exists(tsv_path), tsv_path)
+            lines = self._read_text(tsv_path).strip("\n").split("\n")
+            self.assertEqual(len(lines), 1, f"{suffix} must be header-only")
+
+        # The committed empty_sections fixtures are exactly this output; regenerate them if this fails.
+        for format_name, fixture in self._fixture_paths(self.empty_sections_dir).items():
+            if format_name == "TSV":
+                continue
+            produced = {"XML": xml_path, "JSON": json_path, "MEDIAWIKI": wiki_path}[format_name]
+            self.assertEqual(self._read_text(produced), self._read_text(fixture), f"{format_name} fixture drifted")
+
+    def test_merged_save_keeps_partner_rows_and_marks_none_as_library(self):
+        """A merged save still carries the partner's extras rows, none of them attributed to the library (T1)."""
+        schema = load_schema(self._fixture_paths(self.no_sections_dir)["MEDIAWIKI"])
+        partner = load_schema_version("8.5.0")
+        for format_name, save in (
+            ("XML", lambda p: schema.save_as_xml(p, save_merged=True)),
+            ("JSON", lambda p: schema.save_as_json(p, save_merged=True)),
+            ("MEDIAWIKI", lambda p: schema.save_as_mediawiki(p, save_merged=True)),
+        ):
+            with self.subTest(format=format_name):
+                path = os.path.join(
+                    self.temp_dir,
+                    "merged_" + format_name + {"XML": ".xml", "JSON": ".json"}.get(format_name, ".mediawiki"),
+                )
+                save(path)
+                reloaded = load_schema(path)
+                for key in self.EXTRAS_KEYS:
+                    partner_df = partner.get_extras(key)
+                    expected = 0 if partner_df is None else len(partner_df)
+                    reloaded_df = reloaded.get_extras(key)
+                    self.assertEqual(0 if reloaded_df is None else len(reloaded_df), expected, f"{format_name} {key}")
+                    self.assertEqual(self._library_rows(reloaded, key), 0, f"{format_name} {key}")
 
 
 if __name__ == "__main__":
