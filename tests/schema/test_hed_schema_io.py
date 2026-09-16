@@ -90,12 +90,9 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(schemas3.schema_namespace, "", "load_schema_version has the right version with namespace")
         self.assertEqual(schemas3.name, "testlib_2.1.0,score_2.1.0")
         self.assertEqual(schemas3.version, "testlib_2.1.0,score_2.1.0")
-        # Deprecated tag warnings + character issues from SCORE prologue/epilogue
-        # A group vocabulary is about the tags, units, classes and attributes of its libraries; the
-        # extras sections (links to the outside) play no part in forming it, so annotation issues that
-        # only reflect extras rows are not meaningful here. Everything else must be clean.
-        extras_codes = {"SCHEMA_ANNOTATION_SOURCE_MISSING", "SCHEMA_ANNOTATION_EXTERNAL_MISSING"}
-        self.assertEqual([issue["code"] for issue in issues if issue["code"] not in extras_codes], [])
+        # The group partners with 8.4.0, which is below the 8.5.0 gate on the annotation grammar, so
+        # score 2.1.0's 28 unmatched dc:source texts and 3 bare terms are not reported here.
+        self.assertEqual([issue["code"] for issue in issues], [], f"Got: {issues}")
 
         # Verify this cannot be saved
         with self.assertRaises(HedFileError):
@@ -692,11 +689,9 @@ class TestHedSchemaUnmerged(unittest.TestCase):
         self.assertIsInstance(schemas3, HedSchema, "load_schema_version returns HedSchema version+namespace")
         self.assertTrue(schemas3.version_number, "load_schema_version has the right version with namespace")
         self.assertEqual(schemas3._namespace, "", "load_schema_version has the right version with namespace")
-        # A group vocabulary is about the tags, units, classes and attributes of its libraries; the
-        # extras sections (links to the outside) play no part in forming it, so annotation issues that
-        # only reflect extras rows are not meaningful here. Everything else must be clean.
-        extras_codes = {"SCHEMA_ANNOTATION_SOURCE_MISSING", "SCHEMA_ANNOTATION_EXTERNAL_MISSING"}
-        self.assertEqual([issue["code"] for issue in issues if issue["code"] not in extras_codes], [])
+        # As in the other test_load_schema_version_merged: the group partners with 8.4.0, below the
+        # 8.5.0 gate on the annotation grammar.
+        self.assertEqual([issue["code"] for issue in issues], [], f"Got: {issues}")
 
     def test_load_schema_version_merged_duplicates(self):
         # testscoredupe_1.1.0 is score_1.1.0 under another file name: its header says library=score,

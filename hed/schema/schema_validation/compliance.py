@@ -13,6 +13,7 @@ is data-driven by that metadata rather than hard-coding parallel validator
 dictionaries.
 """
 
+import re
 from collections import defaultdict
 from functools import partial
 
@@ -512,6 +513,18 @@ class SchemaValidator:
         self.summary.record_issues(len(issues))
         return issues
 
+    def _annotation_check_applies(self):
+        """Return True when the annotation grammar applies to this schema.
+
+        The specification scopes SCHEMA_ANNOTATION_INVALID to standard schemas with versions 8.5.0 or
+        later and to library schemas partnered with them. An unpartnered library has no standard
+        version and falls outside the rule.
+        """
+        standard_version = schema_version_for_library(self.hed_schema, "")
+        if standard_version is None:
+            return False
+        return Version(standard_version) >= Version("8.5.0")
+
     def _redundant_unit_check_applies(self):
         """Return True when the redundant-unit rule applies to this schema.
 
@@ -578,31 +591,45 @@ class SchemaValidator:
         return issues
 
     def check_annotation_attribute_values(self):
-        """Validate that annotation attribute values reference valid prefixes, external annotations, and sources.
+        """Validate that every ``annotation`` attribute value follows the grammar of Appendix A.1.4.2.
 
-        For each entry that has an ``annotation`` attribute, checks that:
+        Each value is ``prefix:id`` optionally followed by one space and a value. A failure is a
+        SCHEMA_ANNOTATION_INVALID warning carrying one of four reasons:
 
-        1. The value starts with ``prefix:id`` where ``prefix:`` is defined in
-           the Prefixes extras section and ``prefix:`` + ``id`` is a row in the
-           ExternalAnnotations extras section.
-        2. If the annotation references ``dc:source``, the remaining text after
-           ``dc:source `` must start with a name from the Sources extras section.
+        a. ``prefix`` is not a row of the Prefixes section.
+        b. ``prefix:id`` is not a row of the External annotations section. A bare external term such
+           as ``glotto:afro1255`` falls here; it is written ``skos:exactMatch glotto:afro1255``.
+        c. A ``dc:source`` value names no row of the Sources section, by name or by a URL under a
+           row's link.
+        d. A value of shape ``prefix:term`` whose prefix is not a row of the Prefixes section, or a
+           mapping property (``skos:exactMatch``, ``skos:closeMatch``) whose value is not an external
+           term in prefix notation at all.
+
+        The rule is scoped as the specification scopes it: standard schemas with versions 8.5.0 or
+        later and library schemas partnered with them. Earlier standard schemas wrote bare terms such
+        as ``ncit:C25499`` and are not checked, and neither is an unpartnered library.
         """
         self.summary.start_check(
             "annotation_attributes",
-            "Validate annotation attribute values reference defined prefixes, external annotations, and sources.",
+            "Validate annotation attribute values against the annotation grammar (HED 8.5.0+).",
         )
         self.summary.add_sub_check("prefix defined in Prefixes")
         self.summary.add_sub_check("prefix:id in ExternalAnnotations")
         self.summary.add_sub_check("dc:source references valid Sources entry")
+        self.summary.add_sub_check("external term carries a defined prefix")
 
         issues = []
+        if not self._annotation_check_applies():
+            self.summary.record_section("annotation_entries", 0)
+            self.summary.record_issues(0)
+            return issues
 
         # Build lookup sets from extras
         extras = getattr(self.hed_schema, "extras", {}) or {}
         defined_prefixes = self._get_extras_column_values(extras, df_constants.PREFIXES_KEY, df_constants.prefix)
         external_pairs = self._get_external_annotation_pairs(extras)
         defined_sources = self._get_extras_column_values(extras, df_constants.SOURCES_KEY, df_constants.source)
+        defined_links = self._get_extras_column_values(extras, df_constants.SOURCES_KEY, df_constants.link)
 
         # Scan all entries in all sections for the "annotation" attribute
         entries_checked = 0
@@ -619,7 +646,12 @@ class SchemaValidator:
                     single_annotation = single_annotation.strip()
                     if single_annotation:
                         issues += self._validate_annotation_value(
-                            entry, single_annotation, defined_prefixes, external_pairs, defined_sources
+                            entry,
+                            single_annotation,
+                            defined_prefixes,
+                            external_pairs,
+                            defined_sources,
+                            defined_links,
                         )
                 self.error_handler.pop_error_context()
             self.error_handler.pop_error_context()
@@ -673,7 +705,87 @@ class SchemaValidator:
                     pairs.add((p, i))
         return pairs
 
-    def _validate_annotation_value(self, entry, annotation_value, defined_prefixes, external_pairs, defined_sources):
+    # Mapping properties whose value must itself be an external term in prefix notation.
+    _MAPPING_PROPERTIES = frozenset({("skos:", "exactMatch"), ("skos:", "closeMatch")})
+
+    # A URL token inside free dc:source text, e.g. "Adapted from https://fooddb.example.org/apple".
+    _URL_TOKEN_RE = re.compile(r"https?://\S+", re.IGNORECASE)
+
+    @staticmethod
+    def _normalize_link(url):
+        """Return a URL without its scheme or its trailing slash, for Sources link comparison.
+
+        Parameters:
+            url (str): A URL, with or without an http or https scheme.
+
+        Returns:
+            str: The URL lowercased, without the scheme and without any trailing slashes.
+        """
+        without_scheme = re.sub(r"^https?://", "", url.strip(), flags=re.IGNORECASE)
+        return without_scheme.rstrip("/").lower()
+
+    @staticmethod
+    def _is_prefix_notation(text):
+        """Return True if text has the shape 'prefix:term' rather than free text or a bare URL.
+
+        Parameters:
+            text (str): The value to inspect.
+
+        Returns:
+            bool: True if a colon comes before any space and the text is not a URL.
+        """
+        if not text:
+            return False
+        if text.lower().startswith(("http://", "https://")):
+            return False
+        colon_pos = text.find(":")
+        if colon_pos < 1:
+            return False
+        space_pos = text.find(" ")
+        return space_pos == -1 or space_pos > colon_pos
+
+    @classmethod
+    def _source_text_names_row(cls, text, defined_sources, defined_links):
+        """Return True if a dc:source text names a Sources row (rule R1 of the annotation rules).
+
+        The text names a row when it begins with the row's source name, or when it contains a URL
+        that begins with the row's link, compared without the scheme and without a trailing slash.
+
+        Parameters:
+            text (str): The text following 'dc:source'.
+            defined_sources (set): The source names from the Sources section.
+            defined_links (set): The links from the Sources section.
+
+        Returns:
+            bool: True if the text names a row.
+        """
+        if not text:
+            return False
+        if any(source and text.startswith(source) for source in defined_sources):
+            return True
+        normalized_links = {cls._normalize_link(link) for link in defined_links if link}
+        normalized_links.discard("")
+        if not normalized_links:
+            return False
+        for token in cls._URL_TOKEN_RE.findall(text):
+            normalized_token = cls._normalize_link(token.rstrip(".),"))
+            if any(normalized_token.startswith(link) for link in normalized_links):
+                return True
+        return False
+
+    def _annotation_issue(self, tag_name, annotation_value, reason, **kwargs):
+        """Report one SCHEMA_ANNOTATION_INVALID reason against an annotation value."""
+        return self.error_handler.format_error_with_context(
+            SchemaAttributeErrors.SCHEMA_ANNOTATION_INVALID,
+            tag_name,
+            annotation_value=annotation_value,
+            reason=reason,
+            **kwargs,
+        )
+
+    def _validate_annotation_value(
+        self, entry, annotation_value, defined_prefixes, external_pairs, defined_sources, defined_links
+    ):
         """Validate a single annotation attribute value.
 
         Parameters:
@@ -682,6 +794,7 @@ class SchemaValidator:
             defined_prefixes (set): Valid prefixes from the Prefixes section.
             external_pairs (set): Valid (prefix, id) pairs from ExternalAnnotations.
             defined_sources (set): Valid source names from the Sources section.
+            defined_links (set): Links of the Sources rows.
 
         Returns:
             list: A list of issue dicts.
@@ -693,52 +806,39 @@ class SchemaValidator:
         # Expected format: "prefix:id rest_of_text" e.g. "dc:source Beniczky ea 2017 Table 2."
         colon_pos = annotation_value.find(":")
         if colon_pos < 1:
-            # No colon found — cannot parse prefix:id
-            issues += self.error_handler.format_error_with_context(
-                SchemaAttributeErrors.SCHEMA_ANNOTATION_PREFIX_MISSING,
-                tag_name,
-                annotation_value=annotation_value,
-                prefix="(none)",
-            )
+            # No colon found - cannot parse prefix:id
+            issues += self._annotation_issue(tag_name, annotation_value, "a", prefix="(none)")
             return issues
 
         ann_prefix = annotation_value[: colon_pos + 1]  # e.g. "dc:"
         remainder = annotation_value[colon_pos + 1 :]  # e.g. "source Beniczky ea 2017 Table 2."
 
-        # Split remainder into id and rest — id is the first whitespace-delimited token
+        # Split remainder into id and rest - id is the first whitespace-delimited token
         parts = remainder.split(None, 1)  # split on whitespace, max 1 split
         ann_id = parts[0] if parts else remainder  # e.g. "source"
-        rest_text = parts[1] if len(parts) > 1 else ""  # e.g. "Beniczky ea 2017 Table 2."
+        rest_text = parts[1].strip() if len(parts) > 1 else ""  # e.g. "Beniczky ea 2017 Table 2."
 
-        # Check 1: prefix must be in Prefixes
+        # Reason a: the prefix must be in Prefixes
         if ann_prefix not in defined_prefixes:
-            issues += self.error_handler.format_error_with_context(
-                SchemaAttributeErrors.SCHEMA_ANNOTATION_PREFIX_MISSING,
-                tag_name,
-                annotation_value=annotation_value,
-                prefix=ann_prefix,
-            )
+            issues += self._annotation_issue(tag_name, annotation_value, "a", prefix=ann_prefix)
 
-        # Check 2: prefix:id must be in ExternalAnnotations
+        # Reason b: prefix:id must be in External annotations
         if (ann_prefix, ann_id) not in external_pairs:
-            issues += self.error_handler.format_error_with_context(
-                SchemaAttributeErrors.SCHEMA_ANNOTATION_EXTERNAL_MISSING,
-                tag_name,
-                annotation_value=annotation_value,
-                prefix=ann_prefix,
-                annotation_id=ann_id,
-            )
+            issues += self._annotation_issue(tag_name, annotation_value, "b", prefix=ann_prefix, annotation_id=ann_id)
 
-        # Check 3: If dc:source, the rest_text must start with a defined source name
+        # Reason c: a dc:source value must name a Sources row, by name or by a URL under its link
         if ann_prefix == "dc:" and ann_id == "source":
-            rest_text_stripped = rest_text.strip() if rest_text else ""
-            if not rest_text_stripped or not any(rest_text_stripped.startswith(src) for src in defined_sources):
-                issues += self.error_handler.format_error_with_context(
-                    SchemaAttributeErrors.SCHEMA_ANNOTATION_SOURCE_MISSING,
-                    tag_name,
-                    annotation_value=annotation_value,
-                    source_text=rest_text_stripped,
-                )
+            if not self._source_text_names_row(rest_text, defined_sources, defined_links):
+                issues += self._annotation_issue(tag_name, annotation_value, "c", source_text=rest_text)
+
+        # Reason d: a value that is an external term must carry a prefix from the Prefixes section
+        if self._is_prefix_notation(rest_text):
+            value_prefix = rest_text[: rest_text.find(":") + 1]
+            if value_prefix not in defined_prefixes:
+                issues += self._annotation_issue(tag_name, annotation_value, "d", prefix=value_prefix, term=rest_text)
+        elif (ann_prefix, ann_id) in self._MAPPING_PROPERTIES:
+            # A mapping property's value must be an external term in prefix notation at all.
+            issues += self._annotation_issue(tag_name, annotation_value, "d", term=rest_text)
 
         for issue in issues:
             issue["severity"] = ErrorSeverity.WARNING

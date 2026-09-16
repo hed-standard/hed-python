@@ -311,20 +311,11 @@ class TestDomainRangeValidation(unittest.TestCase):
         self.assertEqual(range_keys_in_validator, range_keys)
 
     def test_no_issues_on_840(self):
-        """8.4.0 should pass compliance with only annotation issues from base schema."""
+        """8.4.0 is clean: its bare-term annotations are below the 8.5.0 gate on the grammar."""
         issues = self.schema.check_compliance()
-        # Base 8.4.0 has annotation entries (e.g. ncit:C25499) that are not in ExternalAnnotations
-        annotation_codes = {
-            "SCHEMA_ANNOTATION_PREFIX_MISSING",
-            "SCHEMA_ANNOTATION_EXTERNAL_MISSING",
-            "SCHEMA_ANNOTATION_SOURCE_MISSING",
-        }
-        annotation_issues = [i for i in issues if i["code"] in annotation_codes]
-        self.assertEqual(
-            len(issues),
-            len(annotation_issues),
-            f"Unexpected non-annotation issues: {[i for i in issues if i not in annotation_issues]}",
-        )
+        # Event carries "ncit:C25499" and "rdfs:comment ..." with no External annotations rows for
+        # either, but the annotation grammar starts at 8.5.0, so neither is reported.
+        self.assertEqual(list(issues), [], f"Got: {issues}")
 
     def test_build_validators_uses_range(self):
         """_build_validators should pull range validators from attribute definitions."""
@@ -383,7 +374,7 @@ class TestLibrarySchemaCompliance(unittest.TestCase):
         self.assertEqual(issues[0]["code"], "SCHEMA_PRERELEASE_VERSION_USED")
 
     def test_testlib_compliance(self):
-        """HED_testlib_4.0.0 should have prerelease + inherited annotation issues."""
+        """HED_testlib_4.0.0 should have only its two prerelease warnings."""
         schema_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/test_merge/HED_testlib_4.0.0.mediawiki"
         )
@@ -393,14 +384,9 @@ class TestLibrarySchemaCompliance(unittest.TestCase):
         # Expect exactly 2 prerelease issues: one for library, one for with_standard base partner
         # (see hed/schema/schema_validation/compliance.py:193-211)
         self.assertEqual(len(prerelease_issues), 2)
-        # The inherited annotation issues from the base schema are also expected
-        annotation_codes = {
-            "SCHEMA_ANNOTATION_PREFIX_MISSING",
-            "SCHEMA_ANNOTATION_EXTERNAL_MISSING",
-            "SCHEMA_ANNOTATION_SOURCE_MISSING",
-        }
-        annotation_issues = [i for i in issues if i["code"] in annotation_codes]
-        self.assertEqual(len(issues), len(prerelease_issues) + len(annotation_issues))
+        # The merged fixture carries the Prefixes, External annotations, and Sources rows that its
+        # annotations need, so the two prerelease warnings are the whole list.
+        self.assertEqual([i["code"] for i in issues], ["SCHEMA_PRERELEASE_VERSION_USED"] * 2, f"Got: {issues}")
 
     def test_testunpart_no_unknown_attributes(self):
         """After loading, no entries in testunpart should have stale _unknown_attributes."""
@@ -530,48 +516,59 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
         )
         cls.testlib_schema = schema.load_schema(cls.testlib_path)
 
-    def test_annotation_check_finds_issues_on_840(self):
-        """8.4.0 has annotation entries (ncit:C25499, rdfs:comment) not in ExternalAnnotations."""
+    def test_annotation_check_gated_out_on_840(self):
+        """8.4.0 carries bare terms (ncit:C25499, rdfs:comment) but predates the 8.5.0 grammar."""
         from hed.errors.error_reporter import ErrorHandler
         from hed.schema.schema_validation.compliance import SchemaValidator
 
         sv = SchemaValidator(self.schema_84, ErrorHandler())
-        issues = sv.check_annotation_attribute_values()
-        self.assertGreater(len(issues), 0, "Should find annotation issues on 8.4.0")
-        # Specifically, ncit:C25499 and rdfs:comment should be flagged as missing from ExternalAnnotations
-        external_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_EXTERNAL_MISSING"]
-        external_messages = " ".join(i.get("message", "") for i in external_issues)
-        self.assertIn("ncit:", external_messages)
-        self.assertIn("rdfs:", external_messages)
+        self.assertEqual(sv.check_annotation_attribute_values(), [])
+
+    def test_annotation_gate_follows_partnered_standard_version(self):
+        """testlib 4.0.0 partners with 8.5.0 and is checked; an unpartnered library is not."""
+        from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.schema_validation.compliance import SchemaValidator
+
+        self.assertTrue(SchemaValidator(self.testlib_schema, ErrorHandler())._annotation_check_applies())
+        unpart_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED_testunpart_1.0.0.mediawiki"
+        )
+        unpart_schema = schema.load_schema(unpart_path)
+        self.assertFalse(SchemaValidator(unpart_schema, ErrorHandler())._annotation_check_applies())
 
     def test_annotation_prefix_check(self):
         """Should detect when an annotation prefix is not in Prefixes."""
-        import copy
-
         import pandas as pd
 
         from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.hed_schema_constants import HedSectionKey
         from hed.schema.schema_io.df_constants import PREFIXES_KEY
         from hed.schema.schema_validation.compliance import SchemaValidator
 
-        test_schema = copy.copy(self.schema_84)
-        test_schema.extras = dict(self.schema_84.extras)
+        test_schema = schema.load_schema(self.testlib_path)
+        test_schema.extras = dict(test_schema.extras)
         # Remove all prefixes so nothing is defined
         test_schema.extras[PREFIXES_KEY] = pd.DataFrame(columns=["prefix", "namespace", "description"])
+        test_schema[HedSectionKey.Tags]["Event"].attributes["annotation"] = "rdfs:comment A note."
         sv = SchemaValidator(test_schema, ErrorHandler())
         issues = sv.check_annotation_attribute_values()
-        prefix_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_PREFIX_MISSING"]
+        prefix_issues = [i for i in issues if "is not in the Prefixes section" in i.get("message", "")]
+        self.assertTrue(all(i["code"] == "SCHEMA_ANNOTATION_INVALID" for i in prefix_issues))
         self.assertGreater(len(prefix_issues), 0, "Should detect missing prefix when Prefixes is empty")
 
     def test_annotation_external_check(self):
         """Should detect when prefix:id is not in ExternalAnnotations."""
         from hed.errors.error_reporter import ErrorHandler
+        from hed.schema.hed_schema_constants import HedSectionKey
         from hed.schema.schema_validation.compliance import SchemaValidator
 
-        sv = SchemaValidator(self.schema_84, ErrorHandler())
+        test_schema = schema.load_schema(self.testlib_path)
+        test_schema[HedSectionKey.Tags]["Event"].attributes["annotation"] = "ncit:C25499"
+        sv = SchemaValidator(test_schema, ErrorHandler())
         issues = sv.check_annotation_attribute_values()
-        external_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_EXTERNAL_MISSING"]
-        self.assertGreater(len(external_issues), 0, "8.4.0 Event has ncit:C25499 which is not in ExternalAnnotations")
+        external_issues = [i for i in issues if "External annotations section" in i.get("message", "")]
+        self.assertEqual(len(external_issues), 1, f"A bare term is reason b: {issues}")
+        self.assertIn("skos:exactMatch ncit:C25499", external_issues[0]["message"])
 
     def test_valid_annotations_no_issues(self):
         """Annotations with valid prefix:id should produce no issues."""
@@ -630,7 +627,7 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
         test_entry.attributes["annotation"] = "dc:source Wikipedia is great"
         sv = SchemaValidator(test_schema, ErrorHandler())
         issues = sv.check_annotation_attribute_values()
-        source_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_SOURCE_MISSING"]
+        source_issues = [i for i in issues if "names no Sources row" in i.get("message", "")]
         self.assertEqual(len(source_issues), 0, f"Wikipedia is a valid source, should not fail: {source_issues}")
 
     def test_dc_source_check_invalid(self):
@@ -663,7 +660,7 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
 
         sv = SchemaValidator(test_schema, ErrorHandler())
         issues = sv.check_annotation_attribute_values()
-        source_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_SOURCE_MISSING"]
+        source_issues = [i for i in issues if "names no Sources row" in i.get("message", "")]
         self.assertEqual(len(source_issues), 1, f"Should detect invalid source name: {issues}")
 
     def test_comma_separated_annotations(self):
@@ -697,7 +694,7 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
         sv = SchemaValidator(test_schema, ErrorHandler())
         issues = sv.check_annotation_attribute_values()
         # badprefix: is not in prefixes, badprefix:unknown not in external annotations
-        prefix_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_PREFIX_MISSING"]
+        prefix_issues = [i for i in issues if "is not in the Prefixes section" in i.get("message", "")]
         self.assertGreater(len(prefix_issues), 0, "Should detect invalid prefix in second annotation")
 
     def test_summary_includes_annotation_check(self):
@@ -719,5 +716,144 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
 
         sv = SchemaValidator(test_schema, ErrorHandler())
         issues = sv.check_annotation_attribute_values()
-        prefix_issues = [i for i in issues if i["code"] == "SCHEMA_ANNOTATION_PREFIX_MISSING"]
+        prefix_issues = [i for i in issues if "is not in the Prefixes section" in i.get("message", "")]
         self.assertGreater(len(prefix_issues), 0, "Should detect annotation with no prefix")
+
+
+class TestAnnotationSourceLinkRule(unittest.TestCase):
+    """Tests for rule R1: a dc:source value names a Sources row by name or by a URL under its link."""
+
+    LINKS = {"https://fooddb.example.org", "http://purl.org/linguistics/gold"}
+    SOURCES = {"FoodDB", "Original"}
+
+    def test_normalize_link_drops_scheme_and_trailing_slash(self):
+        self.assertEqual(SchemaValidator._normalize_link("https://fooddb.example.org/"), "fooddb.example.org")
+        self.assertEqual(SchemaValidator._normalize_link("http://fooddb.example.org"), "fooddb.example.org")
+        self.assertEqual(SchemaValidator._normalize_link("  https://fooddb.example.org//  "), "fooddb.example.org")
+
+    def test_name_match(self):
+        self.assertTrue(SchemaValidator._source_text_names_row("FoodDB fruit table", self.SOURCES, self.LINKS))
+        self.assertTrue(SchemaValidator._source_text_names_row("Original", self.SOURCES, self.LINKS))
+
+    def test_url_match_across_schemes(self):
+        """A row's https link matches an http URL in the text and the other way round."""
+        self.assertTrue(
+            SchemaValidator._source_text_names_row(
+                "Adapted from http://fooddb.example.org/apple", self.SOURCES, self.LINKS
+            )
+        )
+        self.assertTrue(
+            SchemaValidator._source_text_names_row("See https://purl.org/linguistics/gold", self.SOURCES, self.LINKS)
+        )
+
+    def test_url_match_trailing_slash_and_path(self):
+        self.assertTrue(SchemaValidator._source_text_names_row("https://fooddb.example.org/", set(), self.LINKS))
+        self.assertTrue(
+            SchemaValidator._source_text_names_row("https://fooddb.example.org/fruit/apple.html", set(), self.LINKS)
+        )
+
+    def test_url_punctuation_is_stripped(self):
+        self.assertTrue(
+            SchemaValidator._source_text_names_row("Adapted from https://fooddb.example.org/apple.", set(), self.LINKS)
+        )
+        self.assertTrue(SchemaValidator._source_text_names_row("(https://fooddb.example.org/apple)", set(), self.LINKS))
+
+    def test_unrelated_host_does_not_match(self):
+        self.assertFalse(
+            SchemaValidator._source_text_names_row(
+                "Adapted from https://other.example.org/apple", self.SOURCES, self.LINKS
+            )
+        )
+
+    def test_free_text_does_not_match(self):
+        self.assertFalse(SchemaValidator._source_text_names_row("Somebody said so", self.SOURCES, self.LINKS))
+        self.assertFalse(SchemaValidator._source_text_names_row("", self.SOURCES, self.LINKS))
+
+    def test_no_links_defined(self):
+        self.assertFalse(SchemaValidator._source_text_names_row("https://fooddb.example.org", self.SOURCES, set()))
+
+
+class TestAnnotationPrefixNotationRule(unittest.TestCase):
+    """Tests for reason d: an external term in an annotation value needs a defined prefix."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.testlib_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "../data/schema_tests/test_merge/HED_testlib_4.0.0.mediawiki",
+        )
+
+    def _schema_with_mapping_rows(self):
+        """Load testlib 4.0.0 and give it the two SKOS mapping properties that 8.5.0 will carry."""
+        import pandas as pd
+
+        from hed.schema.schema_io import df_constants
+
+        test_schema = schema.load_schema(self.testlib_path)
+        test_schema.extras = dict(test_schema.extras)
+        ext_df = test_schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY].copy()
+        new_rows = pd.DataFrame(
+            {
+                "prefix": ["skos:", "skos:"],
+                "id": ["exactMatch", "closeMatch"],
+                "iri": [
+                    "http://www.w3.org/2004/02/skos/core#exactMatch",
+                    "http://www.w3.org/2004/02/skos/core#closeMatch",
+                ],
+                "description": ["Denotes the same concept.", "Denotes a close concept."],
+            }
+        )
+        test_schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY] = pd.concat([ext_df, new_rows], ignore_index=True)
+        return test_schema
+
+    def _issues_for(self, annotation):
+        test_schema = self._schema_with_mapping_rows()
+        test_schema[HedSectionKey.Tags]["Event"].attributes["annotation"] = annotation
+        sv = SchemaValidator(test_schema, ErrorHandler())
+        return sv.check_annotation_attribute_values()
+
+    def test_is_prefix_notation(self):
+        self.assertTrue(SchemaValidator._is_prefix_notation("foodonto:FOODON_00001234"))
+        self.assertFalse(SchemaValidator._is_prefix_notation("C25499"))
+        self.assertFalse(SchemaValidator._is_prefix_notation(""))
+        self.assertFalse(SchemaValidator._is_prefix_notation("https://example.org/C25499"))
+        self.assertFalse(SchemaValidator._is_prefix_notation("Adapted from https://example.org/x"))
+
+    def test_mapping_value_with_defined_prefix_passes(self):
+        for annotation in ("skos:exactMatch foodonto:FOODON_00001234", "skos:closeMatch foodonto:FOODON_00001234"):
+            with self.subTest(annotation=annotation):
+                self.assertEqual(self._issues_for(annotation), [], annotation)
+
+    def test_mapping_value_with_undefined_prefix_is_reason_d(self):
+        issues = self._issues_for("skos:exactMatch nowhere:X1")
+        self.assertEqual([i["code"] for i in issues], ["SCHEMA_ANNOTATION_INVALID"])
+        self.assertIn("value 'nowhere:X1' has prefix 'nowhere:'", issues[0]["message"])
+
+    def test_mapping_value_not_in_prefix_notation_is_reason_d(self):
+        for annotation in ("skos:exactMatch C25499", "skos:closeMatch C25499"):
+            with self.subTest(annotation=annotation):
+                issues = self._issues_for(annotation)
+                self.assertEqual([i["code"] for i in issues], ["SCHEMA_ANNOTATION_INVALID"], annotation)
+                self.assertIn("is not an external term in prefix notation", issues[0]["message"])
+
+    def test_mapping_value_that_is_a_bare_url_is_reason_d(self):
+        issues = self._issues_for("skos:exactMatch https://example.org/C25499")
+        self.assertEqual([i["code"] for i in issues], ["SCHEMA_ANNOTATION_INVALID"])
+        self.assertIn("is not an external term in prefix notation", issues[0]["message"])
+
+    def test_non_mapping_property_keeps_free_text(self):
+        """Reason d clause 2 applies only to the mapping properties; other values may be free text."""
+        self.assertEqual(self._issues_for("rdfs:comment A note."), [])
+
+    def test_non_mapping_property_still_checks_a_prefixed_value(self):
+        issues = self._issues_for("rdfs:comment nowhere:X1")
+        self.assertEqual([i["code"] for i in issues], ["SCHEMA_ANNOTATION_INVALID"])
+        self.assertIn("value 'nowhere:X1' has prefix 'nowhere:'", issues[0]["message"])
+
+    def test_dc_source_url_under_a_sources_link_passes(self):
+        self.assertEqual(self._issues_for("dc:source Adapted from https://fooddb.example.org/apple"), [])
+
+    def test_dc_source_url_under_no_link_is_reason_c(self):
+        issues = self._issues_for("dc:source Adapted from https://other.example.org/apple")
+        self.assertEqual([i["code"] for i in issues], ["SCHEMA_ANNOTATION_INVALID"])
+        self.assertIn("names no Sources row", issues[0]["message"])
