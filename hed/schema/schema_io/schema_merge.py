@@ -168,24 +168,28 @@ def merge_group(spec: GroupSpec, load_partner: Callable[[str], HedSchema]) -> He
     result.source_format = first.source_format
     result.prologue = first.prologue
     result.epilogue = first.epilogue
-    if first is not result:
-        # A partnered library may use everything its partner defines, the extras rows included
-        # (spec Appendix A: a library's rows "are merged with those of the standard schema").
-        result.extras = _merge_extras(first.extras, result.extras)
+    # A partnered library may use everything its partner defines, the extras rows included (spec
+    # Appendix A: a library's rows "are merged with those of the standard schema"). Every member of the
+    # group contributes its rows; the base (partner copy or merged file) already holds its own.
+    for library in loaded:
+        if library is not result:
+            result.extras = _merge_extras(library.extras, result.extras)
     result.finalize_dictionaries()
     return result
 
 
 def _merge_extras(library_extras: dict, partner_extras: dict) -> dict:
-    """Combine a library's extras rows (Sources, Prefixes, External annotations) with its partner's.
+    """Combine one library's extras rows (Sources, Prefixes, External annotations) with those gathered so far.
 
-    The library's rows keep the ``in_library`` stamp the loader gave them; the partner's rows get an
-    empty one, the marking a merged file gives base rows, so an unmerged save
-    (``schema2base._get_merged_extras``) still writes only the library's rows.
+    The library's rows keep the ``in_library`` stamp the loader gave them; rows without a stamp (the
+    partner's, or a merged base's own base rows) get an empty one, the marking a merged file gives
+    base rows, so an unmerged save (``schema2base._get_merged_extras``) still writes only the
+    library's rows. Called once per group member, accumulating into the result.
 
     Parameters:
-        library_extras (dict): The library's extras, key -> DataFrame, as its loader produced them.
-        partner_extras (dict): The partner's (or merged base's) extras.
+        library_extras (dict): One library's extras, key -> DataFrame, as its loader produced them.
+        partner_extras (dict): The rows gathered so far: the partner's (or merged base's) plus any
+            earlier members'.
 
     Returns:
         dict: key -> DataFrame holding both, deduplicated by content and sorted.

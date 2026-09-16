@@ -681,6 +681,46 @@ class TestPartnerExtrasAvailableToLibrary(unittest.TestCase):
         self.assertEqual(annotation_issues, [])
         self.assertEqual({issue["code"] for issue in issues}, {"SCHEMA_PRERELEASE_VERSION_USED"})
 
+    def test_every_group_member_contributes_its_rows(self):
+        """A group of two unmerged libraries holds the partner's rows plus each library's own, stamped."""
+        from hed.schema.hed_schema_io import _load_schema_version
+
+        second = (
+            self.LIBRARY.replace('library="testpartner"', 'library="testsecond"')
+            .replace("Own-thing", "Other-thing")
+            .replace("Own-child", "Other-child")
+            .replace("own:", "other:")
+            .replace("https://example.org/own/", "https://example.org/other/")
+        )
+        folder = tempfile.mkdtemp(prefix="hed_group_extras_")
+        try:
+            self.schema.save_as_xml(os.path.join(folder, "HED_testpartner_1.0.0.xml"), save_merged=False)
+            from_string(second, ".mediawiki").save_as_xml(
+                os.path.join(folder, "HED_testsecond_1.0.0.xml"), save_merged=False
+            )
+            _load_schema_version.cache_clear()
+            group = load_schema_version(["testpartner_1.0.0", "testsecond_1.0.0"], xml_folder=folder)
+        finally:
+            _load_schema_version.cache_clear()
+            shutil.rmtree(folder, ignore_errors=True)
+        for key, own_rows in (
+            (df_constants.SOURCES_KEY, 0),
+            (df_constants.PREFIXES_KEY, 1),
+            (df_constants.EXTERNAL_ANNOTATION_KEY, 1),
+        ):
+            with self.subTest(section=key):
+                df = group.get_extras(key)
+                partner_df = self.partner.get_extras(key)
+                self.assertEqual(len(df), len(partner_df) + 2 * own_rows, key)
+                stamps = df[df_constants.in_library]
+                self.assertEqual((stamps == "testpartner").sum(), own_rows, key)
+                self.assertEqual((stamps == "testsecond").sum(), own_rows, key)
+                self.assertEqual((stamps == "").sum(), len(partner_df), key)
+        prefixes = set(group.get_extras(df_constants.PREFIXES_KEY)[df_constants.prefix])
+        self.assertTrue({"dc:", "own:", "other:"} <= prefixes, prefixes)
+        annotation_issues = [i for i in group.check_compliance() if i["code"].startswith("SCHEMA_ANNOTATION")]
+        self.assertEqual(annotation_issues, [])
+
     def test_unmerged_save_writes_only_the_library_rows(self):
         """The partner's rows never leak into an unmerged save."""
         temp_dir = tempfile.mkdtemp(prefix="hed_partner_extras_")
