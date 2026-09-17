@@ -765,6 +765,28 @@ class TestAnnotationSourceLinkRule(unittest.TestCase):
             )
         )
 
+    def test_look_alike_host_does_not_match(self):
+        """A host that merely starts with the link text is a different host (PR #1421 review)."""
+        for text in (
+            "See https://fooddb.example.org.evil/steal",
+            "See https://fooddb.example.orgy/apple",
+            "See https://fooddb.example.org-not-really/apple",
+        ):
+            with self.subTest(text=text):
+                self.assertFalse(SchemaValidator._source_text_names_row(text, set(), self.LINKS), text)
+
+    def test_link_boundaries_that_do_match(self):
+        """The link itself, a path under it, and a query or fragment on it all name the row."""
+        for text in (
+            "https://fooddb.example.org",
+            "https://fooddb.example.org/",
+            "https://fooddb.example.org/fruit/apple",
+            "https://fooddb.example.org?q=apple",
+            "https://fooddb.example.org#apple",
+        ):
+            with self.subTest(text=text):
+                self.assertTrue(SchemaValidator._source_text_names_row(text, set(), self.LINKS), text)
+
     def test_free_text_does_not_match(self):
         self.assertFalse(SchemaValidator._source_text_names_row("Somebody said so", self.SOURCES, self.LINKS))
         self.assertFalse(SchemaValidator._source_text_names_row("", self.SOURCES, self.LINKS))
@@ -818,6 +840,22 @@ class TestAnnotationPrefixNotationRule(unittest.TestCase):
         self.assertFalse(SchemaValidator._is_prefix_notation(""))
         self.assertFalse(SchemaValidator._is_prefix_notation("https://example.org/C25499"))
         self.assertFalse(SchemaValidator._is_prefix_notation("Adapted from https://example.org/x"))
+
+    def test_prefix_with_no_term_is_not_prefix_notation(self):
+        """A prefix on its own names no term, so it is not an external term (PR #1421 review)."""
+        self.assertFalse(SchemaValidator._is_prefix_notation("foodonto:"))
+        self.assertFalse(SchemaValidator._is_prefix_notation("foodonto: FOODON_00001234"))
+        self.assertFalse(SchemaValidator._is_prefix_notation("   "))
+        # Free text whose first word ends in a colon is not prefix notation either.
+        self.assertFalse(SchemaValidator._is_prefix_notation("Note: the tag is deprecated."))
+
+    def test_mapping_value_of_bare_prefix_is_reason_d(self):
+        """skos:exactMatch foodonto: must fail even though foodonto: is a defined prefix."""
+        for annotation in ("skos:exactMatch foodonto:", "skos:closeMatch foodonto:"):
+            with self.subTest(annotation=annotation):
+                issues = self._issues_for(annotation)
+                self.assertEqual([i["code"] for i in issues], ["SCHEMA_ANNOTATION_INVALID"], annotation)
+                self.assertIn("is not an external term in prefix notation", issues[0]["message"])
 
     def test_mapping_value_with_defined_prefix_passes(self):
         for annotation in ("skos:exactMatch foodonto:FOODON_00001234", "skos:closeMatch foodonto:FOODON_00001234"):

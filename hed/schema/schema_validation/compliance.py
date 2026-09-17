@@ -728,28 +728,51 @@ class SchemaValidator:
     def _is_prefix_notation(text):
         """Return True if text has the shape 'prefix:term' rather than free text or a bare URL.
 
+        Both parts must be there: a prefix before the colon and a non-empty term after it, all in the
+        first whitespace-delimited token. A bare ``foodonto:`` names no term and is not prefix
+        notation, and neither is free text whose first word happens to end in a colon.
+
         Parameters:
             text (str): The value to inspect.
 
         Returns:
-            bool: True if a colon comes before any space and the text is not a URL.
+            bool: True if the first token is 'prefix:term' with both parts non-empty.
         """
-        if not text:
+        if not text or not text.strip():
             return False
-        if text.lower().startswith(("http://", "https://")):
+        first_token = text.split()[0]
+        if first_token.lower().startswith(("http://", "https://")):
             return False
-        colon_pos = text.find(":")
+        colon_pos = first_token.find(":")
         if colon_pos < 1:
             return False
-        space_pos = text.find(" ")
-        return space_pos == -1 or space_pos > colon_pos
+        return bool(first_token[colon_pos + 1 :])
+
+    @staticmethod
+    def _url_is_under_link(normalized_token, normalized_link):
+        """Return True if a normalized URL is a Sources link itself or a path under it.
+
+        The match stops at a path boundary, so a link such as ``fooddb.example.org`` names the row for
+        ``fooddb.example.org/apple`` but not for the unrelated host ``fooddb.example.org.evil``.
+
+        Parameters:
+            normalized_token (str): A URL from the text, passed through :meth:`_normalize_link`.
+            normalized_link (str): A Sources row link, passed through :meth:`_normalize_link`.
+
+        Returns:
+            bool: True if the URL belongs to that row.
+        """
+        if normalized_token == normalized_link:
+            return True
+        return normalized_token.startswith(normalized_link) and normalized_token[len(normalized_link)] in "/?#"
 
     @classmethod
     def _source_text_names_row(cls, text, defined_sources, defined_links):
         """Return True if a dc:source text names a Sources row (rule R1 of the annotation rules).
 
         The text names a row when it begins with the row's source name, or when it contains a URL
-        that begins with the row's link, compared without the scheme and without a trailing slash.
+        that is the row's link or a path under it, compared without the scheme and without a trailing
+        slash.
 
         Parameters:
             text (str): The text following 'dc:source'.
@@ -769,7 +792,7 @@ class SchemaValidator:
             return False
         for token in cls._URL_TOKEN_RE.findall(text):
             normalized_token = cls._normalize_link(token.rstrip(".),"))
-            if any(normalized_token.startswith(link) for link in normalized_links):
+            if any(cls._url_is_under_link(normalized_token, link) for link in normalized_links):
                 return True
         return False
 
