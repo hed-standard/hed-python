@@ -277,30 +277,40 @@ def schema_error_SCHEMA_MISSING_EXTRA(section_name, column_name, row_index):
 
 
 @hed_error(
-    SchemaAttributeErrors.SCHEMA_ANNOTATION_PREFIX_MISSING,
+    SchemaAttributeErrors.SCHEMA_ANNOTATION_INVALID,
     default_severity=ErrorSeverity.WARNING,
 )
-def schema_error_annotation_prefix_missing(tag, annotation_value, prefix):
-    return f"Tag '{tag}' has annotation '{annotation_value}' with prefix '{prefix}' that is not defined in the Prefixes section."
+def schema_error_SCHEMA_ANNOTATION_INVALID(
+    tag, annotation_value, reason, prefix="", annotation_id="", source_text="", term=""
+):
+    """Return the message for one reason of SCHEMA_ANNOTATION_INVALID.
 
+    Parameters:
+        tag (str): The name of the schema entry carrying the annotation.
+        annotation_value (str): The single annotation value being checked.
+        reason (str): The reason letter from Appendix B: 'a', 'b', 'c', or 'd'.
+        prefix (str): Reasons a, b, d - the prefix at fault, including the colon.
+        annotation_id (str): Reason b - the id part of the value's prefix:id.
+        source_text (str): Reason c - the text following dc:source.
+        term (str): Reason d - the mapping or property value that should be prefix:term.
 
-@hed_error(
-    SchemaAttributeErrors.SCHEMA_ANNOTATION_EXTERNAL_MISSING,
-    default_severity=ErrorSeverity.WARNING,
-)
-def schema_error_annotation_external_missing(tag, annotation_value, prefix, annotation_id):
-    return (
-        f"Tag '{tag}' has annotation '{annotation_value}' with prefix:id '{prefix}{annotation_id}' "
-        f"that is not defined in the ExternalAnnotations section."
-    )
-
-
-@hed_error(
-    SchemaAttributeErrors.SCHEMA_ANNOTATION_SOURCE_MISSING,
-    default_severity=ErrorSeverity.WARNING,
-)
-def schema_error_annotation_source_missing(tag, annotation_value, source_text):
-    return (
-        f"Tag '{tag}' has annotation '{annotation_value}' referencing dc:source "
-        f"but '{source_text}' does not start with any name defined in the Sources section."
-    )
+    Returns:
+        str: The error message.
+    """
+    prolog = f"Tag '{tag}' annotation '{annotation_value}': "
+    if reason == "a":
+        return prolog + f"prefix '{prefix}' is not in the Prefixes section."
+    if reason == "b":
+        return prolog + (
+            f"'{prefix}{annotation_id}' is not in the External annotations section; "
+            f"an external term is written 'skos:exactMatch {prefix}{annotation_id}'."
+        )
+    if reason == "c":
+        return prolog + (
+            f"dc:source value '{source_text}' names no Sources row by name or by a URL under a row's link."
+        )
+    if reason == "d":
+        if prefix:
+            return prolog + f"value '{term}' has prefix '{prefix}' that is not in the Prefixes section."
+        return prolog + f"value '{term}' is not an external term in prefix notation 'prefix:term'."
+    raise ValueError(f"Unknown SCHEMA_ANNOTATION_INVALID reason '{reason}'.")
