@@ -5,3 +5,4 @@ from .string_util import StringValidator
 from .class_util import UnitValueValidator
 from .tag_util import TagValidator
 from .group_util import GroupValidator
+from .placeholder_util import placeholder_tag

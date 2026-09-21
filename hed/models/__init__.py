@@ -49,6 +49,7 @@ Key exports
 
 from .base_input import BaseInput
 from .column_metadata import ColumnMetadata, ColumnType
+from .column_source import ColumnSource, ListColumnSource, distinct_values
 from .definition_dict import DefinitionDict
 from .model_constants import DefTagNames, TopTagReturnType
 from .query_handler import QueryHandler

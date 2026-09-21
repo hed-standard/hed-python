@@ -114,8 +114,14 @@ class Test(unittest.TestCase):
         self.assertEqual(len(filtered_issues), 10)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
+        # The sidecar stage runs first and stops on its errors, so the file's rows are never checked and
+        # the sidecar's own issues (10 errors and 2 warnings) are all that is reported, once each.
         validation_issues = input_file.validate(hed_schema)
-        self.assertEqual(len(validation_issues), 105)
+        self.assertEqual(len(validation_issues), 12)
+        self.assertEqual(
+            sorted(issue["code"] for issue in validation_issues), sorted(issue["code"] for issue in issues)
+        )
+        self.assertTrue(all(ErrorContext.ROW not in issue for issue in validation_issues))
 
     def test_complex_file_validation_invalid_definitions_removed(self):
         # todo: update this/remove
@@ -137,8 +143,10 @@ class Test(unittest.TestCase):
         self.assertEqual(len(issues), 8)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
+        # The sidecar stage stops on its 8 errors; nothing is repeated per row.
         validation_issues = input_file.validate(hed_schema)
-        self.assertEqual(len(validation_issues), 42)
+        self.assertEqual(len(validation_issues), 8)
+        self.assertTrue(all(ErrorContext.ROW not in issue for issue in validation_issues))
 
     def test_file_bad_defs_in_spreadsheet(self):
         schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.0.0t.xml")
@@ -159,7 +167,13 @@ class Test(unittest.TestCase):
         )
 
         validation_issues = loaded_file.validate(hed_schema=hed_schema)
-        self.assertEqual(len(validation_issues), 5)
+        # Three DEFINITION_INVALID and one DEF_INVALID from the HED column stage, which stops the run, so
+        # the whole-row check that also used to flag row 2's repeated group does not run.
+        self.assertEqual(len(validation_issues), 4)
+        self.assertEqual(
+            sorted(issue["code"] for issue in validation_issues),
+            ["DEFINITION_INVALID", "DEFINITION_INVALID", "DEFINITION_INVALID", "DEF_INVALID"],
+        )
 
     def test_tabular_input_with_HED_col_in_json(self):
         schema_path = os.path.realpath(

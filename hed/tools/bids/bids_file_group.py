@@ -189,8 +189,14 @@ class BidsFileGroup:
 
             had_contents = data_obj.contents
             data_obj.set_contents(overwrite=False)
+            # The merged sidecars were validated once each in validate_sidecars, so the file's own
+            # sidecar stage is skipped here rather than repeated for every file that shares a sidecar.
             file_issues = data_obj.contents.validate(
-                hed_schema, extra_def_dicts=extra_def_dicts, name=data_obj.file_path, error_handler=error_handler
+                hed_schema,
+                extra_def_dicts=extra_def_dicts,
+                name=data_obj.file_path,
+                error_handler=error_handler,
+                validate_sidecar=False,
             )
 
             if file_issues:

@@ -115,9 +115,16 @@ class TestSortingByOnset(unittest.TestCase):
         opened_file = TabularInput(df)
         self.assertTrue(opened_file.needs_sorting)
         issues = opened_file.validate(schema)
-        # Should still report the same issue row despite needing sorting for validation
-        self.assertEqual(issues[0]["code"], ValidationErrors.ONSETS_UNORDERED)
-        self.assertEqual(issues[1][ErrorContext.ROW], 5)
+        # The HED column stage reports the invalid tag at its file row whether or not the file needs sorting,
+        # and stops there: the unordered onsets belong to the assembly stage, which does not run.
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TAG_INVALID])
+        self.assertEqual(issues[0][ErrorContext.ROW], 5)
+
+        # With the tag fixed, the assembly stage runs and reports the unordered onsets.
+        df.at[3, "HED"] = "Age/4"
+        opened_file = TabularInput(df)
+        issues = opened_file.validate(schema)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.ONSETS_UNORDERED])
 
     def test_sort(self):
         from hed.models.df_util import sort_dataframe_by_onsets

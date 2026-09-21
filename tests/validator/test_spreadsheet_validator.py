@@ -65,10 +65,10 @@ class TestSpreadsheetValidation(unittest.TestCase):
         self.df_without_onset = base_df.copy()
 
         # No tags in either of these
-        issues = self.validator.validate(TabularInput(self.df_without_onset), def_dicts=def_dict)
+        issues = self.validator.validate(TabularInput(self.df_without_onset), extra_def_dicts=def_dict)
         self.assertEqual(len(issues), 0)
 
-        issues = self.validator.validate(TabularInput(self.df_with_onset), def_dicts=def_dict)
+        issues = self.validator.validate(TabularInput(self.df_with_onset), extra_def_dicts=def_dict)
         self.assertEqual(len(issues), 0)
 
         base_has_tags_df = pd.DataFrame(
@@ -85,10 +85,10 @@ class TestSpreadsheetValidation(unittest.TestCase):
         self.df_with_onset_has_tags["onset"] = [1, 2, 3]
         self.df_without_onset_has_tags = base_has_tags_df.copy()
 
-        issues = self.validator.validate(TabularInput(self.df_without_onset_has_tags), def_dicts=def_dict)
+        issues = self.validator.validate(TabularInput(self.df_without_onset_has_tags), extra_def_dicts=def_dict)
         self.assertEqual(len(issues), 3)
         self.assertEqual(issues[0]["code"], ValidationErrors.TEMPORAL_TAG_ERROR)
-        issues = self.validator.validate(TabularInput(self.df_with_onset_has_tags), def_dicts=def_dict)
+        issues = self.validator.validate(TabularInput(self.df_with_onset_has_tags), extra_def_dicts=def_dict)
         self.assertEqual(len(issues), 0)
 
         base_has_tags_unordered_df = pd.DataFrame(
@@ -104,10 +104,12 @@ class TestSpreadsheetValidation(unittest.TestCase):
         self.df_with_onset_has_tags_unordered["onset"] = [1, 2, 3]
         self.df_without_onset_has_tags_unordered = base_has_tags_unordered_df.copy()
 
-        issues = self.validator.validate(TabularInput(self.df_without_onset_has_tags_unordered), def_dicts=def_dict)
+        issues = self.validator.validate(
+            TabularInput(self.df_without_onset_has_tags_unordered), extra_def_dicts=def_dict
+        )
         self.assertEqual(len(issues), 3)
         self.assertEqual(issues[0]["code"], ValidationErrors.TEMPORAL_TAG_ERROR)
-        issues = self.validator.validate(TabularInput(self.df_with_onset_has_tags_unordered), def_dicts=def_dict)
+        issues = self.validator.validate(TabularInput(self.df_with_onset_has_tags_unordered), extra_def_dicts=def_dict)
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues[0]["code"], ValidationErrors.TEMPORAL_TAG_ERROR)
 
@@ -186,7 +188,7 @@ class TestSpreadsheetValidation(unittest.TestCase):
             ],
         }
         df_with_nans = pd.DataFrame(tsv)
-        issues = self.validator.validate(TabularInput(df_with_nans), def_dicts=def_dict)
+        issues = self.validator.validate(TabularInput(df_with_nans), extra_def_dicts=def_dict)
         self.assertEqual(len(issues), 3)
         self.assertEqual(issues[2]["code"], ValidationErrors.TEMPORAL_TAG_ERROR)
 
@@ -203,14 +205,14 @@ class TestSpreadsheetValidation(unittest.TestCase):
         }
 
         sidecar1 = Sidecar(io.StringIO(json.dumps(sidecar_dict)))
-        issues1 = self.validator.validate(TabularInput(df_with_nans, sidecar=sidecar1), def_dicts=def_dict)
+        issues1 = self.validator.validate(TabularInput(df_with_nans, sidecar=sidecar1), extra_def_dicts=def_dict)
         self.assertEqual(len(issues1), 2)
         self.assertEqual(issues1[1]["code"], ValidationErrors.TEMPORAL_TAG_ERROR)
 
         # The whatelse does not use the bad HED columns and HED column appears in {} so only when assembled is used.
         sidecar_dict["event_code"]["HED"]["whatever"] = "Black, {HED}"
         sidecar2 = Sidecar(io.StringIO(json.dumps(sidecar_dict)))
-        issues2 = self.validator.validate(TabularInput(df_with_nans, sidecar=sidecar2), def_dicts=def_dict)
+        issues2 = self.validator.validate(TabularInput(df_with_nans, sidecar=sidecar2), extra_def_dicts=def_dict)
         self.assertEqual(len(issues2), 1)
         self.assertEqual(issues1[0]["code"], ValidationErrors.ONSETS_UNORDERED)
 
@@ -229,7 +231,7 @@ class TestSpreadsheetValidation(unittest.TestCase):
                 "(Def/Def1, Offset)",
             ],
         }
-        issues = self.validator.validate(TabularInput(pd.DataFrame(tsv)), def_dicts=def_dict)
+        issues = self.validator.validate(TabularInput(pd.DataFrame(tsv)), extra_def_dicts=def_dict)
         self.assertEqual(len(issues), 1, issues)
         self.assertEqual(issues[0]["code"], ValidationErrors.TEMPORAL_TAG_ERROR)
         self.assertEqual(issues[0][ErrorContext.ROW], 3)  # 1-based, plus the header row
@@ -237,7 +239,7 @@ class TestSpreadsheetValidation(unittest.TestCase):
 
         # An unmatched Offset later in the file is still reported, so the onset checks did run.
         tsv["HED"][3] = "(Def/Def1, Offset), (Def/Def1, Offset)"
-        issues = self.validator.validate(TabularInput(pd.DataFrame(tsv)), def_dicts=def_dict)
+        issues = self.validator.validate(TabularInput(pd.DataFrame(tsv)), extra_def_dicts=def_dict)
         codes = [issue["code"] for issue in issues]
         self.assertGreaterEqual(codes.count(ValidationErrors.TEMPORAL_TAG_ERROR), 2, codes)
 
@@ -258,7 +260,7 @@ class TestSpreadsheetValidation(unittest.TestCase):
                 "(Def/Def1, Offset)",
             ],
         }
-        issues = self.validator.validate(TabularInput(pd.DataFrame(tsv)), def_dicts=def_dict)
+        issues = self.validator.validate(TabularInput(pd.DataFrame(tsv)), extra_def_dicts=def_dict)
         self.assertEqual(len(issues), 2, issues)
         self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TEMPORAL_TAG_ERROR] * 2)
         self.assertEqual([issue[ErrorContext.ROW] for issue in issues], [3, 4])  # 1-based, plus the header row
@@ -267,7 +269,7 @@ class TestSpreadsheetValidation(unittest.TestCase):
 
         # Both halves of a group with a non-convertible Delay and a non-convertible Duration are reported.
         tsv["HED"][2] = "(Delay/2 month, Duration/1 year, (Green))"
-        issues = self.validator.validate(TabularInput(pd.DataFrame(tsv)), def_dicts=def_dict)
+        issues = self.validator.validate(TabularInput(pd.DataFrame(tsv)), extra_def_dicts=def_dict)
         messages = " ".join(issue["message"] for issue in issues)
         self.assertEqual(len(issues), 3, issues)
         self.assertIn("Delay/2 month", messages)
@@ -331,15 +333,31 @@ class TestSpreadsheetValidation(unittest.TestCase):
 
     def test_validate_pops_context_on_onset_na_early_return(self):
         """The early return on onset n/a issues must not leave the FILE_NAME context on the stack."""
-        # A temporal tag on a row whose onset is n/a is reported as TEMPORAL_TAG_ERROR and stops
-        # validation, so the invalid tag on the first row is never reported.
+        # A temporal tag on a row whose onset is n/a is reported as TEMPORAL_TAG_ERROR by the assembly
+        # stage, which then returns early. The first row's group is fine on its own, so the earlier
+        # stages pass and the assembly stage is reached.
+        def_dict = "(Definition/MyDef, (Event))"
+        tsv = "onset\tduration\tHED\n1.0\t0\t(Red, Blue)\nn/a\t0\t(Onset, Def/MyDef)\n"
+        error_handler = ErrorHandler()
+
+        issues = self.validator.validate(
+            TabularInput(io.StringIO(tsv)), extra_def_dicts=def_dict, name="events.tsv", error_handler=error_handler
+        )
+
+        codes = {issue["code"] for issue in issues}
+        # The n/a onset also makes the onsets non-monotonic, which is reported alongside.
+        self.assertEqual(codes, {ValidationErrors.TEMPORAL_TAG_ERROR, ValidationErrors.ONSETS_UNORDERED})
+        self.assertTrue(all(issue.get("ec_filename") == "events.tsv" for issue in issues))
+        self.assertEqual(error_handler.error_context, [])
+
+    def test_hed_column_errors_stop_before_assembly(self):
+        """An invalid tag in the HED column stops the run before the assembly stage's onset checks."""
         tsv = "onset\tduration\tHED\n1.0\t0\tInvalidTagXYZ\nn/a\t0\t(Onset, Def/MyDef)\n"
         error_handler = ErrorHandler()
 
         issues = self.validator.validate(TabularInput(io.StringIO(tsv)), name="events.tsv", error_handler=error_handler)
 
         codes = {issue["code"] for issue in issues}
-        self.assertIn(ValidationErrors.TEMPORAL_TAG_ERROR, codes)
-        self.assertNotIn(ValidationErrors.TAG_INVALID, codes)
-        self.assertTrue(all(issue.get("ec_filename") == "events.tsv" for issue in issues))
+        self.assertIn(ValidationErrors.TAG_INVALID, codes)
+        self.assertNotIn(ValidationErrors.TEMPORAL_TAG_ERROR, codes)
         self.assertEqual(error_handler.error_context, [])
