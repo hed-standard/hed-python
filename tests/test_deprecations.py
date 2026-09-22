@@ -20,6 +20,7 @@ from hed.errors.error_types import SchemaAttributeErrors
 from hed.schema import load_schema
 from hed.schema.hed_schema_io import from_string
 from hed.schema.schema_io.base2schema import SchemaLoader
+from hed.validator import SpreadsheetValidator
 
 FIXTURE_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), "data/schema_tests/merge_group_tests"))
 
@@ -40,6 +41,11 @@ SCHEDULED_REMOVALS = [
     (
         "SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE alias of SCHEMA_MISSING_EXTRA",
         lambda: hasattr(SchemaAttributeErrors, "SCHEMA_MISSING_EXTRA_VALUE"),
+        2,
+    ),
+    (
+        "def_dicts= parameter of SpreadsheetValidator.validate",
+        lambda: _has_parameter(SpreadsheetValidator.validate, "def_dicts"),
         2,
     ),
 ]
@@ -86,6 +92,39 @@ class TestSchemaParameterDeprecation(unittest.TestCase):
             warnings.simplefilter("always")
             load_schema(os.path.join(FIXTURE_DIR, "HED8.4.0.xml"))
         self.assertFalse(any(issubclass(w.category, DeprecationWarning) for w in caught))
+
+
+class TestDefDictsParameterDeprecation(unittest.TestCase):
+    """SpreadsheetValidator.validate(data, def_dicts=...) was the signature before the staged validator."""
+
+    @classmethod
+    def setUpClass(cls):
+        import pandas as pd
+
+        from hed.models import TabularInput
+        from hed.schema import load_schema_version
+
+        cls.schema = load_schema_version("8.4.0")
+        cls.definitions = "(Definition/MyDef, (Event))"
+        cls.events = TabularInput(pd.DataFrame({"onset": [1.0, 2.0], "HED": ["(Onset, Def/MyDef)", "Red"]}))
+
+    def test_def_dicts_keyword_warns_and_still_works(self):
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            issues = SpreadsheetValidator(self.schema).validate(self.events, def_dicts=self.definitions)
+        self.assertTrue(any(issubclass(w.category, DeprecationWarning) for w in caught))
+        self.assertEqual(issues, [])
+
+    def test_definitions_in_the_sidecar_position_raise(self):
+        with self.assertRaises(TypeError):
+            SpreadsheetValidator(self.schema).validate(self.events, self.definitions)
+
+    def test_no_warning_with_extra_def_dicts(self):
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            issues = SpreadsheetValidator(self.schema).validate(self.events, extra_def_dicts=self.definitions)
+        self.assertFalse(any(issubclass(w.category, DeprecationWarning) for w in caught))
+        self.assertEqual(issues, [])
 
 
 if __name__ == "__main__":

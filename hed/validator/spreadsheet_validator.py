@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import math
 import re
+import warnings
 
 import pandas as pd
 
@@ -18,6 +19,7 @@ from hed.models.definition_dict import DefinitionDict
 from hed.models.hed_string import HedString
 from hed.models.hed_tag import HedTag
 from hed.models.model_constants import DefTagNames, TopTagReturnType
+from hed.models.sidecar import Sidecar
 from hed.validator.hed_validator import HedValidator
 from hed.validator.onset_validator import OnsetValidator
 from hed.validator.sidecar_validator import SidecarValidator
@@ -50,8 +52,9 @@ class SpreadsheetValidator:
 
     Rows are reported as the 0-based row index plus ``row_offset``. For a :class:`~hed.models.base_input.BaseInput`
     the default offset counts the header line and reports 1-based file lines, as before. An issue found
-    by a distinct-value stage is reported once, at the first row holding the value, with the number of
-    rows holding it in ``row_count``.
+    for a value or HED-column string is reported once, at the first row holding the value, with the number
+    of rows holding it in ``row_count``. The categorical check keeps its column-level form: one
+    SIDECAR_KEY_MISSING warning per column naming every unknown value, with no row, as before.
     """
 
     ONSET_TOLERANCE = 1e-7
@@ -86,6 +89,7 @@ class SpreadsheetValidator:
         error_handler=None,
         row_offset=None,
         validate_sidecar=True,
+        def_dicts=None,
     ) -> list[dict]:
         """Run the four stages on a column source, stopping at the first stage that finds an error.
 
@@ -104,10 +108,26 @@ class SpreadsheetValidator:
                 1 plus 1 for the header line for a BaseInput (1-based file lines), and 0 otherwise.
             validate_sidecar (bool): If False, skip stage 1 because the caller has validated the sidecar
                 already. The sidecar is still used for its definitions and column descriptions.
+            def_dicts: Deprecated name for ``extra_def_dicts`` (removed in hedtools 2.0.0). Before the
+                stages, this was the second positional parameter; a positional definition dictionary
+                is now caught and reported as a TypeError rather than validated as a sidecar.
 
         Returns:
             list[dict]: The issues found, sorted by location.
         """
+        if def_dicts is not None:
+            warnings.warn(
+                "The def_dicts= parameter of SpreadsheetValidator.validate is deprecated and will be removed "
+                "in hedtools 2.0.0; pass the definitions as extra_def_dicts=.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            extra_def_dicts = [extra_def_dicts, def_dicts] if extra_def_dicts is not None else def_dicts
+        if sidecar is not None and not isinstance(sidecar, Sidecar):
+            raise TypeError(
+                "sidecar must be a Sidecar. Definitions go in extra_def_dicts=; the second positional "
+                "parameter of SpreadsheetValidator.validate is the sidecar since the staged validator."
+            )
         if error_handler is None:
             error_handler = ErrorHandler()
         if isinstance(source, BaseInput):
