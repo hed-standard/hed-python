@@ -113,6 +113,22 @@ class TestStagedValidation(unittest.TestCase):
         self.assertEqual(issues[0][ErrorContext.COLUMN], "HED")
         self.assertEqual(issues[0]["ec_filename"], "events.tsv")
 
+    def test_base_input_keeps_its_own_sidecar(self):
+        """A BaseInput is validated with the sidecar it was built with; a different one is refused."""
+        sidecar = _sidecar(self.sidecar_dict)
+        rows = [["onset", "duration", "response_time", "event_code"], ["4.5", "0", "3.4", "face"]]
+        events = _tabular(rows, sidecar)
+
+        # The same object is fine, explicitly or by default.
+        self.assertEqual(self.validator.validate(events, sidecar=sidecar, extra_def_dicts=self.definitions), [])
+        self.assertEqual(self.validator.validate(events, extra_def_dicts=self.definitions), [])
+
+        other = _sidecar({"event_code": {"HED": {"face": "Blue"}}})
+        with self.assertRaises(ValueError):
+            self.validator.validate(events, sidecar=other)
+        with self.assertRaises(ValueError):
+            self.validator.validate(_tabular(rows), sidecar=other)
+
     def test_value_errors_stop_before_the_hed_column(self):
         rows = [
             ["onset", "duration", "response_time", "event_code", "HED"],

@@ -1,12 +1,13 @@
 """A group of BIDS files with specified suffix name."""
 
+import json
 import logging
 import os
 import re
 
 import pandas as pd
 
-from hed.errors.error_reporter import ErrorHandler
+from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
@@ -184,13 +185,30 @@ class BidsFileGroup:
         hed_files = [f for f in self.datafile_dict.values() if f.has_hed]
         logger.debug(f"Processing {len(hed_files)} out of {len(self.datafile_dict)} data files with HED annotations")
 
+        # A data file's sidecar is either one of the group's sidecar files, validated once each in
+        # validate_sidecars, or a Sidecar merged from several of them (_get_tsv_sidecar), which nothing
+        # else validates. Each distinct merged sidecar is validated here once, keyed on its content, and
+        # a data file whose merged sidecar has errors is skipped, as TabularInput.validate would stop.
+        group_sidecars = {id(sidecar.contents) for sidecar in self.sidecar_dict.values()}
+        merged_sidecar_errors = {}
         for i, data_obj in enumerate(hed_files, 1):
             logger.debug(f"Validating data file {i}/{len(hed_files)}: {os.path.basename(data_obj.file_path)}")
 
+            sidecar = data_obj.sidecar
+            if sidecar is not None and id(sidecar) not in group_sidecars:
+                key = json.dumps(sidecar.loaded_dict, sort_keys=True)
+                if key not in merged_sidecar_errors:
+                    sidecar_issues = SidecarValidator(hed_schema).validate(
+                        sidecar, extra_def_dicts=extra_def_dicts, name=sidecar.name, error_handler=error_handler
+                    )
+                    merged_sidecar_errors[key] = check_for_any_errors(sidecar_issues)
+                    issues += sidecar_issues
+                if merged_sidecar_errors[key]:
+                    logger.debug(f"Skipping {os.path.basename(data_obj.file_path)}: its merged sidecar has errors")
+                    continue
+
             had_contents = data_obj.contents
             data_obj.set_contents(overwrite=False)
-            # The merged sidecars were validated once each in validate_sidecars, so the file's own
-            # sidecar stage is skipped here rather than repeated for every file that shares a sidecar.
             file_issues = data_obj.contents.validate(
                 hed_schema,
                 extra_def_dicts=extra_def_dicts,

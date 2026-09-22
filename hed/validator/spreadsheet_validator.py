@@ -96,8 +96,9 @@ class SpreadsheetValidator:
         Parameters:
             source (ColumnSource): The table to validate. A BaseInput (TabularInput, SpreadsheetInput) or any
                 object with the ColumnSource methods.
-            sidecar (Sidecar or None): The sidecar describing the columns. None takes the source's own
-                sidecar when the source is a BaseInput.
+            sidecar (Sidecar or None): The sidecar describing the columns. For a BaseInput this must be
+                the sidecar it was constructed with (None takes it), since the input's mapper and
+                assembly come from that sidecar; anything else raises ValueError.
             extra_def_dicts (list of DefinitionDict or DefinitionDict or None): Definitions in addition to
                 the sidecar's.
             name (str or None): The name to report errors from this table as. If empty, no FILE_NAME
@@ -133,6 +134,13 @@ class SpreadsheetValidator:
         if isinstance(source, BaseInput):
             if sidecar is None:
                 sidecar = source.get_sidecar()
+            elif sidecar is not source.get_sidecar():
+                # The source's mapper and its assembly come from the sidecar it was built with, so a
+                # different one here would validate one set of column descriptions and assemble another.
+                raise ValueError(
+                    "A BaseInput is validated with the sidecar it was constructed with; pass the sidecar to "
+                    "TabularInput instead of to validate."
+                )
             if row_offset is None:
                 row_offset = 1 + int(source.has_column_names)
         elif not isinstance(source, ColumnSource):
