@@ -98,6 +98,23 @@ class TestValidateHedTabular(unittest.TestCase):
             if os.path.exists(tabular_filename):
                 os.remove(tabular_filename)
 
+    def test_bad_sidecar_stops_before_the_tabular_file(self):
+        """A sidecar error is reported and the run stops there; the file's own errors are not listed."""
+        bad_sidecar = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json")
+        json.dump({"trial_type": {"HED": {"show_face": "InvalidTagXYZ"}}}, bad_sidecar)
+        bad_sidecar.close()
+        try:
+            arg_list = [self.invalid_tabular_file.name, "-s", bad_sidecar.name, "-sv", "8.3.0", "--no-log"]
+            with patch("sys.stdout", new=io.StringIO()) as mock_stdout:
+                result = main(arg_list)
+                output = mock_stdout.getvalue()
+            self.assertEqual(result, 1)
+            self.assertIn("InvalidTagXYZ", output)
+            self.assertNotIn("InvalidTag ", output.replace("InvalidTagXYZ", ""))
+        finally:
+            if os.path.exists(bad_sidecar.name):
+                os.remove(bad_sidecar.name)
+
     def test_error_limiting(self):
         """Test error limiting options."""
         # Create data with repeated errors
