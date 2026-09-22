@@ -87,8 +87,9 @@ class Test(unittest.TestCase):
             data_obj.clear_contents()
         issues = events.validate_datafiles(hed_schema)
         self.assertEqual([issue["code"] for issue in issues], ["TAG_INVALID"])
+        # Which of the three sub-002 files comes first depends on the file system's listing order.
         self.assertTrue(issues[0]["ec_filename"].startswith("merged_"))
-        self.assertIn("sub-002_task-FacePerception_run-1_events", issues[0]["ec_filename"])
+        self.assertRegex(issues[0]["ec_filename"], r"sub-002_task-FacePerception_run-[123]_events")
         self.assertEqual(issues[0]["ec_sidecarColumnName"], "bad_column")
 
     def test_summarize(self):

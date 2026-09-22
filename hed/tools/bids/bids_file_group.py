@@ -237,9 +237,11 @@ class BidsFileGroup:
 
         """
         self.sidecar_dir_dict = {}
-        for root, _dirs, files in os.walk(root_path, topdown=True):
+        for root, dirs, files in os.walk(root_path, topdown=True):
+            # Sorted so the order is the same on every file system (Linux returns entries in hash order).
+            dirs.sort()
             sidecar_list = []
-            for r_file in files:
+            for r_file in sorted(files):
                 file_path = os.path.join(os.path.realpath(root), r_file)
                 if file_path in self.sidecar_dict:
                     sidecar_list.append(file_path)

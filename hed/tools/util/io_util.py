@@ -240,8 +240,9 @@ def get_file_list(root_path, name_prefix=None, name_suffix=None, extensions=None
     if not exclude_dirs:
         exclude_dirs = []
     for root, dirs, files in os.walk(root_path, topdown=True):
-        dirs[:] = [d for d in dirs if d not in exclude_dirs]
-        for r_file in files:
+        # Sorted so the order is the same on every file system (Linux returns entries in hash order).
+        dirs[:] = sorted(d for d in dirs if d not in exclude_dirs)
+        for r_file in sorted(files):
             if check_filename(r_file, name_prefix, name_suffix, extensions):
                 file_list.append(os.path.realpath(os.path.join(root, r_file)))
     return file_list
