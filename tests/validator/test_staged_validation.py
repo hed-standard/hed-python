@@ -181,7 +181,11 @@ class TestStagedValidation(unittest.TestCase):
         self.assertNotIn(ROW_COUNT_KEY, issues[1])
 
     def test_validate_sidecar_false_trusts_the_caller(self):
-        """With validate_sidecar=False a sidecar error nobody caught is not found by the later stages."""
+        """With validate_sidecar=False a sidecar error nobody caught is not found by the later stages.
+
+        The value stage does not re-judge the template: an unknown template tag has no placeholder to
+        substitute into, so its values are skipped rather than reported as tag errors.
+        """
         rows = [["onset", "duration", "rt", "code"], ["1.0", "0", "3", "a"]]
         sidecar = _sidecar({"rt": {"HED": "Bogus/#"}, "code": {"HED": {"a": "BogusTag"}}})
         self.assertTrue(_tabular(rows, sidecar).validate(self.schema))

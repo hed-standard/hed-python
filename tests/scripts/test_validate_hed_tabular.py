@@ -109,8 +109,9 @@ class TestValidateHedTabular(unittest.TestCase):
                 result = main(arg_list)
                 output = mock_stdout.getvalue()
             self.assertEqual(result, 1)
+            # The sidecar's bad tag is reported; the file's own bad tag ("InvalidTag") is not reached.
             self.assertIn("InvalidTagXYZ", output)
-            self.assertNotIn("InvalidTag ", output.replace("InvalidTagXYZ", ""))
+            self.assertNotIn("InvalidTag", output.replace("InvalidTagXYZ", ""))
         finally:
             if os.path.exists(bad_sidecar.name):
                 os.remove(bad_sidecar.name)
