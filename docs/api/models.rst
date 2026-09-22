@@ -122,6 +122,14 @@ TimeseriesInput
    :undoc-members:
    :show-inheritance:
 
+ColumnSource
+~~~~~~~~~~~~
+
+.. automodule:: hed.models.column_source
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 ColumnMapper
 ~~~~~~~~~~~~
 

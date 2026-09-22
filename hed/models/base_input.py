@@ -10,6 +10,7 @@ import pandas as pd
 from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.models.column_mapper import ColumnMapper
 from hed.models.column_metadata import ColumnMetadata
+from hed.models.column_source import distinct_values
 from hed.models.definition_dict import DefinitionDict
 from hed.models.df_util import _handle_curly_braces_refs, filter_series_by_onset
 
@@ -365,16 +366,26 @@ class BaseInput:
         else:
             return pd.DataFrame(worksheet.values, dtype=str)
 
-    def validate(self, hed_schema, extra_def_dicts=None, name=None, error_handler=None) -> list[dict]:
-        """Creates a SpreadsheetValidator and returns all issues with this file.
+    def validate(
+        self, hed_schema, extra_def_dicts=None, name=None, error_handler=None, validate_sidecar=True, row_offset=None
+    ) -> list[dict]:
+        """Validate this file with a SpreadsheetValidator and return all issues.
+
+        The validator runs four stages and stops at the first stage that finds an error: the sidecar,
+        each column's own values, the HED column, and the assembled rows. See
+        :class:`~hed.validator.spreadsheet_validator.SpreadsheetValidator`.
 
         Parameters:
             hed_schema (HedSchema): The schema to use for validation.
-            extra_def_dicts (list of DefDict or DefDict): All definitions to use for validation.
+            extra_def_dicts (list of DefDict or DefDict): Definitions in addition to the sidecar's.
             name (str or None): The name to report errors from this file as. None (the default) uses
                 this input's own name; an empty string suppresses the FILE_NAME context even when the
                 input has a name, so a caller can manage the location context itself.
             error_handler (ErrorHandler): Error context to use. Creates a new one if None.
+            validate_sidecar (bool): If False, the sidecar stage is skipped because the caller has
+                validated the sidecar already.
+            row_offset (int or None): Added to the 0-based row index in every reported row. None means
+                1, plus 1 more when the file has a header line, so rows are 1-based file lines.
 
         Returns:
             list[dict]: A list of issues for a HED string.
@@ -385,9 +396,51 @@ class BaseInput:
             name = self.name
         tab_validator = SpreadsheetValidator(hed_schema)
         validation_issues = tab_validator.validate(
-            self, self._mapper.get_def_dict(hed_schema, extra_def_dicts), name, error_handler=error_handler
+            self,
+            sidecar=self.get_sidecar(),
+            extra_def_dicts=extra_def_dicts,
+            name=name,
+            error_handler=error_handler,
+            row_offset=row_offset,
+            validate_sidecar=validate_sidecar,
         )
         return validation_issues
+
+    # ------------------------------------------------------------------------------------------
+    # ColumnSource: what the tabular validator asks of a table
+
+    def column_names(self) -> list:
+        """Return the column names in table order, or the column numbers if the file has no names."""
+        if self._dataframe is None:
+            return []
+        return list(self._dataframe.columns)
+
+    def distinct_values(self, column_name) -> dict[str, list[int]]:
+        """Return the distinct non-missing values of one column, as text, mapped to the 0-based rows holding them.
+
+        Parameters:
+            column_name (str or int): The column, as it appears in ``column_names``.
+
+        Returns:
+            dict[str, list[int]]: Distinct text -> rows. Empty if the column does not exist.
+        """
+        if self._dataframe is None or column_name not in self._dataframe.columns:
+            return {}
+        return distinct_values(self._dataframe[column_name])
+
+    def column_mapper(self):
+        """Return this file's ColumnMapper."""
+        return self._mapper
+
+    def as_base_input(self):
+        """Return self: a BaseInput can always assemble its rows."""
+        return self
+
+    def get_sidecar(self):
+        """Return the sidecar this file's mapper was built from, or None."""
+        if self._mapper:
+            return self._mapper._sidecar
+        return None
 
     @staticmethod
     def _dataframe_has_names(dataframe) -> bool:

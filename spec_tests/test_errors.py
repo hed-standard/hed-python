@@ -436,7 +436,8 @@ class MyTestCase(unittest.TestCase):
 
                 buffer = io.BytesIO(json.dumps(sidecar_test).encode("utf-8"))
                 sidecar = Sidecar(buffer)
-                issues = sidecar.validate(hed_schema=schema, extra_def_dicts=def_dict, error_handler=error_handler)
+                # TabularInput.validate validates the sidecar first and stops there on an error.
+                issues = []
                 string = ""
                 try:
                     for row in test["events"]:

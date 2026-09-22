@@ -149,17 +149,13 @@ def main(arg_list=None):
         if args.sidecar_file:
             logging.info("Loading Sidecar file")
             sidecar = Sidecar(args.sidecar_file, name=os.path.basename(args.sidecar_file))
-            sidecar_issues = sidecar.validate(schema, name=sidecar.name, error_handler=error_handler)
-            issues += sidecar_issues
-            if sidecar_issues:
-                logging.warning(f"Found {len(sidecar_issues)} issues in sidecar validation")
 
         # Parse and Validate Tabular Input
         logging.info("Loading Tabular file")
         tabular_input = TabularInput(args.tabular_file, sidecar=sidecar, name=os.path.basename(args.tabular_file))
 
         logging.info("Validating Tabular file")
-        # Validate tabular input
+        # Validates the sidecar first and stops there if it has errors, then the tabular file.
         tabular_issues = tabular_input.validate(schema, name=tabular_input.name, error_handler=error_handler)
         issues += tabular_issues
 

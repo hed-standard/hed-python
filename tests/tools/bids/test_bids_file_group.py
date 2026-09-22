@@ -60,6 +60,38 @@ class Test(unittest.TestCase):
             len(validation_issues), 6, "BidsFileGroup should have 2 validation warnings for missing columns"
         )
 
+    def test_merged_sidecars_validated_once(self):
+        """A sidecar merged from several files is validated once per distinct content, and a data file
+        whose merged sidecar has errors is skipped, as TabularInput.validate would stop."""
+        root_path = os.path.realpath(
+            os.path.join(os.path.dirname(__file__), "../../data/bids_tests/eeg_ds003645s_hed_inheritance")
+        )
+        file_paths = io_util.get_file_list(
+            root_path, extensions=[".tsv", ".json"], exclude_dirs=self.exclude_dirs, name_suffix=["_events"]
+        )
+        events = BidsFileGroup(root_path, file_paths, "events")
+        hed_schema = load_schema_version("8.4.0")
+        group_sidecars = {id(sidecar.contents) for sidecar in events.sidecar_dict.values()}
+        merged = [
+            f for f in events.datafile_dict.values() if f.sidecar is not None and id(f.sidecar) not in group_sidecars
+        ]
+        self.assertEqual(len(merged), 6, "every events file under a subject has a merged sidecar")
+        self.assertFalse(events.validate_datafiles(hed_schema), "the inheritance dataset is valid")
+
+        # The same bad column in every sub-002 merged sidecar: the three share one content, so the error is
+        # reported once, under the merged name, and those three files are skipped; sub-003's files still run.
+        sub_002 = [f for f in merged if "sub-002" in f.file_path]
+        self.assertEqual(len(sub_002), 3)
+        for data_obj in sub_002:
+            data_obj.sidecar.loaded_dict["bad_column"] = {"HED": {"x": "InvalidTagXYZ"}}
+            data_obj.clear_contents()
+        issues = events.validate_datafiles(hed_schema)
+        self.assertEqual([issue["code"] for issue in issues], ["TAG_INVALID"])
+        # Which of the three sub-002 files comes first depends on the file system's listing order.
+        self.assertTrue(issues[0]["ec_filename"].startswith("merged_"))
+        self.assertRegex(issues[0]["ec_filename"], r"sub-002_task-FacePerception_run-[123]_events")
+        self.assertEqual(issues[0]["ec_sidecarColumnName"], "bad_column")
+
     def test_summarize(self):
         events = BidsFileGroup(self.root_path, self.file_paths, "events")
         info = events.summarize()

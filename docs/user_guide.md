@@ -223,6 +223,15 @@ issues = tabular.validate(schema)
 def_dict = tabular.get_def_dict(schema)
 ```
 
+Validation of a tabular file runs in four stages, and stops at the first stage that finds an error (a warning alone never stops it):
+
+1. **Sidecar**: every template and categorical annotation in the sidecar. Pass `validate_sidecar=False` if you have already validated the sidecar yourself.
+2. **Column values**: each value column's distinct values against the units or value class of the template's `#` tag, and each categorical column's values against its sidecar keys. A value that appears in many rows is checked once and reported at its first row, with the number of rows in the issue's `row_count`.
+3. **HED column**: each distinct annotation in the `HED` column, checked once.
+4. **Assembly**: the rows assembled from all columns, the group-level checks, and for a file with an `onset` column the temporal checks.
+
+Rows are reported as 1-based file lines counting the header. Pass `row_offset=0` to get 0-based data rows instead. The stages are also available one at a time on {py:class}`~hed.validator.spreadsheet_validator.SpreadsheetValidator`, which reads column names and distinct values from any object with the {py:class}`~hed.models.column_source.ColumnSource` methods, so a table that is not a pandas DataFrame can be validated through stage 3 without building one.
+
 ### Using sidecars
 
 ```{index} Sidecar class, JSON sidecar, sidecar validation
