@@ -4,9 +4,11 @@ import io
 import json
 import unittest
 
+import pandas as pd
+
 from hed import Sidecar, SpreadsheetInput, TabularInput, load_schema_version
 from hed.errors.error_reporter import ErrorHandler
-from hed.errors.error_types import ErrorContext, ValidationErrors
+from hed.errors.error_types import ErrorContext, SidecarErrors, ValidationErrors
 from hed.models import DefinitionDict, ListColumnSource
 from hed.validator import SpreadsheetValidator
 from hed.validator.spreadsheet_validator import ROW_COUNT_KEY
@@ -137,6 +139,145 @@ class TestStagedValidation(unittest.TestCase):
         issues = _tabular(rows, _sidecar(self.sidecar_dict)).validate(self.schema, extra_def_dicts=self.definitions)
         self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.VALUE_INVALID])
 
+    def test_value_errors_stop_before_assembly(self):
+        """A stage-2 error hides what the assembly stage would report: unordered onsets and a lone Offset."""
+        rows = [
+            ["onset", "duration", "response_time", "event_code", "HED"],
+            ["5.0", "0", "abc", "face", "(Offset, Def/Acc/3.5)"],
+            ["4.5", "0", "3.4", "face", "Red"],
+        ]
+        events = _tabular(rows, _sidecar(self.sidecar_dict))
+        issues = events.validate(self.schema, extra_def_dicts=self.definitions)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.VALUE_INVALID])
+
+        rows[1][2] = "3.4"
+        issues = _tabular(rows, _sidecar(self.sidecar_dict)).validate(self.schema, extra_def_dicts=self.definitions)
+        codes = {issue["code"] for issue in issues}
+        self.assertIn(ValidationErrors.ONSETS_UNORDERED, codes)
+        self.assertIn(ValidationErrors.TEMPORAL_TAG_ERROR, codes)
+
+    def test_sidecar_warning_does_not_stop(self):
+        """A sidecar with only a warning goes on to the later stages, and the warning is reported once."""
+        sidecar = _sidecar({"event_code": {"HED": {"face": "Item/Extended-thing", "ball": "Red"}}})
+        rows = [["onset", "duration", "event_code", "HED"], ["1.0", "0", "face", "InvalidTagXYZ"]]
+        issues = _tabular(rows, sidecar).validate(self.schema, error_handler=ErrorHandler(check_for_warnings=True))
+        self.assertEqual(
+            sorted(issue["code"] for issue in issues), [ValidationErrors.TAG_EXTENDED, ValidationErrors.TAG_INVALID]
+        )
+
+    def test_hed_column_warning_is_reported_once_and_not_repeated_by_assembly(self):
+        rows = [
+            ["onset", "duration", "HED"],
+            ["1.0", "0", "Item/Extended-thing"],
+            ["2.0", "0", "Item/Extended-thing"],
+            ["3.0", "0", "Red, Red"],
+        ]
+        issues = _tabular(rows).validate(self.schema, error_handler=ErrorHandler(check_for_warnings=True))
+        self.assertEqual(
+            [(issue["code"], issue[ErrorContext.ROW]) for issue in issues],
+            [(ValidationErrors.TAG_EXTENDED, 2), (ValidationErrors.TAG_EXPRESSION_REPEATED, 4)],
+        )
+        self.assertEqual(issues[0][ROW_COUNT_KEY], 2)
+        self.assertNotIn(ROW_COUNT_KEY, issues[1])
+
+    def test_validate_sidecar_false_trusts_the_caller(self):
+        """With validate_sidecar=False a sidecar error nobody caught is not found by the later stages.
+
+        The value stage does not re-judge the template: an unknown template tag has no placeholder to
+        substitute into, so its values are skipped rather than reported as tag errors.
+        """
+        rows = [["onset", "duration", "rt", "code"], ["1.0", "0", "3", "a"]]
+        sidecar = _sidecar({"rt": {"HED": "Bogus/#"}, "code": {"HED": {"a": "BogusTag"}}})
+        self.assertTrue(_tabular(rows, sidecar).validate(self.schema))
+        self.assertEqual(_tabular(rows, sidecar).validate(self.schema, validate_sidecar=False), [])
+
+    def test_sidecar_issues_keep_the_sidecar_name_when_the_table_has_none(self):
+        sidecar = _sidecar({"code": {"HED": {"a": "InvalidTagXYZ"}}}, name="events.json")
+        rows = [["onset", "duration", "code"], ["1.0", "0", "a"]]
+        issues = _tabular(rows, sidecar).validate(self.schema)  # the table has no name
+        self.assertEqual([issue["ec_filename"] for issue in issues], ["events.json"])
+
+        error_handler = ErrorHandler()
+        error_handler.push_error_context(ErrorContext.TABLE_NAME, "trials")
+        issues = _tabular(rows, sidecar).validate(self.schema, name="", error_handler=error_handler)
+        self.assertEqual(
+            [("ec_filename" in issue, issue.get("ec_table_name")) for issue in issues], [(False, "trials")]
+        )
+        self.assertEqual(error_handler.error_context, [(ErrorContext.TABLE_NAME, "trials")])
+
+    def test_column_source_with_a_base_input_reaches_assembly(self):
+        """A non-BaseInput source that hands over a BaseInput gets the assembly stage (ndx-hed assemble=True)."""
+        columns = {
+            "onset": [1.0, 2.0],
+            "duration": [0, 0],
+            "HED": ["(Onset, Def/Acc/3.5)", "(Offset, Def/Acc/3.5), (Offset, Def/Acc/3.5)"],
+        }
+        frame = TabularInput(pd.DataFrame({name: [str(v) for v in values] for name, values in columns.items()}))
+        source = ListColumnSource(columns, base_input=frame)
+        issues = self.validator.validate(source, extra_def_dicts=self.definitions)
+        codes = {issue["code"] for issue in issues}
+        self.assertIn(ValidationErrors.TAG_EXPRESSION_REPEATED, codes)
+        self.assertIn(ValidationErrors.TEMPORAL_TAG_ERROR, codes)
+        self.assertTrue(all(issue[ErrorContext.ROW] == 1 for issue in issues))  # row_offset 0 for a plain source
+
+        source = ListColumnSource(columns)
+        self.assertEqual(self.validator.validate(source, extra_def_dicts=self.definitions), [])
+
+    def test_plain_source_gets_a_warning_for_a_column_the_sidecar_does_not_describe(self):
+        source = ListColumnSource({"id": [1, 2], "onset": [1.0, 2.0], "HED": ["Red", "Blue"]})
+        issues = self.validator.validate(
+            source, sidecar=_sidecar({}), error_handler=ErrorHandler(check_for_warnings=True)
+        )
+        self.assertEqual(
+            [(issue["code"], "id" in issue["message"]) for issue in issues],
+            [(ValidationErrors.HED_UNKNOWN_COLUMN, True)],
+        )
+
+    def test_headerless_spreadsheet_columns_by_number(self):
+        text = "Red\t12\nInvalidTagXYZ\tabc\nRed\t34\nInvalidTagXYZ\t56\n"
+        spreadsheet = SpreadsheetInput(
+            io.StringIO(text),
+            file_type=".tsv",
+            has_column_names=False,
+            tag_columns=[0],
+            column_prefix_dictionary={1: "Age/"},
+        )
+        issues = spreadsheet.validate(self.schema)
+        # Stage 2 finds the bad age (row 1, column 1, 1-based rows with no header) and stops before stage 3.
+        self.assertEqual(
+            [
+                (issue["code"], issue[ErrorContext.ROW], issue[ErrorContext.COLUMN], issue[ROW_COUNT_KEY])
+                for issue in issues
+            ],
+            [(ValidationErrors.VALUE_INVALID, 2, 1, 1)],
+        )
+        spreadsheet = SpreadsheetInput(
+            io.StringIO(text.replace("abc", "7")),
+            file_type=".tsv",
+            has_column_names=False,
+            tag_columns=[0],
+            column_prefix_dictionary={1: "Age/"},
+        )
+        issues = spreadsheet.validate(self.schema)
+        self.assertEqual(
+            [
+                (issue["code"], issue[ErrorContext.ROW], issue[ErrorContext.COLUMN], issue[ROW_COUNT_KEY])
+                for issue in issues
+            ],
+            [(ValidationErrors.TAG_INVALID, 2, 0, 2)],
+        )
+
+    def test_row_offset_applies_to_the_assembly_stage(self):
+        rows = [["onset", "duration", "HED"], ["1.0", "0", "Red"], ["2.0", "0", "(Offset, Def/Acc/3.5)"]]
+        issues = _tabular(rows).validate(self.schema, extra_def_dicts=self.definitions, row_offset=0)
+        self.assertEqual(
+            [(issue["code"], issue[ErrorContext.ROW]) for issue in issues], [(ValidationErrors.TEMPORAL_TAG_ERROR, 1)]
+        )
+        issues = _tabular(rows).validate(self.schema, extra_def_dicts=self.definitions)
+        self.assertEqual(
+            [(issue["code"], issue[ErrorContext.ROW]) for issue in issues], [(ValidationErrors.TEMPORAL_TAG_ERROR, 3)]
+        )
+
     def test_hed_column_reports_each_distinct_string_once(self):
         rows = [
             ["onset", "duration", "HED"],
@@ -150,6 +291,31 @@ class TestStagedValidation(unittest.TestCase):
         self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TAG_INVALID] * 2)
         self.assertEqual([issue[ErrorContext.ROW] for issue in issues], [3, 6])
         self.assertEqual([issue[ROW_COUNT_KEY] for issue in issues], [2, 1])
+
+    def test_value_cells_that_break_hed_syntax_are_rejected(self):
+        """A value that passes its value class may still break the string it is spliced into.
+
+        Before the staged validator every assembled cell was parsed, which caught these; the column stage
+        parses the substituted tag for the same reason. The comma and brace cases are reported by the
+        value-class check first, with their own codes.
+        """
+        sidecar = _sidecar({"note": {"HED": "Parameter-value/#"}})
+        expected = {
+            "(a": ValidationErrors.PARENTHESES_MISMATCH,
+            "a)": ValidationErrors.PARENTHESES_MISMATCH,
+            "a~b": ValidationErrors.TILDES_UNSUPPORTED,
+            "a#b": ValidationErrors.PLACEHOLDER_INVALID,
+            "7,3": ValidationErrors.CHARACTER_INVALID,
+            "{x}": SidecarErrors.SIDECAR_BRACES_INVALID,
+        }
+        for value, code in expected.items():
+            with self.subTest(value=value):
+                rows = [["onset", "duration", "note"], ["1.0", "0", value]]
+                issues = _tabular(rows, sidecar).validate(self.schema)
+                self.assertIn(code, [issue["code"] for issue in issues])
+                self.assertTrue(all(issue[ErrorContext.COLUMN] == "note" for issue in issues))
+        rows = [["onset", "duration", "note"], ["1.0", "0", "A plain note."], ["2.0", "0", "a/b"]]
+        self.assertEqual(_tabular(rows, sidecar).validate(self.schema), [])
 
     def test_value_column_with_a_definition_placeholder(self):
         sidecar = _sidecar({"acc": {"HED": "Def/Acc/#"}})

@@ -108,7 +108,9 @@ class SpreadsheetValidator:
             row_offset (int or None): Added to the 0-based row index in every reported row. None means
                 1 plus 1 for the header line for a BaseInput (1-based file lines), and 0 otherwise.
             validate_sidecar (bool): If False, skip stage 1 because the caller has validated the sidecar
-                already. The sidecar is still used for its definitions and column descriptions.
+                already. The sidecar is still used for its definitions and column descriptions. A
+                sidecar error that the caller did not catch is not found by the later stages: a template
+                or categorical string with an invalid tag simply contributes nothing to check.
             def_dicts: Deprecated name for ``extra_def_dicts`` (removed in hedtools 2.0.0). Before the
                 stages, this was the second positional parameter; a positional definition dictionary
                 is now caught and reported as a TypeError rather than validated as a sidecar.
@@ -155,7 +157,9 @@ class SpreadsheetValidator:
         # Stage 1 runs before this table's FILE_NAME context is pushed so that its issues carry the
         # sidecar's own name. With no name here, the caller manages the location context for both.
         if sidecar is not None and validate_sidecar:
-            sidecar_name = sidecar.name if name else ""
+            # An empty name means the caller manages the location context for both; None means only
+            # that the table has no name, and the sidecar keeps its own.
+            sidecar_name = "" if name == "" else sidecar.name
             issues += SidecarValidator(self._schema).validate(
                 sidecar, extra_def_dicts, name=sidecar_name, error_handler=error_handler
             )
@@ -268,9 +272,12 @@ class SpreadsheetValidator:
 
         Only that one tag is checked, with ``HedValidator.validate_units``: a unit class tag needs valid
         units and a numeric value, a value class tag needs a value of that class, and any other tag
-        needs an extension made of allowed characters. The other tags of the template and its
-        ``{column}`` references play no part; they are the sidecar validator's business. For a
-        ``Def/Name/#`` template the placeholder tag inside the definition is the one checked.
+        needs an extension made of allowed characters. A value that passes is then spliced into the tag
+        and the result parsed with the basic single-string checks, so a value that would break the HED
+        string it lands in (an unbalanced parenthesis, a tilde, a pound sign) is rejected too. The other
+        tags of the template and its ``{column}`` references play no part; they are the sidecar
+        validator's business. For a ``Def/Name/#`` template the placeholder tag inside the definition is
+        the one checked.
 
         Parameters:
             column_name (str or int): The column, for the error context.
@@ -303,12 +310,23 @@ class SpreadsheetValidator:
                 return issues
             tag_text = str(placeholder)
             for value, rows in distinct.items():
-                tag = HedTag(tag_text.replace("#", value, 1), self._schema)
+                substituted = tag_text.replace("#", value, 1)
+                # Units and value class first, on the one tag, so a bad character in the value is reported
+                # as such. A value that passes may still break the HED string it will be spliced into
+                # ("(a", "a~b", "a#b"), so the substituted tag is then parsed and given the basic checks.
+                # The template's tag has a schema entry (placeholder_tag found it), so those checks can
+                # only fail because of the value; the sidecar's own validity is not re-judged here.
+                tag = HedTag(substituted, self._schema)
                 tag_issues = self._hed_validator.validate_units(tag, allow_placeholders=False)
+                substituted_string = HedString(substituted, self._schema, def_dict=self._def_dict)
+                if not tag_issues:
+                    tag_issues = self._hed_validator.run_basic_checks(substituted_string, allow_placeholders=False)
                 if not tag_issues:
                     continue
                 error_handler.push_error_context(ErrorContext.ROW, rows[0] + row_offset)
+                error_handler.push_error_context(ErrorContext.HED_STRING, substituted_string)
                 error_handler.add_context_and_filter(tag_issues)
+                error_handler.pop_error_context()  # HedString
                 error_handler.pop_error_context()  # Row
                 for issue in tag_issues:
                     issue[ROW_COUNT_KEY] = len(rows)
