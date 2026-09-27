@@ -574,7 +574,10 @@ class BaseInput:
 
         # If file is already a DataFrame
         if isinstance(file, pd.DataFrame):
-            self._dataframe = file.astype(str)
+            # A missing cell (NaN or None) becomes "n/a", as in a text file. The object step is what makes
+            # this the same on every pandas: pandas 2 turns a NaN into the text "nan" under astype(str), pandas 3
+            # keeps it missing.
+            self._dataframe = file.astype(object).fillna("n/a").astype(str)
             self._has_column_names = self._dataframe_has_names(self._dataframe)
             return
 

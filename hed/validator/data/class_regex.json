@@ -5,7 +5,7 @@
     "ascii": "[\\x00-\\x7F]",
     "asterisk": "\\*",
     "at-sign": "@",
-    "backslash": "\\",
+    "backslash": "\\\\",
     "blank": " ",
     "caret": "\\^",
     "colon": ":",
@@ -18,7 +18,7 @@
     "exclamation": "!",
     "greater-than": ">",
     "hyphen": "-",
-    "left-paren": "(",
+    "left-paren": "\\(",
     "less-than": "<",
     "letters": "[A-Za-z]",
     "lowercase": "[a-z]",
@@ -32,7 +32,7 @@
     "plus": "\\+",
     "printable": "[\\x20-\\x7E]",
     "question-mark": "\\?",
-    "right-paren": ")",
+    "right-paren": "\\)",
     "semicolon": ";",
     "single-quote": "'",
     "forward-slash": "/",
@@ -42,7 +42,7 @@
     "value-text": "[^\\x00-\\x1F\\x7F-\\x9F,\\[\\]{}()#~]",
     "underscore": "_",
     "uppercase": "[A-Z]",
-    "vertical-bar": "|"
+    "vertical-bar": "\\|"
   },
   "class_chars": {
     "dateTimeClass": [],
