@@ -1,0 +1,125 @@
+HED version="8.5.0"
+
+'''Prologue'''
+Test fixture for the value-text character set: an 8.5.0 schema whose textClass row names value-text as the HED 8.5.0 prerelease will. A textClass value may not contain parentheses or the number sign or the tilde. The unit classes and unit modifiers and schema attributes and properties are copied from the redundant_unit_8.5.0 fixture without its redundant uV unit.
+
+!# start schema
+
+'''Note''' <nowiki>[Test tag whose value is free text.]</nowiki>
+* # <nowiki>{takesValue, valueClass=textClass}</nowiki>
+
+'''Tag-name''' <nowiki>[Test tag whose value is a name.]</nowiki>
+* # <nowiki>{takesValue, valueClass=nameClass}</nowiki>
+
+!# end schema
+
+'''Unit classes'''
+* electricPotentialUnits <nowiki>{defaultUnits=uV, hedId=HED_0011504} [Units of electric potential.]</nowiki>
+** V <nowiki>{SIUnit, unitSymbol, conversionFactor=1000000, hedId=HED_0011609}</nowiki>
+** volt <nowiki>{SIUnit, conversionFactor=1000000, hedId=HED_0011610}</nowiki>
+* timeUnits <nowiki>{defaultUnits=s, hedId=HED_0011513} [Units of time, for example durations, delays, and intervals between events.]</nowiki>
+** second <nowiki>{SIUnit, conversionFactor=1.0, hedId=HED_0011633}</nowiki>
+** s <nowiki>{SIUnit, unitSymbol, conversionFactor=1.0, hedId=HED_0011634}</nowiki>
+** day <nowiki>{conversionFactor=86400, hedId=HED_0011635}</nowiki>
+** week <nowiki>{conversionFactor=604800}</nowiki>
+** month <nowiki>{hedId=HED_0011645}</nowiki>
+** minute <nowiki>{conversionFactor=60, hedId=HED_0011636}</nowiki>
+** hour <nowiki>{conversionFactor=3600, hedId=HED_0011637} [Should be in 24-hour format.]</nowiki>
+
+'''Unit modifiers'''
+* deca <nowiki>{SIUnitModifier, conversionFactor=10.0, hedId=HED_0011400} [SI unit multiple representing 10^1.]</nowiki>
+* da <nowiki>{SIUnitSymbolModifier, conversionFactor=10.0, hedId=HED_0011401} [SI unit multiple representing 10^1.]</nowiki>
+* hecto <nowiki>{SIUnitModifier, conversionFactor=100.0, hedId=HED_0011402} [SI unit multiple representing 10^2.]</nowiki>
+* h <nowiki>{SIUnitSymbolModifier, conversionFactor=100.0, hedId=HED_0011403} [SI unit multiple representing 10^2.]</nowiki>
+* kilo <nowiki>{SIUnitModifier, conversionFactor=1000.0, hedId=HED_0011404} [SI unit multiple representing 10^3.]</nowiki>
+* k <nowiki>{SIUnitSymbolModifier, conversionFactor=1000.0, hedId=HED_0011405} [SI unit multiple representing 10^3.]</nowiki>
+* mega <nowiki>{SIUnitModifier, conversionFactor=1e6, hedId=HED_0011406} [SI unit multiple representing 10^6.]</nowiki>
+* M <nowiki>{SIUnitSymbolModifier, conversionFactor=1e6, hedId=HED_0011407} [SI unit multiple representing 10^6.]</nowiki>
+* giga <nowiki>{SIUnitModifier, conversionFactor=1e9, hedId=HED_0011408} [SI unit multiple representing 10^9.]</nowiki>
+* G <nowiki>{SIUnitSymbolModifier, conversionFactor=1e9, hedId=HED_0011409} [SI unit multiple representing 10^9.]</nowiki>
+* tera <nowiki>{SIUnitModifier, conversionFactor=1e12, hedId=HED_0011410} [SI unit multiple representing 10^12.]</nowiki>
+* T <nowiki>{SIUnitSymbolModifier, conversionFactor=1e12, hedId=HED_0011411} [SI unit multiple representing 10^12.]</nowiki>
+* peta <nowiki>{SIUnitModifier, conversionFactor=1e15, hedId=HED_0011412} [SI unit multiple representing 10^15.]</nowiki>
+* P <nowiki>{SIUnitSymbolModifier, conversionFactor=1e15, hedId=HED_0011413} [SI unit multiple representing 10^15.]</nowiki>
+* exa <nowiki>{SIUnitModifier, conversionFactor=1e18, hedId=HED_0011414} [SI unit multiple representing 10^18.]</nowiki>
+* E <nowiki>{SIUnitSymbolModifier, conversionFactor=1e18, hedId=HED_0011415} [SI unit multiple representing 10^18.]</nowiki>
+* zetta <nowiki>{SIUnitModifier, conversionFactor=1e21, hedId=HED_0011416} [SI unit multiple representing 10^21.]</nowiki>
+* Z <nowiki>{SIUnitSymbolModifier, conversionFactor=1e21, hedId=HED_0011417} [SI unit multiple representing 10^21.]</nowiki>
+* yotta <nowiki>{SIUnitModifier, conversionFactor=1e24, hedId=HED_0011418} [SI unit multiple representing 10^24.]</nowiki>
+* Y <nowiki>{SIUnitSymbolModifier, conversionFactor=1e24, hedId=HED_0011419} [SI unit multiple representing 10^24.]</nowiki>
+* deci <nowiki>{SIUnitModifier, conversionFactor=0.1, hedId=HED_0011420} [SI unit submultiple representing 10^-1.]</nowiki>
+* d <nowiki>{SIUnitSymbolModifier, conversionFactor=0.1, hedId=HED_0011421} [SI unit submultiple representing 10^-1.]</nowiki>
+* centi <nowiki>{SIUnitModifier, conversionFactor=0.01, hedId=HED_0011422} [SI unit submultiple representing 10^-2.]</nowiki>
+* c <nowiki>{SIUnitSymbolModifier, conversionFactor=0.01, hedId=HED_0011423} [SI unit submultiple representing 10^-2.]</nowiki>
+* milli <nowiki>{SIUnitModifier, conversionFactor=0.001, hedId=HED_0011424} [SI unit submultiple representing 10^-3.]</nowiki>
+* m <nowiki>{SIUnitSymbolModifier, conversionFactor=0.001, hedId=HED_0011425} [SI unit submultiple representing 10^-3.]</nowiki>
+* micro <nowiki>{SIUnitModifier, conversionFactor=1e-6, hedId=HED_0011426} [SI unit submultiple representing 10^-6.]</nowiki>
+* u <nowiki>{SIUnitSymbolModifier, conversionFactor=1e-6, hedId=HED_0011427} [SI unit submultiple representing 10^-6.]</nowiki>
+* nano <nowiki>{SIUnitModifier, conversionFactor=1e-9, hedId=HED_0011428} [SI unit submultiple representing 10^-9.]</nowiki>
+* n <nowiki>{SIUnitSymbolModifier, conversionFactor=1e-9, hedId=HED_0011429} [SI unit submultiple representing 10^-9.]</nowiki>
+* pico <nowiki>{SIUnitModifier, conversionFactor=1e-12, hedId=HED_0011430} [SI unit submultiple representing 10^-12.]</nowiki>
+* p <nowiki>{SIUnitSymbolModifier, conversionFactor=1e-12, hedId=HED_0011431} [SI unit submultiple representing 10^-12.]</nowiki>
+* femto <nowiki>{SIUnitModifier, conversionFactor=1e-15, hedId=HED_0011432} [SI unit submultiple representing 10^-15.]</nowiki>
+* f <nowiki>{SIUnitSymbolModifier, conversionFactor=1e-15, hedId=HED_0011433} [SI unit submultiple representing 10^-15.]</nowiki>
+* atto <nowiki>{SIUnitModifier, conversionFactor=1e-18, hedId=HED_0011434} [SI unit submultiple representing 10^-18.]</nowiki>
+* a <nowiki>{SIUnitSymbolModifier, conversionFactor=1e-18, hedId=HED_0011435} [SI unit submultiple representing 10^-18.]</nowiki>
+* zepto <nowiki>{SIUnitModifier, conversionFactor=1e-21, hedId=HED_0011436} [SI unit submultiple representing 10^-21.]</nowiki>
+* z <nowiki>{SIUnitSymbolModifier, conversionFactor=1e-21, hedId=HED_0011437} [SI unit submultiple representing 10^-21.]</nowiki>
+* yocto <nowiki>{SIUnitModifier, conversionFactor=1e-24, hedId=HED_0011438} [SI unit submultiple representing 10^-24.]</nowiki>
+* y <nowiki>{SIUnitSymbolModifier, conversionFactor=1e-24, hedId=HED_0011439} [SI unit submultiple representing 10^-24.]</nowiki>
+
+'''Value classes'''
+* dateTimeClass <nowiki>{allowedCharacter=digits, allowedCharacter=T, allowedCharacter=hyphen, allowedCharacter=colon, hedId=HED_0011301} [Date-times should conform to ISO8601 date-time format YYYY-MM-DDThh:mm:ss.000000Z (year, month, day, hour (24h), minute, second, optional fractional seconds, and optional UTC time indicator. Any variation on the full form is allowed.]</nowiki>
+* nameClass <nowiki>{allowedCharacter=letters, allowedCharacter=digits, allowedCharacter=underscore, allowedCharacter=hyphen, hedId=HED_0011302} [Value class designating values that have the characteristics of node names. The allowed characters are alphanumeric, hyphen, and underscore.]</nowiki>
+* numericClass <nowiki>{allowedCharacter=digits, allowedCharacter=E, allowedCharacter=e, allowedCharacter=plus, allowedCharacter=hyphen, allowedCharacter=period, hedId=HED_0011303} [Value must be a valid numerical value.]</nowiki>
+* posixPath <nowiki>{allowedCharacter=digits, allowedCharacter=letters, allowedCharacter=slash, allowedCharacter=colon, hedId=HED_0011304} [Posix path specification.]</nowiki>
+* textClass <nowiki>{allowedCharacter=value-text, hedId=HED_0011305} [Values that have the characteristics of text. The allowed characters are the printable characters (32 <= ASCII < 127) and non-ASCII characters, excluding comma, square brackets, curly braces, parentheses, number sign, and tilde, which are structural in HED strings.]</nowiki>
+
+'''Schema attributes'''
+* annotation <nowiki>{elementDomain, stringRange, hedId=HED_0010504, annotationProperty} [A annotation link to an item in another ontology or item.]</nowiki>
+* hedId <nowiki>{elementDomain, stringRange, hedId=HED_0010500, annotationProperty} [The unique identifier of this element in the HED namespace.]</nowiki>
+* requireChild <nowiki>{tagDomain, boolRange, hedId=HED_0010501, annotationProperty} [This tag must have a descendent.]</nowiki>
+* rooted <nowiki>{tagDomain, tagRange, hedId=HED_0010502, annotationProperty} [This top-level library schema node should have a parent which is the indicated node in the partnered standard schema.]</nowiki>
+* takesValue <nowiki>{tagDomain, boolRange, hedId=HED_0010503, annotationProperty} [This tag is a hashtag placeholder that is expected to be replaced with a user-defined value.]</nowiki>
+* defaultUnits <nowiki>{unitClassDomain, unitRange, hedId=HED_0010104} [The default units to use if the placeholder has a unit class but the substituted value has no units.]</nowiki>
+* isPartOf <nowiki>{tagDomain, tagRange, hedId=HED_0010109} [This tag is part of the indicated tag -- as in the nose is part of the face.]</nowiki>
+* relatedTag <nowiki>{tagDomain, tagRange, hedId=HED_0010105} [A HED tag that is closely related to this tag. This attribute is used by tagging tools.]</nowiki>
+* suggestedTag <nowiki>{tagDomain, tagRange, hedId=HED_0010106} [A tag that is often associated with this tag. This attribute is used by tagging tools to provide tagging suggestions.]</nowiki>
+* unitClass <nowiki>{tagDomain, unitClassRange, hedId=HED_0010107} [The unit class that the value of a placeholder node can belong to.]</nowiki>
+* valueClass <nowiki>{tagDomain, valueClassRange, hedId=HED_0010108} [Type of value taken on by the value of a placeholder node.]</nowiki>
+* allowedCharacter <nowiki>{unitDomain, unitModifierDomain, valueClassDomain, stringRange, hedId=HED_0010304} [A special character that is allowed in expressing the value of a placeholder of a specified value class. Allowed characters may be listed individual, named individually, or named as a group as specified in Section 2.2 Character sets and restrictions of the HED specification.]</nowiki>
+* conversionFactor <nowiki>{unitDomain, unitModifierDomain, numericRange, hedId=HED_0010305} [The factor to multiply these units or unit modifiers by to convert to default units.]</nowiki>
+* deprecatedFrom <nowiki>{elementDomain, stringRange, hedId=HED_0010306} [The latest schema version in which the element was not deprecated.]</nowiki>
+* extensionAllowed <nowiki>{tagDomain, boolRange, hedId=HED_0010307} [Users can add unlimited levels of child nodes under this tag. This tag is propagated to child nodes except for hashtag placeholders.]</nowiki>
+* inLibrary <nowiki>{elementDomain, stringRange, hedId=HED_0010309} [The named library schema that this schema element is from. This attribute is added by tools when a library schema is merged into its partnered standard schema.]</nowiki>
+* reserved <nowiki>{tagDomain, boolRange, hedId=HED_0010310} [This tag has special meaning and requires special handling by tools.]</nowiki>
+* SIUnit <nowiki>{unitDomain, boolRange, hedId=HED_0010311} [This unit element is an SI unit and can be modified by multiple and sub-multiple names. Note that some units such as byte are designated as SI units although they are not part of the standard.]</nowiki>
+* SIUnitModifier <nowiki>{unitModifierDomain, boolRange, hedId=HED_0010312} [This SI unit modifier represents a multiple or sub-multiple of a base unit rather than a unit symbol.]</nowiki>
+* SIUnitSymbolModifier <nowiki>{unitModifierDomain, boolRange, hedId=HED_0010313} [This SI unit modifier represents a multiple or sub-multiple of a unit symbol rather than a base symbol.]</nowiki>
+* tagGroup <nowiki>{tagDomain, boolRange, hedId=HED_0010314} [This tag can only appear inside a tag group.]</nowiki>
+* topLevelTagGroup <nowiki>{tagDomain, boolRange, hedId=HED_0010315} [This tag (or its descendants) can only appear in a top-level tag group. There are additional tag-specific restrictions on what other tags can appear in the group with this tag.]</nowiki>
+* unique <nowiki>{tagDomain, boolRange, hedId=HED_0010316} [Only one of this tag or its descendants can be used in the event-level HED string.]</nowiki>
+* unitPrefix <nowiki>{deprecatedFrom=8.4.0, unitDomain, boolRange, hedId=HED_0010317} [This unit is a prefix unit (e.g., dollar sign in the currency units). Prefix units are no longer supported.]</nowiki>
+* unitSymbol <nowiki>{unitDomain, boolRange, hedId=HED_0010318} [This tag is an abbreviation or symbol representing a type of unit. Unit symbols represent both the singular and the plural and thus cannot be pluralized.]</nowiki>
+
+'''Properties'''
+* annotationProperty <nowiki>{hedId=HED_0010701} [The value is not inherited by child nodes.]</nowiki>
+* boolRange <nowiki>{hedId=HED_0010702} [This schema attribute's value can be true or false. This property was formerly named boolProperty.]</nowiki>
+* elementDomain <nowiki>{hedId=HED_0010703} [This schema attribute can apply to any type of element class (i.e., tag, unit, unit class, unit modifier, or value class). This property was formerly named elementProperty.]</nowiki>
+* tagDomain <nowiki>{hedId=HED_0010704} [This schema attribute can apply to node (tag-term) elements. This was added so attributes could apply to multiple types of elements. This property was formerly named nodeProperty.]</nowiki>
+* tagRange <nowiki>{hedId=HED_0010705} [This schema attribute's value can be a node. This property was formerly named nodeProperty.]</nowiki>
+* numericRange <nowiki>{hedId=HED_0010706} [This schema attribute's value can be numeric.]</nowiki>
+* stringRange <nowiki>{hedId=HED_0010707} [This schema attribute's value can be a string.]</nowiki>
+* unitClassDomain <nowiki>{hedId=HED_0010708} [This schema attribute can apply to unit classes. This property was formerly named unitClassProperty.]</nowiki>
+* unitClassRange <nowiki>{hedId=HED_0010709} [This schema attribute's value can be a unit class.]</nowiki>
+* unitModifierDomain <nowiki>{hedId=HED_0010710} [This schema attribute can apply to unit modifiers. This property was formerly named unitModifierProperty.]</nowiki>
+* unitDomain <nowiki>{hedId=HED_0010711} [This schema attribute can apply to units. This property was formerly named unitProperty.]</nowiki>
+* unitRange <nowiki>{hedId=HED_0010712} [This schema attribute's value can be units.]</nowiki>
+* valueClassDomain <nowiki>{hedId=HED_0010713} [This schema attribute can apply to value classes. This property was formerly named valueClassProperty.]</nowiki>
+* valueClassRange <nowiki>{hedId=HED_0010714} [This schema attribute's value can be a value class.]</nowiki>
+
+'''Epilogue'''
+This schema is released under the Creative Commons Attribution 4.0 International and is a product of the HED Working Group. The DOI for the latest version of the HED standard schema is 10.5281/zenodo.7876037.
+
+
+!# end hed

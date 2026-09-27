@@ -130,6 +130,37 @@ class Test(unittest.TestCase):
         task_names = BidsFileGroup(self.root_path, self.file_paths, "events").get_task_names()
         self.assertEqual(task_names, sorted(task_names), "get_task_names should return a sorted list")
 
+    def test_merged_sidecar_with_only_warnings_still_runs_its_files(self):
+        """A merged sidecar whose issues are all warnings is reported once and its data files still run."""
+        root_path = os.path.realpath(
+            os.path.join(os.path.dirname(__file__), "../../data/bids_tests/eeg_ds003645s_hed_inheritance")
+        )
+        file_paths = io_util.get_file_list(
+            root_path, extensions=[".tsv", ".json"], exclude_dirs=self.exclude_dirs, name_suffix=["_events"]
+        )
+        events = BidsFileGroup(root_path, file_paths, "events")
+        hed_schema = load_schema_version("8.4.0")
+        group_sidecars = {id(sidecar.contents) for sidecar in events.sidecar_dict.values()}
+        sub_002 = [
+            f
+            for f in events.datafile_dict.values()
+            if f.sidecar is not None and id(f.sidecar) not in group_sidecars and "sub-002" in f.file_path
+        ]
+        self.assertEqual(len(sub_002), 3)
+        # One warning in the shared merged sidecar, and a value column whose stim_file paths cannot be distances.
+        for data_obj in sub_002:
+            data_obj.sidecar.loaded_dict["warn_column"] = {"HED": {"x": "Item/Extended-thing"}}
+            data_obj.sidecar.loaded_dict["stim_file"] = {"HED": "Distance/# m"}
+            data_obj.clear_contents()
+        issues = events.validate_datafiles(hed_schema, error_handler=ErrorHandler(check_for_warnings=True))
+
+        extended = [i for i in issues if i["code"] == "TAG_EXTENDED" and "Extended-thing" in i["message"]]
+        self.assertEqual(len(extended), 1, "the shared merged sidecar is validated once")
+        self.assertTrue(extended[0]["ec_filename"].startswith("merged_"))
+        bad_values = [i for i in issues if i["code"] == "VALUE_INVALID"]
+        self.assertEqual(len({i["ec_filename"] for i in bad_values}), 3, "all three sub-002 files still ran")
+        self.assertTrue(all("sub-002" in i["ec_filename"] and i["ec_column"] == "stim_file" for i in bad_values))
+
 
 if __name__ == "__main__":
     unittest.main()

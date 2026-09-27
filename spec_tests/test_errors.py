@@ -125,6 +125,7 @@ class MyTestCase(unittest.TestCase):
                     issues = e.issues
                     if not issues:
                         issues += [{"code": e.code, "message": e.message}]
+                    self.test_counter["total"] += 1
                     self.report_result(
                         "fails",
                         issues,

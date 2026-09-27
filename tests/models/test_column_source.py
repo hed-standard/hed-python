@@ -62,6 +62,12 @@ class TestBaseInputAsColumnSource(unittest.TestCase):
         self.assertIs(self.tabular.as_base_input(), self.tabular)
         self.assertIsNone(self.tabular.get_sidecar())
 
+    def test_the_text_nan_is_a_value_but_a_real_nan_is_missing(self):
+        """Only None, float NaN, "" and "n/a" are missing; the text "nan" is a value and is validated as one."""
+        self.assertEqual(distinct_values(["nan", math.nan, None, "", "n/a", "NaN"]), {"nan": [0], "NaN": [5]})
+        tabular = TabularInput(pd.DataFrame({"onset": [1.0, 2.0], "HED": [math.nan, "nan"]}))
+        self.assertEqual(tabular.distinct_values("HED"), {"nan": [1]})
+
 
 if __name__ == "__main__":
     unittest.main()

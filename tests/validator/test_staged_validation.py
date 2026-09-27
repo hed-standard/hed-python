@@ -400,6 +400,93 @@ class TestStagedValidation(unittest.TestCase):
         self.assertEqual(issues[0][ErrorContext.ROW], 1)
         self.assertEqual(error_handler.error_context, [])
 
+    def test_prefixed_library_value_column(self):
+        """A value column whose template is a prefixed library tag keeps its namespace through the value stage."""
+        schema = load_schema_version(["8.4.0", "sc:score_2.1.0"])
+        sidecar = _sidecar({"freq": {"HED": "sc:Intermittent-photic-stimulation/# Hz"}})
+        rows = [["onset", "duration", "freq"], ["1.0", "0", "abc"], ["2.0", "0", "12"], ["3.0", "0", "abc"]]
+        issues = _tabular(rows, sidecar).validate(schema)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.VALUE_INVALID])
+        self.assertEqual((issues[0][ErrorContext.ROW], issues[0][ROW_COUNT_KEY]), (2, 2))
+        self.assertIn("sc:Intermittent-photic-stimulation/abc Hz", issues[0]["message"])
+
+    def test_value_column_definition_from_the_sidecar(self):
+        """A Def/Name/# template resolves its placeholder through a definition the sidecar itself carries."""
+        sidecar = _sidecar(
+            {
+                "defs": {"HED": {"def1": "(Definition/Acc/#, (Acceleration/# m-per-s^2, Red))"}},
+                "acc": {"HED": "Def/Acc/#"},
+            }
+        )
+        rows = [["onset", "duration", "acc"], ["1.0", "0", "2.5"], ["2.0", "0", "fast"]]
+        issues = _tabular(rows, sidecar).validate(self.schema)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.VALUE_INVALID])
+        self.assertEqual((issues[0][ErrorContext.ROW], issues[0][ErrorContext.COLUMN]), (3, "acc"))
+
+    def test_two_tag_columns_report_a_shared_bad_string_each(self):
+        """Each HED-tags column reports a bad string with its own first row and row_count (no header, 1-based)."""
+        text = "Red\tInvalidTagXYZ\nInvalidTagXYZ\tRed\nInvalidTagXYZ\tBlue\n"
+        spreadsheet = SpreadsheetInput(io.StringIO(text), file_type=".tsv", has_column_names=False, tag_columns=[0, 1])
+        issues = spreadsheet.validate(self.schema)
+        self.assertTrue(all(issue["code"] == ValidationErrors.TAG_INVALID for issue in issues))
+        self.assertEqual(
+            sorted((issue[ErrorContext.COLUMN], issue[ErrorContext.ROW], issue[ROW_COUNT_KEY]) for issue in issues),
+            [(0, 2, 2), (1, 1, 1)],
+        )
+
+    def test_plain_source_sidecar_issue_under_a_caller_managed_context(self):
+        """Stage 1 for a ListColumnSource with name="" reports under the caller's context, not the sidecar's name."""
+        error_handler = ErrorHandler()
+        error_handler.push_error_context(ErrorContext.TABLE_NAME, "trials")
+        source = ListColumnSource({"onset": [1.0], "code": ["a"]})
+        sidecar = _sidecar({"code": {"HED": {"a": "InvalidTagXYZ"}}}, name="events.json")
+        issues = self.validator.validate(source, sidecar=sidecar, name="", error_handler=error_handler)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TAG_INVALID])
+        self.assertEqual(issues[0].get("ec_table_name"), "trials")
+        self.assertNotIn("ec_filename", issues[0])
+        self.assertEqual(error_handler.error_context, [(ErrorContext.TABLE_NAME, "trials")])
+
+    def test_value_column_whose_tag_has_no_unit_or_value_class(self):
+        """An extension-allowed template tag has no value class, so each value is checked as an extension."""
+        sidecar = _sidecar({"col": {"HED": "Item/#"}})
+        rows = [
+            ["onset", "duration", "col"],
+            ["1.0", "0", "Widget"],
+            ["2.0", "0", "a b"],
+            ["3.0", "0", "a,b"],
+            ["4.0", "0", "a{b"],
+        ]
+        issues = _tabular(rows, sidecar).validate(self.schema, error_handler=ErrorHandler(check_for_warnings=True))
+        # Every value is an extension: the two with a bad character are errors, the others warn like the
+        # template itself does (the template's warning carries no row).
+        self.assertEqual(
+            [(issue["code"], issue.get(ErrorContext.ROW)) for issue in issues],
+            [
+                (ValidationErrors.TAG_EXTENDED, 2),
+                (ValidationErrors.TAG_EXTENDED, 3),
+                (ValidationErrors.CHARACTER_INVALID, 4),
+                (ValidationErrors.CHARACTER_INVALID, 5),
+                (ValidationErrors.TAG_EXTENDED, None),
+            ],
+        )
+        self.assertEqual(_tabular(rows[:3], sidecar).validate(self.schema, error_handler=ErrorHandler(False)), [])
+
+    def test_prefix_template_with_only_a_warning_still_checks_the_values(self):
+        """A column_prefix_dictionary template that only warns (an extension) does not skip its values."""
+        text = "HED\tcode\nRed\ta,b\nBlue\t34\n"
+        spreadsheet = SpreadsheetInput(
+            io.StringIO(text),
+            file_type=".tsv",
+            tag_columns=["HED"],
+            column_prefix_dictionary={"code": "Item/Extended-thing/"},
+        )
+        issues = spreadsheet.validate(self.schema, error_handler=ErrorHandler(check_for_warnings=True))
+        template_issues = [issue["code"] for issue in issues if ErrorContext.ROW not in issue]
+        self.assertEqual(template_issues, [ValidationErrors.TAG_EXTENDED])
+        self.assertIn(
+            (ValidationErrors.CHARACTER_INVALID, 2), [(issue["code"], issue.get(ErrorContext.ROW)) for issue in issues]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

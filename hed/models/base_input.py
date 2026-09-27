@@ -568,13 +568,17 @@ class BaseInput:
             - For Excel files: Loads workbook and converts specified worksheet to DataFrame
             - For text files: Uses pandas read_csv with tab delimiter and handles empty files
             - All loaded data is converted to string type for consistency
-            - NaN values in text files are replaced with "n/a"
+            - Missing cells (empty, "n/a", or a DataFrame NaN or None) are stored as "n/a"; any other cell
+              text, including "nan" or "NULL", is a value
         """
         pandas_header = 0 if has_column_names else None
 
         # If file is already a DataFrame
         if isinstance(file, pd.DataFrame):
-            self._dataframe = file.astype(str)
+            # A missing cell (NaN or None) becomes "n/a", as in a text file. The object step is what makes
+            # this the same on every pandas: pandas 2 turns a NaN into the text "nan" under astype(str), pandas 3
+            # keeps it missing.
+            self._dataframe = file.astype(object).fillna("n/a").astype(str)
             self._has_column_names = self._dataframe_has_names(self._dataframe)
             return
 
@@ -667,10 +671,12 @@ class BaseInput:
                 header=pandas_header,
                 skip_blank_lines=True,
                 dtype=str,
-                keep_default_na=True,
-                na_values=("", "null"),
+                keep_default_na=False,
+                na_values=("", "n/a"),
             )
-            # Replace NaN values with a known value
+            # Only an empty cell and n/a are missing (BIDS). Every other cell text, including nan, NaN, NA,
+            # None and NULL, which pandas would otherwise read as missing, is a value and is validated as one,
+            # as it is when a DataFrame is passed in.
             self._dataframe = self._dataframe.fillna("n/a")
         except pd.errors.EmptyDataError:
             self._dataframe = pd.DataFrame()  # Handle case where file has no data

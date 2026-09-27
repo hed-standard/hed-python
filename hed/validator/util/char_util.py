@@ -9,6 +9,11 @@ from hed.errors.error_types import ValidationErrors
 
 CLASS_REX_FILENAME = "../data/class_regex.json"
 
+# The allowedCharacter names that are complete character sets of the specification (2.2 "Character sets and
+# restrictions"). A value class whose schema declaration uses only these is checked against the declaration,
+# so a schema can move textClass from text to value-text (HED 8.5.0) without a code change.
+SCHEMA_DECLARED_SETS = frozenset({"text", "value-text", "name"})
+
 
 class CharValidator:
     """Class responsible for basic character level validation of a string or tag."""
@@ -182,12 +187,21 @@ class CharRexValidator(CharValidator):
         super().__init__(modern_allowed_char_rules)
         self._rex_dict = self._get_rex_dict()
 
-    def get_problem_chars(self, in_str, cname):
+    def get_problem_chars(self, in_str, cname, declared_names=None):
         """Return a list of (index, char) pairs for characters in in_str not allowed by the value class cname.
+
+        The character sets come from the schema's own declaration of the value class when it consists only
+        of complete named sets (``allowedCharacter=text`` in HED 8.3.0 and 8.4.0, ``allowedCharacter=value-text``
+        from 8.5.0), so the check follows the loaded schema. A declaration that enumerates parts (HED 8.0.0 to
+        8.2.0 list ``+``, ``(``, ... for textClass; every release lists ``letters, digits, underscore, hyphen``
+        for nameClass and omits the ``nonascii`` the specification allows from 8.3.0) is not trusted: the
+        built-in table for the class name applies, as before.
 
         Parameters:
             in_str (str): The string to check.
             cname (str): The value class name used to look up allowed character classes.
+            declared_names (list of str or None): The ``allowedCharacter`` names the schema declares for
+                the class, if any.
 
         Returns:
             list[tuple[int, str]]: Each tuple contains the character index and the offending character.
@@ -196,8 +210,11 @@ class CharRexValidator(CharValidator):
         # List to store problem indices and characters
         bad_indices = []
 
-        # Retrieve the allowed character classes for the given class_name
+        # Retrieve the allowed character classes: the schema's declaration when it is made of complete sets,
+        # else the table
         allowed_classes = self._rex_dict["class_chars"].get(cname, [])
+        if declared_names and all(name in SCHEMA_DECLARED_SETS for name in declared_names):
+            allowed_classes = declared_names
         if not allowed_classes:
             return bad_indices
         # Combine the corresponding regular expressions from the char_regex section

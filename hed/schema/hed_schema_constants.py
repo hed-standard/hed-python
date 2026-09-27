@@ -163,6 +163,10 @@ character_types["alphanumeric"] = character_types["letters"] | character_types["
 character_types["text"] = character_types["printable"].copy()
 character_types["text"].add("nonascii")
 character_types["text"] -= banned_delimiters
+# The characters a value may contain without changing the structure of the HED string it is substituted
+# into: text minus parentheses, the placeholder and the tilde. Standard schema 8.5.0 points textClass at it
+# (specification 2.2 "Character sets and restrictions"); earlier schemas keep textClass on "text".
+character_types["value-text"] = character_types["text"] - set("()#~")
 character_types["name"] = (
     character_types["alphanumeric"]
     | character_types["hyphen"]

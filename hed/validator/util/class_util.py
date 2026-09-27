@@ -104,8 +104,11 @@ class UnitValueValidator:
         """
         return self._check_value_class(original_tag, validate_text, report_as)
 
-    def _get_problem_indices(self, stripped_value, class_name, start_index=0):
-        indices = self._char_validator.get_problem_chars(stripped_value, class_name)
+    def _get_problem_indices(self, stripped_value, class_name, start_index=0, class_entry=None):
+        declared = None
+        if class_entry is not None:
+            declared = [name for name in class_entry.attributes.get("allowedCharacter", "").split(",") if name]
+        indices = self._char_validator.get_problem_chars(stripped_value, class_name, declared_names=declared)
         if indices:
             indices = [(char, index + start_index) for index, char in indices]
         return indices
@@ -126,7 +129,8 @@ class UnitValueValidator:
         if not original_tag.is_takes_value_tag():
             return []
 
-        classes = list(original_tag.value_classes.keys())
+        value_classes = original_tag.value_classes
+        classes = list(value_classes.keys())
         if not classes:
             return []
         start_index = original_tag.extension.find(stripped_value) + len(original_tag.org_base_tag) + 1
@@ -138,7 +142,9 @@ class UnitValueValidator:
 
         char_errors = {}
         for class_name in classes:
-            char_errors[class_name] = self._get_problem_indices(stripped_value, class_name, start_index=start_index)
+            char_errors[class_name] = self._get_problem_indices(
+                stripped_value, class_name, start_index=start_index, class_entry=value_classes[class_name]
+            )
             if class_valid[class_name] and not char_errors[class_name]:  # We have found a valid class
                 return []
 
