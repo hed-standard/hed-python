@@ -124,6 +124,29 @@ class Test(unittest.TestCase):
         validation_issues = tab_input3.validate(hed_schema=self.hed_schema, error_handler=error_handler2)
         self.assertEqual(len(validation_issues), 3)
 
+    def test_only_empty_and_na_cells_are_missing_in_a_text_file(self):
+        """A TSV cell is missing only when it is empty or n/a; nan, NaN, None and NULL are values, as for a
+        DataFrame. pandas would otherwise read them as missing."""
+        events = [
+            ["onset", "duration", "HED"],
+            [1.0, 0, "n/a"],
+            [2.0, 0, ""],
+            [3.0, 0, "nan"],
+            [4.0, 0, "NaN"],
+            [5.0, 0, "None"],
+            [6.0, 0, "NULL"],
+            [7.0, 0, "Red"],
+        ]
+        tab_input = self.get_tabular(events, None)
+        self.assertEqual(tab_input.dataframe["HED"].tolist()[:2], ["n/a", "n/a"])
+        self.assertEqual(
+            tab_input.distinct_values("HED"), {"nan": [2], "NaN": [3], "None": [4], "NULL": [5], "Red": [6]}
+        )
+        # None is a HED tag (Categorical-class-value/None), so only the other three are invalid tags.
+        issues = tab_input.validate(hed_schema=self.hed_schema, error_handler=ErrorHandler(check_for_warnings=False))
+        self.assertEqual(sorted(issue[ErrorContext.ROW] for issue in issues), [4, 5, 7])
+        self.assertTrue(all(issue["code"] == "TAG_INVALID" for issue in issues))
+
     def test_blank_and_duplicate_columns(self):
         filepath = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../data/model_tests/blank_column_name.tsv"
