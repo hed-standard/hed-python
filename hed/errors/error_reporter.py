@@ -57,6 +57,10 @@ default_sort_list = [
 # ErrorContext which is expected to be int based.
 int_sort_list = [ErrorContext.ROW]
 
+# Extra key on an issue reported once for a value that several rows hold: how many rows hold it. It is not
+# an "ec_" key, so it is not treated as context; the printers add it to the message.
+ROW_COUNT_KEY = "row_count"
+
 
 def _register_error_function(error_type, wrapper_func):
     if error_type in error_functions:
@@ -730,13 +734,13 @@ def _error_dict_to_string(print_dict, add_link=True, show_details=False, level=0
     for context, value in print_dict.items():
         if context == "children":
             for child in value:
-                single_issue_message = child["message"]
-                issue_string = level * "\t" + _get_error_prefix(child)
-                issue_string += f"{single_issue_message}\n"
+                single_issue_message = _get_issue_message(child)
                 if add_link:
                     link_url = create_doc_link(child["code"])
                     if link_url:
                         single_issue_message += "\n" + (level + 1) * "\t" + f"   See... {link_url}"
+                issue_string = level * "\t" + _get_error_prefix(child)
+                issue_string += f"{single_issue_message}\n"
                 if show_details and "details" in child:
                     issue_string += _expand_details(child["details"], level + 1)
                 output += issue_string
@@ -807,6 +811,22 @@ def _get_error_prefix(single_issue):
     return error_prefix
 
 
+def _get_issue_message(single_issue):
+    """Return the message to print for an issue, with the number of rows it covers when that is more than one.
+
+    Parameters:
+        single_issue(dict): A single issue object.
+
+    Returns:
+        str:  The message to print.
+    """
+    message = single_issue["message"]
+    row_count = single_issue.get(ROW_COUNT_KEY, 1)
+    if row_count > 1:
+        message += f" [first of {row_count} rows with this value]"
+    return message
+
+
 def _format_single_context_string(context_type, context, tab_count=0):
     """Return the human-readable form of a single context tuple.
 
@@ -848,7 +868,7 @@ def _create_error_tree(error_dict, parent_element=None, add_link=True):
             for child in value:
                 child_li = ET.SubElement(parent_element, "li")
                 error_prefix = _get_error_prefix(child)
-                single_issue_message = child["message"]
+                single_issue_message = _get_issue_message(child)
 
                 # Create a link for the error prefix if add_link is True.
                 if add_link:

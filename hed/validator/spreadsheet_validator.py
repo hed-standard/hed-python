@@ -9,7 +9,7 @@ import warnings
 
 import pandas as pd
 
-from hed.errors.error_reporter import ErrorHandler, check_for_any_errors, sort_issues
+from hed.errors.error_reporter import ROW_COUNT_KEY, ErrorHandler, check_for_any_errors, sort_issues
 from hed.errors.error_types import ErrorContext, TemporalErrors, ValidationErrors
 from hed.models import df_util
 from hed.models.base_input import BaseInput
@@ -27,9 +27,8 @@ from hed.validator.util.placeholder_util import placeholder_tag
 
 PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
-# Extra key on an issue found by a distinct-value stage: how many rows hold the value reported. It is not
-# an "ec_" key, so the error handler does not treat it as context.
-ROW_COUNT_KEY = "row_count"
+# Each issue found by a distinct-value stage carries ROW_COUNT_KEY (defined in error_reporter, whose printers
+# show it): how many rows hold the value reported.
 
 
 class SpreadsheetValidator:
