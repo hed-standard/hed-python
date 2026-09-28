@@ -735,12 +735,12 @@ def _error_dict_to_string(print_dict, add_link=True, show_details=False, level=0
         if context == "children":
             for child in value:
                 single_issue_message = _get_issue_message(child)
-                issue_string = level * "\t" + _get_error_prefix(child)
-                issue_string += f"{single_issue_message}\n"
                 if add_link:
                     link_url = create_doc_link(child["code"])
                     if link_url:
                         single_issue_message += "\n" + (level + 1) * "\t" + f"   See... {link_url}"
+                issue_string = level * "\t" + _get_error_prefix(child)
+                issue_string += f"{single_issue_message}\n"
                 if show_details and "details" in child:
                     issue_string += _expand_details(child["details"], level + 1)
                 output += issue_string

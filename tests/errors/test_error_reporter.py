@@ -174,6 +174,12 @@ class Test(unittest.TestCase):
         self.assertNotIn(suffix, issues[0]["message"])
         self.assertEqual(next(iter_errors(issues[:1]))[ROW_COUNT_KEY], 12)
 
+    def test_printable_issue_string_add_link(self):
+        issues = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
+        link = "https://www.hedtags.org/hed-specification/Appendix_B.html#tag-not-unique"
+        self.assertIn(f"See... {link}", get_printable_issue_string(issues, add_link=True))
+        self.assertNotIn(link, get_printable_issue_string(issues))
+
     def test_iter_errors_no_context(self):
         self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
         error_list = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
