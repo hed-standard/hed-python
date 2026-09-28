@@ -11,7 +11,7 @@ from hed.errors import (
     separate_issues,
     sort_issues,
 )
-from hed.errors.error_reporter import get_printable_issue_string_html, hed_tag_error, iter_errors
+from hed.errors.error_reporter import ROW_COUNT_KEY, get_printable_issue_string_html, hed_tag_error, iter_errors
 
 
 class Test(unittest.TestCase):
@@ -155,6 +155,24 @@ class Test(unittest.TestCase):
         self.assertEqual(printable_issues3.count(my_file), 1)
 
         self.error_handler.reset_error_context()
+
+    def test_printable_issue_string_row_count(self):
+        self.error_handler.push_error_context(ErrorContext.ROW, 5)
+        issues = self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
+        issues += self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
+        issues += self.error_handler.format_error_with_context(ValidationErrors.TAG_NOT_UNIQUE, "")
+        self.error_handler.reset_error_context()
+        issues[0][ROW_COUNT_KEY] = 12
+        issues[1][ROW_COUNT_KEY] = 1
+        suffix = "[first of 12 rows with this value]"
+
+        for printed in (get_printable_issue_string(issues), get_printable_issue_string_html(issues)):
+            self.assertEqual(printed.count(suffix), 1)
+            self.assertNotIn("[first of 1 rows", printed)
+            self.assertEqual(printed.count("rows with this value"), 1)
+        # The message itself is left alone; only the printed form carries the count.
+        self.assertNotIn(suffix, issues[0]["message"])
+        self.assertEqual(next(iter_errors(issues[:1]))[ROW_COUNT_KEY], 12)
 
     def test_iter_errors_no_context(self):
         self.error_handler.push_error_context(ErrorContext.CUSTOM_TITLE, "Default Custom Title")
