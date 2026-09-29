@@ -90,7 +90,9 @@ def val_error_invalid_value_class_value(tag, problem_tag, value_class):
     return f"'{tag}' has an invalid value portion for value class '{value_class}'"
 
 
-@hed_error(ValidationErrors.TILDES_UNSUPPORTED)
+# Reported as CHARACTER_INVALID, the specification's code for a tilde (Appendix B, CHARACTER_INVALID a); the
+# message keeps the replacement advice.
+@hed_error(ValidationErrors.TILDES_UNSUPPORTED, actual_code=ValidationErrors.CHARACTER_INVALID)
 def val_error_tildes_not_supported(source_string, char_index):
     character = source_string[char_index]
     return f"Tildes not supported. Replace (a ~ b ~ c) with (a, (b, c)). '{character}' at index {char_index}'"

@@ -303,7 +303,7 @@ class TestStagedValidation(unittest.TestCase):
         expected = {
             "(a": ValidationErrors.PARENTHESES_MISMATCH,
             "a)": ValidationErrors.PARENTHESES_MISMATCH,
-            "a~b": ValidationErrors.TILDES_UNSUPPORTED,
+            "a~b": ValidationErrors.CHARACTER_INVALID,
             "a#b": ValidationErrors.PLACEHOLDER_INVALID,
             "7,3": ValidationErrors.CHARACTER_INVALID,
             "{x}": SidecarErrors.SIDECAR_BRACES_INVALID,
