@@ -637,7 +637,7 @@ class SchemaComparer:
         added = [line for line in difflib.ndiff(old_lines, new_lines) if line.startswith("+ ")]
 
         def cut(line):
-            text = line[2:].strip()
+            text = line[2:]  # the line as it is, indentation and all, so a whitespace change is visible
             return text if len(text) <= max_chars else text[: max_chars - 3] + "..."
 
         parts = []

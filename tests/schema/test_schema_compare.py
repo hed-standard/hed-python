@@ -197,7 +197,10 @@ class TestGatherSchemaChanges(unittest.TestCase):
         self.assertTrue(misc["prologue"].startswith("prologue changed: "))
         self.assertIn("+ Changed prologue", misc["prologue"])
         for old_line in self.base.prologue.splitlines():
-            self.assertIn(f"- {old_line.strip()}"[:40], misc["prologue"])
+            self.assertIn(f"- {old_line}"[:40], misc["prologue"])
+        # A change of indentation alone is shown as it is, not stripped away.
+        summary = SchemaComparer._text_change_summary("  indented line", "indented line")
+        self.assertIn("-   indented line | + indented line", summary)
 
     def test_epilogue_change_appears_in_misc(self):
         """An epilogue change appears under MISC_SECTION."""
