@@ -67,6 +67,11 @@ class SchemaComparer:
     # Class-level constants
     MISC_SECTION = "misc"
     HED_ID_SECTION = "HedId changes"
+    # Where a change comes from when a schema is a library merged with its standard partner: the library's own
+    # entries carry inLibrary, the partner's do not. Absent from the change dictionaries of unpartnered schemas.
+    ORIGIN_KEY = "origin"
+    LIBRARY_ORIGIN = "library"
+    PARTNER_ORIGIN = "partner"
     EXTRAS_SECTION = "Extras changes"
     SOURCES = SOURCES_KEY
     PREFIXES = PREFIXES_KEY
@@ -278,7 +283,33 @@ class SchemaComparer:
         self._add_unequal_entries(change_dict, unequal_entries)
         self._add_extras_changes(change_dict)
         self._sort_changes_by_severity(change_dict)
+        if self._is_partnered_library():
+            self._mark_origins(change_dict)
         return {key: change_dict[key] for key in self.SECTION_ENTRY_NAMES if key in change_dict}
+
+    def _is_partnered_library(self):
+        """Return True if either schema is a library merged with a standard partner."""
+        return any(schema.library and schema.with_standard for schema in (self.schema1, self.schema2))
+
+    def _mark_origins(self, change_dict):
+        """Add ``origin`` to every change: ``library`` for the library's own entries, ``partner`` for entries
+        that came in from the standard partner (no inLibrary attribute). Metadata and extras changes are the
+        library's. An entry is looked up in schema2 first, then schema1 (a removed entry exists only there)."""
+        for section_key, changes in change_dict.items():
+            for change in changes:
+                if self.ORIGIN_KEY in change:  # extras rows are marked from their in_library column
+                    continue
+                origin = self.LIBRARY_ORIGIN
+                lookup_section = change.get("section", section_key)
+                if isinstance(lookup_section, HedSectionKey):
+                    entry = None
+                    for schema in (self.schema2, self.schema1):
+                        entry = schema.get_tag_entry(change["tag"], key_class=lookup_section)
+                        if entry is not None:
+                            break
+                    if entry is not None and not entry.has_attribute(HedKey.InLibrary):
+                        origin = self.PARTNER_ORIGIN
+                change[self.ORIGIN_KEY] = origin
 
     def pretty_print_change_dict(self, change_dict, title="Schema changes", use_markdown=True):
         """Format a change dictionary into a human-readable string.
@@ -318,24 +349,55 @@ class SchemaComparer:
         if not change_dict:
             return ""
         final_strings = []
-        line_prefix = "- " if use_markdown else "\t"
         if title:
             final_strings.append(f"## {title}" if use_markdown else title)
             final_strings.append("")
+        # A partnered library's changes are printed in two blocks: the library's own entries first, then the
+        # entries that changed because the standard partner changed (a different partner version, usually).
+        library_changes, partner_changes = self._split_by_origin(change_dict)
+        if partner_changes and not library_changes:
+            final_strings.append("No changes in the library's own entries.")
+            final_strings.append("")
+        final_strings += self._render_sections(library_changes, use_markdown)
+        if partner_changes:
+            heading = f"From the partner standard schema ({self._partner_versions()})"
+            final_strings.append(f"### {heading}" if use_markdown else heading)
+            final_strings.append("")
+            final_strings += self._render_sections(partner_changes, use_markdown)
+        return "\n".join(final_strings)
+
+    def _split_by_origin(self, change_dict):
+        """Return (library_changes, partner_changes); changes without an origin count as the library's."""
+        library_changes, partner_changes = {}, {}
+        for section_key, changes in change_dict.items():
+            for change in changes:
+                target = partner_changes if change.get(self.ORIGIN_KEY) == self.PARTNER_ORIGIN else library_changes
+                target.setdefault(section_key, []).append(change)
+        return library_changes, partner_changes
+
+    def _partner_versions(self):
+        """Return the partner versions as ``8.4.0 -> 8.5.0``, or one version if both schemas share it."""
+        versions = [str(schema.with_standard or "none") for schema in (self.schema1, self.schema2)]
+        return versions[0] if versions[0] == versions[1] else f"{versions[0]} -> {versions[1]}"
+
+    def _render_sections(self, change_dict, use_markdown):
+        """Render the sections of a change dictionary as lines, in SECTION_ENTRY_NAMES order."""
+        lines = []
+        line_prefix = "- " if use_markdown else "\t"
         known_keys = [key for key in self.SECTION_ENTRY_NAMES if key in change_dict]
         extra_keys = [key for key in change_dict if key not in self.SECTION_ENTRY_NAMES]
         for section_key in known_keys + extra_keys:
             section_dict = change_dict[section_key]
             name = self.SECTION_ENTRY_NAMES_PLURAL.get(section_key, section_key)
             line_endings = "**" if use_markdown else ""
-            final_strings.append(f"{line_endings}{name}:{line_endings}")
+            lines.append(f"{line_endings}{name}:{line_endings}")
             if use_markdown:
-                final_strings.append("")
+                lines.append("")
             for item in section_dict:
                 change, tag, change_type = item["change"], item["tag"], item["change_type"]
-                final_strings.append(f"{line_prefix}{tag} ({change_type}): {change}")
-            final_strings.append("")
-        return "\n".join(final_strings)
+                lines.append(f"{line_prefix}{tag} ({change_type}): {change}")
+            lines.append("")
+        return lines
 
     def compare_differences(self, attribute_filter=None, title="", use_markdown=True):
         """Compare two schemas and return a formatted report of all differences.
@@ -791,11 +853,13 @@ class SchemaComparer:
             compare_cols = sorted(c for c in set(df1.columns) & set(df2.columns) if c != _in_library)
             if not compare_cols:
                 continue
+            row_origins = self._extras_row_origins(df1, df2, key_cols)
 
             df1 = df1[compare_cols]
             df2 = df2[compare_cols]
 
             diff_results = self._compare_dataframes(df1, df2, key_cols)
+            first_new = len(change_dict.get(key, ()))
             for diff in diff_results:
                 row_key = diff["row"]
                 cols = diff["cols"]
@@ -833,6 +897,23 @@ class SchemaComparer:
                             "tag": str(row_key),
                         }
                     )
+            for change in change_dict.get(key, ())[first_new:]:
+                if change["tag"] in row_origins:
+                    change[self.ORIGIN_KEY] = row_origins[change["tag"]]
+
+    def _extras_row_origins(self, df1, df2, key_cols):
+        """Map each extras row key (as the comparer prints it) to its origin, from the ``in_library`` column a
+        merged library load carries: the library's name means the library's own row, anything else a row that
+        came in from the partner. Empty when neither frame has the column."""
+        origins = {}
+        for schema, df in ((self.schema1, df1), (self.schema2, df2)):
+            if _in_library not in df.columns or not schema.library:
+                continue
+            for _, row in df.iterrows():
+                row_key = row[key_cols[0]] if len(key_cols) == 1 else tuple(row[c] for c in key_cols)
+                own = str(row[_in_library]) == str(schema.library)
+                origins.setdefault(str(row_key), self.LIBRARY_ORIGIN if own else self.PARTNER_ORIGIN)
+        return origins
 
     @staticmethod
     def _compare_dataframes(df1, df2, key_cols):

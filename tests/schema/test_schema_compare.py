@@ -647,3 +647,72 @@ class TestSchemaComparerEmptyExtras(unittest.TestCase):
                 comp = SchemaComparer(old, new)
                 self.assertEqual(self._extras_changes(old, new), {})
                 self.assertEqual(comp.compare_differences(attribute_filter=None), "")
+
+
+class TestPartnerOrigin(unittest.TestCase):
+    """A partnered library's changes are split into its own entries and those inherited from the partner."""
+
+    @classmethod
+    def setUpClass(cls):
+        path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/schema_compare.mediawiki"
+        )
+        with open(path, encoding="utf-8") as fp:
+            text = fp.read()
+        cls.old = load_schema(path)  # library "compare" partnered with 8.2.0
+        # The same library with one tag deleted, partnered with 8.4.0 instead: the partner changes come along.
+        new_text = text.replace('withStandard="8.2.0"', 'withStandard="8.4.0"').replace("* Deleting-tag\n", "")
+        cls.new = from_string(new_text, schema_format=".mediawiki")
+        cls.comparer = SchemaComparer(cls.old, cls.new)
+
+    def test_every_change_of_a_partnered_library_has_an_origin(self):
+        changes = self.comparer.gather_schema_changes()
+        by_origin = {SchemaComparer.LIBRARY_ORIGIN: [], SchemaComparer.PARTNER_ORIGIN: []}
+        for section_changes in changes.values():
+            for change in section_changes:
+                by_origin[change[SchemaComparer.ORIGIN_KEY]].append(change)
+        library_tags = [c["tag"] for c in by_origin[SchemaComparer.LIBRARY_ORIGIN] if c.get("section", None) is None]
+        self.assertIn("Deleting-tag", library_tags)
+        self.assertIn("header_attributes", library_tags)  # metadata is the library's own
+        partner_tags = [c["tag"] for c in by_origin[SchemaComparer.PARTNER_ORIGIN]]
+        self.assertTrue(partner_tags)
+        self.assertNotIn("Deleting-tag", partner_tags)
+        for tag in partner_tags:
+            self.assertIsNone(self.old.get_tag_entry(tag) and self.old.get_tag_entry(tag).attributes.get("inLibrary"))
+
+    def test_partner_changes_are_printed_in_their_own_block(self):
+        out = self.comparer.compare_differences()
+        heading = "### From the partner standard schema (8.2.0 -> 8.4.0)"
+        self.assertIn(heading, out)
+        library_block, partner_block = out.split(heading)
+        self.assertIn("- Deleting-tag (Major): Tag Deleting-tag deleted from Tags", library_block)
+        self.assertNotIn("Deleting-tag", partner_block)
+        self.assertIn("**Tags:**", partner_block)
+        # Plain text has the same two blocks without markdown markers.
+        plain = self.comparer.compare_differences(use_markdown=False)
+        self.assertIn("From the partner standard schema (8.2.0 -> 8.4.0)", plain)
+        self.assertNotIn("###", plain)
+
+    def test_only_partner_changes_says_so(self):
+        """A change dictionary with nothing of the library's own prints a line saying so, then the partner block.
+
+        Rendered from a synthetic dictionary: comparing two loads of one library always changes the header
+        attributes when the partner version changes, so no fixture pair produces this on its own; it happens
+        when the same partner version is re-issued with different content (a prerelease refresh).
+        """
+        partner_only = {
+            HedSectionKey.Tags: [
+                {"change_type": "Minor", "change": "Item Quantity added", "tag": "Quantity", "origin": "partner"}
+            ]
+        }
+        out = self.comparer.pretty_print_change_dict(partner_only, title="t")
+        self.assertIn("No changes in the library's own entries.", out)
+        self.assertIn("### From the partner standard schema (8.2.0 -> 8.4.0)", out)
+        self.assertIn("- Quantity (Minor): Item Quantity added", out)
+        self.assertEqual(out.count("**Tags:**"), 1)
+
+    def test_standard_schemas_have_no_origin_and_no_partner_block(self):
+        comparer = SchemaComparer(load_schema_version("8.3.0"), load_schema_version("8.4.0"))
+        changes = comparer.gather_schema_changes()
+        self.assertFalse(any(SchemaComparer.ORIGIN_KEY in c for cs in changes.values() for c in cs))
+        self.assertNotIn("From the partner standard schema", comparer.compare_differences())
