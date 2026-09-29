@@ -301,10 +301,13 @@ class SchemaComparer:
                     continue
                 origin = self.LIBRARY_ORIGIN
                 lookup_section = change.get("section", section_key)
+                lookup_name = change["tag"]
+                if "unit" in change:  # a unit added to or removed from a unit class: the unit decides
+                    lookup_section, lookup_name = HedSectionKey.Units, change["unit"]
                 if isinstance(lookup_section, HedSectionKey):
                     entry = None
                     for schema in (self.schema2, self.schema1):
-                        entry = schema.get_tag_entry(change["tag"], key_class=lookup_section)
+                        entry = schema.get_tag_entry(lookup_name, key_class=lookup_section)
                         if entry is not None:
                             break
                     if entry is not None and not entry.has_attribute(HedKey.InLibrary):
@@ -644,11 +647,20 @@ class SchemaComparer:
                 change = f"Unit {unit} removed from {entry1.name}"
                 if derivation:
                     change += f"; {derivation}"
-                change_dict[section_key].append({"change_type": change_type, "change": change, "tag": entry1.name})
+                # "unit" names the entry whose origin decides the block (a library may add a unit to a
+                # standard unit class; the class is the partner's, the unit is the library's).
+                change_dict[section_key].append(
+                    {"change_type": change_type, "change": change, "tag": entry1.name, "unit": unit}
+                )
         for unit in entry2.units:
             if unit not in entry1.units:
                 change_dict[section_key].append(
-                    {"change_type": "Patch", "change": f"Unit {unit} added to {entry2.name}", "tag": entry1.name}
+                    {
+                        "change_type": "Patch",
+                        "change": f"Unit {unit} added to {entry2.name}",
+                        "tag": entry1.name,
+                        "unit": unit,
+                    }
                 )
 
     def _add_tag_changes(self, change_dict, section_key, entry1, entry2):
@@ -829,14 +841,10 @@ class SchemaComparer:
             if (df1 is None or df1.empty) and (df2 is None or df2.empty):
                 continue
             if df1 is None and df2 is not None:
-                change_dict[key].append(
-                    {"change_type": "Minor", "change": f"Entire {key} section missing in first schema", "tag": key}
-                )
+                self._add_one_sided_extras(change_dict, key, df2, self.schema2, "first")
                 continue
             if df2 is None and df1 is not None:
-                change_dict[key].append(
-                    {"change_type": "Minor", "change": f"Entire {key} section missing in second schema", "tag": key}
-                )
+                self._add_one_sided_extras(change_dict, key, df1, self.schema1, "second")
                 continue
             if df1 is None and df2 is None:
                 continue
@@ -901,18 +909,48 @@ class SchemaComparer:
                 if change["tag"] in row_origins:
                     change[self.ORIGIN_KEY] = row_origins[change["tag"]]
 
+    def _add_one_sided_extras(self, change_dict, key, df, schema, missing_in):
+        """Record an extras section that only one schema has. When the frame carries ``in_library`` the rows
+        are recorded one by one with their origin, so a section that arrived with the partner lands in the
+        partner block; otherwise one section-level change is recorded (the library's, by default)."""
+        df = df.copy()
+        df.columns = [c.lower() for c in df.columns]
+        key_cols = UNIQUE_EXTRAS_KEYS.get(key) or sorted(c for c in df.columns if c != _in_library)
+        if _in_library not in df.columns or not schema.library or not key_cols:
+            change_dict[key].append(
+                {"change_type": "Minor", "change": f"Entire {key} section missing in {missing_in} schema", "tag": key}
+            )
+            return
+        for row_key, origin in self._row_origins(df, schema, key_cols).items():
+            change_dict[key].append(
+                {
+                    "change_type": "Minor",
+                    "change": f"Row {row_key} missing in {missing_in} schema",
+                    "tag": row_key,
+                    self.ORIGIN_KEY: origin,
+                }
+            )
+
     def _extras_row_origins(self, df1, df2, key_cols):
         """Map each extras row key (as the comparer prints it) to its origin, from the ``in_library`` column a
         merged library load carries: the library's name means the library's own row, anything else a row that
-        came in from the partner. Empty when neither frame has the column."""
+        came in from the partner. The newer schema decides when a row is in both, as for entries; the older
+        one answers only for rows it alone has. Empty when neither frame has the column."""
         origins = {}
-        for schema, df in ((self.schema1, df1), (self.schema2, df2)):
-            if _in_library not in df.columns or not schema.library:
-                continue
-            for _, row in df.iterrows():
-                row_key = row[key_cols[0]] if len(key_cols) == 1 else tuple(row[c] for c in key_cols)
-                own = str(row[_in_library]) == str(schema.library)
-                origins.setdefault(str(row_key), self.LIBRARY_ORIGIN if own else self.PARTNER_ORIGIN)
+        for schema, df in ((self.schema2, df2), (self.schema1, df1)):
+            for row_key, origin in self._row_origins(df, schema, key_cols).items():
+                origins.setdefault(row_key, origin)
+        return origins
+
+    def _row_origins(self, df, schema, key_cols):
+        """Return {printed row key -> origin} for one frame, or {} if it has no ``in_library`` column."""
+        if _in_library not in df.columns or not schema.library:
+            return {}
+        origins = {}
+        for _, row in df.iterrows():
+            row_key = row[key_cols[0]] if len(key_cols) == 1 else tuple(row[c] for c in key_cols)
+            own = str(row[_in_library]) == str(schema.library)
+            origins[str(row_key)] = self.LIBRARY_ORIGIN if own else self.PARTNER_ORIGIN
         return origins
 
     @staticmethod

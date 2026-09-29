@@ -716,3 +716,67 @@ class TestPartnerOrigin(unittest.TestCase):
         changes = comparer.gather_schema_changes()
         self.assertFalse(any(SchemaComparer.ORIGIN_KEY in c for cs in changes.values() for c in cs))
         self.assertNotIn("From the partner standard schema", comparer.compare_differences())
+
+
+class TestPartnerOriginDetails(unittest.TestCase):
+    """The origin follows the entry that changed, not its container, and one-sided extras rows keep theirs."""
+
+    @staticmethod
+    def _unit_library(with_fortnight):
+        q = "'''"
+        lines = [
+            'HED library="unitlib" version="1.0.0" withStandard="8.4.0" unmerged="true"',
+            "",
+            q + "Prologue" + q,
+            "",
+            "!# start schema",
+            "",
+            q + "Lib-tag" + q + " <nowiki>[A library tag.]</nowiki>",
+            "",
+            "!# end schema",
+            "",
+            q + "Unit classes" + q,
+        ]
+        if with_fortnight:
+            lines += [
+                "* timeUnits",  # a bare redeclaration: the placeholder that adds units to a partner class
+                "** fortnight <nowiki>{conversionFactor=1209600} [Fourteen days.]</nowiki>",
+            ]
+        lines += ["", q + "Unit modifiers" + q, "", q + "Value classes" + q, "", q + "Schema attributes" + q, ""]
+        lines += [q + "Properties" + q, "", q + "Epilogue" + q, "", "!# end hed", ""]
+        return from_string("\n".join(lines), schema_format=".mediawiki")
+
+    def test_a_library_unit_added_to_a_standard_unit_class_is_the_librarys(self):
+        """The class timeUnits is the partner's (no inLibrary); the unit fortnight is the library's."""
+        old, new = self._unit_library(False), self._unit_library(True)
+        changes = SchemaComparer(old, new).gather_schema_changes()
+        unit_changes = [c for c in changes.get(HedSectionKey.UnitClasses, []) if c.get("unit") == "fortnight"]
+        self.assertEqual(len(unit_changes), 1)
+        self.assertEqual(unit_changes[0]["change"], "Unit fortnight added to timeUnits")
+        self.assertEqual(unit_changes[0][SchemaComparer.ORIGIN_KEY], SchemaComparer.LIBRARY_ORIGIN)
+        out = SchemaComparer(old, new).compare_differences()
+        self.assertNotIn("### From the partner", out)  # same partner version, nothing inherited changed
+        self.assertIn("- timeUnits (Patch): Unit fortnight added to timeUnits", out)
+        # And removing it again is the library's change too.
+        changes = SchemaComparer(new, old).gather_schema_changes()
+        removed = [c for c in changes[HedSectionKey.UnitClasses] if c.get("unit") == "fortnight"]
+        self.assertEqual(removed[0][SchemaComparer.ORIGIN_KEY], SchemaComparer.LIBRARY_ORIGIN)
+
+    def test_an_extras_section_that_only_the_partner_brought_is_the_partners(self):
+        """8.2.0 has no extras; 8.4.0 has Sources, Prefixes and external annotations, all the partner's rows."""
+        path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/schema_compare.mediawiki"
+        )
+        with open(path, encoding="utf-8") as fp:
+            text = fp.read()
+        old = load_schema(path)
+        new = from_string(text.replace('withStandard="8.2.0"', 'withStandard="8.4.0"'), schema_format=".mediawiki")
+        comparer = SchemaComparer(old, new)
+        changes = comparer.gather_schema_changes()
+        for key in (SchemaComparer.SOURCES, SchemaComparer.PREFIXES, SchemaComparer.ANNOTATION_PROPERTY_EXTERNAL):
+            self.assertTrue(changes[key], key)
+            self.assertTrue(all(c["change"].startswith("Row ") for c in changes[key]), key)
+            self.assertTrue(all(c[SchemaComparer.ORIGIN_KEY] == SchemaComparer.PARTNER_ORIGIN for c in changes[key]))
+        library_block, partner_block = comparer.compare_differences().split("### From the partner standard schema")
+        self.assertNotIn("**Sources:**", library_block)
+        self.assertIn("**Sources:**", partner_block)
