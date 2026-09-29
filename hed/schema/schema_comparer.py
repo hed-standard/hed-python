@@ -23,6 +23,7 @@ Example:
     >>> print(comparer.pretty_print_change_dict(changes))
 """
 
+import difflib
 from collections import defaultdict
 
 import pandas as pd
@@ -618,13 +619,36 @@ class SchemaComparer:
                           tuples. Format: {field_name -> (old_val, new_val), ...}
         """
         for misc_section, (value1, value2) in changes.items():
-            change_type = "Patch" if "prologue" in misc_section or "epilogue" in misc_section else "Patch"
-            change_desc = (
-                f"{misc_section} changed"
-                if "prologue" in misc_section or "epilogue" in misc_section
-                else f"{misc_section} changed from {value1} to {value2}"
-            )
+            change_type = "Patch"
+            if "prologue" in misc_section or "epilogue" in misc_section:
+                change_desc = f"{misc_section} changed: {SchemaComparer._text_change_summary(value1, value2)}"
+            else:
+                change_desc = f"{misc_section} changed from {value1} to {value2}"
             change_dict[section_key].append({"change_type": change_type, "change": change_desc, "tag": misc_section})
+
+    @staticmethod
+    def _text_change_summary(old_text, new_text, max_lines=6, max_chars=120):
+        """Describe how a block of text changed, line by line: ``-`` for a removed line, ``+`` for an added
+        one, at most ``max_lines`` of each shown and long lines cut, so a prologue or epilogue change shows
+        what changed without reproducing the whole text."""
+        old_lines = (old_text or "").splitlines()
+        new_lines = (new_text or "").splitlines()
+        removed = [line for line in difflib.ndiff(old_lines, new_lines) if line.startswith("- ")]
+        added = [line for line in difflib.ndiff(old_lines, new_lines) if line.startswith("+ ")]
+
+        def cut(line):
+            text = line[2:]  # the line as it is, indentation and all, so a whitespace change is visible
+            return text if len(text) <= max_chars else text[: max_chars - 3] + "..."
+
+        parts = []
+        for label, lines in (("-", removed), ("+", added)):
+            shown = [f"{label} {cut(line)}" for line in lines[:max_lines]]
+            if len(lines) > max_lines:
+                shown.append(f"{label} ... {len(lines) - max_lines} more")
+            parts += shown
+        if not parts:
+            return "whitespace only"
+        return f"{len(removed)} removed, {len(added)} added; " + " | ".join(parts)
 
     @classmethod
     def _add_unit_classes_changes(cls, change_dict, section_key, entry1, entry2):

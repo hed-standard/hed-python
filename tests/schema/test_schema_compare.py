@@ -191,7 +191,16 @@ class TestGatherSchemaChanges(unittest.TestCase):
         comp = SchemaComparer(self.base, schema2)
         result = comp.gather_schema_changes()
         self.assertIn(SchemaComparer.MISC_SECTION, result)
-        self.assertIn("prologue", [c["tag"] for c in result[SchemaComparer.MISC_SECTION]])
+        misc = {c["tag"]: c["change"] for c in result[SchemaComparer.MISC_SECTION]}
+        self.assertIn("prologue", misc)
+        # The message says what changed, line by line, not just that it changed.
+        self.assertTrue(misc["prologue"].startswith("prologue changed: "))
+        self.assertIn("+ Changed prologue", misc["prologue"])
+        for old_line in self.base.prologue.splitlines():
+            self.assertIn(f"- {old_line}"[:40], misc["prologue"])
+        # A change of indentation alone is shown as it is, not stripped away.
+        summary = SchemaComparer._text_change_summary("  indented line", "indented line")
+        self.assertIn("-   indented line | + indented line", summary)
 
     def test_epilogue_change_appears_in_misc(self):
         """An epilogue change appears under MISC_SECTION."""
@@ -200,7 +209,19 @@ class TestGatherSchemaChanges(unittest.TestCase):
         comp = SchemaComparer(self.base, schema2)
         result = comp.gather_schema_changes()
         self.assertIn(SchemaComparer.MISC_SECTION, result)
-        self.assertIn("epilogue", [c["tag"] for c in result[SchemaComparer.MISC_SECTION]])
+        misc = {c["tag"]: c["change"] for c in result[SchemaComparer.MISC_SECTION]}
+        self.assertIn("epilogue", misc)
+        self.assertIn("+ Changed epilogue", misc["epilogue"])
+
+    def test_text_change_summary_limits_its_length(self):
+        old = "\n".join(f"line {i}" for i in range(10))
+        new = "\n".join(f"line {i}" for i in range(10, 20)) + "\n" + "x" * 300
+        summary = SchemaComparer._text_change_summary(old, new)
+        self.assertTrue(summary.startswith("10 removed, 11 added; "))
+        self.assertIn("- ... 4 more", summary)
+        self.assertIn("+ ... 5 more", summary)
+        self.assertNotIn("x" * 130, summary)
+        self.assertEqual(SchemaComparer._text_change_summary("a\n", "a"), "whitespace only")
 
     def test_header_attributes_change_appears_in_misc(self):
         """A version change appears under MISC_SECTION."""
