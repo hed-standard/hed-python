@@ -43,8 +43,8 @@ class SpreadsheetValidator:
        tag, and each categorical column's distinct values against its sidecar keys.
     3. **HED column**: each distinct string of every HED-tags column, the basic (single-string) checks.
        For a source that offers no assembly, the group-level checks follow on the same strings, since no
-       stage 4 will run them on the whole row. The required-tag and unique-tag checks belong to the
-       assembled row and never run on a cell.
+       stage 4 will run them on the whole row. The required-tag check belongs to the assembled row and
+       never runs on a cell; the unique-tag check does, since a repeat inside a cell is a repeat of the row.
     4. **Assembly**: the rows assembled from all columns, the group-level checks, and the onset and
        temporal checks of a timeline file.
 
@@ -230,7 +230,7 @@ class SpreadsheetValidator:
         # Stage 4: the assembled rows, only for a source that can provide them. The source is asked only
         # now, so a stage 3 error never costs a table conversion. A source that offers no assembly gets
         # the group-level checks on each distinct HED cell instead, since no stage 4 will run them on the
-        # whole row; the required-tag and unique-tag checks stay with the assembled row.
+        # whole row; the required-tag check stays with the assembled row.
         base_input = source.as_base_input()
         if base_input is not None:
             issues += self.validate_assembled(base_input, error_handler, row_offset=row_offset)
@@ -384,8 +384,9 @@ class SpreadsheetValidator:
             row_offset (int): Added to the first row of each reported string.
             full_string (bool): If True, also run the group-level checks on each string that passes the
                 basic checks. For a caller that will never assemble rows; otherwise those checks belong
-                to the assembly stage, where the row is whole. The required-tag and unique-tag checks
-                need the assembled row and never run here.
+                to the assembly stage, where the row is whole. The required-tag check needs the assembled
+                row and never runs here; the unique-tag check does, since a repeat inside a cell is a repeat
+                of the row.
 
         Returns:
             list[dict]: The issues found, each with ``row_count``.
@@ -395,22 +396,18 @@ class SpreadsheetValidator:
             hed_string = HedString(text, self._schema)
             string_issues = self._hed_validator.run_basic_checks(hed_string, allow_placeholders=False)
             if full_string and not check_for_any_errors(string_issues):
-                string_issues += self._hed_validator.run_full_string_checks(
-                    hed_string, required_tags=False, unique_tags=False
-                )
+                string_issues += self._hed_validator.run_full_string_checks(hed_string, required_tags=False)
             issues += self._report_distinct(string_issues, hed_string, rows, column_name, error_handler, row_offset)
         return issues
 
     def _validate_hed_cells(self, column_name, distinct, error_handler, row_offset) -> list[dict]:
         """Run the group-level checks on each distinct string of a HED-tags column that has passed stage 3,
         for a source that offers no assembly. One more parse per distinct string. A cell is part of a row,
-        so the required-tag and unique-tag checks are left to assembly."""
+        so the required-tag check is left to assembly; a unique tag repeated inside the cell is reported."""
         issues = []
         for text, rows in distinct.items():
             hed_string = HedString(text, self._schema)
-            string_issues = self._hed_validator.run_full_string_checks(
-                hed_string, required_tags=False, unique_tags=False
-            )
+            string_issues = self._hed_validator.run_full_string_checks(hed_string, required_tags=False)
             issues += self._report_distinct(string_issues, hed_string, rows, column_name, error_handler, row_offset)
         return issues
 
