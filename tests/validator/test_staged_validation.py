@@ -220,8 +220,25 @@ class TestStagedValidation(unittest.TestCase):
         self.assertIn(ValidationErrors.TEMPORAL_TAG_ERROR, codes)
         self.assertTrue(all(issue[ErrorContext.ROW] == 1 for issue in issues))  # row_offset 0 for a plain source
 
-        source = ListColumnSource(columns)
-        self.assertEqual(self.validator.validate(source, extra_def_dicts=self.definitions), [])
+        # Without a BaseInput the string-level repeat is found in stage 3; the cross-row temporal check needs assembly.
+        issues = self.validator.validate(ListColumnSource(columns), extra_def_dicts=self.definitions)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TAG_EXPRESSION_REPEATED])
+        self.assertEqual((issues[0][ErrorContext.ROW], issues[0][ROW_COUNT_KEY]), (1, 1))
+
+    def test_plain_source_gets_the_full_string_checks_in_the_hed_column_stage(self):
+        """A source with no BaseInput never reaches assembly, so stage 3 runs the group-level checks on each
+        distinct string; the same columns with a BaseInput leave those checks to stage 4, once."""
+        columns = {"onset": [1.0, 2.0, 3.0], "HED": ["Red", "(Onset)", "(Onset)"]}
+
+        issues = self.validator.validate(ListColumnSource(columns))
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TEMPORAL_TAG_ERROR])
+        self.assertEqual((issues[0][ErrorContext.ROW], issues[0][ROW_COUNT_KEY]), (1, 2))
+
+        frame = TabularInput(pd.DataFrame({name: [str(v) for v in values] for name, values in columns.items()}))
+        issues = self.validator.validate(ListColumnSource(columns, base_input=frame))
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TEMPORAL_TAG_ERROR] * 2)
+        self.assertEqual([issue[ErrorContext.ROW] for issue in issues], [1, 2])
+        self.assertTrue(all(ROW_COUNT_KEY not in issue for issue in issues))
 
     def test_plain_source_gets_a_warning_for_a_column_the_sidecar_does_not_describe(self):
         source = ListColumnSource({"id": [1, 2], "onset": [1.0, 2.0], "HED": ["Red", "Blue"]})
