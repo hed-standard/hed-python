@@ -94,7 +94,7 @@ class HedValidator:
         issues += self._def_validator.validate_def_tags(hed_string)
         return issues
 
-    def run_full_string_checks(self, hed_string, required_tags=True, unique_tags=True) -> list[dict]:
+    def run_full_string_checks(self, hed_string, *, required_tags=True, unique_tags=True) -> list[dict]:
         """Run all full-string validation checks on a HED string.
 
         Parameters:
