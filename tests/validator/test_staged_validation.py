@@ -268,9 +268,9 @@ class TestStagedValidation(unittest.TestCase):
         self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.VALUE_INVALID])
         self.assertEqual(source.base_input_calls, 0)
 
-    def test_hed_cell_of_a_multi_column_row_is_not_held_to_whole_row_rules(self):
-        """When other columns carry HED too, a HED cell alone cannot be checked for required or unique tags:
-        the sidecar may supply them. The group-level checks still apply to the cell."""
+    def test_required_and_unique_tags_are_checked_only_on_assembled_rows(self):
+        """A HED cell is part of a row, so the required-tag and unique-tag checks never run on it alone: the
+        sidecar may supply the tags. They run in the assembly stage; the group-level checks apply to a cell."""
         schema_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/HED8.0.0_added_tests.mediawiki"
         )
@@ -286,11 +286,23 @@ class TestStagedValidation(unittest.TestCase):
         issues = validator.validate(source, sidecar=sidecar)
         self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TEMPORAL_TAG_ERROR])
 
-        # With no other HED column the cell is the row, and the required tags are checked.
-        source = ListColumnSource({"HED": ["Event"]})
-        issues = validator.validate(source)
+        # Without assembly a HED-only table is not checked for required tags either; with assembly it is.
+        columns = {"onset": [1.0], "duration": [0], "HED": ["Event"]}
+        self.assertEqual(validator.validate(ListColumnSource(columns)), [])
+        frame = TabularInput(pd.DataFrame({name: [str(v) for v in values] for name, values in columns.items()}))
+        issues = validator.validate(ListColumnSource(columns, base_input=frame))
         self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.REQUIRED_TAG_MISSING] * 2)
-        self.assertTrue(all(issue[ROW_COUNT_KEY] == 1 for issue in issues))
+
+        # The same holds for a unique tag repeated within one cell.
+        columns = {
+            "onset": [1.0],
+            "duration": [0],
+            "HED": ["(Event-context, (Red, Blue)), (Event-context, (Green, Yellow))"],
+        }
+        self.assertEqual(self.validator.validate(ListColumnSource(columns)), [])
+        frame = TabularInput(pd.DataFrame({name: [str(v) for v in values] for name, values in columns.items()}))
+        issues = self.validator.validate(ListColumnSource(columns, base_input=frame))
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TAG_NOT_UNIQUE])
 
     def test_plain_source_gets_a_warning_for_a_column_the_sidecar_does_not_describe(self):
         source = ListColumnSource({"id": [1, 2], "onset": [1.0, 2.0], "HED": ["Red", "Blue"]})
