@@ -40,8 +40,10 @@ class SpreadsheetValidator:
     2. **Column values**: the column structure (mapper issues, sidecar references to columns the table
        lacks), then each value column's distinct values against the units or value class of its ``#``
        tag, and each categorical column's distinct values against its sidecar keys.
-    3. **HED column**: each distinct string of every HED-tags column, the basic (single-string) checks;
-       for a source that offers no assembly, the group-level checks too, since no stage 4 follows.
+    3. **HED column**: each distinct string of every HED-tags column, the basic (single-string) checks.
+       For a source that offers no assembly, the group-level checks follow on the same strings, since no
+       stage 4 will run them on the whole row; the checks that need every tag of the row (required and
+       unique tags) run only when the HED column is the row's only HED.
     4. **Assembly**: the rows assembled from all columns, the group-level checks, and the onset and
        temporal checks of a timeline file.
 
@@ -215,24 +217,32 @@ class SpreadsheetValidator:
         if check_for_any_errors(issues):
             return sort_issues(issues)
 
-        # Stage 3: every HED-tags column, one parse per distinct string. A source that will never
-        # assemble rows gets the full-string checks here, since no stage 4 will run them on the whole row.
-        base_input = source.as_base_input()
-        for column in columns:
-            if column.column_type == ColumnType.HEDTags:
-                issues += self.validate_hed_column(
-                    column.column_name,
-                    source.distinct_values(column.column_name),
-                    error_handler,
-                    row_offset=row_offset,
-                    full_string=base_input is None,
-                )
+        # Stage 3: every HED-tags column, one parse per distinct string.
+        hed_columns = [column for column in columns if column.column_type == ColumnType.HEDTags]
+        for column in hed_columns:
+            issues += self.validate_hed_column(
+                column.column_name, source.distinct_values(column.column_name), error_handler, row_offset=row_offset
+            )
         if check_for_any_errors(issues):
             return sort_issues(issues)
 
-        # Stage 4: the assembled rows, only for a source that can provide them.
+        # Stage 4: the assembled rows, only for a source that can provide them. The source is asked only
+        # now, so a stage 3 error never costs a table conversion. A source that offers no assembly gets
+        # the group-level checks on each distinct HED cell instead, since no stage 4 will run them on the
+        # whole row; the checks that need every tag of the row apply only when the cell is the row.
+        base_input = source.as_base_input()
         if base_input is not None:
             issues += self.validate_assembled(base_input, error_handler, row_offset=row_offset)
+            return sort_issues(issues)
+        whole_row = len(hed_columns) == len(columns) == 1
+        for column in hed_columns:
+            issues += self._validate_hed_cells(
+                column.column_name,
+                source.distinct_values(column.column_name),
+                error_handler,
+                row_offset=row_offset,
+                whole_row=whole_row,
+            )
         return sort_issues(issues)
 
     @staticmethod
@@ -368,7 +378,9 @@ class SpreadsheetValidator:
     # ------------------------------------------------------------------------------------------
     # Stage 3
 
-    def validate_hed_column(self, column_name, distinct, error_handler, row_offset=0, full_string=False) -> list[dict]:
+    def validate_hed_column(
+        self, column_name, distinct, error_handler, row_offset=0, full_string=False, whole_row=True
+    ) -> list[dict]:
         """Run the single-string checks on each distinct string of a HED-tags column, once per string.
 
         Parameters:
@@ -379,6 +391,8 @@ class SpreadsheetValidator:
             full_string (bool): If True, also run the full-string (group-level) checks on each string
                 that passes the basic checks. For a caller that will never assemble rows; otherwise
                 those checks belong to the assembly stage, where the row is whole.
+            whole_row (bool): With ``full_string``, whether each cell is the whole row's HED. If False
+                (other columns carry HED too), the checks that need every tag of the row are skipped.
 
         Returns:
             list[dict]: The issues found, each with ``row_count``.
@@ -388,20 +402,35 @@ class SpreadsheetValidator:
             hed_string = HedString(text, self._schema)
             string_issues = self._hed_validator.run_basic_checks(hed_string, allow_placeholders=False)
             if full_string and not check_for_any_errors(string_issues):
-                string_issues += self._hed_validator.run_full_string_checks(hed_string)
-            if not string_issues:
-                continue
-            error_handler.push_error_context(ErrorContext.ROW, rows[0] + row_offset)
-            error_handler.push_error_context(ErrorContext.COLUMN, column_name)
-            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string)
-            error_handler.add_context_and_filter(string_issues)
-            error_handler.pop_error_context()  # HedString
-            error_handler.pop_error_context()  # Column
-            error_handler.pop_error_context()  # Row
-            for issue in string_issues:
-                issue[ROW_COUNT_KEY] = len(rows)
-            issues += string_issues
+                string_issues += self._hed_validator.run_full_string_checks(hed_string, whole_row=whole_row)
+            issues += self._report_distinct(string_issues, hed_string, rows, column_name, error_handler, row_offset)
         return issues
+
+    def _validate_hed_cells(self, column_name, distinct, error_handler, row_offset, whole_row) -> list[dict]:
+        """Run the full-string checks on each distinct string of a HED-tags column that has passed stage 3,
+        for a source that offers no assembly. One more parse per distinct string."""
+        issues = []
+        for text, rows in distinct.items():
+            hed_string = HedString(text, self._schema)
+            string_issues = self._hed_validator.run_full_string_checks(hed_string, whole_row=whole_row)
+            issues += self._report_distinct(string_issues, hed_string, rows, column_name, error_handler, row_offset)
+        return issues
+
+    @staticmethod
+    def _report_distinct(string_issues, hed_string, rows, column_name, error_handler, row_offset) -> list[dict]:
+        """Give the issues of one distinct string their row, column, and string context and ``row_count``."""
+        if not string_issues:
+            return []
+        error_handler.push_error_context(ErrorContext.ROW, rows[0] + row_offset)
+        error_handler.push_error_context(ErrorContext.COLUMN, column_name)
+        error_handler.push_error_context(ErrorContext.HED_STRING, hed_string)
+        error_handler.add_context_and_filter(string_issues)
+        error_handler.pop_error_context()  # HedString
+        error_handler.pop_error_context()  # Column
+        error_handler.pop_error_context()  # Row
+        for issue in string_issues:
+            issue[ROW_COUNT_KEY] = len(rows)
+        return string_issues
 
     # ------------------------------------------------------------------------------------------
     # Stage 4

@@ -2,11 +2,12 @@
 
 import io
 import json
+import os
 import unittest
 
 import pandas as pd
 
-from hed import Sidecar, SpreadsheetInput, TabularInput, load_schema_version
+from hed import Sidecar, SpreadsheetInput, TabularInput, load_schema, load_schema_version
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ErrorContext, SidecarErrors, ValidationErrors
 from hed.models import DefinitionDict, ListColumnSource
@@ -21,6 +22,18 @@ def _sidecar(sidecar_dict, name=None):
 def _tabular(rows, sidecar=None, name=None):
     text = "".join("\t".join(str(x) for x in row) + "\n" for row in rows)
     return TabularInput(io.BytesIO(text.encode("utf-8")), sidecar=sidecar, name=name)
+
+
+class _CountingSource(ListColumnSource):
+    """A ListColumnSource that records how often the validator asks for its BaseInput."""
+
+    def __init__(self, columns, base_input=None):
+        super().__init__(columns, base_input=base_input)
+        self.base_input_calls = 0
+
+    def as_base_input(self):
+        self.base_input_calls += 1
+        return super().as_base_input()
 
 
 class TestStagedValidation(unittest.TestCase):
@@ -225,20 +238,59 @@ class TestStagedValidation(unittest.TestCase):
         self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TAG_EXPRESSION_REPEATED])
         self.assertEqual((issues[0][ErrorContext.ROW], issues[0][ROW_COUNT_KEY]), (1, 1))
 
-    def test_plain_source_gets_the_full_string_checks_in_the_hed_column_stage(self):
-        """A source with no BaseInput never reaches assembly, so stage 3 runs the group-level checks on each
-        distinct string; the same columns with a BaseInput leave those checks to stage 4, once."""
+    def test_plain_source_gets_the_full_string_checks_after_the_hed_column_stage(self):
+        """A source with no BaseInput never reaches assembly, so the group-level checks run on each distinct
+        HED string once stage 3 has passed; the same columns with a BaseInput leave them to stage 4, once."""
         columns = {"onset": [1.0, 2.0, 3.0], "HED": ["Red", "(Onset)", "(Onset)"]}
 
-        issues = self.validator.validate(ListColumnSource(columns))
+        source = _CountingSource(columns)
+        issues = self.validator.validate(source)
         self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TEMPORAL_TAG_ERROR])
         self.assertEqual((issues[0][ErrorContext.ROW], issues[0][ROW_COUNT_KEY]), (1, 2))
+        self.assertEqual(source.base_input_calls, 1)
 
         frame = TabularInput(pd.DataFrame({name: [str(v) for v in values] for name, values in columns.items()}))
         issues = self.validator.validate(ListColumnSource(columns, base_input=frame))
         self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TEMPORAL_TAG_ERROR] * 2)
         self.assertEqual([issue[ErrorContext.ROW] for issue in issues], [1, 2])
         self.assertTrue(all(ROW_COUNT_KEY not in issue for issue in issues))
+
+    def test_base_input_is_not_asked_for_when_an_earlier_stage_stops(self):
+        """Building a BaseInput may mean converting the whole table, so the validator asks for it only once
+        stages 2 and 3 have passed; a stage 3 error is reported without that cost."""
+        source = _CountingSource({"onset": [1.0, 2.0], "HED": ["Red", "InvalidTagXYZ"]})
+        issues = self.validator.validate(source)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TAG_INVALID])
+        self.assertEqual(source.base_input_calls, 0)
+
+        source = _CountingSource({"onset": [1.0], "response_time": ["abc"], "HED": ["Red"]})
+        issues = self.validator.validate(source, sidecar=_sidecar(self.sidecar_dict), extra_def_dicts=self.definitions)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.VALUE_INVALID])
+        self.assertEqual(source.base_input_calls, 0)
+
+    def test_hed_cell_of_a_multi_column_row_is_not_held_to_whole_row_rules(self):
+        """When other columns carry HED too, a HED cell alone cannot be checked for required or unique tags:
+        the sidecar may supply them. The group-level checks still apply to the cell."""
+        schema_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/HED8.0.0_added_tests.mediawiki"
+        )
+        validator = SpreadsheetValidator(load_schema(schema_path))
+        sidecar = _sidecar({"condition": {"HED": {"a": "Action, Animal-agent"}}})
+
+        # The row assembles to "Action, Animal-agent, Event" and satisfies the required tags.
+        source = ListColumnSource({"condition": ["a"], "HED": ["Event"]})
+        self.assertEqual(validator.validate(source, sidecar=sidecar), [])
+
+        # A group-level error in the cell is still an error of the row.
+        source = ListColumnSource({"condition": ["a"], "HED": ["Event, (Onset)"]})
+        issues = validator.validate(source, sidecar=sidecar)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TEMPORAL_TAG_ERROR])
+
+        # With no other HED column the cell is the row, and the required tags are checked.
+        source = ListColumnSource({"HED": ["Event"]})
+        issues = validator.validate(source)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.REQUIRED_TAG_MISSING] * 2)
+        self.assertTrue(all(issue[ROW_COUNT_KEY] == 1 for issue in issues))
 
     def test_plain_source_gets_a_warning_for_a_column_the_sidecar_does_not_describe(self):
         source = ListColumnSource({"id": [1, 2], "onset": [1.0, 2.0], "HED": ["Red", "Blue"]})
