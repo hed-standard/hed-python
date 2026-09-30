@@ -229,6 +229,28 @@ class Test(unittest.TestCase):
         issues = test_string.validate(hed_schema)
         self.assertEqual(len(issues), 1)
 
+    def test_run_full_string_checks_row_tag_flags(self):
+        """The required-tag and unique-tag checks need the whole row; each can be left out for a fragment,
+        while the group-level checks always run."""
+        schema_path = os.path.join(self.hed_base_dir, "HED8.0.0_added_tests.mediawiki")
+        validator = HedValidator(schema.load_schema(schema_path))
+
+        missing_required = HedString("Event, (Onset)", validator._hed_schema)
+        codes = [issue["code"] for issue in validator.run_full_string_checks(missing_required)]
+        self.assertEqual(codes, ["REQUIRED_TAG_MISSING", "REQUIRED_TAG_MISSING"])
+        codes = [issue["code"] for issue in validator.run_full_string_checks(missing_required, required_tags=False)]
+        self.assertEqual(codes, ["TEMPORAL_TAG_ERROR"])
+
+        repeated_unique = HedString(
+            "Action, Animal-agent, (Event-context, (Red, Blue)), (Event-context, (Green, Yellow))",
+            validator._hed_schema,
+        )
+        codes = [issue["code"] for issue in validator.run_full_string_checks(repeated_unique)]
+        self.assertEqual(codes, ["TAG_NOT_UNIQUE"])
+        self.assertEqual(validator.run_full_string_checks(repeated_unique, unique_tags=False), [])
+        codes = [issue["code"] for issue in validator.run_full_string_checks(repeated_unique, required_tags=False)]
+        self.assertEqual(codes, ["TAG_NOT_UNIQUE"])
+
     def test_severity_enum_not_string_github_hedit_161(self):
         """Regression test for critical bug: severity should be ErrorSeverity enum, not string.
 

@@ -293,6 +293,23 @@ class TestStagedValidation(unittest.TestCase):
         issues = validator.validate(ListColumnSource(columns, base_input=frame))
         self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.REQUIRED_TAG_MISSING] * 2)
 
+        # Required tags split between a sidecar string and the HED cell: clean through a real assembled input,
+        # so stage 1 must not hold the sidecar string alone to the required-tag rule either.
+        split = _sidecar({"condition": {"HED": {"a": "Action"}}})
+        frame = _tabular([["onset", "duration", "condition", "HED"], [1.0, 0, "a", "Animal-agent"]], sidecar=split)
+        self.assertEqual(validator.validate(frame), [])
+        self.assertEqual(
+            validator.validate(ListColumnSource({"condition": ["a"], "HED": ["Animal-agent"]}), sidecar=split), []
+        )
+
+        # A unique tag repeated inside one sidecar string is repeated in every row that uses it, so stage 1
+        # still reports it (hed-tests TAG_NOT_UNIQUE has a sidecar-only case).
+        repeated = _sidecar(
+            {"condition": {"HED": {"a": "(Event-context, (Red, Blue)), (Event-context, (Green, Yellow))"}}}
+        )
+        issues = self.validator.validate(ListColumnSource({"condition": ["a"]}), sidecar=repeated)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TAG_NOT_UNIQUE])
+
         # The same holds for a unique tag repeated within one cell.
         columns = {
             "onset": [1.0],

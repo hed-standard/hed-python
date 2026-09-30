@@ -36,7 +36,8 @@ class SpreadsheetValidator:
 
     The stages run in order and each stops the run when it finds an error (never on a warning alone):
 
-    1. **Sidecar**: every template and categorical string of the sidecar (``SidecarValidator``).
+    1. **Sidecar**: every template and categorical string of the sidecar (``SidecarValidator``). A sidecar
+       string is a fragment of a row, so the required-tag check waits for assembly.
     2. **Column values**: the column structure (mapper issues, sidecar references to columns the table
        lacks), then each value column's distinct values against the units or value class of its ``#``
        tag, and each categorical column's distinct values against its sidecar keys.
@@ -394,7 +395,9 @@ class SpreadsheetValidator:
             hed_string = HedString(text, self._schema)
             string_issues = self._hed_validator.run_basic_checks(hed_string, allow_placeholders=False)
             if full_string and not check_for_any_errors(string_issues):
-                string_issues += self._hed_validator.run_full_string_checks(hed_string, whole_row=False)
+                string_issues += self._hed_validator.run_full_string_checks(
+                    hed_string, required_tags=False, unique_tags=False
+                )
             issues += self._report_distinct(string_issues, hed_string, rows, column_name, error_handler, row_offset)
         return issues
 
@@ -405,7 +408,9 @@ class SpreadsheetValidator:
         issues = []
         for text, rows in distinct.items():
             hed_string = HedString(text, self._schema)
-            string_issues = self._hed_validator.run_full_string_checks(hed_string, whole_row=False)
+            string_issues = self._hed_validator.run_full_string_checks(
+                hed_string, required_tags=False, unique_tags=False
+            )
             issues += self._report_distinct(string_issues, hed_string, rows, column_name, error_handler, row_offset)
         return issues
 
