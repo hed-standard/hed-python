@@ -805,7 +805,9 @@ class SchemaComparer:
             unique_inherited_keys = unique_keys
         all_unique_keys = unique_keys.union(unique_inherited_keys).difference(already_checked_attributes)
 
-        for key in all_unique_keys:
+        # Sorted: a set of strings iterates in an order that changes with the hash seed, and the
+        # changelog this feeds is a generated, committed file.
+        for key in sorted(all_unique_keys):
             is_inherited = key in unique_inherited_keys
             is_direct = key in unique_keys
 
@@ -857,7 +859,7 @@ class SchemaComparer:
         extras2 = getattr(self.schema2, "extras", {}) or {}
 
         all_keys = set(extras1.keys()).union(extras2.keys())
-        for key in all_keys:
+        for key in sorted(all_keys):
             df1 = extras1.get(key)
             df2 = extras2.get(key)
             # An absent section and one present with no rows are the same thing: writers always
@@ -1001,6 +1003,11 @@ class SchemaComparer:
                     * "Row missing in second schema"
                     * "Duplicate keys found"
                     * "Column values differ"
+
+        Notes:
+            - The differences are listed in key order (as text), so two runs on the same frames give the
+              same list. A set of keys iterates in an order that changes with the hash seed, which put
+              spurious reorderings into the generated changelog.
         """
         results = []
 
@@ -1009,7 +1016,10 @@ class SchemaComparer:
 
         all_keys = set(df1_indexed.index).union(df2_indexed.index)
 
-        for key in all_keys:
+        def key_text(key):
+            return [str(part) for part in key] if isinstance(key, tuple) else [str(key)]
+
+        for key in sorted(all_keys, key=key_text):
             if key not in df1_indexed.index:
                 results.append({"row": key, "cols": None, "message": "Row missing in first schema"})
             elif key not in df2_indexed.index:

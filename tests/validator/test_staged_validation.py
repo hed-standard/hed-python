@@ -268,9 +268,10 @@ class TestStagedValidation(unittest.TestCase):
         self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.VALUE_INVALID])
         self.assertEqual(source.base_input_calls, 0)
 
-    def test_required_and_unique_tags_are_checked_only_on_assembled_rows(self):
-        """A HED cell is part of a row, so the required-tag and unique-tag checks never run on it alone: the
-        sidecar may supply the tags. They run in the assembly stage; the group-level checks apply to a cell."""
+    def test_required_tags_are_checked_only_on_assembled_rows(self):
+        """A HED cell is part of a row, so the required-tag check never runs on it alone: the sidecar may supply
+        the tags. It runs in the assembly stage. The group-level and unique-tag checks apply to a cell, since
+        what they find inside the cell holds for the row."""
         schema_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/HED8.0.0_added_tests.mediawiki"
         )
@@ -293,16 +294,37 @@ class TestStagedValidation(unittest.TestCase):
         issues = validator.validate(ListColumnSource(columns, base_input=frame))
         self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.REQUIRED_TAG_MISSING] * 2)
 
-        # The same holds for a unique tag repeated within one cell.
+        # Required tags split between a sidecar string and the HED cell: clean through a real assembled input,
+        # so stage 1 must not hold the sidecar string alone to the required-tag rule either.
+        split = _sidecar({"condition": {"HED": {"a": "Action"}}})
+        frame = _tabular([["onset", "duration", "condition", "HED"], [1.0, 0, "a", "Animal-agent"]], sidecar=split)
+        self.assertEqual(validator.validate(frame), [])
+        self.assertEqual(
+            validator.validate(ListColumnSource({"condition": ["a"], "HED": ["Animal-agent"]}), sidecar=split), []
+        )
+
+        # A unique tag repeated inside one sidecar string is repeated in every row that uses it, so stage 1
+        # still reports it (hed-tests TAG_NOT_UNIQUE has a sidecar-only case).
+        repeated = _sidecar(
+            {"condition": {"HED": {"a": "(Event-context, (Red, Blue)), (Event-context, (Green, Yellow))"}}}
+        )
+        issues = self.validator.validate(ListColumnSource({"condition": ["a"]}), sidecar=repeated)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TAG_NOT_UNIQUE])
+
+        # A unique tag repeated within one cell is reported without assembly, once with a row count, and
+        # with assembly once per row; never both, since the cell pass runs only when no assembly follows.
         columns = {
-            "onset": [1.0],
-            "duration": [0],
-            "HED": ["(Event-context, (Red, Blue)), (Event-context, (Green, Yellow))"],
+            "onset": [1.0, 2.0],
+            "duration": [0, 0],
+            "HED": ["(Event-context, (Red, Blue)), (Event-context, (Green, Yellow))"] * 2,
         }
-        self.assertEqual(self.validator.validate(ListColumnSource(columns)), [])
+        issues = self.validator.validate(ListColumnSource(columns))
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TAG_NOT_UNIQUE])
+        self.assertEqual((issues[0][ErrorContext.ROW], issues[0][ROW_COUNT_KEY]), (0, 2))
         frame = TabularInput(pd.DataFrame({name: [str(v) for v in values] for name, values in columns.items()}))
         issues = self.validator.validate(ListColumnSource(columns, base_input=frame))
-        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TAG_NOT_UNIQUE])
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TAG_NOT_UNIQUE] * 2)
+        self.assertTrue(all(ROW_COUNT_KEY not in issue for issue in issues))
 
     def test_plain_source_gets_a_warning_for_a_column_the_sidecar_does_not_describe(self):
         source = ListColumnSource({"id": [1, 2], "onset": [1.0, 2.0], "HED": ["Red", "Blue"]})

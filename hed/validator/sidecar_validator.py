@@ -123,8 +123,11 @@ class SidecarValidator:
                             modified_string = df_util.replace_ref(modified_string, f"{{{ref}}}", ref_dict[ref])
                         hed_string_obj = HedString(modified_string, hed_schema=self._schema, def_dict=sidecar_def_dict)
 
+                        # A sidecar string is a fragment of a row: a tag it lacks may come from another
+                        # column, so the required-tag check waits for assembly. A unique tag repeated in
+                        # the fragment is repeated in the row, so that check runs here.
                         error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
-                        new_issues += hed_validator.run_full_string_checks(hed_string_obj)
+                        new_issues += hed_validator.run_full_string_checks(hed_string_obj, required_tags=False)
                         error_handler.add_context_and_filter(new_issues)
                         issues += new_issues
                         error_handler.pop_error_context()  # Hed string

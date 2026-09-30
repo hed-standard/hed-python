@@ -94,14 +94,16 @@ class HedValidator:
         issues += self._def_validator.validate_def_tags(hed_string)
         return issues
 
-    def run_full_string_checks(self, hed_string, whole_row=True) -> list[dict]:
+    def run_full_string_checks(self, hed_string, *, required_tags=True, unique_tags=True) -> list[dict]:
         """Run all full-string validation checks on a HED string.
 
         Parameters:
             hed_string (HedString): The HED string to validate.
-            whole_row (bool): If False, the string is one cell of a row whose other columns also carry HED,
-                so the checks that need every tag of the row (required and unique tags) are skipped. The
-                group-level checks still apply: a group in the cell is a group of the row.
+            required_tags (bool): Run the required-tag check. Pass False for a fragment of a row (a HED cell,
+                a sidecar string): the tag it lacks may come from another column, so the check needs the
+                assembled row.
+            unique_tags (bool): Run the unique-tag check. A unique tag repeated inside a fragment is repeated
+                in the row too, so this check is safe on a fragment; pass False to leave it to assembly.
 
         Returns:
             list[dict]: A list of issues found during validation. Each issue is represented as a dictionary.
@@ -111,14 +113,25 @@ class HedValidator:
             - Each check is a callable function that takes `hed_string` as input and returns a list of issues.
             - If any check returns issues, the method stops and returns those issues immediately.
             - If no issues are found, an empty list is returned.
+            - The group-level checks (tag placement, reserved groups, duplicates, Onset and Offset) always
+              run: a group in a fragment is a group of the row.
 
         """
+
+        def row_tag_checks(string_obj):
+            tags = string_obj.get_all_tags()
+            issues = []
+            if required_tags:
+                issues += self._group_validator.check_for_required_tags(tags)
+            if unique_tags:
+                issues += self._group_validator.check_multiple_unique_tags_exist(tags)
+            return issues
+
         checks = [
+            row_tag_checks,
             self._group_validator.run_tag_level_validators,
             self._def_validator.validate_onset_offset,
         ]
-        if whole_row:
-            checks.insert(0, self._group_validator.run_all_tags_validators)
 
         for check in checks:
             issues = check(hed_string)  # Call each function with `hed_string`

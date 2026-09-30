@@ -326,6 +326,32 @@ class TestExtrasChanges(unittest.TestCase):
         self.assertEqual(len(added), 1)
         self.assertEqual(added[0]["change_type"], "Minor")
 
+    def test_one_sided_rows_listed_in_key_order(self):
+        """Rows present in one schema only are recorded in key order, in either direction."""
+        base = pd.DataFrame({"source": ["src1"], "link": ["http://a.org"], "description": ["d"]})
+        more = pd.DataFrame(
+            {
+                "source": ["src1", "src9", "src3", "src5"],
+                "link": ["http://a.org", "http://i.org", "http://c.org", "http://e.org"],
+                "description": ["d", "i", "c", "e"],
+            }
+        )
+        schema1 = self._make_schema({SOURCES_KEY: base.copy()})
+        schema2 = self._make_schema({SOURCES_KEY: more.copy()})
+        changes = self._extras_result(schema1, schema2)[SOURCES_KEY]
+        self.assertEqual(
+            [c["change"] for c in changes],
+            [f"Row {key} missing in first schema" for key in ["src3", "src5", "src9"]],
+        )
+
+        schema1 = self._make_schema({SOURCES_KEY: more.copy()})
+        schema2 = self._make_schema({SOURCES_KEY: base.copy()})
+        changes = self._extras_result(schema1, schema2)[SOURCES_KEY]
+        self.assertEqual(
+            [c["change"] for c in changes],
+            [f"Row {key} missing in second schema" for key in ["src3", "src5", "src9"]],
+        )
+
     def test_row_removed_from_schema2_is_minor(self):
         """A row present in schema1 but not schema2 is Minor."""
         df1 = pd.DataFrame(
@@ -440,6 +466,23 @@ class TestCompareDataFrames(unittest.TestCase):
         messages = [r["message"] for r in results]
         self.assertIn("Row missing in first schema", messages)
         self.assertIn("Column values differ", messages)
+
+    def test_differences_listed_in_key_order(self):
+        """The list is in key order whatever order the frames or the hash seed would give, so a generated
+        changelog does not reorder between runs."""
+        df1 = pd.DataFrame({"key": ["m", "z"], "val": ["x", "old"]})
+        df2 = pd.DataFrame({"key": ["z", "c", "a", "b"], "val": ["new", "x", "x", "x"]})
+        results = SchemaComparer._compare_dataframes(df1, df2, ["key"])
+        self.assertEqual([r["row"] for r in results], ["a", "b", "c", "m", "z"])
+        self.assertEqual(
+            [r["message"] for r in results],
+            ["Row missing in first schema"] * 3 + ["Row missing in second schema", "Column values differ"],
+        )
+
+        df1 = pd.DataFrame({"k1": ["b"], "k2": ["1"], "val": ["x"]})
+        df2 = pd.DataFrame({"k1": ["b", "a", "b"], "k2": ["1", "2", "0"], "val": ["x", "y", "z"]})
+        results = SchemaComparer._compare_dataframes(df1, df2, ["k1", "k2"])
+        self.assertEqual([r["row"] for r in results], [("a", "2"), ("b", "0")])
 
 
 class TestDerivableUnitRemoval(unittest.TestCase):
