@@ -94,11 +94,14 @@ class HedValidator:
         issues += self._def_validator.validate_def_tags(hed_string)
         return issues
 
-    def run_full_string_checks(self, hed_string) -> list[dict]:
+    def run_full_string_checks(self, hed_string, whole_row=True) -> list[dict]:
         """Run all full-string validation checks on a HED string.
 
         Parameters:
             hed_string (HedString): The HED string to validate.
+            whole_row (bool): If False, the string is one cell of a row whose other columns also carry HED,
+                so the checks that need every tag of the row (required and unique tags) are skipped. The
+                group-level checks still apply: a group in the cell is a group of the row.
 
         Returns:
             list[dict]: A list of issues found during validation. Each issue is represented as a dictionary.
@@ -111,10 +114,11 @@ class HedValidator:
 
         """
         checks = [
-            self._group_validator.run_all_tags_validators,
             self._group_validator.run_tag_level_validators,
             self._def_validator.validate_onset_offset,
         ]
+        if whole_row:
+            checks.insert(0, self._group_validator.run_all_tags_validators)
 
         for check in checks:
             issues = check(hed_string)  # Call each function with `hed_string`
