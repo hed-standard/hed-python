@@ -40,7 +40,8 @@ class SpreadsheetValidator:
     2. **Column values**: the column structure (mapper issues, sidecar references to columns the table
        lacks), then each value column's distinct values against the units or value class of its ``#``
        tag, and each categorical column's distinct values against its sidecar keys.
-    3. **HED column**: each distinct string of every HED-tags column, the basic (single-string) checks.
+    3. **HED column**: each distinct string of every HED-tags column, the basic (single-string) checks;
+       for a source that offers no assembly, the group-level checks too, since no stage 4 follows.
     4. **Assembly**: the rows assembled from all columns, the group-level checks, and the onset and
        temporal checks of a timeline file.
 
@@ -214,17 +215,22 @@ class SpreadsheetValidator:
         if check_for_any_errors(issues):
             return sort_issues(issues)
 
-        # Stage 3: every HED-tags column, one parse per distinct string.
+        # Stage 3: every HED-tags column, one parse per distinct string. A source that will never
+        # assemble rows gets the full-string checks here, since no stage 4 will run them on the whole row.
+        base_input = source.as_base_input()
         for column in columns:
             if column.column_type == ColumnType.HEDTags:
                 issues += self.validate_hed_column(
-                    column.column_name, source.distinct_values(column.column_name), error_handler, row_offset=row_offset
+                    column.column_name,
+                    source.distinct_values(column.column_name),
+                    error_handler,
+                    row_offset=row_offset,
+                    full_string=base_input is None,
                 )
         if check_for_any_errors(issues):
             return sort_issues(issues)
 
         # Stage 4: the assembled rows, only for a source that can provide them.
-        base_input = source.as_base_input()
         if base_input is not None:
             issues += self.validate_assembled(base_input, error_handler, row_offset=row_offset)
         return sort_issues(issues)
