@@ -21,6 +21,7 @@ from hed.schema import load_schema
 from hed.schema.hed_schema_io import from_string
 from hed.schema.schema_io.base2schema import SchemaLoader
 from hed.validator import SpreadsheetValidator
+from hed.validator.util import UnitValueValidator
 
 FIXTURE_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), "data/schema_tests/merge_group_tests"))
 
@@ -46,6 +47,11 @@ SCHEDULED_REMOVALS = [
     (
         "def_dicts= parameter of SpreadsheetValidator.validate",
         lambda: _has_parameter(SpreadsheetValidator.validate, "def_dicts"),
+        2,
+    ),
+    (
+        "value_validators= parameter of UnitValueValidator.__init__ (no-op since the date-time cleanup)",
+        lambda: _has_parameter(UnitValueValidator.__init__, "value_validators"),
         2,
     ),
 ]
@@ -125,6 +131,23 @@ class TestDefDictsParameterDeprecation(unittest.TestCase):
             issues = SpreadsheetValidator(self.schema).validate(self.events, extra_def_dicts=self.definitions)
         self.assertFalse(any(issubclass(w.category, DeprecationWarning) for w in caught))
         self.assertEqual(issues, [])
+
+
+class TestValueValidatorsParameterDeprecation(unittest.TestCase):
+    """UnitValueValidator(value_validators=...) injected per-class functions that validation never called."""
+
+    def test_value_validators_keyword_warns_and_is_ignored(self):
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            validator = UnitValueValidator(value_validators={"dateTimeClass": lambda value: False})
+        self.assertTrue(any(issubclass(w.category, DeprecationWarning) for w in caught))
+        self.assertTrue(validator._char_validator.is_valid_value("2026-09-30T09:55:00", "dateTimeClass"))
+
+    def test_no_warning_without_value_validators(self):
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            UnitValueValidator(modern_allowed_char_rules=True)
+        self.assertFalse(any(issubclass(w.category, DeprecationWarning) for w in caught))
 
 
 if __name__ == "__main__":

@@ -1,7 +1,6 @@
 """Utilities to support HED validation."""
 
-import datetime
-import re
+import warnings
 
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
@@ -11,42 +10,30 @@ from hed.validator.util.char_util import CharRexValidator
 class UnitValueValidator:
     """Validates units."""
 
-    DATE_TIME_VALUE_CLASS = "dateTimeClass"
-    NUMERIC_VALUE_CLASS = "numericClass"
-    TEXT_VALUE_CLASS = "textClass"
-    NAME_VALUE_CLASS = "nameClass"
-
-    DIGIT_OR_POUND_EXPRESSION = r"^(-?[\d.]+(?:e-?\d+)?|#)$"
-
     def __init__(self, modern_allowed_char_rules=False, value_validators=None):
         """Validates the unit and value classes on a given tag.
 
         Parameters:
-            value_validators(dict or None): Override or add value class validators
+            modern_allowed_char_rules (bool): If True, use the 8.3.0 and later character rules.
+            value_validators (dict or None): Deprecated, removed in hedtools 2.0.0. Accepted so
+                that existing callers keep working; it has no effect. The per-class validator
+                functions it used to override were never reached by validation.
 
+        Notes:
+            The per-character sets and the whole-value rules of each value class come from
+            ``hed/validator/data/class_regex.json`` through ``CharRexValidator``; there is no
+            per-class validator function.
         """
 
+        if value_validators is not None:
+            warnings.warn(
+                "The value_validators= parameter of UnitValueValidator is deprecated and will be removed in "
+                "hedtools 2.0.0; it has no effect. Value class rules come from hed/validator/data/class_regex.json.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         self._validate_characters = modern_allowed_char_rules
-        self._value_validators = self._get_default_value_class_validators()
         self._char_validator = CharRexValidator()
-        if value_validators and isinstance(value_validators, dict):
-            self._value_validators.update(value_validators)
-
-    def _get_default_value_class_validators(self):
-        """Return a dictionary of value class validator functions.
-
-        Returns:
-            dict:  Dictionary of value class validator functions.
-
-        """
-        validator_dict = {
-            self.DATE_TIME_VALUE_CLASS: is_date_time_value_class,
-            self.NUMERIC_VALUE_CLASS: is_numeric_value_class,
-            self.TEXT_VALUE_CLASS: is_text_value_class,
-            self.NAME_VALUE_CLASS: is_name_value_class,
-        }
-
-        return validator_dict
 
     def check_tag_unit_class_units_are_valid(
         self, original_tag, validate_text, report_as=None, error_code=None, allow_placeholders=True
@@ -224,142 +211,3 @@ class UnitValueValidator:
         report_as = report_as if report_as else original_tag
         tag_unit_class_units = original_tag.get_tag_unit_class_units()
         return ErrorHandler.format_error(ValidationErrors.UNITS_INVALID, tag=report_as, units=tag_unit_class_units)
-
-    def _validate_value_class_portion(self, original_tag, portion_to_validate):
-        if portion_to_validate is None:
-            return False
-
-        value_class_types = original_tag.value_classes
-        return self.validate_value_class_type(portion_to_validate, value_class_types)
-
-    def validate_value_class_type(self, unit_or_value_portion, valid_types) -> bool:
-        """Report invalid unit or valid class values.
-
-        Parameters:
-            unit_or_value_portion (str): The value portion to validate.
-            valid_types (list): The names of value class or unit class types (e.g. dateTime or dateTimeClass).
-
-        Returns:
-            bool: True if this is one of the valid_types validators.
-
-        """
-        has_valid_func = False
-        for unit_class_type in valid_types:
-            valid_func = self._value_validators.get(unit_class_type)
-            if valid_func:
-                has_valid_func = True
-                if valid_func(unit_or_value_portion):
-                    return True
-        return not has_valid_func
-
-
-def find_invalid_positions(s, pattern):
-    """Return a list of (index, char) pairs for characters in s that do not match pattern.
-
-    Parameters:
-        s (str): The string to scan.
-        pattern (str): A single-character regex pattern specifying valid characters.
-
-    Returns:
-        list[tuple[int, str]]: Each tuple contains the character index and the invalid character.
-
-    """
-    # List to store positions of invalid characters
-    invalid_positions = []
-
-    # Iterate over the string, check each character
-    for i, char in enumerate(s):
-        if not re.match(pattern, char):
-            # If the character does not match, record its position and value
-            invalid_positions.append((i, char))
-
-    return invalid_positions
-
-
-def is_date_time_value_class(date_time_string) -> bool:
-    """Check if the specified string is a valid datetime.
-
-    Parameters:
-        date_time_string (str): A datetime string.
-
-    Returns:
-        bool: True if the datetime string is valid. False, if otherwise.
-
-    Notes:
-        - ISO 8601 datetime string.
-
-    """
-    try:
-        date_time_obj = datetime.datetime.fromisoformat(date_time_string)
-        return not date_time_obj.tzinfo
-    except ValueError:
-        return False
-
-
-def is_name_value_class(name_str) -> bool:
-    """Return True if name_str is a valid HED name-value.
-
-    Allowed characters are ASCII word characters (letters, digits, underscore),
-    hyphens, and Unicode code points U+0080 through U+FFFF.
-
-    Parameters:
-        name_str (str): The string to validate.
-
-    Returns:
-        bool: True if the string matches the allowed pattern.
-
-    """
-    pattern = r"^[\w\-\u0080-\uFFFF]+$"
-    if re.fullmatch(pattern, name_str):
-        return True
-    else:
-        return False
-
-
-def is_numeric_value_class(numeric_string) -> bool:
-    """Check to see if valid numeric value.
-
-    Parameters:
-        numeric_string (str): A string that should be only a number with no units.
-
-    Returns:
-        bool: True if the numeric string is valid. False, if otherwise.
-
-    """
-    if re.search(UnitValueValidator.DIGIT_OR_POUND_EXPRESSION, numeric_string):
-        return True
-
-    return False
-
-
-def is_text_value_class(text_string) -> bool:
-    """Placeholder for eventual text value class validation.
-
-    Parameters:
-        text_string (str): Text class.
-
-    Returns:
-        bool: True
-
-    """
-    return True
-
-
-def is_clock_face_time(time_string) -> bool:
-    """Check if a valid HH:MM time string.
-
-    Parameters:
-        time_string (str): A time string.
-
-    Returns:
-        bool: True if the time string is valid. False, if otherwise.
-
-    Notes:
-        - This is deprecated and has no expected use going forward.
-
-    """
-    try:
-        time_obj = datetime.time.fromisoformat(time_string)
-        return not time_obj.tzinfo and not time_obj.microsecond
-    except ValueError:
-        return False
