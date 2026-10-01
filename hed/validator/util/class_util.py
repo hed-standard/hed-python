@@ -1,5 +1,7 @@
 """Utilities to support HED validation."""
 
+import warnings
+
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 from hed.validator.util.char_util import CharRexValidator
@@ -8,11 +10,14 @@ from hed.validator.util.char_util import CharRexValidator
 class UnitValueValidator:
     """Validates units."""
 
-    def __init__(self, modern_allowed_char_rules=False):
+    def __init__(self, modern_allowed_char_rules=False, value_validators=None):
         """Validates the unit and value classes on a given tag.
 
         Parameters:
             modern_allowed_char_rules (bool): If True, use the 8.3.0 and later character rules.
+            value_validators (dict or None): Deprecated, removed in hedtools 2.0.0. Accepted so
+                that existing callers keep working; it has no effect. The per-class validator
+                functions it used to override were never reached by validation.
 
         Notes:
             The per-character sets and the whole-value rules of each value class come from
@@ -20,6 +25,13 @@ class UnitValueValidator:
             per-class validator function.
         """
 
+        if value_validators is not None:
+            warnings.warn(
+                "The value_validators= parameter of UnitValueValidator is deprecated and will be removed in "
+                "hedtools 2.0.0; it has no effect. Value class rules come from hed/validator/data/class_regex.json.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         self._validate_characters = modern_allowed_char_rules
         self._char_validator = CharRexValidator()
 
