@@ -56,7 +56,7 @@ jobs:
 
       # Upload coverage to qlty
       - name: Upload coverage to qlty
-        uses: qltysh/qlty-action/coverage@c9b09987143d1e4ac955f4803c7bea742102feb5 # v2
+        uses: qltysh/qlty-action/coverage@c9b09987143d1e4ac955f4803c7bea742102feb5 # v2.4.0
         with:
           oidc: true
           files: coverage.xml
