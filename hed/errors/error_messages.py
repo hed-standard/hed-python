@@ -62,10 +62,24 @@ def val_error_tag_extended(tag, problem_tag):
     return f"Hed tag is extended. '{problem_tag}' in {tag}"
 
 
+def _invalid_character_message(character, char_index, source_string, code_point=None, allows=None):
+    """One message pattern for every invalid-character report (decision 2026-09-30).
+
+    ``Invalid character "?" (U+003F) at index 8 of "Label/reaching?": nameClass allows ...``. The code point
+    is computed when the caller does not pass it; the ``allows`` clause names the set the character failed.
+    """
+    if code_point is None:
+        code_point = f"U+{ord(character):04X}"
+    message = f'Invalid character "{character}" ({code_point}) at index {char_index} of "{source_string}"'
+    if allows:
+        message += f": {allows}"
+    return message
+
+
 @hed_error(ValidationErrors.CHARACTER_INVALID)
-def val_error_invalid_char(source_string, char_index):
+def val_error_invalid_char(source_string, char_index, char_set=None, code_point=None, allows=None):
     character = source_string[char_index]
-    return f'Invalid character "{character}" at index {char_index}"'
+    return _invalid_character_message(character, char_index, source_string, code_point, allows)
 
 
 @hed_tag_error(ValidationErrors.ELEMENT_DEPRECATED, default_severity=ErrorSeverity.WARNING)
@@ -74,26 +88,35 @@ def val_error_element_deprecated(tag):
 
 
 @hed_tag_error(ValidationErrors.INVALID_TAG_CHARACTER, has_sub_tag=True, actual_code=ValidationErrors.CHARACTER_INVALID)
-def val_error_invalid_tag_character(tag, problem_tag):
-    return f"Invalid character '{problem_tag}' in tag '{tag}'"
+def val_error_invalid_tag_character(tag, problem_tag, char_index=None, char_set=None, code_point=None, allows=None):
+    if char_index is None:
+        return f"Invalid character '{problem_tag}' in tag '{tag}'"
+    return _invalid_character_message(problem_tag, char_index, tag, code_point, allows)
 
 
 @hed_tag_error(
     ValidationErrors.INVALID_VALUE_CLASS_CHARACTER, has_sub_tag=False, actual_code=ValidationErrors.CHARACTER_INVALID
 )
-def val_error_val_error_invalid_value_class_character(tag, problem_tag, value_class):
-    return f"Invalid character '{problem_tag}' in tag '{tag}' for value class '{value_class}'"
+def val_error_val_error_invalid_value_class_character(
+    tag, problem_tag, value_class, char_index=None, char_set=None, code_point=None, allows=None
+):
+    if char_index is None:
+        return f"Invalid character '{problem_tag}' in tag '{tag}' for value class '{value_class}'"
+    return _invalid_character_message(problem_tag, char_index, tag, code_point, allows)
 
 
 @hed_tag_error(ValidationErrors.INVALID_VALUE_CLASS_VALUE, has_sub_tag=True, actual_code=ValidationErrors.VALUE_INVALID)
-def val_error_invalid_value_class_value(tag, problem_tag, value_class):
-    return f"'{tag}' has an invalid value portion for value class '{value_class}'"
+def val_error_invalid_value_class_value(tag, problem_tag, value_class, rule=None):
+    message = f"'{tag}' has an invalid value portion for value class '{value_class}'"
+    if rule:
+        message += f": {value_class} requires {rule}"
+    return message
 
 
 # Reported as CHARACTER_INVALID, the specification's code for a tilde (Appendix B, CHARACTER_INVALID a); the
 # message keeps the replacement advice.
 @hed_error(ValidationErrors.TILDES_UNSUPPORTED, actual_code=ValidationErrors.CHARACTER_INVALID)
-def val_error_tildes_not_supported(source_string, char_index):
+def val_error_tildes_not_supported(source_string, char_index, char_set=None, code_point=None, allows=None):
     character = source_string[char_index]
     return f"Tildes not supported. Replace (a ~ b ~ c) with (a, (b, c)). '{character}' at index {char_index}'"
 

@@ -1,30 +1,66 @@
 """Classes responsible for basic character validation of a string or tag."""
 
-import json
-import os
-import re
+from semantic_version import Version
 
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
+from hed.schema.schema_io.schema_util import schema_version_greater_equal
+from hed.validator.util.character_sets import CharacterSets, code_point
 
-CLASS_REX_FILENAME = "../data/class_regex.json"
+# The character sets a tag extension may use (specification 3.2.5 says ``name`` characters; hedtools has always
+# also admitted the characters below, which appear in extensions of existing datasets).
+EXTENSION_SETS = (
+    "alphanumeric",
+    "hyphen",
+    "underscore",
+    "forward-slash",
+    "period",
+    "plus",
+    "caret",
+    "blank",
+    "number-sign",
+    "colon",
+    "nonascii",
+)
+# The character sets of the schema path of a tag (the part matched to schema nodes).
+TAG_PATH_SETS = ("alphanumeric", "hyphen", "underscore", "forward-slash", "colon", "nonascii")
+# The value class used for a value whose placeholder declares no valueClass (decision 2026-09-30, D3).
+UNCLASSED_VALUE_SETS = ("value-text",)
+# The version from which pre-8.3.0 schemas' ASCII-only rule no longer applies, for the message.
+ASCII_ONLY_BEFORE = "8.3.0"
+# Message clauses for the string-level checks (specification Appendix B CHARACTER_INVALID b).
+COLUMN_BRACES_RULE = "curly braces may appear only in a sidecar column reference"
+# hedtools (and hed-javascript) have always checked a textClass value of HED 8.0.0 to 8.2.0 against the 8.3.0
+# ``text`` set, not against the characters those schemas enumerate (no underscore, no apostrophe); PR #1430
+# kept it so. The specification file records the enumeration as the 8.0.0 default. Until the two are
+# reconciled (open question, 2026-10-02) ``text`` stays in force here, so no released dataset changes verdict.
+LEGACY_TEXT_CLASS = "textClass"
+LEGACY_TEXT_DEFAULTS = ["text"]
+LEGACY_TEXT_BEFORE = "8.3.0"
 
-# The allowedCharacter names that are complete character sets of the specification (2.2 "Character sets and
-# restrictions"). A value class whose schema declaration uses only these is checked against the declaration,
-# so a schema can move textClass from text to value-text (HED 8.5.0) without a code change.
-SCHEMA_DECLARED_SETS = frozenset({"text", "value-text", "name"})
+
+def _standard_version(hed_schema):
+    """Return the highest standard schema version a schema or schema group is based on, or None.
+
+    A standard schema contributes its own version; a partnered library its ``withStandard`` version; an
+    unpartnered library nothing. None means no standard version is known (an unpartnered library, or no schema).
+    """
+    if hed_schema is None:
+        return None
+    versions = []
+    for namespace in hed_schema.valid_prefixes:
+        schema = hed_schema.schema_for_namespace(namespace)
+        if schema.with_standard:
+            versions.append(schema.with_standard)
+        elif schema.library == "":
+            versions.append(schema.version_number)
+    if not versions:
+        return None
+    return max(versions, key=Version)
 
 
 class CharValidator:
     """Class responsible for basic character level validation of a string or tag."""
-
-    # # sign is allowed by default as it is specifically checked for separately.
-    DEFAULT_ALLOWED_PLACEHOLDER_CHARS = ".+-^ _#"
-    # Placeholder characters are checked elsewhere, but by default allowed
-    TAG_ALLOWED_CHARS = "-_/"
-
-    INVALID_STRING_CHARS = "[]{}~"
-    INVALID_STRING_CHARS_PLACEHOLDERS = "[]~"
 
     def __init__(self, modern_allowed_char_rules=False):
         """Does basic character validation for HED strings/tags
@@ -33,9 +69,10 @@ class CharValidator:
             modern_allowed_char_rules(bool): If True, use 8.3 style rules for unicode characters.
         """
         self._validate_characters = modern_allowed_char_rules
+        self._sets = CharacterSets.load()
 
     def check_invalid_character_issues(self, hed_string, allow_placeholders) -> list[dict]:
-        """Report invalid characters.
+        """Report characters no HED string may contain.
 
         Parameters:
             hed_string (str): A HED string.
@@ -45,20 +82,32 @@ class CharValidator:
             list: Validation issues. Each issue is a dictionary.
 
         Notes:
-            - Invalid tag characters are defined by self.INVALID_STRING_CHARS or
-                                                    self.INVALID_STRING_CHARS_PLACEHOLDERS
+            - The forbidden characters come from ``character_sets.json`` ``hed_string.forbidden``
+              (specification Appendix B CHARACTER_INVALID a): ``[ ] ~ "`` and the control ranges, the latter
+              implemented as ``not str.isprintable()``. Curly braces are forbidden where placeholders are not
+              allowed (CHARACTER_INVALID b). Schemas before 8.3.0 also reject every non-ASCII character.
         """
         validation_issues = []
-        invalid_dict = self.INVALID_STRING_CHARS
-        if allow_placeholders:
-            invalid_dict = self.INVALID_STRING_CHARS_PLACEHOLDERS
+        forbidden = self._sets.forbidden_characters
+        column_braces = self._sets.column_braces
         for index, character in enumerate(hed_string):
-            if self._validate_characters:
-                if character in invalid_dict or not character.isprintable():
-                    validation_issues += self._report_invalid_character_error(hed_string, index)
-            else:
-                if character in invalid_dict or ord(character) > 127:
-                    validation_issues += self._report_invalid_character_error(hed_string, index)
+            if character in forbidden:
+                validation_issues += self._report_invalid_character_error(
+                    hed_string, index, "forbidden", self._sets.describe_forbidden()
+                )
+            elif character in column_braces and not allow_placeholders:
+                validation_issues += self._report_invalid_character_error(
+                    hed_string, index, "structural", COLUMN_BRACES_RULE
+                )
+            elif self._validate_characters:
+                if not character.isprintable():
+                    validation_issues += self._report_invalid_character_error(
+                        hed_string, index, "forbidden", self._sets.describe_forbidden()
+                    )
+            elif ord(character) > 127:
+                validation_issues += self._report_invalid_character_error(
+                    hed_string, index, "ascii", f"schemas before {ASCII_ONLY_BEFORE} allow only ASCII characters"
+                )
 
         return validation_issues
 
@@ -73,16 +122,18 @@ class CharValidator:
             list: Validation issues. Each issue is a dictionary.
         """
         validation_issues = self._check_invalid_prefix_issues(original_tag)
-        allowed_chars = self.TAG_ALLOWED_CHARS
+        allowed_names = list(TAG_PATH_SETS)
         if allow_placeholders:
-            allowed_chars += "#"
-        validation_issues += self._check_invalid_chars(original_tag.org_base_tag, allowed_chars, original_tag)
+            allowed_names.append("number-sign")
+        validation_issues += self._check_invalid_chars(
+            original_tag.org_base_tag, allowed_names, original_tag, subject="a tag path"
+        )
         return validation_issues
 
     def check_for_invalid_extension_chars(
         self, original_tag, validate_text, error_code=None, index_offset=0
     ) -> list[dict]:
-        """Report invalid characters in extension/value.
+        """Report invalid characters in a tag extension.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
@@ -93,46 +144,44 @@ class CharValidator:
         Returns:
             list: Validation issues. Each issue is a dictionary.
         """
-        allowed_chars = self.TAG_ALLOWED_CHARS
-        allowed_chars += self.DEFAULT_ALLOWED_PLACEHOLDER_CHARS
-        allowed_chars += " "
         return self._check_invalid_chars(
             validate_text,
-            allowed_chars,
+            list(EXTENSION_SETS),
             original_tag,
             starting_index=len(original_tag.org_base_tag) + 1 + index_offset,
             error_code=error_code,
+            subject="a tag extension",
         )
 
-    @staticmethod
-    def _check_invalid_chars(check_string, allowed_chars, source_tag, starting_index=0, error_code=None):
+    def _check_invalid_chars(
+        self, check_string, allowed_names, source_tag, starting_index=0, error_code=None, subject="a tag"
+    ):
         """Helper for checking for invalid characters.
 
         Parameters:
             check_string (str): String to be checked for invalid characters.
-            allowed_chars (str): Characters allowed in string.
+            allowed_names (list of str): Names of the character sets allowed in the string.
             source_tag (HedTag): Tag from which the string came from.
             starting_index (int): Starting index of check_string within the tag.
             error_code (str): The code to override the error as. Again mostly for def/def-expand tags.
+            subject (str): What is being checked, for the message ("a tag extension").
 
         Returns:
             list:  List of dictionaries with validation issues.
         """
         validation_issues = []
-        for i, character in enumerate(check_string):
-            if character.isalnum():
-                continue
-            if character in allowed_chars:
-                continue
-            # Todo: Remove this patch when clock times and invalid characters are more properly checked
-            if character == ":":
-                continue
+        allows = f"{subject} allows {self._sets.describe(allowed_names)}"
+        for i, character in self._sets.problem_characters(check_string, allowed_names):
             validation_issues += ErrorHandler.format_error(
                 ValidationErrors.INVALID_TAG_CHARACTER,
                 tag=source_tag,
                 index_in_tag=starting_index + i,
                 index_in_tag_end=starting_index + i + 1,
                 actual_error=error_code,
+                char_index=starting_index + i,
+                char_set=", ".join(allowed_names),
+                code_point=code_point(character),
+                allows=allows,
             )
         return validation_issues
 
@@ -157,12 +206,14 @@ class CharValidator:
         return issues
 
     @staticmethod
-    def _report_invalid_character_error(hed_string, index):
+    def _report_invalid_character_error(hed_string, index, char_set, allows):
         """Report an invalid character.
 
         Parameters:
             hed_string (str): The HED string that caused the error.
             index (int): The index of the invalid character in the HED string.
+            char_set (str): The ``char_set`` issue key: the set or rule the character failed.
+            allows (str): What the string may contain instead, for the message.
 
         Returns:
             list: A singleton list with a dictionary representing the error.
@@ -172,67 +223,86 @@ class CharValidator:
         character = hed_string[index]
         if character == "~":
             error_type = ValidationErrors.TILDES_UNSUPPORTED
-        return ErrorHandler.format_error(error_type, char_index=index, source_string=hed_string)
+        return ErrorHandler.format_error(
+            error_type,
+            char_index=index,
+            source_string=hed_string,
+            char_set=char_set,
+            code_point=code_point(character),
+            allows=allows,
+        )
 
 
 class CharRexValidator(CharValidator):
-    """Class responsible for basic character level validation of a string or tag."""
+    """Character validation of values against the value classes of the loaded schema."""
 
-    def __init__(self, modern_allowed_char_rules=False):
+    def __init__(self, modern_allowed_char_rules=False, hed_schema=None):
         """Does basic character validation for HED strings/tags
 
         Parameters:
             modern_allowed_char_rules(bool): If True, use 8.3 style rules for Unicode characters.
+            hed_schema (HedSchema, HedSchemaGroup or None): The schema being validated against. It decides
+                whether a value class's own ``allowedCharacter`` declaration or the specification's per-class
+                defaults define its characters (see ``allowed_names``). None trusts the declaration.
         """
         super().__init__(modern_allowed_char_rules)
-        self._rex_dict = self._get_rex_dict()
+        self._standard_version = _standard_version(hed_schema)
+        if hed_schema is None:
+            self._declaration_wins = True
+        else:
+            self._declaration_wins = schema_version_greater_equal(hed_schema, self._sets.declaration_wins_from)
+
+    @property
+    def character_sets(self) -> CharacterSets:
+        """The shared character-set table."""
+        return self._sets
+
+    def allowed_names(self, cname, declared_names=None) -> list[str]:
+        """Return the character-set names that define the characters of value class *cname*.
+
+        From standard schema 8.5.0, and in libraries partnered with 8.5.0 or later, the schema's own
+        ``allowedCharacter`` declaration defines the class (decision D2, 2026-09-30), provided every name is a
+        known set, an alias, or a single literal character; an unknown name is a schema compliance error and
+        the defaults apply instead. On earlier standard versions the specification's ``value_class_defaults``
+        define the five standard classes (D5), because their released declarations are incomplete (nameClass
+        omits ``nonascii``); textClass before 8.3.0 keeps the ``text`` set hedtools has always applied there
+        (``LEGACY_TEXT_DEFAULTS``). A class the file has no defaults for (a library's own value class) always
+        follows its declaration.
+
+        Parameters:
+            cname (str): The value class name.
+            declared_names (list of str or None): The ``allowedCharacter`` names the schema declares for it.
+
+        Returns:
+            list[str]: The names; empty when nothing constrains the characters.
+        """
+        defaults = self._sets.defaults_for(cname, self._standard_version)
+        if (
+            cname == LEGACY_TEXT_CLASS
+            and self._standard_version is not None
+            and Version(self._standard_version) < Version(LEGACY_TEXT_BEFORE)
+        ):
+            defaults = list(LEGACY_TEXT_DEFAULTS)
+        declared = [name for name in (declared_names or []) if name]
+        if declared and (self._declaration_wins or not defaults):
+            if all(self._sets.is_known_name(name) for name in declared):
+                return declared
+        return defaults
 
     def get_problem_chars(self, in_str, cname, declared_names=None):
         """Return a list of (index, char) pairs for characters in in_str not allowed by the value class cname.
-
-        The character sets come from the schema's own declaration of the value class when it consists only
-        of complete named sets (``allowedCharacter=text`` in HED 8.3.0 and 8.4.0, ``allowedCharacter=value-text``
-        from 8.5.0), so the check follows the loaded schema. A declaration that enumerates parts (HED 8.0.0 to
-        8.2.0 list ``+``, ``(``, ... for textClass; every release lists ``letters, digits, underscore, hyphen``
-        for nameClass and omits the ``nonascii`` the specification allows from 8.3.0) is not trusted: the
-        built-in table for the class name applies, as before.
 
         Parameters:
             in_str (str): The string to check.
             cname (str): The value class name used to look up allowed character classes.
             declared_names (list of str or None): The ``allowedCharacter`` names the schema declares for
-                the class, if any.
+                the class, if any. See ``allowed_names`` for when they are used.
 
         Returns:
             list[tuple[int, str]]: Each tuple contains the character index and the offending character.
 
         """
-        # List to store problem indices and characters
-        bad_indices = []
-
-        # Retrieve the allowed character classes: the schema's declaration when it is made of complete sets,
-        # else the table
-        allowed_classes = self._rex_dict["class_chars"].get(cname, [])
-        if declared_names and all(name in SCHEMA_DECLARED_SETS for name in declared_names):
-            allowed_classes = declared_names
-        if not allowed_classes:
-            return bad_indices
-        # Combine the corresponding regular expressions from the char_regex section
-        allowed_regex_parts = [self._rex_dict["char_regex"][char_class] for char_class in allowed_classes]
-
-        # Create one combined regex that matches any of the allowed character classes
-        combined_regex = "|".join(allowed_regex_parts)
-
-        # Compile the combined regular expression
-        compiled_regex = re.compile(combined_regex)
-
-        # Iterate through the input string, checking each character
-        for index, char in enumerate(in_str):
-            # If the character doesn't match the combined regex, it's a problem
-            if not compiled_regex.match(char):
-                bad_indices.append((index, char))
-
-        return bad_indices
+        return self._sets.problem_characters(in_str, self.allowed_names(cname, declared_names))
 
     def is_valid_value(self, in_string, cname):
         """Check whether in_string is a valid whole-word value for class cname.
@@ -248,17 +318,8 @@ class CharRexValidator(CharValidator):
                 - ``False`` if *in_string* does not match the word-level regex (invalid value).
 
         """
-        # Retrieve the allowed character classes for the given class_name
-        class_regex = self._rex_dict["class_words"].get(cname, [])
-        if not class_regex:
+        class_regex = self._sets.word_rule(cname)
+        if class_regex is None:
             return True
-        match = re.match(class_regex, in_string)
-        match = match if match else False
-        return match
-
-    @staticmethod
-    def _get_rex_dict():
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        json_path = os.path.realpath(os.path.join(current_dir, CLASS_REX_FILENAME))
-        with open(json_path, encoding="utf-8") as f:
-            return json.load(f)
+        match = class_regex.match(in_string)
+        return match if match else False

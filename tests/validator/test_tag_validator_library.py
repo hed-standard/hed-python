@@ -7,7 +7,12 @@ from hed.errors import error_reporter
 from hed.errors.error_types import DefinitionErrors, ValidationErrors
 from hed.errors.exceptions import HedFileError
 from hed.schema.hed_schema_group import HedSchemaGroup
+from hed.validator.util.character_sets import CharacterSets
 from tests.validator.test_tag_validator_base import TestValidatorBase
+
+_SETS = CharacterSets.load()
+DATETIME_RULE = _SETS.word_rule_description("dateTimeClass")
+NUMERIC_RULE = _SETS.word_rule_description("numericClass")
 
 
 class TestHed3(TestValidatorBase):
@@ -244,6 +249,7 @@ class IndividualHedTagsShort(TestHed3):
                 ValidationErrors.INVALID_VALUE_CLASS_VALUE,
                 tag=0,
                 value_class="dateTimeClass",
+                rule=DATETIME_RULE,
                 index_in_tag=0,
                 index_in_tag_end=25,
             ),
@@ -297,6 +303,7 @@ class IndividualHedTagsShort(TestHed3):
                 index_in_tag=0,
                 index_in_tag_end=16,
                 value_class="numericClass",
+                rule=NUMERIC_RULE,
             )
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)

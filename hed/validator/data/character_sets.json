@@ -1,0 +1,270 @@
+{
+  "title": "HED character sets",
+  "description": "Machine-readable form of HED specification section 2.2 (Character sets and restrictions). The table in docs/source/02_Terminology.md is generated from this file by scripts/generate_character_table.py. Validators load this file unchanged; every regex uses only syntax that Python re and JavaScript RegExp share, with ASCII digit classes ([0-9], never a Unicode-aware shorthand). Each regex under sets matches exactly one character (one UTF-16 code unit in JavaScript); the regexes under value_class_words match a whole value and the one under hed_string.forbidden matches any single forbidden character.",
+  "specification_version": "4.0.0",
+  "file_version": "1.0.0",
+  "sets": {
+    "alphanumeric": {
+      "regex": "[A-Za-z0-9]",
+      "description": "`letters` and/or `digits`"
+    },
+    "ampersand": {
+      "regex": "&",
+      "description": "ASCII code 38"
+    },
+    "ascii": {
+      "regex": "[\\x00-\\x7F]",
+      "description": "utf-8 codes 0 to 127 (single byte)"
+    },
+    "asterisk": {
+      "regex": "\\*",
+      "description": "ASCII code 42"
+    },
+    "at-sign": {
+      "regex": "@",
+      "description": "ASCII code 64"
+    },
+    "backslash": {
+      "regex": "\\\\",
+      "description": "ASCII code 92"
+    },
+    "blank": {
+      "regex": " ",
+      "description": "ASCII code 32"
+    },
+    "caret": {
+      "regex": "\\^",
+      "description": "ASCII code 94"
+    },
+    "colon": {
+      "regex": ":",
+      "description": "ASCII code 58"
+    },
+    "comma": {
+      "regex": ",",
+      "description": "ASCII code 44"
+    },
+    "digits": {
+      "regex": "[0-9]",
+      "description": "0-9"
+    },
+    "dollar": {
+      "regex": "\\$",
+      "description": "ASCII code 36"
+    },
+    "double-quote": {
+      "regex": "\"",
+      "description": "ASCII code 34"
+    },
+    "equals": {
+      "regex": "=",
+      "description": "ASCII code 61"
+    },
+    "exclamation": {
+      "regex": "!",
+      "description": "ASCII code 33"
+    },
+    "forward-slash": {
+      "regex": "/",
+      "description": "ASCII code 47"
+    },
+    "greater-than": {
+      "regex": ">",
+      "description": "ASCII code 62"
+    },
+    "hyphen": {
+      "regex": "-",
+      "description": "ASCII code 45"
+    },
+    "left-paren": {
+      "regex": "\\(",
+      "description": "ASCII code 40"
+    },
+    "less-than": {
+      "regex": "<",
+      "description": "ASCII code 60"
+    },
+    "letters": {
+      "regex": "[A-Za-z]",
+      "description": "`lowercase` and/or `uppercase`"
+    },
+    "lowercase": {
+      "regex": "[a-z]",
+      "description": "ASCII characters a-z"
+    },
+    "name": {
+      "regex": "[A-Za-z0-9_\\-]|[^\\x00-\\x9F]",
+      "description": "`alphanumeric`, `hyphen`, `underscore`, `nonascii`",
+      "tests": {
+        "valid": ["a", "Z", "7", "_", "-", "é", "中"],
+        "invalid": [".", " ", "/", "(", "\u0085"]
+      }
+    },
+    "newline": {
+      "regex": "\\n",
+      "description": "ASCII code 10 (linefeed)"
+    },
+    "nonascii": {
+      "regex": "[^\\x00-\\x9F]",
+      "description": "utf-8 codes 160 and above (multi-byte)",
+      "tests": {
+        "valid": [" ", "é", "￿"],
+        "invalid": ["a", "\u007f", "\u0085", "\u009f"]
+      }
+    },
+    "number-sign": {
+      "regex": "#",
+      "description": "ASCII code 35"
+    },
+    "numeric": {
+      "regex": "[0-9.\\-+^Ee]",
+      "description": "digits, period, hyphen, plus, caret, E, e"
+    },
+    "percent-sign": {
+      "regex": "%",
+      "description": "ASCII code 37"
+    },
+    "period": {
+      "regex": "\\.",
+      "description": "ASCII code 46"
+    },
+    "plus": {
+      "regex": "\\+",
+      "description": "ASCII code 43"
+    },
+    "printable": {
+      "regex": "[\\x20-\\x7E]",
+      "description": "ASCII codes 32 to 126",
+      "tests": {
+        "valid": [" ", "a", "~"],
+        "invalid": ["\u001f", "\u007f", "é"]
+      }
+    },
+    "question-mark": {
+      "regex": "\\?",
+      "description": "ASCII code 63"
+    },
+    "right-paren": {
+      "regex": "\\)",
+      "description": "ASCII code 41"
+    },
+    "semicolon": {
+      "regex": ";",
+      "description": "ASCII code 59"
+    },
+    "single-quote": {
+      "regex": "'",
+      "description": "ASCII code 39"
+    },
+    "tab": {
+      "regex": "\\t",
+      "description": "ASCII code 09"
+    },
+    "text": {
+      "regex": "[^\\x00-\\x1F\\x7F-\\x9F,\\[\\]{}]",
+      "description": "`printable` and/or `nonascii` excluding comma, square brackets, and curly braces.",
+      "excludes": [",", "[", "]", "{", "}"],
+      "tests": {
+        "valid": ["a", " ", "(", ")", "#", "~", "\"", "é"],
+        "invalid": [",", "[", "]", "{", "}", "\u0000", "\u007f", "\u0085"]
+      }
+    },
+    "tilde": {
+      "regex": "~",
+      "description": "ASCII code 126"
+    },
+    "underscore": {
+      "regex": "_",
+      "description": "ASCII code 95"
+    },
+    "uppercase": {
+      "regex": "[A-Z]",
+      "description": "ASCII characters A-Z"
+    },
+    "value-text": {
+      "regex": "[^\\x00-\\x1F\\x7F-\\x9F,\\[\\]{}()#~]",
+      "description": "`text` excluding left and right parentheses, number sign, and tilde.",
+      "excludes": [",", "[", "]", "{", "}", "(", ")", "#", "~"],
+      "tests": {
+        "valid": ["a", " ", "?", "=", ":", ".", "\"", "é"],
+        "invalid": [",", "[", "]", "{", "}", "(", ")", "#", "~", "\u0000", "\u0085"]
+      }
+    },
+    "vertical-bar": {
+      "regex": "\\|",
+      "description": "ASCII code 124"
+    }
+  },
+  "aliases": {
+    "slash": "forward-slash"
+  },
+  "literal_names": {
+    "rule": "Any single character is an allowedCharacter name for itself. HED 8.0.0 through 8.2.0 declare, for example, allowedCharacter=- and allowedCharacter=$; every version declares T, E and e for dateTimeClass and numericClass.",
+    "regex_for": "the character, regex-escaped"
+  },
+  "declaration_wins_from": {
+    "standard_version": "8.5.0",
+    "rule": "From standard schema 8.5.0, and in library schemas partnered with 8.5.0 or later, the allowedCharacter names a value class declares define its characters, resolved through sets, aliases and literal_names. For earlier standard versions value_class_defaults define the characters of the five standard value classes, because their released declarations are incomplete (nameClass omits nonascii; dateTimeClass omits period and Z). A declaration that uses a name that is none of the three is a schema compliance error."
+  },
+  "value_class_defaults": {
+    "dateTimeClass": [
+      {"from": "8.0.0", "sets": ["digits", "T", "hyphen", "colon", "period", "plus", "Z"]}
+    ],
+    "nameClass": [
+      {"from": "8.0.0", "sets": ["letters", "digits", "hyphen", "underscore"]},
+      {"from": "8.3.0", "sets": ["letters", "digits", "hyphen", "underscore", "nonascii"]}
+    ],
+    "numericClass": [
+      {"from": "8.0.0", "sets": ["digits", "E", "e", "plus", "hyphen", "period"]}
+    ],
+    "posixPath": [
+      {"from": "8.0.0", "sets": ["digits", "letters", "forward-slash", "colon"]}
+    ],
+    "textClass": [
+      {"from": "8.0.0", "sets": ["letters", "digits", "blank", "+", "-", ":", ";", ".", "/", "(", ")", "?", "*", "%", "$", "@"]},
+      {"from": "8.3.0", "sets": ["text"]},
+      {"from": "8.5.0", "sets": ["value-text"]}
+    ]
+  },
+  "value_class_words": {
+    "dateTimeClass": {
+      "regex": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:2[0-3]|[01][0-9]):[0-5][0-9]:(?:[0-5][0-9]|60)(?:\\.[0-9]{1,6})?(?:Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$",
+      "description": "the BIDS Datetime format, RFC 3339 with an optional offset: YYYY-MM-DDThh:mm:ss[.ffffff][Z|+hh:mm|-hh:mm], fraction 1 to 6 digits, hour 00-23, seconds 00-60; a non-existent date such as 2026-02-31 passes, as in BIDS",
+      "tests": {
+        "valid": ["2026-09-30T09:55:00", "2026-09-30T09:55:00.5", "2026-09-30T09:55:00.123456Z", "2026-09-30T09:55:00+02:00", "2026-09-30T09:55:00-05:30", "2026-09-30T23:59:60"],
+        "invalid": ["2026-09-30", "2026-09-30 09:55:00", "2026-09-30t09:55:00z", "2026-09-30T09:55", "2026-09-30T09:55:00+0200", "2026-09-30T09:55:00+02", "2026-09-30T24:00:00", "2026-09-30T09:55:00.1234567", "2026-13-01T09:55:00", "2026-09-32T09:55:00", "2026-09-30T09:60:00", "2026-09-30T09:55:00+99:99", "20260930T095500"]
+      }
+    },
+    "numericClass": {
+      "regex": "^[+-]?([0-9]+(\\.[0-9]*)?|\\.[0-9]+)([eE][+-]?[0-9]+)?$",
+      "description": "an optionally signed decimal number, with optional scientific-notation exponent",
+      "tests": {
+        "valid": ["3", "-3.5", ".5", "3.", "1e10", "-2.5E-3"],
+        "invalid": ["", "3 mA", "1e", "abc", "3^2", "+", "\u0663", "1\u0663"]
+      }
+    }
+  },
+  "hed_string": {
+    "forbidden": {
+      "characters": ["[", "]", "~", "\""],
+      "code_ranges": [[0, 31], [127, 159]],
+      "regex": "[\\x00-\\x1F\\x7F-\\x9F\\[\\]~\"]",
+      "description": "characters no HED string may contain anywhere, whatever the value class (Appendix B CHARACTER_INVALID a)"
+    },
+    "structural": {
+      "comma": ",",
+      "group_open": "(",
+      "group_close": ")",
+      "column_open": "{",
+      "column_close": "}",
+      "placeholder": "#",
+      "path_separator": "/",
+      "namespace_separator": ":",
+      "description": "characters that give a HED string its structure; a value may contain one only where its value class allows it (value-text allows none of the first six)"
+    },
+    "tag_chars": {
+      "sets": ["name"],
+      "description": "characters of a schema node name and of a tag extension"
+    }
+  }
+}

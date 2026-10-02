@@ -20,7 +20,7 @@ from semantic_version import Version
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import SchemaAttributeErrors, SchemaErrors, SchemaWarnings, ValidationErrors
 from hed.schema.hed_cache import get_hed_versions
-from hed.schema.hed_schema_constants import HedKey, HedSectionKey, character_types
+from hed.schema.hed_schema_constants import HedKey, HedSectionKey
 from hed.schema.schema_validation.validation_util import schema_version_for_library
 
 
@@ -314,13 +314,17 @@ def allowed_characters_check(hed_schema, tag_entry, attribute_name) -> list:
     Returns:
         list[dict]: A list of issues from validating this attribute.
     """
+    # The names come from the specification's character_sets.json (section 2.2): a named set, an alias, or a
+    # single literal character. Imported here, not at module level, because hed.validator imports hed.schema.
+    from hed.validator.util.character_sets import CharacterSets
+
     issues = []
-    allowed_strings = character_types
+    character_sets = CharacterSets.load()
 
     char_string = tag_entry.attributes.get(attribute_name, "")
     characters = char_string.split(",")
     for character in characters:
-        if character not in allowed_strings and len(character) != 1:
+        if not character_sets.is_known_name(character):
             issues += ErrorHandler.format_error(
                 SchemaAttributeErrors.SCHEMA_ALLOWED_CHARACTERS_INVALID, tag_entry.name, character
             )
