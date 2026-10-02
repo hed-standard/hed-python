@@ -1,9 +1,12 @@
 import math
 import unittest
+from fractions import Fraction
 
+import numpy as np
 import pandas as pd
 
 from hed.models import ColumnSource, ListColumnSource, TabularInput, distinct_values
+from hed.models.column_source import is_missing
 
 
 class TestDistinctValues(unittest.TestCase):
@@ -14,6 +17,27 @@ class TestDistinctValues(unittest.TestCase):
     def test_missing_values_are_dropped(self):
         values = [None, float("nan"), "", "n/a", "Red", math.nan, "n/a"]
         self.assertEqual(distinct_values(values), {"Red": [4]})
+
+    def test_numpy_nan_of_any_width_is_missing(self):
+        """numpy float32 and float16 are not instances of float; their NaN is still a missing value."""
+        for dtype in (np.float16, np.float32, np.float64):
+            values = np.array([1.5, np.nan, 1.5], dtype=dtype)
+            self.assertEqual(distinct_values(values), {"1.5": [0, 2]}, dtype)
+            self.assertTrue(is_missing(values[1]), dtype)
+            self.assertFalse(is_missing(values[0]), dtype)
+        self.assertFalse(is_missing(np.int32(0)))
+        self.assertFalse(is_missing(np.bool_(False)))
+        self.assertFalse(is_missing(0))
+        self.assertTrue(is_missing(None))
+        self.assertTrue(is_missing("n/a"))
+        self.assertFalse(is_missing("nan"))  # the text nan is a value
+
+    def test_real_values_that_do_not_fit_a_float_are_values(self):
+        """An integer too large for a float, or a Fraction, is a value: the NaN test converts nothing."""
+        huge = 10**1000
+        self.assertFalse(is_missing(huge))
+        self.assertFalse(is_missing(Fraction(1, 3)))
+        self.assertEqual(distinct_values([huge, Fraction(1, 3), huge]), {str(huge): [0, 2], "1/3": [1]})
 
     def test_non_strings_become_text_and_bytes_are_decoded(self):
         values = [3, 3.5, b"Blue", 3]
