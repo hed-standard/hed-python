@@ -11,7 +11,6 @@ a DataFrame unless it wants assembly.
 
 from __future__ import annotations
 
-import math
 import numbers
 from typing import Protocol, runtime_checkable
 
@@ -50,12 +49,14 @@ def is_missing(value) -> bool:
 
     The NaN test accepts any real number rather than only ``float``: numpy's float32 and float16 do not
     subclass Python's float (only float64 does), and a numpy-backed table (an NWB column, a pandas
-    frame read with a narrow dtype) hands those NaNs over as values.
+    frame read with a narrow dtype) hands those NaNs over as values. NaN is the one real value that is
+    not equal to itself, and that test needs no conversion to float, so an integer too large for a
+    float or a Fraction is simply a value.
     """
     if value is None:
         return True
     if isinstance(value, numbers.Real):
-        return math.isnan(value)
+        return bool(value != value)
     return isinstance(value, str) and value in MISSING_VALUES
 
 

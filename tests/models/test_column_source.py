@@ -1,5 +1,6 @@
 import math
 import unittest
+from fractions import Fraction
 
 import numpy as np
 import pandas as pd
@@ -30,6 +31,13 @@ class TestDistinctValues(unittest.TestCase):
         self.assertTrue(is_missing(None))
         self.assertTrue(is_missing("n/a"))
         self.assertFalse(is_missing("nan"))  # the text nan is a value
+
+    def test_real_values_that_do_not_fit_a_float_are_values(self):
+        """An integer too large for a float, or a Fraction, is a value: the NaN test converts nothing."""
+        huge = 10**1000
+        self.assertFalse(is_missing(huge))
+        self.assertFalse(is_missing(Fraction(1, 3)))
+        self.assertEqual(distinct_values([huge, Fraction(1, 3), huge]), {str(huge): [0, 2], "1/3": [1]})
 
     def test_non_strings_become_text_and_bytes_are_decoded(self):
         values = [3, 3.5, b"Blue", 3]
