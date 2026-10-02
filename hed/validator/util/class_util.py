@@ -143,8 +143,11 @@ class UnitValueValidator:
 
         classes = list(value_classes.keys())
         class_valid = {}
+        rule_failures = {}
         for class_name in classes:
             class_valid[class_name] = self._char_validator.is_valid_value(stripped_value, class_name)
+            if not class_valid[class_name]:
+                rule_failures[class_name] = self._char_validator.value_failure(stripped_value, class_name)
 
         char_errors = {}
         allowed = {}
@@ -154,9 +157,11 @@ class UnitValueValidator:
             if class_valid[class_name] and not char_errors[class_name]:  # We have found a valid class
                 return []
 
-        return self.report_value_errors(char_errors, class_valid, report_as, allowed_names=allowed)
+        return self.report_value_errors(
+            char_errors, class_valid, report_as, allowed_names=allowed, rule_failures=rule_failures
+        )
 
-    def report_value_errors(self, error_dict, class_valid, report_as, allowed_names=None):
+    def report_value_errors(self, error_dict, class_valid, report_as, allowed_names=None, rule_failures=None):
         """Build validation issues from per-class character error and validity dicts.
 
         Parameters:
@@ -166,6 +171,8 @@ class UnitValueValidator:
             report_as (HedTag): The tag object used as context in error reporting.
             allowed_names (dict or None): Mapping of class name to the character-set names in force for it,
                 for the messages and the ``char_set`` issue key.
+            rule_failures (dict or None): Mapping of class name to the whole-value rule the value broke
+                (``CharRexValidator.value_failure``); the class's rule description when absent.
 
         Returns:
             list[dict]: Validation issue dictionaries.
@@ -173,6 +180,7 @@ class UnitValueValidator:
         """
         validation_issues = []
         allowed_names = allowed_names or {}
+        rule_failures = rule_failures or {}
         sets = self._char_validator.character_sets
         for class_name, errors in error_dict.items():
             if not errors and class_valid[class_name]:
@@ -184,7 +192,7 @@ class UnitValueValidator:
                     index_in_tag_end=len(report_as.org_tag),
                     value_class=class_name,
                     tag=report_as,
-                    rule=sets.word_rule_description(class_name),
+                    rule=rule_failures.get(class_name) or sets.word_rule_description(class_name),
                 )
             elif errors:
                 names = allowed_names.get(class_name, [])

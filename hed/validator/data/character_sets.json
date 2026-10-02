@@ -229,7 +229,7 @@
   "value_class_words": {
     "dateTimeClass": {
       "regex": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:2[0-3]|[01][0-9]):[0-5][0-9]:(?:[0-5][0-9]|60)(?:\\.[0-9]{1,6})?(?:Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$",
-      "description": "the BIDS Datetime format, RFC 3339 with an optional offset: YYYY-MM-DDThh:mm:ss[.ffffff][Z|+hh:mm|-hh:mm], fraction 1 to 6 digits, hour 00-23, seconds 00-60; a non-existent date such as 2026-02-31 passes, as in BIDS",
+      "description": "the BIDS Datetime format, RFC 3339 with an optional offset: YYYY-MM-DDThh:mm:ss[.ffffff][Z|+hh:mm|-hh:mm], fraction 1 to 6 digits, hour 00-23, seconds 00-60; after the expression the date must exist in the Gregorian calendar (2026-02-31 and 2027-02-29 are invalid, 2028-02-29 is valid), which the regex alone does not check",
       "tests": {
         "valid": ["2026-09-30T09:55:00", "2026-09-30T09:55:00.5", "2026-09-30T09:55:00.123456Z", "2026-09-30T09:55:00+02:00", "2026-09-30T09:55:00-05:30", "2026-09-30T23:59:60"],
         "invalid": ["2026-09-30", "2026-09-30 09:55:00", "2026-09-30t09:55:00z", "2026-09-30T09:55", "2026-09-30T09:55:00+0200", "2026-09-30T09:55:00+02", "2026-09-30T24:00:00", "2026-09-30T09:55:00.1234567", "2026-13-01T09:55:00", "2026-09-32T09:55:00", "2026-09-30T09:60:00", "2026-09-30T09:55:00+99:99", "20260930T095500"]

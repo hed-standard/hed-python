@@ -1,5 +1,7 @@
 """Classes responsible for basic character validation of a string or tag."""
 
+import datetime
+
 from semantic_version import Version
 
 from hed.errors.error_reporter import ErrorHandler
@@ -37,6 +39,10 @@ COLUMN_BRACES_RULE = "curly braces may appear only in a sidecar column reference
 LEGACY_TEXT_CLASS = "textClass"
 LEGACY_TEXT_DEFAULTS = ["text"]
 LEGACY_TEXT_BEFORE = "8.3.0"
+# The value class whose whole-value rule is a date-time. After the shape regex the date must exist in the
+# Gregorian calendar (Kay, 2026-10-02: the BIDS text says so, even though the BIDS validator checks only the
+# regex). The leap second ``:60`` the regex admits is not a calendar question and stays allowed.
+DATE_TIME_CLASS = "dateTimeClass"
 
 
 def _standard_version(hed_schema):
@@ -315,11 +321,45 @@ class CharRexValidator(CharValidator):
             True | re.Match | False:
                 - ``True`` if no word-level regex is defined for *cname* (class imposes no constraint).
                 - A ``re.Match`` object if *in_string* matches the word-level regex (valid value).
-                - ``False`` if *in_string* does not match the word-level regex (invalid value).
+                - ``False`` if *in_string* does not match the word-level regex, or is a dateTimeClass value
+                  whose date does not exist (invalid value).
 
         """
         class_regex = self._sets.word_rule(cname)
         if class_regex is None:
             return True
         match = class_regex.match(in_string)
-        return match if match else False
+        if not match:
+            return False
+        if cname == DATE_TIME_CLASS and not self._date_exists(in_string):
+            return False
+        return match
+
+    def value_failure(self, in_string, cname) -> str:
+        """Say why *in_string* fails the whole-value rule of class *cname*, for the VALUE_INVALID message.
+
+        Parameters:
+            in_string (str): The value.
+            cname (str): The value class name.
+
+        Returns:
+            str: The rule the value breaks (the class description, or "an existing Gregorian calendar date;
+            2026-02-31 does not exist"); empty when the value passes or the class has no whole-value rule.
+        """
+        class_regex = self._sets.word_rule(cname)
+        if class_regex is None:
+            return ""
+        if not class_regex.match(in_string):
+            return self._sets.word_rule_description(cname)
+        if cname == DATE_TIME_CLASS and not self._date_exists(in_string):
+            return f"an existing Gregorian calendar date; {in_string[:10]} does not exist"
+        return ""
+
+    @staticmethod
+    def _date_exists(value) -> bool:
+        """Return True when the ``YYYY-MM-DD`` that opens *value* is a real Gregorian date (year 1 or later)."""
+        try:
+            datetime.date(int(value[0:4]), int(value[5:7]), int(value[8:10]))
+        except ValueError:
+            return False
+        return True

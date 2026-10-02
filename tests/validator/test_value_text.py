@@ -83,6 +83,16 @@ class TestValueText(unittest.TestCase):
             "an optionally signed decimal number, with optional scientific-notation exponent",
         )
 
+    def test_a_date_that_does_not_exist_names_the_calendar_rule(self):
+        issues = self.value_issues(self.schema_840, "Creation-date/2026-02-31T09:55:00")
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.VALUE_INVALID])
+        self.assertEqual(
+            issues[0]["message"],
+            "'Creation-date/2026-02-31T09:55:00' has an invalid value portion for value class 'dateTimeClass': "
+            "dateTimeClass requires an existing Gregorian calendar date; 2026-02-31 does not exist",
+        )
+        self.assertEqual(self.value_issues(self.schema_840, "Creation-date/2028-02-29T09:55:00"), [])
+
     def test_the_schema_row_is_compliant(self):
         codes = {issue["code"] for issue in self.schema_850.check_compliance()}
         self.assertEqual(codes - {SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED}, set())
