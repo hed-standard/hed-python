@@ -40,7 +40,7 @@ class UnitValueValidator:
         self._char_validator = CharRexValidator(modern_allowed_char_rules, hed_schema=hed_schema)
 
     def check_tag_unit_class_units_are_valid(
-        self, original_tag, validate_text, report_as=None, error_code=None, allow_placeholders=True
+        self, original_tag, validate_text, report_as=None, error_code=None, allow_placeholders=True, index_offset=0
     ) -> list[dict]:
         """Report incorrect unit class or units.
 
@@ -50,6 +50,8 @@ class UnitValueValidator:
             report_as (HedTag): Report errors as coming from this tag, rather than original_tag.
             error_code (str): Override error codes.
             allow_placeholders (bool): Whether placeholders are allowed (affects value class validation for "#")
+            index_offset (int): Where validate_text starts within the extension of report_as, for the
+                character index of an issue (a Def tag's placeholder value follows its label).
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
@@ -72,7 +74,9 @@ class UnitValueValidator:
 
         # Check the value classes
         # If placeholders are NOT allowed, "#" will fail value class validation (e.g., not a valid number)
-        validation_issues += self._check_value_class(original_tag, stripped_value, report_as)
+        validation_issues += self._check_value_class(
+            original_tag, stripped_value, report_as, validate_text=validate_text, index_offset=index_offset
+        )
 
         # Override error code if specified (for def/def-expand tags)
         if error_code and validation_issues and not any(error_code == issue["code"] for issue in validation_issues):
@@ -82,25 +86,33 @@ class UnitValueValidator:
 
         return validation_issues
 
-    def check_tag_value_class_valid(self, original_tag, validate_text, report_as=None) -> list[dict]:
+    def check_tag_value_class_valid(self, original_tag, validate_text, report_as=None, index_offset=0) -> list[dict]:
         """Report an invalid value portion.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
             validate_text (str): The text to validate.
             report_as (HedTag): Report errors as coming from this tag, rather than original_tag.
+            index_offset (int): Where validate_text starts within the extension of report_as, for the
+                character index of an issue.
 
         Returns:
             list: Validation issues.
         """
-        return self._check_value_class(original_tag, validate_text, report_as)
+        return self._check_value_class(original_tag, validate_text, report_as, index_offset=index_offset)
 
-    def _allowed_names(self, class_name, class_entry=None):
-        """Return the character-set names in force for *class_name* (see ``CharRexValidator.allowed_names``)."""
+    def _allowed_names(self, class_name, class_entry=None, owner=None):
+        """Return the character-set names in force for *class_name* (see ``CharRexValidator.allowed_names``).
+
+        Parameters:
+            class_name (str): The value class name.
+            class_entry (HedSchemaEntry or None): The class's entry, whose ``allowedCharacter`` is the declaration.
+            owner (HedSchema or None): The schema that owns the tag; its standard version sets the policy.
+        """
         declared = None
         if class_entry is not None:
             declared = [name for name in class_entry.attributes.get("allowedCharacter", "").split(",") if name]
-        return self._char_validator.allowed_names(class_name, declared)
+        return self._char_validator.allowed_names(class_name, declared, hed_schema=owner)
 
     def _get_problem_indices(self, stripped_value, allowed_names, start_index=0):
         sets = self._char_validator.character_sets
@@ -112,25 +124,35 @@ class UnitValueValidator:
         subject = class_name if class_name else "a value with no value class"
         return f"{subject} allows {sets.describe(list(allowed_names))}"
 
-    def _check_value_class(self, original_tag, stripped_value, report_as):
+    def _check_value_class(self, original_tag, stripped_value, report_as, validate_text=None, index_offset=0):
         """Return any issues found if this is a value tag,
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
             stripped_value (str): value without units
             report_as (HedTag): Report as this tag.
+            validate_text (str or None): The text stripped_value came from; the extension of original_tag
+                when None.
+            index_offset (int): Where validate_text starts within the extension of report_as.
 
         Returns:
             list:  List of dictionaries of validation issues.
 
+        Notes:
+            A character index is relative to the tag the issue is reported as. For a Def or Def-expand tag the
+            validated tag is the definition's placeholder tag with the value substituted, so the index is
+            rebuilt from the Def tag's base and the offset of the value within its extension.
         """
 
         if not original_tag.is_takes_value_tag():
             return []
 
         value_classes = original_tag.value_classes
-        start_index = original_tag.extension.find(stripped_value) + len(original_tag.org_base_tag) + 1
+        owner = self._char_validator.schema_for_tag(original_tag)
+        if validate_text is None:
+            validate_text = original_tag.extension
         report_as = report_as if report_as else original_tag
+        start_index = len(report_as.org_base_tag) + 1 + index_offset + validate_text.find(stripped_value)
 
         if not value_classes:
             # A placeholder with no valueClass takes value-text: the characters a value may contain without
@@ -152,7 +174,7 @@ class UnitValueValidator:
         char_errors = {}
         allowed = {}
         for class_name in classes:
-            allowed[class_name] = self._allowed_names(class_name, value_classes[class_name])
+            allowed[class_name] = self._allowed_names(class_name, value_classes[class_name], owner)
             char_errors[class_name] = self._get_problem_indices(stripped_value, allowed[class_name], start_index)
             if class_valid[class_name] and not char_errors[class_name]:  # We have found a valid class
                 return []

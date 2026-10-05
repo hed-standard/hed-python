@@ -4,7 +4,7 @@ import unittest
 from hed import schema
 from hed.errors import ErrorContext, ErrorHandler
 from hed.models import DefinitionDict, HedString
-from hed.validator import DefValidator
+from hed.validator import DefValidator, HedValidator
 
 
 class Test(unittest.TestCase):
@@ -292,6 +292,42 @@ class TestDefErrors(unittest.TestCase):
             remove_definitions=True,
             basic_definition_string=self.placeholder_definition_string,
         )
+
+
+class TestDefValueCharacterIndex(unittest.TestCase):
+    """A character error in a Def or Def-expand placeholder value is indexed within the displayed tag.
+
+    The validated tag is the definition's placeholder tag with the value substituted (``Label/a?``), so without
+    the offset the index pointed into that hidden tag (PR #1442, Copilot round 2).
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.hed_schema = schema.load_schema_version("8.4.0")
+        cls.defs = DefinitionDict("(Definition/Test/#, (Label/#))", cls.hed_schema)
+        cls.assertEqual(cls(), cls.defs.issues, [])
+
+    def issues(self, text):
+        hed_string = HedString(text, self.hed_schema, def_dict=self.defs)
+        validator = HedValidator(self.hed_schema, def_dicts=self.defs)
+        return validator.validate(hed_string, allow_placeholders=False)
+
+    def test_def_value_index_is_within_the_def_tag(self):
+        issues = self.issues("Def/Test/a?")
+        self.assertEqual(len(issues), 1)
+        self.assertIn('"?" (U+003F) at index 10 of "Def/Test/a?"', issues[0]["message"])
+
+    def test_def_expand_value_index_is_within_the_def_expand_tag(self):
+        issues = self.issues("(Def-expand/Test/a?, (Label/a?))")
+        messages = [issue["message"] for issue in issues]
+        self.assertEqual(len(messages), 2)
+        self.assertTrue(any('at index 17 of "Def-expand/Test/a?"' in message for message in messages), messages)
+        self.assertTrue(any('at index 7 of "Label/a?"' in message for message in messages), messages)
+
+    def test_a_plain_tag_is_unchanged(self):
+        issues = self.issues("Label/a?")
+        self.assertEqual(len(issues), 1)
+        self.assertIn('at index 7 of "Label/a?"', issues[0]["message"])
 
 
 if __name__ == "__main__":

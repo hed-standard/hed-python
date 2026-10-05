@@ -246,18 +246,51 @@ class CharRexValidator(CharValidator):
                 defaults define its characters (see ``allowed_names``). None trusts the declaration.
         """
         super().__init__(modern_allowed_char_rules)
-        self._standard_version = _standard_version(hed_schema)
+        self._hed_schema = hed_schema
+        self._policies = {}
+        self._standard_version, self._declaration_wins = self._policy_for(hed_schema)
+
+    def _policy_for(self, hed_schema):
+        """Return ``(standard_version, declaration_wins)`` for a schema, a schema group, or None.
+
+        A single schema answers for itself: a standard schema by its version, a partnered library by its
+        ``withStandard`` version, an unpartnered library with no version (so only a class the file has no
+        defaults for follows its declaration). A group answers group-wide, with the highest version it holds
+        and ``schema_version_greater_equal``; callers that know the owning schema pass that schema instead.
+        """
         if hed_schema is None:
-            self._declaration_wins = True
-        else:
-            self._declaration_wins = schema_version_greater_equal(hed_schema, self._sets.declaration_wins_from)
+            return None, True
+        version = _standard_version(hed_schema)
+        return version, schema_version_greater_equal(hed_schema, self._sets.declaration_wins_from)
+
+    def _policy(self, hed_schema):
+        """Return the cached policy of *hed_schema*, or the policy of the schema this validator was built with."""
+        if hed_schema is None or hed_schema is self._hed_schema:
+            return self._standard_version, self._declaration_wins
+        key = id(hed_schema)
+        if key not in self._policies:
+            self._policies[key] = self._policy_for(hed_schema)
+        return self._policies[key]
+
+    def schema_for_tag(self, tag):
+        """Return the schema of the group that owns *tag*, or None when it is unknown.
+
+        Parameters:
+            tag (HedTag): A tag whose ``schema_namespace`` names one schema of the group.
+
+        Returns:
+            HedSchema or None: The owning schema; None without a schema or for a namespace the group lacks.
+        """
+        if self._hed_schema is None or tag is None:
+            return None
+        return self._hed_schema.schema_for_namespace(tag.schema_namespace)
 
     @property
     def character_sets(self) -> CharacterSets:
         """The shared character-set table."""
         return self._sets
 
-    def allowed_names(self, cname, declared_names=None) -> list[str]:
+    def allowed_names(self, cname, declared_names=None, hed_schema=None) -> list[str]:
         """Return the character-set names that define the characters of value class *cname*.
 
         From standard schema 8.5.0, and in libraries partnered with 8.5.0 or later, the schema's own
@@ -272,24 +305,27 @@ class CharRexValidator(CharValidator):
         Parameters:
             cname (str): The value class name.
             declared_names (list of str or None): The ``allowedCharacter`` names the schema declares for it.
+            hed_schema (HedSchema or None): The schema that owns the tag being checked. Its standard version
+                decides the policy; None uses the schema or group this validator was built with.
 
         Returns:
             list[str]: The names; empty when nothing constrains the characters.
         """
-        defaults = self._sets.defaults_for(cname, self._standard_version)
+        standard_version, declaration_wins = self._policy(hed_schema)
+        defaults = self._sets.defaults_for(cname, standard_version)
         if (
             cname == LEGACY_TEXT_CLASS
-            and self._standard_version is not None
-            and Version(self._standard_version) < Version(LEGACY_TEXT_BEFORE)
+            and standard_version is not None
+            and Version(standard_version) < Version(LEGACY_TEXT_BEFORE)
         ):
             defaults = list(LEGACY_TEXT_DEFAULTS)
         declared = [name for name in (declared_names or []) if name]
-        if declared and (self._declaration_wins or not defaults):
+        if declared and (declaration_wins or not defaults):
             if all(self._sets.is_known_name(name) for name in declared):
                 return declared
         return defaults
 
-    def get_problem_chars(self, in_str, cname, declared_names=None):
+    def get_problem_chars(self, in_str, cname, declared_names=None, hed_schema=None):
         """Return a list of (index, char) pairs for characters in in_str not allowed by the value class cname.
 
         Parameters:
@@ -297,12 +333,13 @@ class CharRexValidator(CharValidator):
             cname (str): The value class name used to look up allowed character classes.
             declared_names (list of str or None): The ``allowedCharacter`` names the schema declares for
                 the class, if any. See ``allowed_names`` for when they are used.
+            hed_schema (HedSchema or None): The schema that owns the value's tag; see ``allowed_names``.
 
         Returns:
             list[tuple[int, str]]: Each tuple contains the character index and the offending character.
 
         """
-        return self._sets.problem_characters(in_str, self.allowed_names(cname, declared_names))
+        return self._sets.problem_characters(in_str, self.allowed_names(cname, declared_names, hed_schema))
 
     def is_valid_value(self, in_string, cname):
         """Check whether in_string is a valid whole-word value for class cname.

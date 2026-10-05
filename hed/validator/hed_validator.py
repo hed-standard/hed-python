@@ -230,10 +230,13 @@ class HedValidator:
                 report_as=report_as,
                 error_code=error_code,
                 allow_placeholders=allow_placeholders,
+                index_offset=index_offset,
             )
         elif original_tag.is_value_class_tag() or original_tag.is_takes_value_tag():
             # A placeholder without a valueClass is checked against value-text (decision 2026-09-30, D3).
-            issues += self._unit_validator.check_tag_value_class_valid(original_tag, validate_text, report_as=report_as)
+            issues += self._unit_validator.check_tag_value_class_valid(
+                original_tag, validate_text, report_as=report_as, index_offset=index_offset
+            )
         elif original_tag.extension:
             issues += self._char_validator.check_for_invalid_extension_chars(
                 original_tag, validate_text, index_offset=index_offset
