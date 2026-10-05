@@ -1,7 +1,8 @@
 """Whole-value rules of the value classes, as the character table defines them.
 
 The dateTimeClass rule is the BIDS Datetime format (RFC 3339 with an optional offset), shared with
-hed-specification's character_sets.json; the numericClass rule uses ASCII digits only.
+hed-specification's character_sets.json, followed by a Gregorian calendar check of the date (Kay,
+2026-10-02); the numericClass rule uses ASCII digits only.
 """
 
 import unittest
@@ -24,6 +25,9 @@ class TestValueClassWholeValueRules(unittest.TestCase):
             "2026-09-30T09:55:00-05:30",
             "2026-09-30T23:59:60",
             "2000-01-01T00:00:00",
+            "2028-02-29T00:00:00",
+            "2000-02-29T00:00:00",
+            "2026-04-30T00:00:00",
         ]:
             with self.subTest(value=value):
                 self.assertTrue(self.validator.is_valid_value(value, "dateTimeClass"), value)
@@ -49,6 +53,26 @@ class TestValueClassWholeValueRules(unittest.TestCase):
         ]:
             with self.subTest(value=value):
                 self.assertFalse(self.validator.is_valid_value(value, "dateTimeClass"), value)
+
+    def test_dates_that_do_not_exist_are_invalid(self):
+        """The shape passes but the Gregorian calendar has no such day."""
+        for value in [
+            "2026-02-31T09:55:00",
+            "2026-04-31T09:55:00",
+            "2027-02-29T09:55:00",
+            "1900-02-29T09:55:00",
+            "2026-02-30T09:55:00.5Z",
+            "0000-01-01T00:00:00",
+        ]:
+            with self.subTest(value=value):
+                self.assertFalse(self.validator.is_valid_value(value, "dateTimeClass"), value)
+                self.assertEqual(
+                    self.validator.value_failure(value, "dateTimeClass"),
+                    f"an existing Gregorian calendar date; {value[:10]} does not exist",
+                )
+        self.assertTrue(self.validator.value_failure("2026-09-30", "dateTimeClass").startswith("the BIDS Datetime"))
+        self.assertEqual(self.validator.value_failure("2026-09-30T09:55:00", "dateTimeClass"), "")
+        self.assertEqual(self.validator.value_failure("anything", "nameClass"), "")
 
     def test_numeric_values_use_ascii_digits(self):
         for value in ["3", "-3.5", ".5", "3.", "1e10", "-2.5E-3", "+7"]:

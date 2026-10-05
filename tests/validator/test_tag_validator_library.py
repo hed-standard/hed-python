@@ -6,8 +6,15 @@ from hed import schema
 from hed.errors import error_reporter
 from hed.errors.error_types import DefinitionErrors, ValidationErrors
 from hed.errors.exceptions import HedFileError
+from hed.models import HedString
 from hed.schema.hed_schema_group import HedSchemaGroup
+from hed.validator import HedValidator
+from hed.validator.util.character_sets import CharacterSets
 from tests.validator.test_tag_validator_base import TestValidatorBase
+
+_SETS = CharacterSets.load()
+DATETIME_RULE = _SETS.word_rule_description("dateTimeClass")
+NUMERIC_RULE = _SETS.word_rule_description("numericClass")
 
 
 class TestHed3(TestValidatorBase):
@@ -244,6 +251,7 @@ class IndividualHedTagsShort(TestHed3):
                 ValidationErrors.INVALID_VALUE_CLASS_VALUE,
                 tag=0,
                 value_class="dateTimeClass",
+                rule=DATETIME_RULE,
                 index_in_tag=0,
                 index_in_tag_end=25,
             ),
@@ -297,6 +305,7 @@ class IndividualHedTagsShort(TestHed3):
                 index_in_tag=0,
                 index_in_tag_end=16,
                 value_class="numericClass",
+                rule=NUMERIC_RULE,
             )
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
@@ -528,6 +537,47 @@ class RequiredTags(TestHed3):
             ),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
+
+
+class TestMixedVersionGroups(unittest.TestCase):
+    """Each tag follows the character policy of the schema that owns it, not one policy for the whole group.
+
+    Before 8.5.0 the specification's defaults define the standard value classes (nameClass with nonascii,
+    dateTimeClass with period and Z); from 8.5.0 the schema's own declaration does. A group that mixes the
+    two must judge an 8.4.0 tag by the defaults and an 8.5.0 tag by its declaration (PR #1442, Copilot round 2).
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.schema_840 = schema.load_schema_version("8.4.0")
+        cls.schema_850 = schema.load_schema_version("8.5.0")
+        cls.mixed = schema.load_schema_version(["8.5.0", "old:8.4.0"])
+        cls.with_library = schema.load_schema_version(["8.5.0", "sc:score_2.1.0"])
+
+    @staticmethod
+    def codes(hed_schema, text):
+        issues = HedValidator(hed_schema).validate(HedString(text, hed_schema), allow_placeholders=False)
+        return [issue["code"] for issue in issues]
+
+    def test_an_older_standard_in_the_group_keeps_its_defaults(self):
+        for text in ("Label/caf\u00e9", "Creation-date/2024-01-02T03:04:05.123Z"):
+            self.assertEqual(self.codes(self.schema_840, text), [], text)
+            self.assertEqual(self.codes(self.mixed, "old:" + text), [], text)
+
+    def test_the_newer_standard_in_the_group_follows_its_own_declaration(self):
+        # The same verdict as 8.5.0 alone, whatever its nameClass declaration says today.
+        for text in ("Label/caf\u00e9", "Label/a?"):
+            self.assertEqual(self.codes(self.mixed, text), self.codes(self.schema_850, text), text)
+        self.assertEqual(self.codes(self.mixed, "Label/a?"), [ValidationErrors.CHARACTER_INVALID])
+
+    def test_a_library_partnered_with_an_older_standard_keeps_its_defaults(self):
+        self.assertEqual(self.with_library.schema_for_namespace("sc:").with_standard, "8.4.0")
+        self.assertEqual(self.codes(self.with_library, "sc:Label/caf\u00e9"), [])
+        self.assertEqual(self.codes(self.with_library, "sc:Label/a?"), [ValidationErrors.CHARACTER_INVALID])
+        # The partnered library does not switch the 8.5.0 standard away from its declaration.
+        self.assertEqual(
+            self.codes(self.with_library, "Label/caf\u00e9"), self.codes(self.schema_850, "Label/caf\u00e9")
+        )
 
 
 if __name__ == "__main__":

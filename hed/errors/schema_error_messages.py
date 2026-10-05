@@ -255,12 +255,12 @@ def schema_error_SCHEMA_HED_ID_INVALID(
     actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID,
 )
 def schema_error_SCHEMA_ALLOWED_CHARACTERS_INVALID(tag, invalid_character):
-    from hed.schema.hed_schema_constants import character_types
+    from hed.validator.util.character_sets import CharacterSets
 
     return (
         f"Tag '{tag}' has an invalid allowedCharacter: '{invalid_character}'. "
         f"Allowed characters are: a single character, "
-        f"or one of the following - {', '.join(character_types.keys())}."
+        f"or one of the following - {', '.join(CharacterSets.load().known_names())}."
     )
 
 

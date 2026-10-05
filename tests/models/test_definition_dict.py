@@ -6,6 +6,9 @@ from hed.models.definition_dict import DefinitionDict
 from hed.models.hed_string import HedString
 from tests.validator.test_tag_validator_base import TestHedBase
 
+# The nameClass defaults of HED 8.3.0 and later (specification character_sets.json).
+NAME_SETS = "letters, digits, hyphen, underscore, nonascii"
+
 
 class TestDefBase(TestHedBase):
     @classmethod
@@ -112,12 +115,20 @@ class TestDefinitionDict(TestDefBase):
                 "Definition/InvalidDef1/this-part-is-not-allowed/#",
                 "/",
                 value_class="nameClass",
+                char_index=22,
+                char_set=NAME_SETS,
+                code_point="U+002F",
+                allows="nameClass allows " + NAME_SETS,
             ),
             "invalidPlaceholder": self.format_error(
                 ValidationErrors.INVALID_VALUE_CLASS_CHARACTER,
                 "Definition/InvalidDef1/InvalidPlaceholder",
                 "/",
                 value_class="nameClass",
+                char_index=22,
+                char_set=NAME_SETS,
+                code_point="U+002F",
+                allows="nameClass allows " + NAME_SETS,
             ),
             "defInGroup": self.format_error(
                 DefinitionErrors.DEF_TAG_IN_DEFINITION,

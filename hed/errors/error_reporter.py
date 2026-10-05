@@ -61,6 +61,16 @@ int_sort_list = [ErrorContext.ROW]
 # an "ec_" key, so it is not treated as context; the printers add it to the message.
 ROW_COUNT_KEY = "row_count"
 
+# Keyword arguments of an error message function that are also copied onto the issue dictionary, so that a
+# consumer (hed-server, the CLI) can render them without parsing the message. ``char_set`` names the character
+# set or rule an invalid character failed; ``code_point`` is its ``U+XXXX`` form (decision 2026-09-30).
+ISSUE_DETAIL_KEYS = ("char_set", "code_point")
+
+
+def _issue_details(kwargs) -> dict:
+    """Return the ISSUE_DETAIL_KEYS present in *kwargs*, for ``_create_error_object``."""
+    return {key: kwargs[key] for key in ISSUE_DETAIL_KEYS if key in kwargs}
+
 
 def _register_error_function(error_type, wrapper_func):
     if error_type in error_functions:
@@ -95,7 +105,9 @@ def hed_error(error_type: str, actual_code: str | None = None, default_severity:
                 list: A list of dict with the errors.
             """
             base_message = func(*args, **kwargs)
-            error_object = ErrorHandler._create_error_object(actual_code, base_message, severity)
+            error_object = ErrorHandler._create_error_object(
+                actual_code, base_message, severity, **_issue_details(kwargs)
+            )
             return error_object
 
         _register_error_function(error_type, wrapper_func=wrapper)
@@ -157,6 +169,7 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                     index_in_tag=index_in_tag,
                     index_in_tag_end=index_in_tag_end,
                     source_tag=tag,
+                    **_issue_details(kwargs),
                 )
 
                 return error_object
@@ -189,7 +202,9 @@ def hed_tag_error(error_type, default_severity=ErrorSeverity.ERROR, has_sub_tag=
                 else:
                     org_tag_text = str(tag)
                 base_message = func(org_tag_text, *args, **kwargs)
-                error_object = ErrorHandler._create_error_object(actual_code, base_message, severity, source_tag=tag)
+                error_object = ErrorHandler._create_error_object(
+                    actual_code, base_message, severity, source_tag=tag, **_issue_details(kwargs)
+                )
 
                 return error_object
 

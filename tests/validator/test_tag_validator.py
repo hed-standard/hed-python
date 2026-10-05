@@ -5,7 +5,14 @@ from hed.errors import ErrorContext, ErrorHandler
 from hed.errors.error_types import DefinitionErrors, ValidationErrors
 from hed.models.hed_string import HedString
 from hed.schema.hed_schema_io import load_schema_version
+from hed.validator.util.char_util import COLUMN_BRACES_RULE
+from hed.validator.util.character_sets import CharacterSets
 from tests.validator.test_tag_validator_base import TestValidatorBase
+
+_SETS = CharacterSets.load()
+FORBIDDEN_RULE = _SETS.describe_forbidden()
+DATETIME_RULE = _SETS.word_rule_description("dateTimeClass")
+NUMERIC_RULE = _SETS.word_rule_description("numericClass")
 
 
 # todo: update these tests(TagValidator no longer exists)
@@ -230,6 +237,7 @@ class IndividualHedTagsShort(TestHed):
                 index_in_tag=0,
                 index_in_tag_end=16,
                 value_class="dateTimeClass",
+                rule=DATETIME_RULE,
                 actual_error=ValidationErrors.VALUE_INVALID,
             ),
             "specialAllowedCharUnit": [],
@@ -423,6 +431,7 @@ class IndividualHedTagsShort(TestHed):
                 index_in_tag=0,
                 index_in_tag_end=24,
                 value_class="numericClass",
+                rule=NUMERIC_RULE,
             ),
             "placeholderWithInvalidUnits": self.format_error(
                 ValidationErrors.INVALID_TAG_CHARACTER,
@@ -445,6 +454,7 @@ class IndividualHedTagsShort(TestHed):
                 index_in_tag=0,
                 index_in_tag_end=14,
                 value_class="numericClass",
+                rule=NUMERIC_RULE,
             ),
         }
 
@@ -907,16 +917,36 @@ class FullHedString(TestHed):
         }
         expected_issues = {
             "openingBrace": self.format_error(
-                ValidationErrors.CHARACTER_INVALID, char_index=45, source_string=test_strings["openingBrace"]
+                ValidationErrors.CHARACTER_INVALID,
+                char_index=45,
+                source_string=test_strings["openingBrace"],
+                char_set="structural",
+                code_point="U+007B",
+                allows=COLUMN_BRACES_RULE,
             ),
             "closingBrace": self.format_error(
-                ValidationErrors.CHARACTER_INVALID, char_index=45, source_string=test_strings["closingBrace"]
+                ValidationErrors.CHARACTER_INVALID,
+                char_index=45,
+                source_string=test_strings["closingBrace"],
+                char_set="structural",
+                code_point="U+007D",
+                allows=COLUMN_BRACES_RULE,
             ),
             "openingBracket": self.format_error(
-                ValidationErrors.CHARACTER_INVALID, char_index=45, source_string=test_strings["openingBracket"]
+                ValidationErrors.CHARACTER_INVALID,
+                char_index=45,
+                source_string=test_strings["openingBracket"],
+                char_set="forbidden",
+                code_point="U+005B",
+                allows=FORBIDDEN_RULE,
             ),
             "closingBracket": self.format_error(
-                ValidationErrors.CHARACTER_INVALID, char_index=45, source_string=test_strings["closingBracket"]
+                ValidationErrors.CHARACTER_INVALID,
+                char_index=45,
+                source_string=test_strings["closingBracket"],
+                char_set="forbidden",
+                code_point="U+005D",
+                allows=FORBIDDEN_RULE,
             ),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
@@ -1018,22 +1048,46 @@ class FullHedString(TestHed):
         expected_issues = {
             "noTildeGroup": [],
             "oneTildeGroup": self.format_error(
-                ValidationErrors.TILDES_UNSUPPORTED, source_string=test_strings["oneTildeGroup"], char_index=56
+                ValidationErrors.TILDES_UNSUPPORTED,
+                source_string=test_strings["oneTildeGroup"],
+                char_index=56,
+                char_set="forbidden",
+                code_point="U+007E",
             ),
             "twoTildeGroup": self.format_error(
-                ValidationErrors.TILDES_UNSUPPORTED, source_string=test_strings["twoTildeGroup"], char_index=49
+                ValidationErrors.TILDES_UNSUPPORTED,
+                source_string=test_strings["twoTildeGroup"],
+                char_index=49,
+                char_set="forbidden",
+                code_point="U+007E",
             )
             + self.format_error(
-                ValidationErrors.TILDES_UNSUPPORTED, source_string=test_strings["twoTildeGroup"], char_index=77
+                ValidationErrors.TILDES_UNSUPPORTED,
+                source_string=test_strings["twoTildeGroup"],
+                char_index=77,
+                char_set="forbidden",
+                code_point="U+007E",
             ),
             "invalidTildeGroup": self.format_error(
-                ValidationErrors.TILDES_UNSUPPORTED, source_string=test_strings["invalidTildeGroup"], char_index=49
+                ValidationErrors.TILDES_UNSUPPORTED,
+                source_string=test_strings["invalidTildeGroup"],
+                char_index=49,
+                char_set="forbidden",
+                code_point="U+007E",
             )
             + self.format_error(
-                ValidationErrors.TILDES_UNSUPPORTED, source_string=test_strings["invalidTildeGroup"], char_index=77
+                ValidationErrors.TILDES_UNSUPPORTED,
+                source_string=test_strings["invalidTildeGroup"],
+                char_index=77,
+                char_set="forbidden",
+                code_point="U+007E",
             )
             + self.format_error(
-                ValidationErrors.TILDES_UNSUPPORTED, source_string=test_strings["invalidTildeGroup"], char_index=147
+                ValidationErrors.TILDES_UNSUPPORTED,
+                source_string=test_strings["invalidTildeGroup"],
+                char_index=147,
+                char_set="forbidden",
+                code_point="U+007E",
             ),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
@@ -1144,7 +1198,14 @@ class TestHedAllowedCharacters(TestHed):
         expected_issues = {
             "ascii": [],
             "illegalTab": self.format_error(
-                ValidationErrors.INVALID_VALUE_CLASS_CHARACTER, tag=0, problem_tag="\t", value_class="textClass"
+                ValidationErrors.INVALID_VALUE_CLASS_CHARACTER,
+                tag=0,
+                problem_tag="\t",
+                value_class="textClass",
+                char_index=13,
+                char_set="text",
+                code_point="U+0009",
+                allows="textClass allows " + _SETS.describe(["text"]),
             ),
             "allowTab": [],
         }

@@ -1,7 +1,7 @@
 HED version="8.5.0"
 
 '''Prologue'''
-Test fixture for the value-text character set: an 8.5.0 schema whose textClass row names value-text as the HED 8.5.0 prerelease will. A textClass value may not contain parentheses or the number sign or the tilde. The unit classes and unit modifiers and schema attributes and properties are copied from the redundant_unit_8.5.0 fixture without its redundant uV unit.
+Test fixture for the value-text character set: an 8.5.0 schema whose textClass row names value-text as the HED 8.5.0 prerelease will. A textClass value may not contain parentheses or the number sign or the tilde. The nameClass row carries nonascii as the 8.5.0 prerelease does after hed-schemas 6a0f781. The dateTimeClass row is the older declaration without period or plus or Z so that the declaration-wins gate can be exercised. idClass is a value class the standard schema does not have. The unit classes and unit modifiers and schema attributes and properties are copied from the redundant_unit_8.5.0 fixture without its redundant uV unit.
 
 !# start schema
 
@@ -10,6 +10,12 @@ Test fixture for the value-text character set: an 8.5.0 schema whose textClass r
 
 '''Tag-name''' <nowiki>[Test tag whose value is a name.]</nowiki>
 * # <nowiki>{takesValue, valueClass=nameClass}</nowiki>
+
+'''Time-stamp''' <nowiki>[Test tag whose value is a date-time. The dateTimeClass row below is the pre-2026-09-30 declaration without period, plus and Z, so on this 8.5.0 schema the declaration wins and a fractional second is rejected.]</nowiki>
+* # <nowiki>{takesValue, valueClass=dateTimeClass}</nowiki>
+
+'''Tag-id''' <nowiki>[Test tag whose value class is defined by this schema alone, so its declaration always applies.]</nowiki>
+* # <nowiki>{takesValue, valueClass=idClass}</nowiki>
 
 !# end schema
 
@@ -70,9 +76,10 @@ Test fixture for the value-text character set: an 8.5.0 schema whose textClass r
 
 '''Value classes'''
 * dateTimeClass <nowiki>{allowedCharacter=digits, allowedCharacter=T, allowedCharacter=hyphen, allowedCharacter=colon, hedId=HED_0011301} [Date-times should conform to ISO8601 date-time format YYYY-MM-DDThh:mm:ss.000000Z (year, month, day, hour (24h), minute, second, optional fractional seconds, and optional UTC time indicator. Any variation on the full form is allowed.]</nowiki>
-* nameClass <nowiki>{allowedCharacter=letters, allowedCharacter=digits, allowedCharacter=underscore, allowedCharacter=hyphen, hedId=HED_0011302} [Value class designating values that have the characteristics of node names. The allowed characters are alphanumeric, hyphen, and underscore.]</nowiki>
+* nameClass <nowiki>{allowedCharacter=letters, allowedCharacter=digits, allowedCharacter=underscore, allowedCharacter=hyphen, allowedCharacter=nonascii, hedId=HED_0011302} [Value class designating values that have the characteristics of node names. The allowed characters are alphanumeric, hyphen, and underscore.]</nowiki>
 * numericClass <nowiki>{allowedCharacter=digits, allowedCharacter=E, allowedCharacter=e, allowedCharacter=plus, allowedCharacter=hyphen, allowedCharacter=period, hedId=HED_0011303} [Value must be a valid numerical value.]</nowiki>
 * posixPath <nowiki>{allowedCharacter=digits, allowedCharacter=letters, allowedCharacter=slash, allowedCharacter=colon, hedId=HED_0011304} [Posix path specification.]</nowiki>
+* idClass <nowiki>{allowedCharacter=letters, allowedCharacter=digits, allowedCharacter=period, hedId=HED_0011306} [Test value class of this fixture: letters, digits and periods.]</nowiki>
 * textClass <nowiki>{allowedCharacter=value-text, hedId=HED_0011305} [Values that have the characteristics of text. The allowed characters are the printable characters (32 <= ASCII < 127) and non-ASCII characters, excluding comma, square brackets, curly braces, parentheses, number sign, and tilde, which are structural in HED strings.]</nowiki>
 
 '''Schema attributes'''
