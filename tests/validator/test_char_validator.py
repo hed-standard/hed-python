@@ -148,6 +148,18 @@ class TestStringLevelCharacters(unittest.TestCase):
         self.assertEqual([issue["code_point"] for issue in issues], ["U+0008", "U+0085"])
         self.assertEqual({issue["char_set"] for issue in issues}, {"forbidden"})
 
+    def test_control_characters_are_forbidden_before_8_3_0_too(self):
+        # CHARACTER_INVALID a applies to every HED string; before 8.3.0 the C1 range is also non-ASCII, but
+        # the forbidden verdict comes first.
+        issues = self.issues("Item/Bl\x08, Item/a\x85", modern=False)
+        self.assertEqual([issue["code_point"] for issue in issues], ["U+0008", "U+0085"])
+        self.assertEqual({issue["char_set"] for issue in issues}, {"forbidden"})
+
+    def test_non_printable_characters_outside_the_control_ranges_are_allowed(self):
+        # The file's nonascii set accepts U+00A0 (no-break space), which str.isprintable() rejects; the
+        # string-level check follows the file's code ranges, not isprintable().
+        self.assertEqual(self.issues("Label/a\xa0b, Label/c\u200bd"), [])
+
     def test_curly_braces_only_where_placeholders_are_allowed(self):
         self.assertEqual(self.issues("{col}, Red", allow_placeholders=True), [])
         issues = self.issues("{col}, Red", allow_placeholders=False)

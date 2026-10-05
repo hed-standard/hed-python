@@ -98,6 +98,12 @@ class TestCharacterSetsFile(unittest.TestCase):
 
     def test_hed_string_rules(self):
         self.assertEqual(self.sets.forbidden_characters, set('[]~"'))
+        self.assertEqual(self.sets.forbidden_code_ranges, [(0, 31), (127, 159)])
+        for character in '[]~"\x00\x1f\x7f\x85\x9f':
+            self.assertTrue(self.sets.is_forbidden(character), code_point(character))
+        # The ranges, not str.isprintable(), decide: U+00A0 and U+200B are not printable but are allowed.
+        for character in " a\xa0\u200b\ufeff\u4f60":
+            self.assertFalse(self.sets.is_forbidden(character), code_point(character))
         self.assertEqual(self.sets.column_braces, {"{", "}"})
         self.assertEqual(
             self.sets.describe_forbidden(),

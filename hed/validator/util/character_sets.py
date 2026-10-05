@@ -176,6 +176,23 @@ class CharacterSets:
         """The characters no HED string may contain (``[``, ``]``, ``~``, ``"``); the control ranges are separate."""
         return set(self.forbidden.get("characters", []))
 
+    @property
+    def forbidden_code_ranges(self) -> list[tuple[int, int]]:
+        """The inclusive code point ranges no HED string may contain (the C0 and C1 control characters)."""
+        return [(low, high) for low, high in self.forbidden.get("code_ranges", [])]
+
+    def is_forbidden(self, character) -> bool:
+        """Return True if no HED string may contain the character (``hed_string.forbidden``).
+
+        A character is forbidden when it is one of the listed characters or its code point falls in one of the
+        listed ranges. The ranges are the file's contract, not ``str.isprintable()``, which also rejects
+        characters such as U+00A0 that the ``nonascii`` set accepts.
+        """
+        if character in self.forbidden_characters:
+            return True
+        code = ord(character)
+        return any(low <= code <= high for low, high in self.forbidden_code_ranges)
+
     def describe_forbidden(self) -> str:
         """Say what a HED string may never contain, for an error message."""
         chars = " ".join(self.forbidden.get("characters", []))

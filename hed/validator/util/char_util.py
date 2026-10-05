@@ -89,15 +89,14 @@ class CharValidator:
 
         Notes:
             - The forbidden characters come from ``character_sets.json`` ``hed_string.forbidden``
-              (specification Appendix B CHARACTER_INVALID a): ``[ ] ~ "`` and the control ranges, the latter
-              implemented as ``not str.isprintable()``. Curly braces are forbidden where placeholders are not
-              allowed (CHARACTER_INVALID b). Schemas before 8.3.0 also reject every non-ASCII character.
+              (specification Appendix B CHARACTER_INVALID a): ``[ ] ~ "`` and the control code ranges
+              (0-31 and 127-159), whatever the schema version. Curly braces are forbidden where placeholders
+              are not allowed (CHARACTER_INVALID b). Schemas before 8.3.0 also reject every non-ASCII character.
         """
         validation_issues = []
-        forbidden = self._sets.forbidden_characters
         column_braces = self._sets.column_braces
         for index, character in enumerate(hed_string):
-            if character in forbidden:
+            if self._sets.is_forbidden(character):
                 validation_issues += self._report_invalid_character_error(
                     hed_string, index, "forbidden", self._sets.describe_forbidden()
                 )
@@ -105,12 +104,7 @@ class CharValidator:
                 validation_issues += self._report_invalid_character_error(
                     hed_string, index, "structural", COLUMN_BRACES_RULE
                 )
-            elif self._validate_characters:
-                if not character.isprintable():
-                    validation_issues += self._report_invalid_character_error(
-                        hed_string, index, "forbidden", self._sets.describe_forbidden()
-                    )
-            elif ord(character) > 127:
+            elif not self._validate_characters and ord(character) > 127:
                 validation_issues += self._report_invalid_character_error(
                     hed_string, index, "ascii", f"schemas before {ASCII_ONLY_BEFORE} allow only ASCII characters"
                 )
