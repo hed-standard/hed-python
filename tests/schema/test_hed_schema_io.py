@@ -867,10 +867,13 @@ class TestHedSchemaMerging(unittest.TestCase):
         for section in schema._sections.values():
             self.assertTrue("customElementAttribute" in section.valid_attributes)
 
-        # Only check for non-character-invalid issues (SCORE prologue/epilogue has commas/brackets)
+        # Only check for non-character-invalid issues (SCORE prologue/epilogue has commas/brackets).
+        # The fixture declares customProperty in an unmerged partnered library, which specification Appendix B
+        # SCHEMA_LIBRARY_INVALID (j) forbids; that one issue is expected and shows the property round-trips.
         issues = schema.check_compliance()
         non_char_issues = [i for i in issues if i["code"] != "SCHEMA_CHARACTER_INVALID"]
-        self.assertFalse(non_char_issues)
+        self.assertEqual([i["code"] for i in non_char_issues], ["SCHEMA_LIBRARY_INVALID"])
+        self.assertIn("Property 'customProperty' is declared by library 'score'", non_char_issues[0]["message"])
 
     def test_saving_merged2(self):
         s1 = load_schema(os.path.join(self.full_base_folder, "add_all_types.mediawiki"))
@@ -943,8 +946,10 @@ class TestHedSchemaMerging(unittest.TestCase):
     def test_saving_in_library_wiki(self):
         old_score_schema = load_schema_version("score_1.0.0")
 
+        # score 1.0.0 is unpartnered: it has no standard partner to be told apart from, so the loader
+        # does not stamp inLibrary on its entries (decision 2026-09-14).
         tag_entry = old_score_schema.get_tag_entry("Modulator")
-        self.assertTrue(tag_entry.has_attribute(HedKey.InLibrary))
+        self.assertFalse(tag_entry.has_attribute(HedKey.InLibrary))
 
         schema_string = old_score_schema.get_as_mediawiki_string()
         score_count = schema_string.count("inLibrary=score")
@@ -971,7 +976,7 @@ class TestHedSchemaMerging(unittest.TestCase):
         old_score_schema = load_schema_version("score_1.0.0")
 
         tag_entry = old_score_schema.get_tag_entry("Modulator")
-        self.assertTrue(tag_entry.has_attribute(HedKey.InLibrary))
+        self.assertFalse(tag_entry.has_attribute(HedKey.InLibrary))  # unpartnered: no stamp
 
         schema_string = old_score_schema.get_as_xml_string()
         score_count = schema_string.count("<name>inLibrary</name>")

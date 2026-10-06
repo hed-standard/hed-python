@@ -50,7 +50,7 @@ class TestComplianceSummary(unittest.TestCase):
         _ = list(issues)
 
     def test_has_all_checks(self):
-        """Summary should contain all 9 top-level checks."""
+        """Summary should contain every top-level check, in order."""
         issues = self.schema_84.check_compliance()
         summary = issues.compliance_summary
         check_names = [c["name"] for c in summary.check_results]
@@ -60,6 +60,7 @@ class TestComplianceSummary(unittest.TestCase):
             "invalid_characters",
             "attributes",
             "duplicate_names",
+            "library_partner_rules",
             "redundant_units",
             "any_units_class",
             "units_unique_across_classes",
@@ -400,6 +401,118 @@ class TestLibrarySchemaCompliance(unittest.TestCase):
                     entry._unknown_attributes,
                     f"{section.section_key.name}/{entry.name} has stale _unknown_attributes: {entry._unknown_attributes}",
                 )
+
+
+class TestLibraryPartnerRules(unittest.TestCase):
+    """check_library_partner_rules: specification Appendix B SCHEMA_LIBRARY_INVALID reasons j, k and l, and the
+    inLibrary stamp that only unmerged partnered libraries receive (plan library_compliance_rules.md, 2026-10-06).
+
+    The fixtures are the hed-tests SCHEMA_LIBRARY_INVALID cases, trimmed; the partner is HED 8.4.0.
+    """
+
+    HEADER_UNMERGED = 'HED version="1.0.0" library="testconflict" withStandard="8.4.0" unmerged="True"'
+    HEADER_MERGED = 'HED version="1.0.0" library="testconflict" withStandard="8.4.0"'
+    HEADER_UNPARTNERED = 'HED version="1.0.0" library="testconflict"'
+    WIKI = "'''"
+
+    @classmethod
+    def setUpClass(cls):
+        # The partner's Properties section, written back as mediawiki rows: name and description (hedId is
+        # tool bookkeeping and is not compared).
+        partner = schema.load_schema_version("8.4.0")
+        cls.PROPERTIES_840 = [
+            f"* {entry.name} <nowiki>[{entry.description}]</nowiki>" for entry in partner.properties.all_entries
+        ]
+
+    @classmethod
+    def schema_from(cls, header, tags, properties, attributes=None):
+        w = cls.WIKI
+        lines = [header, f"{w}Prologue{w}", "!# start schema", *tags, "!# end schema"]
+        lines += [f"{w}Unit classes{w}", f"{w}Unit modifiers{w}", f"{w}Value classes{w}", f"{w}Schema attributes{w}"]
+        lines += attributes or []
+        lines += [f"{w}Properties{w}", *properties, f"{w}Epilogue{w}", "!# end hed"]
+        return schema.from_string("\n".join(lines), schema_format=".mediawiki")
+
+    @classmethod
+    def tag(cls, text):
+        return f"{cls.WIKI}{text}{cls.WIKI}"
+
+    @staticmethod
+    def library_issues(hed_schema):
+        return [i for i in hed_schema.check_compliance() if i["code"] == "SCHEMA_LIBRARY_INVALID"]
+
+    def test_j_unmerged_library_declaring_a_property(self):
+        hed_schema = self.schema_from(self.HEADER_UNMERGED, [self.tag("NewTag") + " {rooted=Event}"], ["* boolRange"])
+        messages = [i["message"] for i in self.library_issues(hed_schema)]
+        self.assertTrue(
+            any("Property 'boolRange' is declared by library 'testconflict'" in m for m in messages), messages
+        )
+        self.assertTrue(any("SCHEMA_LIBRARY_INVALID j" in m for m in messages))
+
+    def test_j_unmerged_library_with_empty_properties_is_clean(self):
+        hed_schema = self.schema_from(self.HEADER_UNMERGED, [self.tag("NewTag") + " {rooted=Event}"], [])
+        self.assertEqual(self.library_issues(hed_schema), [])
+
+    def _merged(self, properties):
+        tags = [
+            self.tag("Event") + " <nowiki>[Something that happens at a given place and time.]</nowiki>",
+            "* Rooted-tag <nowiki>{rooted=Event, inLibrary=testconflict}[A library subtree rooted under Event.]</nowiki>",
+        ]
+        attributes = [
+            "* inLibrary <nowiki>{elementDomain, stringRange} [The named library schema that this schema element is "
+            "from.]</nowiki>",
+        ]
+        return self.schema_from(self.HEADER_MERGED, tags, properties, attributes)
+
+    def test_k_merged_library_properties_equal_to_the_partner_are_clean(self):
+        self.assertEqual(self.library_issues(self._merged(self.PROPERTIES_840)), [])
+
+    def test_k_merged_library_property_with_a_different_description(self):
+        shorter = "* boolRange <nowiki>[This schema attribute's value can be true or false.]</nowiki>"
+        properties = [shorter if p.startswith("* boolRange") else p for p in self.PROPERTIES_840]
+        issues = self.library_issues(self._merged(properties))
+        self.assertEqual(len(issues), 1)
+        self.assertIn(
+            "Property 'boolRange' of library 'testconflict', merged with HED 8.4.0, has a different description",
+            issues[0]["message"],
+        )
+        self.assertIn("SCHEMA_LIBRARY_INVALID k", issues[0]["message"])
+
+    def test_k_merged_library_missing_and_extra_properties(self):
+        properties = [p for p in self.PROPERTIES_840 if not p.startswith("* tagRange")]
+        properties.append("* extraRange <nowiki>[Not a partner property.]</nowiki>")
+        messages = sorted(i["message"] for i in self.library_issues(self._merged(properties)))
+        self.assertEqual(len(messages), 2, messages)
+        self.assertIn(
+            "Property 'extraRange' of library 'testconflict', merged with HED 8.4.0, is not a property", messages[0]
+        )
+        self.assertIn("Property 'tagRange' of library 'testconflict', merged with HED 8.4.0, is missing", messages[1])
+
+    def test_l_reserved_in_a_partnered_library(self):
+        hed_schema = self.schema_from(self.HEADER_UNMERGED, [self.tag("NewTag") + " <nowiki>{reserved}</nowiki>"], [])
+        issues = self.library_issues(hed_schema)
+        self.assertEqual(len(issues), 1)
+        self.assertIn(
+            "'NewTag' in the Tags section of library 'testconflict' uses the reserved attribute", issues[0]["message"]
+        )
+        self.assertIn("SCHEMA_LIBRARY_INVALID l", issues[0]["message"])
+
+    def test_unpartnered_library_may_declare_properties_and_use_reserved(self):
+        hed_schema = self.schema_from(
+            self.HEADER_UNPARTNERED,
+            [self.tag("NewTag") + " <nowiki>{reserved}</nowiki>"],
+            ["* boolProperty"],
+            ["* reserved <nowiki>{boolProperty}</nowiki>"],
+        )
+        issues = hed_schema.check_compliance()
+        self.assertEqual([i["code"] for i in issues], ["SCHEMA_PRERELEASE_VERSION_USED"], issues)
+        # An unpartnered library's entries carry no inLibrary stamp: there is no partner to be told apart from.
+        self.assertFalse(hed_schema.tags["NewTag"].has_attribute("inLibrary"))
+        self.assertFalse(hed_schema.properties["boolProperty"].has_attribute("inLibrary"))
+
+    def test_unmerged_partnered_library_entries_are_stamped(self):
+        hed_schema = self.schema_from(self.HEADER_UNMERGED, [self.tag("NewTag") + " {rooted=Event}"], [])
+        self.assertEqual(hed_schema.tags["NewTag"].attributes.get("inLibrary"), "testconflict")
 
 
 class TestExtrasColumnsCompliance(unittest.TestCase):

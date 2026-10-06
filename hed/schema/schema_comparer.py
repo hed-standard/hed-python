@@ -201,6 +201,10 @@ class SchemaComparer:
             ...     print(f"Tag {tag} unchanged")
         """
         matches, not_in_schema2, not_in_schema1, unequal_entries = {}, {}, {}, {}
+        # An unpartnered library's entries carry no inLibrary (every entry is the library's own), so for such a
+        # schema the inLibrary filter admits every entry; a partnered schema beside it keeps the filter.
+        filter1 = self._filter_for(self.schema1, attribute_filter)
+        filter2 = self._filter_for(self.schema2, attribute_filter)
 
         # Handle miscellaneous sections
         if sections is None or self.MISC_SECTION in sections:
@@ -224,20 +228,24 @@ class SchemaComparer:
             name_attribute = "short_tag_name" if section_key == HedSectionKey.Tags else "name"
 
             for entry in section1.all_entries:
-                if not attribute_filter or entry.has_attribute(attribute_filter):
+                if not filter1 or entry.has_attribute(filter1):
                     dict1[getattr(entry, name_attribute)] = entry
 
             for entry in section2.all_entries:
-                if not attribute_filter or entry.has_attribute(attribute_filter):
+                if not filter2 or entry.has_attribute(filter2):
                     dict2[getattr(entry, name_attribute)] = entry
 
             not_in_schema2[section_key] = {key: dict1[key] for key in dict1 if key not in dict2}
             not_in_schema1[section_key] = {key: dict2[key] for key in dict2 if key not in dict1}
             unequal_entries[section_key] = {
-                key: (dict1[key], dict2[key]) for key in dict1 if key in dict2 and dict1[key] != dict2[key]
+                key: (dict1[key], dict2[key])
+                for key in dict1
+                if key in dict2 and not self._same_entry(dict1[key], dict2[key])
             }
             matches[section_key] = {
-                key: (dict1[key], dict2[key]) for key in dict1 if key in dict2 and dict1[key] == dict2[key]
+                key: (dict1[key], dict2[key])
+                for key in dict1
+                if key in dict2 and self._same_entry(dict1[key], dict2[key])
             }
 
         return matches, not_in_schema1, not_in_schema2, unequal_entries
@@ -287,6 +295,36 @@ class SchemaComparer:
         if self._is_partnered_library():
             self._mark_origins(change_dict)
         return {key: change_dict[key] for key in self.SECTION_ENTRY_NAMES if key in change_dict}
+
+    @staticmethod
+    def _same_entry(entry1, entry2):
+        """Entry equality that ignores ``inLibrary``: the attribute is loader bookkeeping, not schema content.
+
+        A partnered library's entries carry it and an unpartnered library's do not, so the same tag in score
+        1.0.0 (unpartnered) and score 1.1.0 (partnered) must still compare equal.
+        """
+        if entry1 == entry2:
+            return True
+
+        def without_stamp(attributes):
+            return {key: value for key, value in (attributes or {}).items() if key != HedKey.InLibrary}
+
+        if entry1.name != entry2.name or (entry1.description or "") != (entry2.description or ""):
+            return False
+        if not entry1._compare_attributes_no_order(without_stamp(entry1.attributes), without_stamp(entry2.attributes)):
+            return False
+        inherited1 = without_stamp(getattr(entry1, "inherited_attributes", None))
+        inherited2 = without_stamp(getattr(entry2, "inherited_attributes", None))
+        if not entry1._compare_attributes_no_order(inherited1, inherited2):
+            return False
+        return getattr(entry1, "units", None) == getattr(entry2, "units", None)
+
+    @staticmethod
+    def _filter_for(schema, attribute_filter):
+        """Return the attribute filter to apply to *schema*: none for an unpartnered library asked for inLibrary."""
+        if attribute_filter == HedKey.InLibrary and schema.library and not schema.with_standard:
+            return None
+        return attribute_filter
 
     def _is_partnered_library(self):
         """Return True if either schema is a library merged with a standard partner."""

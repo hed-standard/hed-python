@@ -106,6 +106,9 @@ class HedIDValidator:
         # todo: If you have a way to know the schema should have 100% ids, you could check for that and flag missing
         new_id_str = tag_entry.attributes.get(attribute_name, "")
         tag_library = tag_entry.has_attribute(HedKey.InLibrary, return_value=True) or ""
+        if not tag_library and not self.hed_schema.with_standard:
+            # An unpartnered library's entries carry no inLibrary; every entry is the library's own.
+            tag_library = self.hed_schema.library
         old_id = self._get_old_id_int(tag_entry, tag_library)
 
         new_id = None
