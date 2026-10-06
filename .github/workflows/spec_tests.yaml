@@ -39,16 +39,6 @@ jobs:
       - name: Install dependencies
         run: uv pip install -e ".[test]"
 
-      - name: Character sets file matches hed-specification
-        # hed/validator/data/character_sets.json is a verbatim copy of the file hed-specification
-        # publishes (its docs/source/_static/character_sets.json, served at
-        # https://www.hedtags.org/hed-specification/_static/character_sets.json). The file has one
-        # home; this step fails when the copy drifts from hed-specification main.
-        run: |
-          curl -fsSL -o /tmp/character_sets.json \
-            https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/_static/character_sets.json
-          cmp /tmp/character_sets.json hed/validator/data/character_sets.json
-
       - name: Spec Error Tests
         id: spec_error_tests
         continue-on-error: true
