@@ -32,13 +32,6 @@ UNCLASSED_VALUE_SETS = ("value-text",)
 ASCII_ONLY_BEFORE = "8.3.0"
 # Message clauses for the string-level checks (specification Appendix B CHARACTER_INVALID b).
 COLUMN_BRACES_RULE = "curly braces may appear only in a sidecar column reference"
-# hedtools (and hed-javascript) have always checked a textClass value of HED 8.0.0 to 8.2.0 against the 8.3.0
-# ``text`` set, not against the characters those schemas enumerate (no underscore, no apostrophe); PR #1430
-# kept it so. The specification file records the enumeration as the 8.0.0 default. Until the two are
-# reconciled (open question, 2026-10-02) ``text`` stays in force here, so no released dataset changes verdict.
-LEGACY_TEXT_CLASS = "textClass"
-LEGACY_TEXT_DEFAULTS = ["text"]
-LEGACY_TEXT_BEFORE = "8.3.0"
 # The value class whose whole-value rule is a date-time. After the shape regex the date must exist in the
 # Gregorian calendar (Kay, 2026-10-02: the BIDS text says so, even though the BIDS validator checks only the
 # regex). The leap second ``:60`` the regex admits is not a calendar question and stays allowed.
@@ -298,9 +291,9 @@ class CharRexValidator(CharValidator):
         known set, an alias, or a single literal character; an unknown name is a schema compliance error and
         the defaults apply instead. On earlier standard versions the specification's ``value_class_defaults``
         define the five standard classes (D5), because their released declarations are incomplete (nameClass
-        omits ``nonascii``); textClass before 8.3.0 keeps the ``text`` set hedtools has always applied there
-        (``LEGACY_TEXT_DEFAULTS``). A class the file has no defaults for (a library's own value class) always
-        follows its declaration.
+        omits ``nonascii``; the 8.0.0 to 8.2.0 textClass enumerates characters without the underscore, and the
+        file records ``text`` there, as validators have always applied). A class the file has no defaults for (a
+        library's own value class) always follows its declaration.
 
         Parameters:
             cname (str): The value class name.
@@ -313,12 +306,6 @@ class CharRexValidator(CharValidator):
         """
         standard_version, declaration_wins = self._policy(hed_schema)
         defaults = self._sets.defaults_for(cname, standard_version)
-        if (
-            cname == LEGACY_TEXT_CLASS
-            and standard_version is not None
-            and Version(standard_version) < Version(LEGACY_TEXT_BEFORE)
-        ):
-            defaults = list(LEGACY_TEXT_DEFAULTS)
         declared = [name for name in (declared_names or []) if name]
         if declared and (declaration_wins or not defaults):
             if all(self._sets.is_known_name(name) for name in declared):
