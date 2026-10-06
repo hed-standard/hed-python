@@ -1,0 +1,41 @@
+---
+name: Character sets copy check
+
+# hed/validator/data/character_sets.json is a verbatim copy of the file hed-specification publishes
+# (its docs/source/_static/character_sets.json, served at
+# https://www.hedtags.org/hed-specification/_static/character_sets.json). The file has one home, so
+# this check fails when the copy drifts from hed-specification main. It runs when the copy or this
+# workflow changes and weekly, not on every pull request, so an unrelated change cannot start
+# failing because the specification moved.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - hed/validator/data/character_sets.json
+      - .github/workflows/character_sets.yaml
+  pull_request:
+    paths:
+      - hed/validator/data/character_sets.json
+      - .github/workflows/character_sets.yaml
+  schedule:
+    # Weekly on Sundays at 4 AM UTC, after the link checker
+    - cron: '0 4 * * 0'
+
+permissions:
+  contents: read
+
+jobs:
+  copy-check:
+    name: Copy matches hed-specification main
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Compare with hed-specification main
+        run: |
+          curl -fsSL -o /tmp/character_sets.json \
+            https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/_static/character_sets.json
+          cmp /tmp/character_sets.json hed/validator/data/character_sets.json
