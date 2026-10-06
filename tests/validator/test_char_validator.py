@@ -101,7 +101,7 @@ class TestAllowedNamesGate(unittest.TestCase):
             validator.allowed_names("nameClass", ["letters", "digits", "_", "-"]),
             ["letters", "digits", "hyphen", "underscore"],
         )
-        # textClass before 8.3.0 keeps the text set, not the enumeration the file records (LEGACY_TEXT_DEFAULTS).
+        # textClass before 8.3.0 is the text set (the file's default), not the enumeration the schema declares.
         self.assertEqual(validator.allowed_names("textClass", ["letters", "digits", "blank", "+"]), ["text"])
 
     def test_declaration_wins_from_8_5_0(self):

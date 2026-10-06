@@ -134,8 +134,8 @@ class TestDeclarationWinsGate(unittest.TestCase):
         self.assertTrue(issues[0]["message"].endswith(": idClass allows letters, digits, period"))
 
     def test_pre_8_3_0_text_values_keep_the_text_set(self):
-        """8.0.0 to 8.2.0 enumerate the textClass characters without underscore or apostrophe; hedtools has
-        always applied the 8.3.0 text set there and still does (char_util.LEGACY_TEXT_DEFAULTS), so
+        """8.0.0 to 8.2.0 enumerate the textClass characters without underscore or apostrophe; validators have
+        always applied the text set there and character_sets.json records it as the default from 8.0.0, so
         ID/left_hand.png in an 8.2.0 dataset keeps its verdict."""
         for value in ["left_hand.png", "Don't", "a=b <c> & d!"]:
             with self.subTest(value=value):

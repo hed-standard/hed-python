@@ -81,7 +81,7 @@ class TestCharacterSetsFile(unittest.TestCase):
         self.assertEqual(self.sets.defaults_for("textClass", "8.4.0"), ["text"])
         self.assertEqual(self.sets.defaults_for("textClass", "8.5.0"), ["value-text"])
         self.assertEqual(self.sets.defaults_for("textClass", None), ["value-text"])
-        self.assertEqual(self.sets.defaults_for("textClass", "8.0.0")[:3], ["letters", "digits", "blank"])
+        self.assertEqual(self.sets.defaults_for("textClass", "8.0.0"), ["text"])
         self.assertEqual(self.sets.defaults_for("idClass", "8.5.0"), [])
 
     def test_describe(self):

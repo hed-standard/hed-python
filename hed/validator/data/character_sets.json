@@ -204,7 +204,7 @@
   },
   "declaration_wins_from": {
     "standard_version": "8.5.0",
-    "rule": "From standard schema 8.5.0, and in library schemas partnered with 8.5.0 or later, the allowedCharacter names a value class declares define its characters, resolved through sets, aliases and literal_names. For earlier standard versions value_class_defaults define the characters of the five standard value classes, because their released declarations are incomplete (nameClass omits nonascii; dateTimeClass omits period and Z). A declaration that uses a name that is none of the three is a schema compliance error."
+    "rule": "From standard schema 8.5.0, and in library schemas partnered with 8.5.0 or later, the allowedCharacter names a value class declares define its characters, resolved through sets, aliases and literal_names. For earlier standard versions value_class_defaults define the characters of the five standard value classes, because their released declarations are incomplete (nameClass omits nonascii; dateTimeClass omits period and Z; textClass in 8.0.0 to 8.2.0 enumerates characters without the underscore, and validators have always applied text there). A declaration that uses a name that is none of the three is a schema compliance error."
   },
   "value_class_defaults": {
     "dateTimeClass": [
@@ -221,8 +221,7 @@
       {"from": "8.0.0", "sets": ["digits", "letters", "forward-slash", "colon"]}
     ],
     "textClass": [
-      {"from": "8.0.0", "sets": ["letters", "digits", "blank", "+", "-", ":", ";", ".", "/", "(", ")", "?", "*", "%", "$", "@"]},
-      {"from": "8.3.0", "sets": ["text"]},
+      {"from": "8.0.0", "sets": ["text"]},
       {"from": "8.5.0", "sets": ["value-text"]}
     ]
   },
