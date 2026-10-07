@@ -52,9 +52,9 @@ def schema_error_library_properties_mismatch(tag, library, with_standard, differ
 @hed_error(SchemaErrors.SCHEMA_LIBRARY_RESERVED, actual_code=SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY)
 def schema_error_library_reserved(tag, library, with_standard, section):
     return (
-        f"'{tag}' in the {section} section of library '{library}' uses the reserved attribute; a library partnered "
-        f"with HED {with_standard} may not, only a standard schema or an unpartnered library may (specification "
-        f"Appendix B SCHEMA_LIBRARY_INVALID l)."
+        f"'{tag}' in the {section} section of library '{library}' uses the reserved attribute; an unmerged "
+        f"library partnered with HED {with_standard} may not, only a standard schema, an unpartnered library "
+        f"or a merged partnered library file may (specification Appendix B SCHEMA_LIBRARY_INVALID l)."
     )
 
 

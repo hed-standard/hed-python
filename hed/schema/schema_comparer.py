@@ -317,7 +317,11 @@ class SchemaComparer:
         inherited2 = without_stamp(getattr(entry2, "inherited_attributes", None))
         if not entry1._compare_attributes_no_order(inherited1, inherited2):
             return False
-        return getattr(entry1, "units", None) == getattr(entry2, "units", None)
+        units1 = getattr(entry1, "units", None) or {}
+        units2 = getattr(entry2, "units", None) or {}
+        if units1.keys() != units2.keys():
+            return False
+        return all(SchemaComparer._same_entry(units1[name], units2[name]) for name in units1)
 
     @staticmethod
     def _filter_for(schema, attribute_filter):

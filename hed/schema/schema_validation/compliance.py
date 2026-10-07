@@ -385,18 +385,20 @@ class SchemaValidator:
     _PROPERTY_COMPARE_EXCLUDED = (HedKey.InLibrary, HedKey.HedID)
 
     def check_library_partner_rules(self):
-        """Check the rules a partnered library's own elements follow (Appendix B SCHEMA_LIBRARY_INVALID j, k, l).
+        """Check the rules a partnered library file follows (Appendix B SCHEMA_LIBRARY_INVALID j, k, l).
 
-        j: an unmerged partnered library declares no Properties; k: a merged partnered library's Properties
-        section equals its partner's; l: a partnered library's own elements do not use ``reserved``.
+        The rules depend on the file form, which ``HedSchema.unmerged_libraries`` records through loading:
+        j: an unmerged partnered library declares no Properties; l: an unmerged partnered library does not
+        use ``reserved``; k: a merged partnered library's Properties section equals its partner's.
 
         Notes:
-            - A loaded unmerged file is the merge of the library with its partner, so a Properties entry that
-              carries ``inLibrary`` is one the library file declared (reason j). A merged file keeps its own
-              Properties section, compared entry by entry with the partner's (reason k): names, descriptions
-              and attributes other than ``inLibrary`` and ``hedId``, which are tool bookkeeping.
-            - The partner is loaded through the schema cache; when it cannot be loaded the comparison is
-              skipped, since compliance never raises.
+            - A loaded unmerged file is the merge of the library with its partner; the entries that carry its
+              ``inLibrary`` value are the ones the file declared, so a Properties entry among them is reason j
+              and one with ``reserved`` is reason l.
+            - A merged file keeps its own Properties section, compared entry by entry with the partner's
+              (reason k): names, descriptions and attributes other than ``inLibrary`` and ``hedId``, which are
+              tool bookkeeping. The partner is loaded through the schema cache; when it cannot be loaded the
+              comparison is skipped, since compliance never raises.
             - An unpartnered library is self-contained and may declare properties and use ``reserved``.
         """
         self.summary.start_check(
@@ -406,29 +408,37 @@ class SchemaValidator:
         issues = []
         with_standard = self.hed_schema.with_standard
         if self.hed_schema.library and with_standard:
-            library = self.hed_schema.library
-            properties = self.hed_schema[HedSectionKey.Properties]
-            declared = [entry for entry in properties.all_entries if entry.has_attribute(HedKey.InLibrary)]
-            for entry in declared:
-                issues += self.error_handler.format_error_with_context(
-                    SchemaErrors.SCHEMA_LIBRARY_PROPERTIES_DECLARED,
-                    entry.name,
-                    library=library,
-                    with_standard=with_standard,
-                )
-            if not declared:
-                issues += self._compare_properties_with_partner(library, with_standard)
-            for section_key in HedSectionKey:
-                for entry in self.hed_schema[section_key].all_entries:
-                    if entry.has_attribute(HedKey.InLibrary) and entry.has_attribute(HedKey.Reserved):
-                        issues += self.error_handler.format_error_with_context(
-                            SchemaErrors.SCHEMA_LIBRARY_RESERVED,
-                            entry.name,
-                            library=library,
-                            with_standard=with_standard,
-                            section=section_key.name,
-                        )
+            unmerged = self.hed_schema.unmerged_libraries
+            if unmerged:
+                issues += self._check_unmerged_library_rules(unmerged, with_standard)
+            else:
+                issues += self._compare_properties_with_partner(self.hed_schema.library, with_standard)
         self.summary.record_issues(len(issues))
+        return issues
+
+    def _check_unmerged_library_rules(self, unmerged, with_standard):
+        """Return the reason-j and reason-l issues for the entries declared by unmerged library files."""
+        issues = []
+        for section_key in HedSectionKey:
+            for entry in self.hed_schema[section_key].all_entries:
+                library = entry.attributes.get(HedKey.InLibrary)
+                if library not in unmerged:
+                    continue
+                if section_key == HedSectionKey.Properties:
+                    issues += self.error_handler.format_error_with_context(
+                        SchemaErrors.SCHEMA_LIBRARY_PROPERTIES_DECLARED,
+                        entry.name,
+                        library=library,
+                        with_standard=with_standard,
+                    )
+                if entry.has_attribute(HedKey.Reserved):
+                    issues += self.error_handler.format_error_with_context(
+                        SchemaErrors.SCHEMA_LIBRARY_RESERVED,
+                        entry.name,
+                        library=library,
+                        with_standard=with_standard,
+                        section=section_key.name,
+                    )
         return issues
 
     def _compare_properties_with_partner(self, library, with_standard):

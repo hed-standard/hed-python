@@ -868,12 +868,13 @@ class TestHedSchemaMerging(unittest.TestCase):
             self.assertTrue("customElementAttribute" in section.valid_attributes)
 
         # Only check for non-character-invalid issues (SCORE prologue/epilogue has commas/brackets).
-        # The fixture declares customProperty in an unmerged partnered library, which specification Appendix B
-        # SCHEMA_LIBRARY_INVALID (j) forbids; that one issue is expected and shows the property round-trips.
+        # The fixture declares customProperty, which a partnered library may not: in the unmerged form it is
+        # specification Appendix B SCHEMA_LIBRARY_INVALID (j), and once saved merged and reloaded it is (k), an
+        # extra property. That one issue is expected and shows the property round-trips.
         issues = schema.check_compliance()
         non_char_issues = [i for i in issues if i["code"] != "SCHEMA_CHARACTER_INVALID"]
         self.assertEqual([i["code"] for i in non_char_issues], ["SCHEMA_LIBRARY_INVALID"])
-        self.assertIn("Property 'customProperty' is declared by library 'score'", non_char_issues[0]["message"])
+        self.assertIn("Property 'customProperty'", non_char_issues[0]["message"])
 
     def test_saving_merged2(self):
         s1 = load_schema(os.path.join(self.full_base_folder, "add_all_types.mediawiki"))

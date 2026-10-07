@@ -146,6 +146,44 @@ class TestCompareSchemas(unittest.TestCase):
         self.assertEqual(len(unequal[HedSectionKey.Tags]), 80)
 
 
+class TestSameEntryIgnoresInLibrary(unittest.TestCase):
+    """_same_entry: the inLibrary stamp is not a difference, on an entry or on the units of a unit class."""
+
+    W = "'''"
+
+    @classmethod
+    def _library(cls, header):
+        from hed.schema import from_string  # noqa: PLC0415
+
+        w = cls.W
+        lines = [
+            header,
+            f"{w}Prologue{w}",
+            "!# start schema",
+            f"{w}Cmp-tag{w}",
+            "!# end schema",
+            f"{w}Unit classes{w}",
+            "* cmpUnits",
+            "** cmpu",
+            f"{w}Unit modifiers{w}",
+            f"{w}Value classes{w}",
+            f"{w}Schema attributes{w}",
+            f"{w}Properties{w}",
+            f"{w}Epilogue{w}",
+            "!# end hed",
+        ]
+        return from_string("\n".join(lines), schema_format=".mediawiki")
+
+    def test_unit_class_with_stamped_units_is_the_same_entry(self):
+        unpartnered = self._library('HED library="testcmp" version="1.0.0"')
+        partnered = self._library('HED library="testcmp" version="1.0.0" withStandard="8.3.0" unmerged="true"')
+        class1, class2 = unpartnered.unit_classes["cmpUnits"], partnered.unit_classes["cmpUnits"]
+        self.assertFalse(class2.units["cmpu"].attributes.get("inLibrary") is None, "the partnered unit is stamped")
+        self.assertNotEqual(class1, class2, "plain equality sees the stamp")
+        self.assertTrue(SchemaComparer._same_entry(class1, class2))
+        self.assertTrue(SchemaComparer._same_entry(unpartnered.tags["Cmp-tag"], partnered.tags["Cmp-tag"]))
+
+
 class TestGatherSchemaChanges(unittest.TestCase):
     """Tests for gather_schema_changes — verifying change_type values and section routing."""
 

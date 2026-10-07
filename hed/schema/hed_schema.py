@@ -53,6 +53,10 @@ class HedSchema(HedSchemaBase):
 
         self._sections = self._create_empty_sections()
         self.source_format = None  # The type of file this was loaded from(MEDIAWIKI, XML, or JSON - None if mixed)
+        # The libraries of this schema whose source file had the unmerged header attribute. A loaded unmerged
+        # file is combined with its partner, and its header then reads as merged; the rules that depend on the
+        # file form (specification Appendix B SCHEMA_LIBRARY_INVALID j and l) read this instead.
+        self._unmerged_libraries = frozenset()
 
     # ===============================================
     # Basic schema properties
@@ -119,6 +123,15 @@ class HedSchema(HedSchemaBase):
             str: HED version or empty string.
         """
         return self.header_attributes.get(WITH_STANDARD_ATTRIBUTE, "")
+
+    @property
+    def unmerged_libraries(self) -> frozenset:
+        """The library names of this schema that were loaded from a file with the ``unmerged`` header attribute.
+
+        Returns:
+            frozenset: Empty for a standard schema, an unpartnered library, or a library loaded from a merged file.
+        """
+        return self._unmerged_libraries
 
     @property
     def merged(self) -> bool:

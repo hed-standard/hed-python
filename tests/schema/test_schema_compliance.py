@@ -510,6 +510,39 @@ class TestLibraryPartnerRules(unittest.TestCase):
         self.assertFalse(hed_schema.tags["NewTag"].has_attribute("inLibrary"))
         self.assertFalse(hed_schema.properties["boolProperty"].has_attribute("inLibrary"))
 
+    def test_l_does_not_apply_to_a_merged_file(self):
+        # Appendix B states reason l for the unmerged form only; a merged file's own tag may carry reserved.
+        tags = [
+            self.tag("Event") + " <nowiki>[Something that happens at a given place and time.]</nowiki>",
+            "* Rooted-tag <nowiki>{rooted=Event, inLibrary=testconflict, reserved}[A library subtree.]</nowiki>",
+        ]
+        attributes = ["* inLibrary <nowiki>{elementDomain, stringRange} [The library of this element.]</nowiki>"]
+        hed_schema = self.schema_from(self.HEADER_MERGED, tags, self.PROPERTIES_840, attributes)
+        self.assertEqual(hed_schema.unmerged_libraries, frozenset())
+        self.assertEqual(self.library_issues(hed_schema), [])
+
+    def test_k_merged_file_property_carrying_in_library_is_an_extra_property(self):
+        # In a merged file an inLibrary property is not reason j (that is the unmerged form); k reports it.
+        properties = self.PROPERTIES_840 + [
+            "* extraRange <nowiki>{inLibrary=testconflict}[Not a partner property.]</nowiki>"
+        ]
+        issues = self.library_issues(self._merged(properties))
+        self.assertEqual(len(issues), 1, issues)
+        self.assertIn(
+            "Property 'extraRange' of library 'testconflict', merged with HED 8.4.0, is not a property",
+            issues[0]["message"],
+        )
+        self.assertNotIn("is declared by library", issues[0]["message"])
+
+    def test_unmerged_libraries_records_the_source_form(self):
+        unmerged = self.schema_from(self.HEADER_UNMERGED, [self.tag("NewTag") + " {rooted=Event}"], [])
+        self.assertEqual(unmerged.unmerged_libraries, frozenset({"testconflict"}))
+        self.assertTrue(unmerged.merged, "after loading, the combined schema's header reads as merged")
+        self.assertEqual(self._merged(self.PROPERTIES_840).unmerged_libraries, frozenset())
+        unpartnered = self.schema_from(self.HEADER_UNPARTNERED, [self.tag("NewTag")], [])
+        self.assertEqual(unpartnered.unmerged_libraries, frozenset())
+        self.assertEqual(schema.load_schema_version("8.4.0").unmerged_libraries, frozenset())
+
     def test_unmerged_partnered_library_entries_are_stamped(self):
         hed_schema = self.schema_from(self.HEADER_UNMERGED, [self.tag("NewTag") + " {rooted=Event}"], [])
         self.assertEqual(hed_schema.tags["NewTag"].attributes.get("inLibrary"), "testconflict")

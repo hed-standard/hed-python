@@ -68,3 +68,51 @@ class Test(unittest.TestCase):
         issues = id_validator.verify_tag_id(schema84, event_entry, HedKey.HedID)
         self.assertGreater(len(issues), 0)
         self.assertIn("It must be an integer in the format", issues[0]["message"])
+
+
+class TestUnpartneredLibrary(unittest.TestCase):
+    """An unpartnered library's entries carry no inLibrary, so the validator falls back to the schema's library
+    name for the previous-version lookup and the id range (PR #1448)."""
+
+    W = "'''"
+
+    @classmethod
+    def setUpClass(cls):
+        from hed.schema import from_string  # noqa: PLC0415
+
+        w = cls.W
+        lines = [
+            'HED library="score" version="1.1.0"',
+            f"{w}Prologue{w}",
+            "!# start schema",
+            f"{w}Modulator{w} <nowiki>{{hedId=HED_0045000}}</nowiki>",
+            f"{w}Sleep-modulator{w} <nowiki>{{hedId=HED_0012345}}</nowiki>",
+            "!# end schema",
+            f"{w}Unit classes{w}",
+            f"{w}Unit modifiers{w}",
+            f"{w}Value classes{w}",
+            f"{w}Schema attributes{w}",
+            "* hedId <nowiki>{elementProperty, stringRange}</nowiki>",
+            f"{w}Properties{w}",
+            "* elementProperty",
+            "* stringRange",
+            f"{w}Epilogue{w}",
+            "!# end hed",
+        ]
+        cls.unpartnered = from_string("\n".join(lines), schema_format=".mediawiki")
+        cls.id_validator = HedIDValidator(cls.unpartnered)
+
+    def test_library_name_comes_from_the_schema(self):
+        self.assertFalse(self.unpartnered.tags["Modulator"].has_attribute(HedKey.InLibrary))
+        self.assertEqual(self.id_validator._previous_schemas["score"].version_number, "1.0.0")
+        self.assertEqual(self.id_validator.library_data["score"]["id_range"], [40000, 59999])
+
+    def test_id_in_the_library_range_is_accepted(self):
+        entry = self.unpartnered.tags["Modulator"]
+        self.assertEqual(self.id_validator.verify_tag_id(self.unpartnered, entry, HedKey.HedID), [])
+
+    def test_id_outside_the_library_range_is_reported(self):
+        entry = self.unpartnered.tags["Sleep-modulator"]
+        issues = self.id_validator.verify_tag_id(self.unpartnered, entry, HedKey.HedID)
+        self.assertEqual(len(issues), 1, issues)
+        self.assertIn("between 40000", issues[0]["message"])
