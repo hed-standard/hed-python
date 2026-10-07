@@ -6,7 +6,7 @@ For ontology/OMN conversion functionality, see the hed-ontology repository.
 
 import pandas as pd
 
-from hed.errors.exceptions import HedFileError
+from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.schema.hed_cache import get_library_data
 from hed.schema.hed_schema_constants import HedKey
 from hed.schema.schema_io import df_constants as constants, schema_util
@@ -206,6 +206,13 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", assign_mis
 
     if assign_missing_ids:
         # 3: Add any HED ID's as needed to these generated dfs.
+        if not get_library_data(schema_name):
+            raise HedFileError(
+                HedExceptions.SCHEMA_LIBRARY_INVALID,
+                f"Cannot assign hedIds: '{schema_name or 'standard'}' has no id_range in hed-schemas "
+                "library_data.json. Register the schema there (on hed-schemas main) before assigning ids.",
+                schema.name,
+            )
         # Retired ids are removed from the pool here, not in _get_hedid_range, so that step 1 still
         # accepts a spreadsheet that carries a retired id for an element removed in a later version.
         retired_ids = _get_retired_ids(schema_name)
@@ -215,7 +222,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", assign_mis
             unused_tag_ids = _get_hedid_range(schema_name, df_key) - retired_ids
 
             # If no errors, assign new HED ID's
-            assign_hed_ids_section(df, unused_tag_ids)
+            assign_hed_ids_section(df, unused_tag_ids, schema_name=schema_name, df_key=df_key)
 
     # 4: Merge the dataframes
     for df_key in output_dfs.keys():
@@ -290,12 +297,17 @@ def _verify_hedid_matches(section, df, unused_tag_ids):
     return hedid_errors
 
 
-def assign_hed_ids_section(df, unused_tag_ids):
+def assign_hed_ids_section(df, unused_tag_ids, schema_name="", df_key=""):
     """Adds missing HedIds to dataframe.
 
     Parameters:
         df(pd.DataFrame): The dataframe to add id's to.
         unused_tag_ids(set of int): The possible HED id's to assign from
+        schema_name(str): The schema name, for the error message when the range is exhausted.
+        df_key(str): The dataframe section, for the same message.
+
+    Raises:
+        HedFileError: When the section needs more ids than the range has free.
     """
     # Remove already used ids
     unused_tag_ids -= get_all_ids(df)
@@ -310,6 +322,13 @@ def assign_hed_ids_section(df, unused_tag_ids):
         # we already verified existing ones
         if isinstance(hed_id, str) and hed_id:
             continue
+        if not sorted_unused_ids:
+            raise HedFileError(
+                HedExceptions.SCHEMA_LIBRARY_INVALID,
+                f"Cannot assign hedIds: no free id left in the {df_key or 'section'} range of "
+                f"'{schema_name or 'standard'}' (hed-schemas library_data.json).",
+                schema_name,
+            )
         df.at[_row_number, constants.hed_id] = f"HED_{sorted_unused_ids.pop():07d}"
 
 

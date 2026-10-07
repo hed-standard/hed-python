@@ -1,6 +1,7 @@
 import contextlib
 import copy
 import io
+import json
 import os
 import shutil
 import unittest
@@ -121,6 +122,26 @@ class TestConvertAndUpdate(unittest.TestCase):
         tsv_reloaded = load_schema(add_extension(basename, ".tsv"))
         self.assertNotIn("uV", tsv_reloaded.units)
         self.assertEqual(schema_reloaded, tsv_reloaded)
+
+    def test_library_prerelease_forms(self):
+        # hed-schemas keeps a library's mediawiki, TSV and JSON unmerged and only the XML merged.
+        basename = os.path.join(self.base_path, "HED_score_2.1.0")
+        load_schema_version("score_2.1.0").save_as_mediawiki(basename + ".mediawiki")  # unmerged by default
+        with contextlib.redirect_stdout(io.StringIO()):
+            result = convert_and_update([basename + ".mediawiki"], set_ids=False)
+        self.assertEqual(result, 0)
+
+        with open(basename + ".json", encoding="utf-8") as fp:
+            as_json = json.load(fp)
+        self.assertEqual(as_json.get("unmerged"), "True", "the prerelease JSON is unmerged")
+        self.assertNotIn("Event", as_json.get("tags", {}), "an unmerged library JSON carries no standard tags")
+        with open(basename + ".xml", encoding="utf-8") as fp:
+            xml_text = fp.read()
+        self.assertIn("<name>Event</name>", xml_text, "the prerelease XML is merged")
+        self.assertNotIn('unmerged="True"', xml_text.split("\n", 2)[1])
+        with open(basename + ".mediawiki", encoding="utf-8") as fp:
+            self.assertIn('unmerged="True"', fp.readline())
+        self.assertEqual(load_schema(basename + ".json"), load_schema(basename + ".xml"))
 
     def test_format_removed_row(self):
         full = {"section": "Unit", "label": "uV", "hedId": "HED_0011644", "removed_in": "8.5.0", "replacement": "V"}
