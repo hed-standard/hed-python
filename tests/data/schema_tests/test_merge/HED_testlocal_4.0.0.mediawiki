@@ -1,12 +1,12 @@
-HED version="4.0.0" library="testlib" withStandard="8.5.0"
+HED version="4.0.0" library="testlocal" withStandard="8.5.0"
 
 '''Prologue'''
 This schema is designed to be lazy partnered with prerelease 8.5.0.
 
 !# start schema
 
-'''Test-some''' <nowiki>{inLibrary=testlib} [Unknown stuff.]</nowiki>
-* Unknown1 <nowiki>{inLibrary=testlib} [Unknown1 stuff]</nowiki>
+'''Test-some''' <nowiki>{inLibrary=testlocal} [Unknown stuff.]</nowiki>
+* Unknown1 <nowiki>{inLibrary=testlocal} [Unknown1 stuff]</nowiki>
 
 '''Event''' <nowiki>{suggestedTag=Task-property, hedId=HED_0012001} [Something that happens at a given time and (typically) place. Elements of this tag subtree designate the general category in which an event falls.]</nowiki>
 * Sensory-event <nowiki>{suggestedTag=Task-event-role, suggestedTag=Sensory-presentation, hedId=HED_0012002} [Something perceivable by the participant. An event meant to be an experimental stimulus should include the tag Task-property/Task-event-role/Experimental-stimulus.]</nowiki>
@@ -269,11 +269,11 @@ This schema is designed to be lazy partnered with prerelease 8.5.0.
 *** Animal <nowiki>{hedId=HED_0012231} [A living organism that has membranous cell walls, requires oxygen and organic foods, and is capable of voluntary movement.]</nowiki>
 *** Human <nowiki>{hedId=HED_0012232} [The bipedal primate mammal Homo sapiens.]</nowiki>
 *** Plant <nowiki>{hedId=HED_0012233} [Any living organism that typically synthesizes its food from inorganic substances and possesses cellulose cell walls.]</nowiki>
-**** Fruit <nowiki>{rooted=Plant, inLibrary=testlib} [Fruit stuff.]</nowiki>
-***** Apple <nowiki>{annotation=foodonto:has_botanical_name, inLibrary=testlib} [Apple stuff]</nowiki>
-****** Honey-crisp <nowiki>{inLibrary=testlib} [Type of apple]</nowiki>
-**** Vegetable <nowiki>{rooted=Plant, inLibrary=testlib} [Vegetable stuff.]</nowiki>
-***** Carrot <nowiki>{annotation=foodonto:has_botanical_name, inLibrary=testlib} [Carrot stuff]</nowiki>
+**** Fruit <nowiki>{rooted=Plant, inLibrary=testlocal} [Fruit stuff.]</nowiki>
+***** Apple <nowiki>{annotation=foodonto:has_botanical_name, inLibrary=testlocal} [Apple stuff]</nowiki>
+****** Honey-crisp <nowiki>{inLibrary=testlocal} [Type of apple]</nowiki>
+**** Vegetable <nowiki>{rooted=Plant, inLibrary=testlocal} [Vegetable stuff.]</nowiki>
+***** Carrot <nowiki>{annotation=foodonto:has_botanical_name, inLibrary=testlocal} [Carrot stuff]</nowiki>
 * Language-item <nowiki>{suggestedTag=Sensory-presentation, hedId=HED_0012234} [An entity related to a systematic means of communicating by the use of sounds, symbols, or gestures.]</nowiki>
 ** Character <nowiki>{hedId=HED_0012235} [A mark or symbol used in writing.]</nowiki>
 ** Clause <nowiki>{hedId=HED_0012236} [A unit of grammatical organization next below the sentence in rank, usually consisting of a subject and predicate.]</nowiki>
@@ -1417,13 +1417,13 @@ This schema is designed to be lazy partnered with prerelease 8.5.0.
 A final section.
 
 '''Sources'''
-* <nowiki>{inLibrary=testlib} source=FoodDB,link=https://fooddb.example.org,description=Botanical and nutritional database for fruits and vegetables.</nowiki>
+* <nowiki>{inLibrary=testlocal} source=FoodDB,link=https://fooddb.example.org,description=Botanical and nutritional database for fruits and vegetables.</nowiki>
 * <nowiki>source=Wikipedia,link=https://en.wikipedia.org,description=General definitions of concepts.</nowiki>
 
 '''Prefixes'''
 * <nowiki>prefix=dc:,namespace=http://purl.org/dc/elements/1.1/#,description=The Dublin Core elements</nowiki>
 * <nowiki>prefix=foaf:,namespace=http://xmlns.com/foaf/0.1/#,description=Friend-of-a-Friend http://xmlns.com/foaf/spec/</nowiki>
-* <nowiki>{inLibrary=testlib} prefix=foodonto:,namespace=http://purl.obolibrary.org/obo/foodon.owl,description=Food Ontology (FOODON)</nowiki>
+* <nowiki>{inLibrary=testlocal} prefix=foodonto:,namespace=http://purl.obolibrary.org/obo/foodon.owl,description=Food Ontology (FOODON)</nowiki>
 * <nowiki>prefix=iao:,namespace=http://purl.obolibrary.org/obo/iao.owl,description=Information Artifact Ontology (IAO)</nowiki>
 * <nowiki>prefix=ncit:,namespace=http://purl.obolibrary.org/obo/ncit.owl,description=NCI Thesaurus OBO Edition</nowiki>
 * <nowiki>prefix=obogo:,namespace=http://www.geneontology.org/formats/oboInOwl,description=The OBO Format Namespace</nowiki>
@@ -1451,7 +1451,7 @@ A final section.
 * <nowiki>prefix=dc:,id=title,iri=http://purl.org/dc/elements/1.1/title,description=A name given to the resource.</nowiki>
 * <nowiki>prefix=dc:,id=type,iri=http://purl.org/dc/elements/1.1/type,description=The nature or genre of the resource.</nowiki>
 * <nowiki>prefix=foaf:,id=homepage,iri=http://xmlns.com/foaf/0.1/homepage,description=A homepage for some thing.</nowiki>
-* <nowiki>{inLibrary=testlib} prefix=foodonto:,id=has_botanical_name,iri=http://purl.obolibrary.org/obo/FOODON_00001234,description=The botanical or scientific name of a food item.</nowiki>
+* <nowiki>{inLibrary=testlocal} prefix=foodonto:,id=has_botanical_name,iri=http://purl.obolibrary.org/obo/FOODON_00001234,description=The botanical or scientific name of a food item.</nowiki>
 * <nowiki>prefix=obogo:,id=has_dbxref,iri=http://www.geneontology.org/formats/oboInOwl#hasDbXref,description=Property indicating that an ontology term has a cross-reference to a database.</nowiki>
 * <nowiki>prefix=rdfs:,id=comment,iri=http://www.w3.org/2000/01/rdf-schema#comment,description=Standard way to provide a human-readable description.</nowiki>
 * <nowiki>prefix=terms:,id=license,iri=http://purl.org/dc/terms/license,description=A legal document giving official permission to do something with the resource.</nowiki>

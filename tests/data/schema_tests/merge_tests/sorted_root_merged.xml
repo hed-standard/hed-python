@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<HED version="1.0.2" library="testlib" withStandard="8.2.0">
+<HED version="1.0.2" library="testlocal" withStandard="8.2.0">
    <prologue>This schema is the first official release that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.</prologue>
    <schema>
       <node>
@@ -7,20 +7,20 @@
          <description>These should not be sorted.  B should be first</description>
          <attribute>
             <name>inLibrary</name>
-            <value>testlib</value>
+            <value>testlocal</value>
          </attribute>
          <node>
             <name>SubnodeB1</name>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
          <node>
             <name>SubnodeB2</name>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
       </node>
@@ -29,27 +29,27 @@
          <description>These should not be sorted.  A should be second</description>
          <attribute>
             <name>inLibrary</name>
-            <value>testlib</value>
+            <value>testlocal</value>
          </attribute>
          <node>
             <name>SubnodeA3</name>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
          <node>
             <name>SubnodeA1</name>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
          <node>
             <name>SubnodeA2</name>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
       </node>
@@ -58,27 +58,27 @@
          <description>These should not be sorted.  C should be last</description>
          <attribute>
             <name>inLibrary</name>
-            <value>testlib</value>
+            <value>testlocal</value>
          </attribute>
          <node>
             <name>SubnodeC3</name>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
          <node>
             <name>SubnodeC1</name>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
          <node>
             <name>SubnodeC2</name>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
       </node>
@@ -90,27 +90,27 @@
          </attribute>
          <attribute>
             <name>inLibrary</name>
-            <value>testlib</value>
+            <value>testlocal</value>
          </attribute>
          <node>
             <name>SubnodeE1</name>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
          <node>
             <name>SubnodeE2</name>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
          <node>
             <name>SubnodeE3</name>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
       </node>
@@ -122,27 +122,27 @@
          </attribute>
          <attribute>
             <name>inLibrary</name>
-            <value>testlib</value>
+            <value>testlocal</value>
          </attribute>
          <node>
             <name>SubnodeD1</name>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
          <node>
             <name>SubnodeD2</name>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
          <node>
             <name>SubnodeD3</name>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
       </node>
@@ -1807,20 +1807,20 @@
                      </attribute>
                      <attribute>
                         <name>inLibrary</name>
-                        <value>testlib</value>
+                        <value>testlocal</value>
                      </attribute>
                      <node>
                         <name>Flute-subsound1</name>
                         <attribute>
                            <name>inLibrary</name>
-                           <value>testlib</value>
+                           <value>testlocal</value>
                         </attribute>
                      </node>
                      <node>
                         <name>Flute-subsound2</name>
                         <attribute>
                            <name>inLibrary</name>
-                           <value>testlib</value>
+                           <value>testlocal</value>
                         </attribute>
                      </node>
                   </node>
@@ -1833,20 +1833,20 @@
                      </attribute>
                      <attribute>
                         <name>inLibrary</name>
-                        <value>testlib</value>
+                        <value>testlocal</value>
                      </attribute>
                      <node>
                         <name>Oboe-subsound1</name>
                         <attribute>
                            <name>inLibrary</name>
-                           <value>testlib</value>
+                           <value>testlocal</value>
                         </attribute>
                      </node>
                      <node>
                         <name>Oboe-subsound2</name>
                         <attribute>
                            <name>inLibrary</name>
-                           <value>testlib</value>
+                           <value>testlocal</value>
                         </attribute>
                      </node>
                   </node>
@@ -1859,27 +1859,27 @@
                      </attribute>
                      <attribute>
                         <name>inLibrary</name>
-                        <value>testlib</value>
+                        <value>testlocal</value>
                      </attribute>
                      <node>
                         <name>Violin-subsound1</name>
                         <attribute>
                            <name>inLibrary</name>
-                           <value>testlib</value>
+                           <value>testlocal</value>
                         </attribute>
                      </node>
                      <node>
                         <name>Violin-subsound2</name>
                         <attribute>
                            <name>inLibrary</name>
-                           <value>testlib</value>
+                           <value>testlocal</value>
                         </attribute>
                      </node>
                      <node>
                         <name>Violin-subsound3</name>
                         <attribute>
                            <name>inLibrary</name>
-                           <value>testlib</value>
+                           <value>testlocal</value>
                         </attribute>
                      </node>
                   </node>

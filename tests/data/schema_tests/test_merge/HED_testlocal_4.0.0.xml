@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<HED version="4.0.0" library="testlib" withStandard="8.5.0">
+<HED version="4.0.0" library="testlocal" withStandard="8.5.0">
    <prologue>This schema is designed to be lazy partnered with prerelease 8.5.0.</prologue>
    <schema>
       <node>
@@ -7,14 +7,14 @@
          <description>Unknown stuff.</description>
          <attribute>
             <name>inLibrary</name>
-            <value>testlib</value>
+            <value>testlocal</value>
          </attribute>
          <node>
             <name>Unknown1</name>
             <description>Unknown1 stuff</description>
             <attribute>
                <name>inLibrary</name>
-               <value>testlib</value>
+               <value>testlocal</value>
             </attribute>
          </node>
       </node>
@@ -2213,7 +2213,7 @@
                      </attribute>
                      <attribute>
                         <name>inLibrary</name>
-                        <value>testlib</value>
+                        <value>testlocal</value>
                      </attribute>
                      <node>
                         <name>Apple</name>
@@ -2224,14 +2224,14 @@
                         </attribute>
                         <attribute>
                            <name>inLibrary</name>
-                           <value>testlib</value>
+                           <value>testlocal</value>
                         </attribute>
                         <node>
                            <name>Honey-crisp</name>
                            <description>Type of apple</description>
                            <attribute>
                               <name>inLibrary</name>
-                              <value>testlib</value>
+                              <value>testlocal</value>
                            </attribute>
                         </node>
                      </node>
@@ -2245,7 +2245,7 @@
                      </attribute>
                      <attribute>
                         <name>inLibrary</name>
-                        <value>testlib</value>
+                        <value>testlocal</value>
                      </attribute>
                      <node>
                         <name>Carrot</name>
@@ -2256,7 +2256,7 @@
                         </attribute>
                         <attribute>
                            <name>inLibrary</name>
-                           <value>testlib</value>
+                           <value>testlocal</value>
                         </attribute>
                      </node>
                   </node>
@@ -13508,7 +13508,7 @@
          <description>Botanical and nutritional database for fruits and vegetables.</description>
          <attribute>
             <name>inLibrary</name>
-            <value>testlib</value>
+            <value>testlocal</value>
          </attribute>
       </schemaSource>
       <schemaSource>
@@ -13534,7 +13534,7 @@
          <description>Food Ontology (FOODON)</description>
          <attribute>
             <name>inLibrary</name>
-            <value>testlib</value>
+            <value>testlocal</value>
          </attribute>
       </schemaPrefix>
       <schemaPrefix>
@@ -13685,7 +13685,7 @@
          <description>The botanical or scientific name of a food item.</description>
          <attribute>
             <name>inLibrary</name>
-            <value>testlib</value>
+            <value>testlocal</value>
          </attribute>
       </externalAnnotation>
       <externalAnnotation>

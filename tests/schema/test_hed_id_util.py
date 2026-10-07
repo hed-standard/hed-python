@@ -14,6 +14,7 @@ from hed.schema.schema_io.hed_id_util import (
     remove_retired_rows,
     update_dataframes_from_schema,
 )
+from tests.schema.util_test_schemas import load_test_schema
 
 hed_schema_global = load_schema_version("8.4.0")
 
@@ -36,10 +37,10 @@ class TestLibraryFunctions(unittest.TestCase):
         self.assertEqual(first_id, 40000)
 
     def test_get_library_name_and_id_unknown(self):
-        # Test for an unknown library
-        schema = load_schema_version("testlib_2.1.0")
+        # A library with no entry in library_data.json (a hed-tests test schema)
+        schema = load_test_schema("testconflict_2.1.0")
         name, first_id = get_library_name_and_id(schema)
-        self.assertEqual(name, "Testlib")
+        self.assertEqual(name, "Testconflict")
         self.assertEqual(first_id, df_util.UNKNOWN_LIBRARY_VALUE)
 
     def test_get_hedid_range_normal_case(self):
@@ -104,7 +105,7 @@ class TestVerifyHedIdMatches(unittest.TestCase):
         """An unregistered library returns empty range — IDs should not be reported as out-of-range."""
         empty_range = set()
         df = pd.DataFrame([{"rdfs:label": "Event", "hedId": "HED_0012001"}])
-        # testlib has no library_data entry, so _get_hedid_range returns an empty set
+        # a library with no library_data entry gives _get_hedid_range an empty set
         errors = _verify_hedid_matches(self.schema_82.tags, df, empty_range)
         self.assertEqual(len(errors), 0, "Unknown-library empty range should not trigger range errors")
 
@@ -241,9 +242,9 @@ class TestRetiredIds(unittest.TestCase):
         self.assertIn(10308, retired)  # hedId attribute, moved before the 8.3.0 release
 
     def test_get_retired_ids_without_entries(self):
-        # score is registered but has no retired ids; testlib is not registered at all.
+        # score is registered but has no retired ids; testconflict (a hed-tests schema) is not registered at all.
         self.assertEqual(hed_id_util._get_retired_ids("score"), set())
-        self.assertEqual(hed_id_util._get_retired_ids("testlib"), set())
+        self.assertEqual(hed_id_util._get_retired_ids("testconflict"), set())
 
     def test_range_still_contains_retired_id(self):
         # The valid range is unchanged, so an older spreadsheet that still carries uV verifies clean.
@@ -333,9 +334,9 @@ class TestRetiredIds(unittest.TestCase):
             update_dataframes_from_schema(dataframes, schema)
 
     def test_remove_retired_rows_library_without_registry(self):
-        # testlib is not registered, so nothing can be retired and nothing is removed.
+        # testconflict is not registered, so nothing can be retired and nothing is removed.
         dataframes = hed_schema_global.get_as_dataframes()
-        self.assertEqual(remove_retired_rows(dataframes, hed_schema_global, "testlib"), [])
+        self.assertEqual(remove_retired_rows(dataframes, hed_schema_global, "testconflict"), [])
 
 
 if __name__ == "__main__":

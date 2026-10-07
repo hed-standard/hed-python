@@ -13,7 +13,7 @@ dc:	subject	http://purl.org/dc/elements/1.1/subject		The topic of the resource.
 dc:	title	http://purl.org/dc/elements/1.1/title		A name given to the resource.
 dc:	type	http://purl.org/dc/elements/1.1/type		The nature or genre of the resource.
 foaf:	homepage	http://xmlns.com/foaf/0.1/homepage		A homepage for some thing.
-foodonto:	has_botanical_name	http://purl.obolibrary.org/obo/FOODON_00001234	inLibrary=testlib	The botanical or scientific name of a food item.
+foodonto:	has_botanical_name	http://purl.obolibrary.org/obo/FOODON_00001234	inLibrary=testlocal	The botanical or scientific name of a food item.
 obogo:	has_dbxref	http://www.geneontology.org/formats/oboInOwl#hasDbXref		Property indicating that an ontology term has a cross-reference to a database.
 rdfs:	comment	http://www.w3.org/2000/01/rdf-schema#comment		Standard way to provide a human-readable description.
 terms:	license	http://purl.org/dc/terms/license		A legal document giving official permission to do something with the resource.

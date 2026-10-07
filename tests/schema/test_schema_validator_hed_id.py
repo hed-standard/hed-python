@@ -4,6 +4,7 @@ import unittest
 from hed import load_schema_version
 from hed.schema import HedKey, hed_schema_constants
 from hed.schema.schema_validation.hed_id_validator import HedIDValidator
+from tests.schema.util_test_schemas import load_test_schema
 
 # tests needed:
 # 1. Verify HED id(HARDEST, MAY SKIP)
@@ -14,7 +15,8 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.hed_schema = load_schema_version("8.3.0")
-        cls.test_schema = load_schema_version("testlib_3.0.0")
+        # score is the released library with a version history and a registry entry (plan Q1, 2026-10-07).
+        cls.test_schema = load_schema_version("score_2.1.0")
         cls.hed_schema84 = copy.deepcopy(cls.hed_schema)
         cls.hed_schema84.header_attributes[hed_schema_constants.VERSION_ATTRIBUTE] = "8.4.0"
 
@@ -29,21 +31,26 @@ class Test(unittest.TestCase):
 
         self.assertTrue(id_validator._previous_schemas[""])
         self.assertTrue(id_validator.library_data[""])
-        self.assertTrue(id_validator._previous_schemas["testlib"])
-        self.assertEqual(id_validator.library_data.get("testlib"), None)
-        self.assertEqual(id_validator._previous_schemas["testlib"].version_number, "2.2.0")
+        self.assertTrue(id_validator._previous_schemas["score"])
+        self.assertEqual(id_validator.library_data["score"]["id_range"], [40000, 59999])
+        self.assertEqual(id_validator._previous_schemas["score"].version_number, "2.0.0")
         self.assertEqual(id_validator._previous_schemas[""].version_number, "8.3.0")
+
+        # A library with no published history and no registry entry (a hed-tests test schema).
+        id_validator = HedIDValidator(load_test_schema("testconflict_2.1.0"))
+        self.assertNotIn("testconflict", id_validator._previous_schemas)
+        self.assertEqual(id_validator.library_data.get("testconflict"), None)
 
     def test_get_previous_version(self):
         self.assertEqual(HedIDValidator._get_previous_version("8.3.0", ""), "8.2.0")
         self.assertEqual(HedIDValidator._get_previous_version("8.2.0", ""), "8.1.0")
         self.assertEqual(HedIDValidator._get_previous_version("8.0.0", ""), None)
-        self.assertEqual(HedIDValidator._get_previous_version("3.0.0", "testlib"), "testlib_2.2.0")
+        self.assertEqual(HedIDValidator._get_previous_version("2.1.0", "score"), "score_2.0.0")
         # Regression guard: the previous version must come from the full (manifest) version list,
-        # not just whatever happens to be in the local cache. This reaches deeper into testlib's
+        # not just whatever happens to be in the local cache. This reaches deeper into score's
         # history than the case above, so it fails if the list is ever truncated/incomplete again
-        # (the bug that surfaced on a fresh CI runner). testlib releases: 1.0.2, 2.0.0, 2.1.0, ...
-        self.assertEqual(HedIDValidator._get_previous_version("2.0.0", "testlib"), "testlib_1.0.2")
+        # (the bug that surfaced on a fresh CI runner). score releases: 1.0.0, 1.1.0, 2.0.0, 2.1.0.
+        self.assertEqual(HedIDValidator._get_previous_version("1.1.0", "score"), "score_1.0.0")
 
     def test_verify_tag_id(self):
         event_entry = self.hed_schema84.tags["Event"]

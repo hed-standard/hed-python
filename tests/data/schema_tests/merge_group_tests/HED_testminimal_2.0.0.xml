@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <HED version="2.0.0" library="testminimal" withStandard="8.4.0" unmerged="True">
-   <prologue>testminimal 2.0.0 partners with standard schema 8.4.0. Change from 1.0.0: partnering with a standard schema (major bump, testlib precedent). Vocabulary unchanged.</prologue>
+   <prologue>testminimal 2.0.0 partners with standard schema 8.4.0. Change from 1.0.0: partnering with a standard schema (major bump, precedent of an earlier library). Vocabulary unchanged.</prologue>
    <schema>
       <node>
          <name>Mini-tag</name>

@@ -7,7 +7,7 @@ Purpose: core Python library for HED (Hierarchical Event Descriptors) validation
 Test framework: unittest. Never convert the suite to pytest style as a side effect of other work, and never mix the two.
 
 - Install dev env: `pip install -e ".[dev,test,docs,examples]"` (uv works: `uv venv .venv` then `uv pip install ...`)
-- Fetch test data: `git submodule update --init --recursive`
+- Fetch test data: `git submodule update --init --recursive` (the spec tests need it; the unit tests that load a library schema read the hed-tests test schemas from it and skip without it)
 - Run tests: `python -m unittest discover tests -v`
 - Spec tests (need submodules): `python -m unittest discover spec_tests -v`
 - Single test: `python -m unittest tests.models.test_hed_string.TestHedString.test_constructor`

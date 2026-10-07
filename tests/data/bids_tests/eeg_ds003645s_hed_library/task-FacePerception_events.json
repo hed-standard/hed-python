@@ -22,7 +22,7 @@
       "double_press": "Experiment participant presses both keys ."
     },
     "HED": {
-      "show_face": "Sensory-event, test:Experimental-stimulus, (Def/Face-image, Onset), (Def/Blink-inhibition-task,Onset),(Def/Cross-only, Offset)",
+      "show_face": "Sensory-event, test:Object-one, (Def/Face-image, Onset), (Def/Blink-inhibition-task,Onset),(Def/Cross-only, Offset)",
       "show_face_initial": "Sensory-event, Experimental-stimulus, (Def/Face-image, Onset), (Def/Blink-inhibition-task,Onset), (Def/Fixation-task, Onset)",
       "show_circle": "Sensory-event, (Intended-effect, Cue), (Def/Circle-only, Onset), (Def/Face-image, Offset), (Def/Blink-inhibition-task, Offset), (Def/Fixation-task, Offset)",
       "show_cross": "Sensory-event, (Intended-effect, Cue), (Def/Cross-only, Onset), (Def/Fixation-task, Onset),  (Def/Circle-only, Offset), Hyperventilation-refused-procedure/Could not comply",
@@ -68,12 +68,12 @@
   },
   "stim_file": {
     "Description": "Path of the stimulus file in the stimuli directory.",
-    "HED": "(Image, Pathname/#), test:Image"
+    "HED": "(Image, Pathname/#), test:Object-two"
   },
   "hed_def_sensory": {
     "Description": "Metadata dictionary for gathering sensory definitions",
     "HED": {
-      "cross_only_def": "(Definition/Cross-only, (Visual-presentation, (Foreground-view, (White, Cross), (Center-of, Computer-screen)), Sleep-architecture, (Background-view, Black), test:Cue, Description/A white fixation cross on a black background in the center of the screen.))",
+      "cross_only_def": "(Definition/Cross-only, (Visual-presentation, (Foreground-view, (White, Cross), (Center-of, Computer-screen)), Sleep-architecture, (Background-view, Black), test:Object-three, Description/A white fixation cross on a black background in the center of the screen.))",
       "face_image_def": "(Definition/Face-image, (Visual-presentation, (Foreground-view, ((Image, Face, Hair), Color/Grayscale), ((White, Cross), (Center-of, Computer-screen))), (Background-view, Black), Description/A happy or neutral face in frontal or three-quarters frontal pose with long hair cropped presented as an achromatic foreground image on a black background with a white fixation cross superposed.))",
       "circle_only_def": "(Definition/Circle-only, (Visual-presentation, (Foreground-view, ((White, Circle), (Center-of, Computer-screen))), (Background-view, Black), Description/A white circle on a black background in the center of the screen.))"
     }

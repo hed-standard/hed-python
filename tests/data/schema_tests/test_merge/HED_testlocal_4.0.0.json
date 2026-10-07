@@ -1,6 +1,6 @@
 {
   "version": "4.0.0",
-  "library": "testlib",
+  "library": "testlocal",
   "withStandard": "8.5.0",
   "prologue": "This schema is designed to be lazy partnered with prerelease 8.5.0.",
   "tags": {
@@ -13,10 +13,10 @@
         "Unknown1"
       ],
       "attributes": {
-        "inLibrary": "testlib"
+        "inLibrary": "testlocal"
       },
       "explicitAttributes": {
-        "inLibrary": "testlib"
+        "inLibrary": "testlocal"
       }
     },
     "Unknown1": {
@@ -26,10 +26,10 @@
       "parent": "Test-some",
       "children": [],
       "attributes": {
-        "inLibrary": "testlib"
+        "inLibrary": "testlocal"
       },
       "explicitAttributes": {
-        "inLibrary": "testlib"
+        "inLibrary": "testlocal"
       }
     },
     "Event": {
@@ -4197,11 +4197,11 @@
       "attributes": {
         "extensionAllowed": true,
         "rooted": "Plant",
-        "inLibrary": "testlib"
+        "inLibrary": "testlocal"
       },
       "explicitAttributes": {
         "rooted": "Plant",
-        "inLibrary": "testlib"
+        "inLibrary": "testlocal"
       }
     },
     "Apple": {
@@ -4214,11 +4214,11 @@
       ],
       "attributes": {
         "extensionAllowed": true,
-        "inLibrary": "testlib",
+        "inLibrary": "testlocal",
         "annotation": "foodonto:has_botanical_name"
       },
       "explicitAttributes": {
-        "inLibrary": "testlib",
+        "inLibrary": "testlocal",
         "annotation": "foodonto:has_botanical_name"
       }
     },
@@ -4230,10 +4230,10 @@
       "children": [],
       "attributes": {
         "extensionAllowed": true,
-        "inLibrary": "testlib"
+        "inLibrary": "testlocal"
       },
       "explicitAttributes": {
-        "inLibrary": "testlib"
+        "inLibrary": "testlocal"
       }
     },
     "Vegetable": {
@@ -4247,11 +4247,11 @@
       "attributes": {
         "extensionAllowed": true,
         "rooted": "Plant",
-        "inLibrary": "testlib"
+        "inLibrary": "testlocal"
       },
       "explicitAttributes": {
         "rooted": "Plant",
-        "inLibrary": "testlib"
+        "inLibrary": "testlocal"
       }
     },
     "Carrot": {
@@ -4262,11 +4262,11 @@
       "children": [],
       "attributes": {
         "extensionAllowed": true,
-        "inLibrary": "testlib",
+        "inLibrary": "testlocal",
         "annotation": "foodonto:has_botanical_name"
       },
       "explicitAttributes": {
-        "inLibrary": "testlib",
+        "inLibrary": "testlocal",
         "annotation": "foodonto:has_botanical_name"
       }
     },
@@ -20620,7 +20620,7 @@
       "name": "FoodDB",
       "link": "https://fooddb.example.org",
       "description": "Botanical and nutritional database for fruits and vegetables.",
-      "inLibrary": "testlib"
+      "inLibrary": "testlocal"
     },
     {
       "name": "Wikipedia",
@@ -20643,7 +20643,7 @@
       "name": "foodonto:",
       "namespace": "http://purl.obolibrary.org/obo/foodon.owl",
       "description": "Food Ontology (FOODON)",
-      "inLibrary": "testlib"
+      "inLibrary": "testlocal"
     },
     {
       "name": "iao:",
@@ -20791,7 +20791,7 @@
       "id": "has_botanical_name",
       "iri": "http://purl.obolibrary.org/obo/FOODON_00001234",
       "description": "The botanical or scientific name of a food item.",
-      "inLibrary": "testlib"
+      "inLibrary": "testlocal"
     },
     {
       "name": "obogo:",

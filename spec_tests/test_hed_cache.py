@@ -131,12 +131,18 @@ class Test(unittest.TestCase):
     def test_get_hed_version_path_auto_refresh_downloads_missing_version(self):
         """get_hed_version_path downloads only the single requested version from GitHub.
 
-        Uses a testlib version, which is not bundled with hedtools, so the download must come from
-        GitHub rather than the local bundle. testlib lives in a normal ``hedxml/`` folder, so this
-        exercises the real on-demand download path (manifest fast path and REST API fallback alike)
-        without relying on deprecated versions. Only the listing for the relevant library and the
-        one XML file are fetched - not the entire catalog.
+        Uses score 1.2.0, a released library version that hedtools does not bundle in
+        ``hed/schema/schema_data/`` (the bundle has score 1.0.0, 1.1.0, 2.0.0 and 2.1.0), so seeding the
+        fresh cache with the bundle cannot satisfy the lookup and the file must come from GitHub. score
+        lives in a normal ``hedxml/`` folder, so this exercises the real on-demand download path (manifest
+        fast path and REST API fallback alike). Only the listing for the relevant library and the one XML
+        file are fetched - not the entire catalog.
         """
+        # Guard the premise: if this version is ever bundled, the test stops exercising the download.
+        self.assertFalse(
+            os.path.isfile(os.path.join(hed_cache.INSTALLED_CACHE_LOCATION, "HED_score_1.2.0.xml")),
+            "score 1.2.0 is now bundled; pick an unbundled released version for this test",
+        )
         # Use a fresh cache directory so the version is definitely not present
         fresh_cache = os.path.join(os.path.dirname(self.hed_cache_dir), "schema_cache_auto_refresh/")
         if os.path.exists(fresh_cache):
@@ -145,16 +151,22 @@ class Test(unittest.TestCase):
         saved = hed_cache.HED_CACHE_DIRECTORY
         try:
             hed_cache.HED_CACHE_DIRECTORY = fresh_cache
-            # testlib 2.0.0 is a released library version that is NOT bundled - it must come from GitHub.
-            result = hed_cache.get_hed_version_path("2.0.0", library_name="testlib")
-            self.assertIsNotNone(result, "get_hed_version_path should download testlib 2.0.0 from GitHub on demand")
+            result = hed_cache.get_hed_version_path("1.2.0", library_name="score")
+            self.assertIsNotNone(result, "get_hed_version_path should download score 1.2.0 from GitHub on demand")
             self.assertTrue(os.path.exists(result))
-            # Only the one requested file should have been downloaded (plus any bundled schemas the
+            # Only the one requested file should have been downloaded (plus the bundled schemas the
             # cache seeds); no full-catalog download.
             xml_files = [f for f in os.listdir(fresh_cache) if hed_cache.version_pattern.match(f)]
-            self.assertTrue(
-                any("testlib" in f and "2.0.0" in f for f in xml_files),
-                f"HED_testlib_2.0.0.xml must be in the cache after on-demand download; found: {xml_files}",
+            self.assertIn(
+                "HED_score_1.2.0.xml",
+                xml_files,
+                f"HED_score_1.2.0.xml must be in the cache after on-demand download; found: {xml_files}",
+            )
+            bundled = set(os.listdir(hed_cache.INSTALLED_CACHE_LOCATION))
+            self.assertEqual(
+                [f for f in xml_files if f not in bundled],
+                ["HED_score_1.2.0.xml"],
+                "only the requested file should be downloaded; no full-catalog download",
             )
         finally:
             hed_cache.HED_CACHE_DIRECTORY = saved

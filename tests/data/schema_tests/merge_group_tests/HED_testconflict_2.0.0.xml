@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <HED version="2.0.0" library="testconflict" withStandard="8.5.0" unmerged="True">
-   <prologue>testconflict 2.0.0 partners with standard schema 8.5.0. Changes from 1.1.2: deletes Legacy-tag (major bump: tag deleted) and adds the Rooted-tag subtree rooted under the standard Event tag. Partnering an unpartnered library is itself a major change (testlib precedent).</prologue>
+   <prologue>testconflict 2.0.0 partners with standard schema 8.5.0. Changes from 1.1.2: deletes Legacy-tag (major bump: tag deleted) and adds the Rooted-tag subtree rooted under the standard Event tag. Partnering an unpartnered library is itself a major change (precedent of an earlier library).</prologue>
    <schema>
       <node>
          <name>Object-tag</name>

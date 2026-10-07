@@ -15,6 +15,7 @@ from hed.errors.error_types import SchemaErrors
 from hed.schema import HedKey, HedSchema, HedSchemaGroup, hed_cache, load_schema, load_schema_version
 from hed.schema.hed_schema_io import _load_schema_version, from_string, parse_version_list
 from tests.schema.schema_test_helpers import get_temp_filename, with_temp_file
+from tests.schema.util_test_schemas import TEST_SCHEMAS_DIR, load_test_schema, test_schemas_available
 
 
 def _assert_valid_sorted_versions(test_case, versions):
@@ -82,16 +83,15 @@ class TestHedSchema(unittest.TestCase):
         self.assertEqual(schemas3.name, "base:8.0.0")
 
     def test_load_schema_version_merged(self):
-        ver4 = ["testlib_2.1.0", "score_2.1.0"]
-        schemas3 = load_schema_version(ver4)
-        issues = schemas3.check_compliance()
+        # Two hed-tests libraries partnered with the same standard (8.5.0) form one merged schema.
+        ver4 = ["testconflict_2.1.0", "testclash_1.0.0"]
+        schemas3 = load_test_schema(ver4)
+        issues = schemas3.check_compliance(check_for_warnings=False)
         self.assertIsInstance(schemas3, HedSchema, "load_schema_version returns HedSchema version+namespace")
         self.assertTrue(schemas3.version_number, "load_schema_version has the right version with namespace")
         self.assertEqual(schemas3.schema_namespace, "", "load_schema_version has the right version with namespace")
-        self.assertEqual(schemas3.name, "testlib_2.1.0,score_2.1.0")
-        self.assertEqual(schemas3.version, "testlib_2.1.0,score_2.1.0")
-        # The group partners with 8.4.0, which is below the 8.5.0 gate on the annotation grammar, so
-        # score 2.1.0's 28 unmatched dc:source texts and 3 bare terms are not reported here.
+        self.assertEqual(schemas3.name, "testconflict_2.1.0,testclash_1.0.0")
+        self.assertEqual(schemas3.version, "testconflict_2.1.0,testclash_1.0.0")
         self.assertEqual([issue["code"] for issue in issues], [], f"Got: {issues}")
 
         # Verify this cannot be saved
@@ -512,43 +512,45 @@ class TestHedSchema(unittest.TestCase):
             self.assertIn("No version specified", str(context.exception))
 
     def test_load_and_verify_tags(self):
-        # Load 'testlib' by itself
-        testlib = load_schema_version("testlib_2.1.0")
+        # Load 'testconflict' by itself
+        conflict = load_test_schema("testconflict_2.1.0")
 
-        # Load 'score' by itself
-        score = load_schema_version("score_2.1.0")
+        # Load 'testclash' by itself
+        clash = load_test_schema("testclash_1.0.0")
 
-        # Load both 'testlib' and 'score' together
-        schemas3 = load_schema_version(["testlib_2.1.0", "score_2.1.0"])
+        # Load both together
+        schemas3 = load_test_schema(["testconflict_2.1.0", "testclash_1.0.0"])
 
         # Extract the tag names from each library
-        testlib_tags = set(testlib.tags.all_names.keys())
-        score_tags = set(score.tags.all_names.keys())
+        conflict_tags = set(conflict.tags.all_names.keys())
+        clash_tags = set(clash.tags.all_names.keys())
         merged_tags = set(schemas3.tags.all_names.keys())
 
-        # Verify that all tags in 'testlib' and 'score' are in the merged library
-        for tag in testlib_tags:
-            self.assertIn(tag, merged_tags, f"Tag {tag} from testlib is missing in the merged schema.")
+        # Verify that all tags in both libraries are in the merged library
+        for tag in conflict_tags:
+            self.assertIn(tag, merged_tags, f"Tag {tag} from testconflict is missing in the merged schema.")
 
-        for tag in score_tags:
-            self.assertIn(tag, merged_tags, f"Tag {tag} from score is missing in the merged schema.")
+        for tag in clash_tags:
+            self.assertIn(tag, merged_tags, f"Tag {tag} from testclash is missing in the merged schema.")
 
         # Negative test cases
-        # Ensure merged_tags is not a subset of testlib_tags or score_tags
-        self.assertFalse(merged_tags.issubset(testlib_tags), "The merged tags should not be a subset of testlib tags.")
-        self.assertFalse(merged_tags.issubset(score_tags), "The merged tags should not be a subset of score tags.")
+        # Ensure merged_tags is not a subset of either library's tags
+        self.assertFalse(
+            merged_tags.issubset(conflict_tags), "The merged tags should not be a subset of testconflict tags."
+        )
+        self.assertFalse(merged_tags.issubset(clash_tags), "The merged tags should not be a subset of testclash tags.")
 
         # Ensure there are tags that came uniquely from each library
-        unique_testlib_tags = testlib_tags - score_tags
-        unique_score_tags = score_tags - testlib_tags
+        unique_conflict_tags = conflict_tags - clash_tags
+        unique_clash_tags = clash_tags - conflict_tags
 
         self.assertTrue(
-            any(tag in merged_tags for tag in unique_testlib_tags),
-            "There should be unique tags from testlib in the merged schema.",
+            any(tag in merged_tags for tag in unique_conflict_tags),
+            "There should be unique tags from testconflict in the merged schema.",
         )
         self.assertTrue(
-            any(tag in merged_tags for tag in unique_score_tags),
-            "There should be unique tags from score in the merged schema.",
+            any(tag in merged_tags for tag in unique_clash_tags),
+            "There should be unique tags from testclash in the merged schema.",
         )
 
     def test_load_schema_version_libraries(self):
@@ -643,21 +645,12 @@ class TestHedSchemaUnmerged(unittest.TestCase):
                 new_filename = f"HED_{cls.dupe_library_name}.xml"
                 loaded_schema.save_as_xml(os.path.join(cls.hed_cache_dir, new_filename), save_merged=False)
 
-        # Also copy testlib schemas from spec_tests/hed-schemas if available for testing library merging
-        testlib_spec_path = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "../../spec_tests/hed-schemas/library_schemas/testlib"
-        )
-        if os.path.exists(testlib_spec_path):
-            for root, _dirs, files in os.walk(testlib_spec_path):
-                for filename in files:
-                    if filename.endswith(".xml"):
-                        testlib_file = os.path.join(root, filename)
-                        try:
-                            loaded_schema = schema.load_schema(testlib_file)
-                            loaded_schema.save_as_xml(os.path.join(cls.hed_cache_dir, filename), save_merged=False)
-                        except Exception:
-                            # Skip if there's an issue loading this particular testlib schema
-                            pass
+        # Also copy two hed-tests libraries and their 8.5.0 partner into the cache, saved unmerged, so the
+        # merge tests below can load them by version string the way the cache does.
+        if test_schemas_available():
+            for filename in ("HED8.5.0.xml", "HED_testconflict_2.1.0.xml", "HED_testclash_1.0.0.xml"):
+                loaded_schema = schema.load_schema(os.path.join(TEST_SCHEMAS_DIR, filename))
+                loaded_schema.save_as_xml(os.path.join(cls.hed_cache_dir, filename), save_merged=False)
 
     @classmethod
     def tearDownClass(cls):
@@ -683,14 +676,14 @@ class TestHedSchemaUnmerged(unittest.TestCase):
         self.assertEqual(schemas3._namespace, "base:", "load_schema_version has the right version with namespace")
 
     def test_load_schema_version_merged(self):
-        ver4 = ["testlib_2.1.0", "score_2.1.0"]
+        if not test_schemas_available():
+            self.skipTest("spec_tests/hed-tests is not checked out")
+        ver4 = ["testconflict_2.1.0", "testclash_1.0.0"]
         schemas3 = load_schema_version(ver4)
-        issues = schemas3.check_compliance()
+        issues = schemas3.check_compliance(check_for_warnings=False)
         self.assertIsInstance(schemas3, HedSchema, "load_schema_version returns HedSchema version+namespace")
         self.assertTrue(schemas3.version_number, "load_schema_version has the right version with namespace")
         self.assertEqual(schemas3._namespace, "", "load_schema_version has the right version with namespace")
-        # As in the other test_load_schema_version_merged: the group partners with 8.4.0, below the
-        # 8.5.0 gate on the annotation grammar.
         self.assertEqual([issue["code"] for issue in issues], [], f"Got: {issues}")
 
     def test_load_schema_version_merged_duplicates(self):
@@ -703,43 +696,47 @@ class TestHedSchemaUnmerged(unittest.TestCase):
         self.assertEqual(schemas, load_schema_version("score_1.1.0"))
 
     def test_load_and_verify_tags(self):
-        # Load 'testlib' by itself
-        testlib = load_schema_version("testlib_2.1.0")
+        if not test_schemas_available():
+            self.skipTest("spec_tests/hed-tests is not checked out")
+        # Load 'testconflict' by itself
+        conflict = load_schema_version("testconflict_2.1.0")
 
-        # Load 'score' by itself
-        score = load_schema_version("score_2.1.0")
+        # Load 'testclash' by itself
+        clash = load_schema_version("testclash_1.0.0")
 
-        # Load both 'testlib' and 'score' together
-        schemas3 = load_schema_version(["testlib_2.1.0", "score_2.1.0"])
+        # Load both together
+        schemas3 = load_schema_version(["testconflict_2.1.0", "testclash_1.0.0"])
 
         # Extract the tag names from each library
-        testlib_tags = set(testlib.tags.all_names.keys())
-        score_tags = set(score.tags.all_names.keys())
+        conflict_tags = set(conflict.tags.all_names.keys())
+        clash_tags = set(clash.tags.all_names.keys())
         merged_tags = set(schemas3.tags.all_names.keys())
 
-        # Verify that all tags in 'testlib' and 'score' are in the merged library
-        for tag in testlib_tags:
-            self.assertIn(tag, merged_tags, f"Tag {tag} from testlib is missing in the merged schema.")
+        # Verify that all tags in both libraries are in the merged library
+        for tag in conflict_tags:
+            self.assertIn(tag, merged_tags, f"Tag {tag} from testconflict is missing in the merged schema.")
 
-        for tag in score_tags:
-            self.assertIn(tag, merged_tags, f"Tag {tag} from score is missing in the merged schema.")
+        for tag in clash_tags:
+            self.assertIn(tag, merged_tags, f"Tag {tag} from testclash is missing in the merged schema.")
 
         # Negative test cases
-        # Ensure merged_tags is not a subset of testlib_tags or score_tags
-        self.assertFalse(merged_tags.issubset(testlib_tags), "The merged tags should not be a subset of testlib tags.")
-        self.assertFalse(merged_tags.issubset(score_tags), "The merged tags should not be a subset of score tags.")
+        # Ensure merged_tags is not a subset of either library's tags
+        self.assertFalse(
+            merged_tags.issubset(conflict_tags), "The merged tags should not be a subset of testconflict tags."
+        )
+        self.assertFalse(merged_tags.issubset(clash_tags), "The merged tags should not be a subset of testclash tags.")
 
         # Ensure there are tags that came uniquely from each library
-        unique_testlib_tags = testlib_tags - score_tags
-        unique_score_tags = score_tags - testlib_tags
+        unique_conflict_tags = conflict_tags - clash_tags
+        unique_clash_tags = clash_tags - conflict_tags
 
         self.assertTrue(
-            any(tag in merged_tags for tag in unique_testlib_tags),
-            "There should be unique tags from testlib in the merged schema.",
+            any(tag in merged_tags for tag in unique_conflict_tags),
+            "There should be unique tags from testconflict in the merged schema.",
         )
         self.assertTrue(
-            any(tag in merged_tags for tag in unique_score_tags),
-            "There should be unique tags from score in the merged schema.",
+            any(tag in merged_tags for tag in unique_clash_tags),
+            "There should be unique tags from testclash in the merged schema.",
         )
 
 
@@ -1062,8 +1059,8 @@ class TestParseVersionList(unittest.TestCase):
 
     def test_multiple_libraries_without_and_with_prefix(self):
         """Test that multiple libraries without a prefix and with the same prefix are handled correctly."""
-        self.assertEqual(parse_version_list(["score", "testlib"]), {"": "score,testlib"})
-        self.assertEqual(parse_version_list(["test:score", "test:testlib"]), {"test": "test:score,testlib"})
+        self.assertEqual(parse_version_list(["score", "mylib"]), {"": "score,mylib"})
+        self.assertEqual(parse_version_list(["test:score", "test:mylib"]), {"test": "test:score,mylib"})
 
     def test_single_and_multiple_libraries_with_different_prefixes(self):
         """Test a single library with a prefix and multiple libraries with different prefixes are handled correctly."""
@@ -1077,13 +1074,13 @@ class TestParseVersionList(unittest.TestCase):
         """Duplicate versions in one merge group are ignored, not an error (spec 3.1.2.4)."""
         self.assertEqual(parse_version_list(["score", "score"]), {"": "score"})
         self.assertEqual(parse_version_list(["ol:otherlib", "ol:otherlib"]), {"ol": "ol:otherlib"})
-        self.assertEqual(parse_version_list(["score", "testlib", "score"]), {"": "score,testlib"})
+        self.assertEqual(parse_version_list(["score", "mylib", "score"]), {"": "score,mylib"})
 
     def test_triple_prefixes(self):
         """Test that libraries with triple prefixes are handled correctly."""
         self.assertEqual(
-            parse_version_list(["test:score", "ol:otherlib", "test:testlib", "abc:anotherlib"]),
-            {"test": "test:score,testlib", "ol": "ol:otherlib", "abc": "abc:anotherlib"},
+            parse_version_list(["test:score", "ol:otherlib", "test:mylib", "abc:anotherlib"]),
+            {"test": "test:score,mylib", "ol": "ol:otherlib", "abc": "abc:anotherlib"},
         )
 
 
@@ -1130,15 +1127,15 @@ class TestPrereleaseSchemaLoading(unittest.TestCase):
 
     def test_load_prerelease_library(self):
         """Test loading a prerelease library schema."""
-        schema = load_schema_version("testliba_2.1.0", xml_folder=self.schema_dir)
+        schema = load_schema_version("testlocala_2.1.0", xml_folder=self.schema_dir)
         self.assertIsInstance(schema, HedSchema)
         self.assertEqual(schema.version_number, "2.1.0")
-        self.assertEqual(schema.library, "testliba")
+        self.assertEqual(schema.library, "testlocala")
         self.assertIn("prerelease-item", schema.tags.all_names)
 
     def test_mixed_regular_and_prerelease_schemas(self):
         """Test loading a mix of regular and prerelease schemas with different namespaces."""
-        schemas = load_schema_version(["base:8.2.0", "test:testlib_2.1.0"], xml_folder=self.schema_dir)
+        schemas = load_schema_version(["base:8.2.0", "test:testlocal_2.1.0"], xml_folder=self.schema_dir)
         self.assertIsInstance(schemas, HedSchemaGroup)
         self.assertEqual(len(schemas._schemas), 2)
         self.assertIn("base:", schemas._schemas)

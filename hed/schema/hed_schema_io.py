@@ -322,8 +322,8 @@ def get_hed_xml_version(xml_file_path) -> str:
 def parse_version_list(xml_version_list) -> dict:
     """Takes a list of xml versions and returns a dictionary split by prefix
 
-        e.g. ["score", "testlib"] will return {"": "score, testlib"}
-        e.g. ["score", "testlib", "ol:otherlib"] will return {"": "score, testlib", "ol:": "otherlib"}
+        e.g. ["score", "lang"] will return {"": "score, lang"}
+        e.g. ["score", "lang", "ol:otherlib"] will return {"": "score, lang", "ol:": "otherlib"}
 
     Parameters:
         xml_version_list (list): List of str specifying which HED schemas to use

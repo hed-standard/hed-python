@@ -32,14 +32,14 @@ class TestInLibraryAttribute(unittest.TestCase):
         cls.lang_schema = load_schema_version("lang_1.1.0")
         cls.score_schema = load_schema_version("score_1.1.0")
 
-        # Also load testlib from test data if available
+        # Also load testlocal from test data if available
         cls.test_data_dir = os.path.join(os.path.dirname(__file__), "../data/schema_tests/test_merge")
         cls.test_data_dir = os.path.normpath(cls.test_data_dir)
-        cls.testlib_path = os.path.join(cls.test_data_dir, "HED_testlib_4.0.0")
+        cls.testlocal_path = os.path.join(cls.test_data_dir, "HED_testlocal_4.0.0")
 
-        cls.testlib_schema = None
-        if os.path.exists(cls.testlib_path):
-            cls.testlib_schema = load_schema(cls.testlib_path)
+        cls.testlocal_schema = None
+        if os.path.exists(cls.testlocal_path):
+            cls.testlocal_schema = load_schema(cls.testlocal_path)
 
     @classmethod
     def tearDownClass(cls):
@@ -327,22 +327,22 @@ class TestInLibraryAttribute(unittest.TestCase):
                         roundtrip_path, library_name, should_have_inlibrary=False
                     )
 
-    def test_07_testlib_inlibrary_behavior(self):
-        """Test inLibrary behavior with testlib schema if available."""
-        if self.testlib_schema is None:
-            self.skipTest("testlib schema not available in test data")
+    def test_07_testlocal_inlibrary_behavior(self):
+        """Test inLibrary behavior with testlocal schema if available."""
+        if self.testlocal_schema is None:
+            self.skipTest("testlocal schema not available in test data")
 
-        library_name = self._get_library_name(self.testlib_schema)
+        library_name = self._get_library_name(self.testlocal_schema)
 
-        # Test merged save - testlib has library-specific unitclass (myAngleUnits), so require TSV presence
-        paths_merged = self._save_schema_all_formats(self.testlib_schema, "testlib", save_merged=True)
+        # Test merged save - testlocal has library-specific unitclass (myAngleUnits), so require TSV presence
+        paths_merged = self._save_schema_all_formats(self.testlocal_schema, "testlocal", save_merged=True)
         self._verify_inlibrary_in_tsv_schema_sections(
             paths_merged["tsv"], library_name, should_have_inlibrary=True, require_inlibrary_in_tsv=True
         )
         self._verify_no_inlibrary_in_tsv_extras(paths_merged["tsv"])
 
         # Test unmerged save
-        paths_unmerged = self._save_schema_all_formats(self.testlib_schema, "testlib", save_merged=False)
+        paths_unmerged = self._save_schema_all_formats(self.testlocal_schema, "testlocal", save_merged=False)
         self._verify_inlibrary_in_tsv_schema_sections(paths_unmerged["tsv"], library_name, should_have_inlibrary=False)
         self._verify_no_inlibrary_in_tsv_extras(paths_unmerged["tsv"])
 
