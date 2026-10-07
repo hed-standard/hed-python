@@ -15,6 +15,7 @@ from hed.schema.hed_schema_io import load_schema_version
 TEST_SCHEMAS_DIR = os.path.realpath(
     os.path.join(os.path.dirname(__file__), "../../spec_tests/hed-tests/json_test_data/test_schemas/hedxml")
 )
+SKIP_REASON = "spec_tests/hed-tests is not checked out: git submodule update --init --recursive"
 
 
 def test_schemas_available() -> bool:
@@ -36,5 +37,5 @@ def load_test_schema(versions):
         unittest.SkipTest: When the submodule is not checked out (``git submodule update --init --recursive``).
     """
     if not test_schemas_available():
-        raise unittest.SkipTest("spec_tests/hed-tests is not checked out: git submodule update --init --recursive")
+        raise unittest.SkipTest(SKIP_REASON)
     return load_schema_version(versions, xml_folder=TEST_SCHEMAS_DIR)

@@ -11,7 +11,12 @@ from hed.tools.bids.bids_dataset import BidsDataset
 from hed.tools.bids.bids_file_group import BidsFileGroup
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
-from tests.schema.util_test_schemas import TEST_SCHEMAS_DIR, load_test_schema, test_schemas_available
+from tests.schema.util_test_schemas import (
+    SKIP_REASON,
+    TEST_SCHEMAS_DIR,
+    load_test_schema,
+    test_schemas_available,
+)
 
 
 class Test(unittest.TestCase):
@@ -32,9 +37,10 @@ class Test(unittest.TestCase):
         cls.inherit_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_hed_inheritance"
         )
-        # The library dataset's HEDVersion names the hed-tests library testconflict 1.1.2, which BidsDataset
-        # resolves through the schema cache only. Point the cache at a folder seeded with that file, the
-        # bundled standard schemas, and the real cache's score 2.0.0 when it is there (else it downloads).
+        # The library dataset's HEDVersion names score 2.0.0 and the hed-tests library testconflict 1.1.2,
+        # which BidsDataset resolves through the schema cache only. Point the cache at a folder seeded with
+        # the bundled schemas (score 2.0.0 is one of them) and, when hed-tests is checked out, the
+        # testconflict file. Tests that open the library dataset skip without hed-tests.
         cls.saved_cache_dir = hed_cache.HED_CACHE_DIRECTORY
         cls.cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../schema_cache_test_bids/")
         shutil.rmtree(cls.cache_dir, ignore_errors=True)
@@ -43,7 +49,6 @@ class Test(unittest.TestCase):
             os.path.join(hed_cache.INSTALLED_CACHE_LOCATION, name)
             for name in os.listdir(hed_cache.INSTALLED_CACHE_LOCATION)
         ]
-        sources.append(os.path.join(cls.saved_cache_dir, "HED_score_2.0.0.xml"))
         if test_schemas_available():
             sources.append(os.path.join(TEST_SCHEMAS_DIR, "HED_testconflict_1.1.2.xml"))
         for source in sources:
@@ -247,6 +252,7 @@ class Test(unittest.TestCase):
             "The original top-level sidecar should not be overwritten famous_face",
         )
 
+    @unittest.skipUnless(test_schemas_available(), SKIP_REASON)
     def test_libraries(self):
         bids = BidsDataset(self.library_path, suffixes=["participants", "events"])
         self.assertIsInstance(
@@ -306,6 +312,9 @@ class Test(unittest.TestCase):
         self.assertEqual(
             len(summary1["hed_schema_versions"]), 1, "BidsDataset summary hed_schema_versions entry has one schema"
         )
+
+    @unittest.skipUnless(test_schemas_available(), SKIP_REASON)
+    def test_get_summary_libraries(self):
         bids2 = BidsDataset(self.library_path)
         summary2 = bids2.get_summary()
         self.assertIsInstance(summary2, dict, "BidsDataset with libraries has a summary that is a dictionary")
@@ -318,7 +327,7 @@ class Test(unittest.TestCase):
         self.assertEqual(
             len(summary2["hed_schema_versions"]),
             2,
-            "BidsDataset with libraries summary hed_schema_versions list has 3 schema",
+            "BidsDataset with libraries summary hed_schema_versions list has 2 schemas",
         )
         self.assertTrue("dataset" in summary2)
 
