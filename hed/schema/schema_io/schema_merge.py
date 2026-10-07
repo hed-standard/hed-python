@@ -163,6 +163,9 @@ def merge_group(spec: GroupSpec, load_partner: Callable[[str], HedSchema]) -> He
 
     first = loaded[0]
     result.header_attributes = _merged_header(spec, loaded)
+    result._unmerged_libraries = frozenset(
+        schema.library for schema in loaded if schema is not result and schema.library and not schema.merged
+    )
     result.filename = first.filename
     result.name = first._name
     result.source_format = first.source_format

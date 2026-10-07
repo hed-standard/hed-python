@@ -28,6 +28,7 @@ from hed.errors.error_types import (
     SchemaErrors,
     SchemaWarnings,
 )
+from hed.errors.exceptions import HedFileError
 from hed.schema import hed_cache
 from hed.schema.hed_schema import HedKey, HedSchema, HedSectionKey
 from hed.schema.hed_schema_constants import ANY_UNITS_CLASS
@@ -83,6 +84,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
     issues += validator.check_invalid_characters()
     issues += validator.check_attributes()
     issues += validator.check_duplicate_names()
+    issues += validator.check_library_partner_rules()
     issues += validator.check_redundant_units()
     issues += validator.check_any_units_class()
     issues += validator.check_units_unique_across_classes()
@@ -378,6 +380,105 @@ class SchemaValidator:
                 )
         self.summary.record_issues(len(issues))
         return issues
+
+    # Attributes that are tool bookkeeping, not schema content, and so never a Properties difference.
+    _PROPERTY_COMPARE_EXCLUDED = (HedKey.InLibrary, HedKey.HedID)
+
+    def check_library_partner_rules(self):
+        """Check the rules a partnered library file follows (Appendix B SCHEMA_LIBRARY_INVALID j, k, l).
+
+        The rules depend on the file form, which ``HedSchema.unmerged_libraries`` records through loading:
+        j: an unmerged partnered library declares no Properties; l: an unmerged partnered library does not
+        use ``reserved``; k: a merged partnered library's Properties section equals its partner's.
+
+        Notes:
+            - A loaded unmerged file is the merge of the library with its partner; the entries that carry its
+              ``inLibrary`` value are the ones the file declared, so a Properties entry among them is reason j
+              and one with ``reserved`` is reason l.
+            - A merged file keeps its own Properties section, compared entry by entry with the partner's
+              (reason k): names, descriptions and attributes other than ``inLibrary`` and ``hedId``, which are
+              tool bookkeeping. The partner is loaded through the schema cache; when it cannot be loaded the
+              comparison is skipped, since compliance never raises.
+            - An unpartnered library is self-contained and may declare properties and use ``reserved``.
+        """
+        self.summary.start_check(
+            "library_partner_rules",
+            "Check a partnered library's Properties section and its use of the reserved attribute.",
+        )
+        issues = []
+        with_standard = self.hed_schema.with_standard
+        if self.hed_schema.library and with_standard:
+            unmerged = self.hed_schema.unmerged_libraries
+            if unmerged:
+                issues += self._check_unmerged_library_rules(unmerged, with_standard)
+            else:
+                issues += self._compare_properties_with_partner(self.hed_schema.library, with_standard)
+        self.summary.record_issues(len(issues))
+        return issues
+
+    def _check_unmerged_library_rules(self, unmerged, with_standard):
+        """Return the reason-j and reason-l issues for the entries declared by unmerged library files."""
+        issues = []
+        for section_key in HedSectionKey:
+            for entry in self.hed_schema[section_key].all_entries:
+                library = entry.attributes.get(HedKey.InLibrary)
+                if library not in unmerged:
+                    continue
+                if section_key == HedSectionKey.Properties:
+                    issues += self.error_handler.format_error_with_context(
+                        SchemaErrors.SCHEMA_LIBRARY_PROPERTIES_DECLARED,
+                        entry.name,
+                        library=library,
+                        with_standard=with_standard,
+                    )
+                if entry.has_attribute(HedKey.Reserved):
+                    issues += self.error_handler.format_error_with_context(
+                        SchemaErrors.SCHEMA_LIBRARY_RESERVED,
+                        entry.name,
+                        library=library,
+                        with_standard=with_standard,
+                        section=section_key.name,
+                    )
+        return issues
+
+    def _compare_properties_with_partner(self, library, with_standard):
+        """Return one reason-k issue per Properties entry that is missing, extra, or differs from the partner's."""
+        from hed.schema.hed_schema_io import _load_schema_version  # noqa: PLC0415 (avoids an import cycle)
+
+        try:
+            partner = _load_schema_version(xml_version=with_standard)
+        except HedFileError:
+            return []
+        own = {entry.name: entry for entry in self.hed_schema[HedSectionKey.Properties].all_entries}
+        theirs = {entry.name: entry for entry in partner[HedSectionKey.Properties].all_entries}
+        issues = []
+        for name in sorted(set(own) | set(theirs)):
+            if name not in theirs:
+                difference = "is not a property of the partner"
+            elif name not in own:
+                difference = "is missing"
+            else:
+                difference = self._property_difference(own[name], theirs[name])
+            if difference:
+                issues += self.error_handler.format_error_with_context(
+                    SchemaErrors.SCHEMA_LIBRARY_PROPERTIES_MISMATCH,
+                    name,
+                    library=library,
+                    with_standard=with_standard,
+                    difference=difference,
+                )
+        return issues
+
+    @classmethod
+    def _property_difference(cls, own, theirs):
+        """Say how two same-named Properties entries differ, or return an empty string when they do not."""
+        if (own.description or "") != (theirs.description or ""):
+            return "has a different description"
+        own_attributes = {k: v for k, v in own.attributes.items() if k not in cls._PROPERTY_COMPARE_EXCLUDED}
+        their_attributes = {k: v for k, v in theirs.attributes.items() if k not in cls._PROPERTY_COMPARE_EXCLUDED}
+        if own_attributes != their_attributes:
+            return "has different attributes"
+        return ""
 
     def check_redundant_units(self):
         """Check that no unit is derivable from another unit of the same unit class.

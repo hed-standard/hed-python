@@ -31,6 +31,33 @@ def schema_error_redundant_unit(unit_name, unit_class_name, derivations):
     )
 
 
+@hed_error(SchemaErrors.SCHEMA_LIBRARY_PROPERTIES_DECLARED, actual_code=SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY)
+def schema_error_library_properties_declared(tag, library, with_standard):
+    return (
+        f"Property '{tag}' is declared by library '{library}', which is partnered with HED {with_standard} and "
+        f"unmerged: an unmerged partnered library has an empty Properties section, since its properties are its "
+        f"partner's (specification Appendix B SCHEMA_LIBRARY_INVALID j)."
+    )
+
+
+@hed_error(SchemaErrors.SCHEMA_LIBRARY_PROPERTIES_MISMATCH, actual_code=SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY)
+def schema_error_library_properties_mismatch(tag, library, with_standard, difference):
+    return (
+        f"Property '{tag}' of library '{library}', merged with HED {with_standard}, {difference}: a merged partnered "
+        f"library's Properties section is identical to its partner's (specification Appendix B "
+        f"SCHEMA_LIBRARY_INVALID k)."
+    )
+
+
+@hed_error(SchemaErrors.SCHEMA_LIBRARY_RESERVED, actual_code=SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY)
+def schema_error_library_reserved(tag, library, with_standard, section):
+    return (
+        f"'{tag}' in the {section} section of library '{library}' uses the reserved attribute; an unmerged "
+        f"library partnered with HED {with_standard} may not, only a standard schema, an unpartnered library "
+        f"or a merged partnered library file may (specification Appendix B SCHEMA_LIBRARY_INVALID l)."
+    )
+
+
 @hed_error(SchemaErrors.SCHEMA_INVALID_SIBLING, actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_INVALID)
 def schema_error_SCHEMA_INVALID_SIBLING(tag, sibling_tag_list):
     tag_join_delimiter = ", "

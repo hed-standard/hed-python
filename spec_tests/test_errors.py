@@ -11,17 +11,14 @@ from hed.schema import from_string
 from hed.validator import HedValidator
 
 skip_tests = {
+    # The fixtures of this case are an unmerged partnered library (score 1.1.0 with 8.4.0) that declares a
+    # property, which Appendix B SCHEMA_LIBRARY_INVALID (j) forbids since 2026-10-06 (reasons j-l implemented).
+    # hed-tests makes the fixtures an unpartnered library and renames the case to
+    # schema-deprecated-property-used-by-attribute; remove this skip with that submodule bump.
+    "schema-deprecated-deprecated-property": "fixture declares Properties in an unmerged partnered library (j)",
     # "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
     # "curly-braces-has-no-hed": "Need to fix issue #1006",
     # "character-invalid-non-printing appears": "Need to recheck how this is verified for textClass",
-    # Added to hed-tests 2026-09-01 (spec Appendix B SCHEMA_LIBRARY_INVALID reasons j-l). Two gaps:
-    # reasons k (merged Properties must equal the partner's) and l (reserved in unmerged) are not
-    # implemented, and compliance flags the tool-stamped inLibrary attribute as unknown in an
-    # unpartnered library that defines its own attributes (base2schema._add_to_dict_base stamps it;
-    # schema_validation flags it because such a library defines no inLibrary attribute).
-    "library-invalid-unpartnered-properties-allowed": "inLibrary stamp flagged as unknown attribute",
-    "library-invalid-merged-properties-mismatch": "Reason k (Properties must match partner) not implemented",
-    "library-invalid-reserved-in-unmerged": "Reason l (reserved in unmerged) not implemented",
 }
 
 

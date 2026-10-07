@@ -124,6 +124,11 @@ class SchemaErrors:
     SCHEMA_INVALID_CHILD = "SCHEMA_INVALID_CHILD"
     # Reported as SCHEMA_DUPLICATE_NODE: a unit derivable as modifier + another unit of its class (HED 8.5.0+)
     SCHEMA_REDUNDANT_UNIT = "SCHEMA_REDUNDANT_UNIT"
+    # Reported as SCHEMA_LIBRARY_INVALID (specification Appendix B reasons j, k, l): a partnered library's
+    # Properties section and its use of the reserved attribute.
+    SCHEMA_LIBRARY_PROPERTIES_DECLARED = "SCHEMA_LIBRARY_PROPERTIES_DECLARED"
+    SCHEMA_LIBRARY_PROPERTIES_MISMATCH = "SCHEMA_LIBRARY_PROPERTIES_MISMATCH"
+    SCHEMA_LIBRARY_RESERVED = "SCHEMA_LIBRARY_RESERVED"
 
 
 class SchemaWarnings:
