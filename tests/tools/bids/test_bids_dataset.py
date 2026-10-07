@@ -1,14 +1,17 @@
 import os
+import shutil
 import unittest
 
 from hed.models.sidecar import Sidecar
+from hed.schema import hed_cache
 from hed.schema.hed_schema import HedSchema
 from hed.schema.hed_schema_group import HedSchemaGroup
-from hed.schema.hed_schema_io import load_schema_version
+from hed.schema.hed_schema_io import _load_schema_version, load_schema_version
 from hed.tools.bids.bids_dataset import BidsDataset
 from hed.tools.bids.bids_file_group import BidsFileGroup
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
+from tests.schema.util_test_schemas import TEST_SCHEMAS_DIR, load_test_schema, test_schemas_available
 
 
 class Test(unittest.TestCase):
@@ -29,6 +32,31 @@ class Test(unittest.TestCase):
         cls.inherit_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_hed_inheritance"
         )
+        # The library dataset's HEDVersion names the hed-tests library testconflict 1.1.2, which BidsDataset
+        # resolves through the schema cache only. Point the cache at a folder seeded with that file, the
+        # bundled standard schemas, and the real cache's score 2.0.0 when it is there (else it downloads).
+        cls.saved_cache_dir = hed_cache.HED_CACHE_DIRECTORY
+        cls.cache_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../schema_cache_test_bids/")
+        shutil.rmtree(cls.cache_dir, ignore_errors=True)
+        os.makedirs(cls.cache_dir)
+        sources = [
+            os.path.join(hed_cache.INSTALLED_CACHE_LOCATION, name)
+            for name in os.listdir(hed_cache.INSTALLED_CACHE_LOCATION)
+        ]
+        sources.append(os.path.join(cls.saved_cache_dir, "HED_score_2.0.0.xml"))
+        if test_schemas_available():
+            sources.append(os.path.join(TEST_SCHEMAS_DIR, "HED_testconflict_1.1.2.xml"))
+        for source in sources:
+            if os.path.isfile(source):
+                shutil.copy(source, cls.cache_dir)
+        hed_cache.set_cache_directory(cls.cache_dir)
+        _load_schema_version.cache_clear()
+
+    @classmethod
+    def tearDownClass(cls):
+        hed_cache.set_cache_directory(cls.saved_cache_dir)
+        _load_schema_version.cache_clear()
+        shutil.rmtree(cls.cache_dir, ignore_errors=True)
 
     def test_basic(self):
         bids = BidsDataset(self.root_path, suffixes=["events"])
@@ -247,7 +275,8 @@ class Test(unittest.TestCase):
         self.assertEqual(len(bids.file_groups), 2, "BidsDataset for dataset should have no file groups")
 
     def test_with_schema_group(self):
-        x = load_schema_version(["score_2.0.0", "test:testlib_1.0.2"])
+        # score from the cache, an unpartnered hed-tests library under its own namespace from the vendored folder.
+        x = HedSchemaGroup([load_schema_version("score_2.0.0"), load_test_schema("test:testconflict_1.1.2")])
         bids = BidsDataset(self.library_path, schema=x, suffixes=["participants"])
         self.assertIsInstance(
             bids, BidsDataset, "BidsDataset with libraries should create a valid object from valid dataset"

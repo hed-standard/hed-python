@@ -183,7 +183,7 @@ class TestRedundantUnits(unittest.TestCase):
         data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests")
         cls.fixture_path = os.path.join(data_dir, "redundant_unit_8.5.0.mediawiki")
         cls.unpart_path = os.path.join(data_dir, "HED_testunpart_1.0.0.mediawiki")
-        cls.testlib_850_path = os.path.join(data_dir, "test_merge", "HED_testlib_4.0.0.mediawiki")
+        cls.testlocal_850_path = os.path.join(data_dir, "test_merge", "HED_testlocal_4.0.0.mediawiki")
         cls.schema_84 = schema.load_schema_version("8.4.0")
 
     @staticmethod
@@ -222,11 +222,11 @@ class TestRedundantUnits(unittest.TestCase):
 
     def test_gate_follows_partnered_standard_version(self):
         """A library partnered with 8.5.0 is checked; one partnered with 8.4.0 is not."""
-        sv_850 = self._validator(schema.load_schema(self.testlib_850_path))
+        sv_850 = self._validator(schema.load_schema(self.testlocal_850_path))
         self.assertTrue(sv_850._redundant_unit_check_applies())
         self.assertEqual(sv_850.check_redundant_units(), [])
-        testlib_840_path = os.path.join(os.path.dirname(self.fixture_path), "HED_testlib_2.1.0.xml")
-        sv_840 = self._validator(schema.load_schema(testlib_840_path))
+        testlocal_840_path = os.path.join(os.path.dirname(self.fixture_path), "HED_testlocal_2.1.0.xml")
+        sv_840 = self._validator(schema.load_schema(testlocal_840_path))
         self.assertFalse(sv_840._redundant_unit_check_applies())
 
     def test_unpartnered_library_is_checked(self):
@@ -374,10 +374,10 @@ class TestLibrarySchemaCompliance(unittest.TestCase):
         self.assertEqual(len(issues), 1)
         self.assertEqual(issues[0]["code"], "SCHEMA_PRERELEASE_VERSION_USED")
 
-    def test_testlib_compliance(self):
-        """HED_testlib_4.0.0 should have only its two prerelease warnings."""
+    def test_testlocal_compliance(self):
+        """HED_testlocal_4.0.0 should have only its two prerelease warnings."""
         schema_path = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/test_merge/HED_testlib_4.0.0.mediawiki"
+            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/test_merge/HED_testlocal_4.0.0.mediawiki"
         )
         hed_schema = schema.load_schema(schema_path)
         issues = hed_schema.check_compliance()
@@ -554,11 +554,11 @@ class TestExtrasColumnsCompliance(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.schema_84 = schema.load_schema_version("8.4.0")
-        cls.testlib_path = os.path.join(
+        cls.testlocal_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
-            "../data/schema_tests/test_merge/HED_testlib_4.0.0.mediawiki",
+            "../data/schema_tests/test_merge/HED_testlocal_4.0.0.mediawiki",
         )
-        cls.testlib_schema = schema.load_schema(cls.testlib_path)
+        cls.testlocal_schema = schema.load_schema(cls.testlocal_path)
 
     def test_no_missing_values_840(self):
         """8.4.0 extras should have no empty values."""
@@ -570,12 +570,12 @@ class TestExtrasColumnsCompliance(unittest.TestCase):
         val_issues = [i for i in issues if i["code"] == "SCHEMA_MISSING_EXTRA"]
         self.assertEqual(len(val_issues), 0, f"Empty values: {val_issues}")
 
-    def test_no_missing_values_testlib(self):
-        """testlib 4.0.0 extras should have no empty values."""
+    def test_no_missing_values_testlocal(self):
+        """testlocal 4.0.0 extras should have no empty values."""
         from hed.errors.error_reporter import ErrorHandler
         from hed.schema.schema_validation.compliance import SchemaValidator
 
-        sv = SchemaValidator(self.testlib_schema, ErrorHandler())
+        sv = SchemaValidator(self.testlocal_schema, ErrorHandler())
         issues = sv.check_extras_columns()
         val_issues = [i for i in issues if i["code"] == "SCHEMA_MISSING_EXTRA"]
         self.assertEqual(len(val_issues), 0, f"Empty values: {val_issues}")
@@ -656,11 +656,11 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.schema_84 = schema.load_schema_version("8.4.0")
-        cls.testlib_path = os.path.join(
+        cls.testlocal_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
-            "../data/schema_tests/test_merge/HED_testlib_4.0.0.mediawiki",
+            "../data/schema_tests/test_merge/HED_testlocal_4.0.0.mediawiki",
         )
-        cls.testlib_schema = schema.load_schema(cls.testlib_path)
+        cls.testlocal_schema = schema.load_schema(cls.testlocal_path)
 
     def test_annotation_check_gated_out_on_840(self):
         """8.4.0 carries bare terms (ncit:C25499, rdfs:comment) but predates the 8.5.0 grammar."""
@@ -671,11 +671,11 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
         self.assertEqual(sv.check_annotation_attribute_values(), [])
 
     def test_annotation_gate_follows_partnered_standard_version(self):
-        """testlib 4.0.0 partners with 8.5.0 and is checked; an unpartnered library is not."""
+        """testlocal 4.0.0 partners with 8.5.0 and is checked; an unpartnered library is not."""
         from hed.errors.error_reporter import ErrorHandler
         from hed.schema.schema_validation.compliance import SchemaValidator
 
-        self.assertTrue(SchemaValidator(self.testlib_schema, ErrorHandler())._annotation_check_applies())
+        self.assertTrue(SchemaValidator(self.testlocal_schema, ErrorHandler())._annotation_check_applies())
         unpart_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED_testunpart_1.0.0.mediawiki"
         )
@@ -691,7 +691,7 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
         from hed.schema.schema_io.df_constants import PREFIXES_KEY
         from hed.schema.schema_validation.compliance import SchemaValidator
 
-        test_schema = schema.load_schema(self.testlib_path)
+        test_schema = schema.load_schema(self.testlocal_path)
         test_schema.extras = dict(test_schema.extras)
         # Remove all prefixes so nothing is defined
         test_schema.extras[PREFIXES_KEY] = pd.DataFrame(columns=["prefix", "namespace", "description"])
@@ -708,7 +708,7 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
         from hed.schema.hed_schema_constants import HedSectionKey
         from hed.schema.schema_validation.compliance import SchemaValidator
 
-        test_schema = schema.load_schema(self.testlib_path)
+        test_schema = schema.load_schema(self.testlocal_path)
         test_schema[HedSectionKey.Tags]["Event"].attributes["annotation"] = "ncit:C25499"
         sv = SchemaValidator(test_schema, ErrorHandler())
         issues = sv.check_annotation_attribute_values()
@@ -725,7 +725,7 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
         from hed.schema.schema_validation.compliance import SchemaValidator
 
         # Create a schema where all annotation values are properly defined
-        test_schema = schema.load_schema(self.testlib_path)
+        test_schema = schema.load_schema(self.testlocal_path)
         test_schema.extras = dict(test_schema.extras)
 
         # Add ncit:C25499 and rdfs:comment to ExternalAnnotations
@@ -753,7 +753,7 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
         from hed.schema.schema_io import df_constants
         from hed.schema.schema_validation.compliance import SchemaValidator
 
-        test_schema = schema.load_schema(self.testlib_path)
+        test_schema = schema.load_schema(self.testlocal_path)
         test_schema.extras = dict(test_schema.extras)
 
         # Add ncit:C25499 and rdfs:comment to ExternalAnnotations
@@ -785,7 +785,7 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
         from hed.schema.schema_io import df_constants
         from hed.schema.schema_validation.compliance import SchemaValidator
 
-        test_schema = schema.load_schema(self.testlib_path)
+        test_schema = schema.load_schema(self.testlocal_path)
         test_schema.extras = dict(test_schema.extras)
 
         # Add ncit:C25499 and rdfs:comment to ExternalAnnotations
@@ -818,7 +818,7 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
         from hed.schema.schema_io import df_constants
         from hed.schema.schema_validation.compliance import SchemaValidator
 
-        test_schema = schema.load_schema(self.testlib_path)
+        test_schema = schema.load_schema(self.testlocal_path)
         test_schema.extras = dict(test_schema.extras)
 
         # Add ncit:C25499 and rdfs:comment to ExternalAnnotations
@@ -855,7 +855,7 @@ class TestAnnotationAttributeCompliance(unittest.TestCase):
         from hed.schema.hed_schema_constants import HedSectionKey
         from hed.schema.schema_validation.compliance import SchemaValidator
 
-        test_schema = schema.load_schema(self.testlib_path)
+        test_schema = schema.load_schema(self.testlocal_path)
         # Set annotation to a value with no colon
         test_entry = test_schema[HedSectionKey.Tags]["Event"]
         test_entry.attributes["annotation"] = "no_prefix_here"
@@ -946,18 +946,18 @@ class TestAnnotationPrefixNotationRule(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.testlib_path = os.path.join(
+        cls.testlocal_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
-            "../data/schema_tests/test_merge/HED_testlib_4.0.0.mediawiki",
+            "../data/schema_tests/test_merge/HED_testlocal_4.0.0.mediawiki",
         )
 
     def _schema_with_mapping_rows(self):
-        """Load testlib 4.0.0 and give it the two SKOS mapping properties that 8.5.0 will carry."""
+        """Load testlocal 4.0.0 and give it the two SKOS mapping properties that 8.5.0 will carry."""
         import pandas as pd
 
         from hed.schema.schema_io import df_constants
 
-        test_schema = schema.load_schema(self.testlib_path)
+        test_schema = schema.load_schema(self.testlocal_path)
         test_schema.extras = dict(test_schema.extras)
         ext_df = test_schema.extras[df_constants.EXTERNAL_ANNOTATION_KEY].copy()
         new_rows = pd.DataFrame(

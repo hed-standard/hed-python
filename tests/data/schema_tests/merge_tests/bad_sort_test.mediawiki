@@ -1,4 +1,4 @@
-HED library="testlib" version="1.0.2"
+HED library="testlocal" version="1.0.2"
 
 '''Prologue'''
 This is to make sure it's properly handling tags that are a previous tag name extended with a dash.

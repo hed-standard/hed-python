@@ -1,6 +1,6 @@
 hedId	Level	rdfs:label	omn:SubClassOf	Attributes	dc:description
-	0	Test-some	HedTag	inLibrary=testlib	Unknown stuff.
-	1	Unknown1	Test-some	inLibrary=testlib	Unknown1 stuff
+	0	Test-some	HedTag	inLibrary=testlocal	Unknown stuff.
+	1	Unknown1	Test-some	inLibrary=testlocal	Unknown1 stuff
 HED_0012001	0	Event	HedTag	suggestedTag=Task-property	Something that happens at a given time and (typically) place. Elements of this tag subtree designate the general category in which an event falls.
 HED_0012002	1	Sensory-event	Event	suggestedTag=Task-event-role, suggestedTag=Sensory-presentation	Something perceivable by the participant. An event meant to be an experimental stimulus should include the tag Task-property/Task-event-role/Experimental-stimulus.
 HED_0012003	1	Agent-action	Event	suggestedTag=Task-event-role, suggestedTag=Agent	Any action engaged in by an agent (see the Agent subtree for agent categories). A participant response to an experiment stimulus should include the tag Agent-property/Agent-task-role/Experiment-participant.
@@ -259,11 +259,11 @@ HED_0012230	2	Organism	Biological-item		A living entity, more specifically a bio
 HED_0012231	3	Animal	Organism		A living organism that has membranous cell walls, requires oxygen and organic foods, and is capable of voluntary movement.
 HED_0012232	3	Human	Organism		The bipedal primate mammal Homo sapiens.
 HED_0012233	3	Plant	Organism		Any living organism that typically synthesizes its food from inorganic substances and possesses cellulose cell walls.
-	4	Fruit	Plant	rooted=Plant, inLibrary=testlib	Fruit stuff.
-	5	Apple	Fruit	annotation=foodonto:has_botanical_name, inLibrary=testlib	Apple stuff
-	6	Honey-crisp	Apple	inLibrary=testlib	Type of apple
-	4	Vegetable	Plant	rooted=Plant, inLibrary=testlib	Vegetable stuff.
-	5	Carrot	Vegetable	annotation=foodonto:has_botanical_name, inLibrary=testlib	Carrot stuff
+	4	Fruit	Plant	rooted=Plant, inLibrary=testlocal	Fruit stuff.
+	5	Apple	Fruit	annotation=foodonto:has_botanical_name, inLibrary=testlocal	Apple stuff
+	6	Honey-crisp	Apple	inLibrary=testlocal	Type of apple
+	4	Vegetable	Plant	rooted=Plant, inLibrary=testlocal	Vegetable stuff.
+	5	Carrot	Vegetable	annotation=foodonto:has_botanical_name, inLibrary=testlocal	Carrot stuff
 HED_0012234	1	Language-item	Item	suggestedTag=Sensory-presentation	An entity related to a systematic means of communicating by the use of sounds, symbols, or gestures.
 HED_0012235	2	Character	Language-item		A mark or symbol used in writing.
 HED_0012236	2	Clause	Language-item		A unit of grammatical organization next below the sentence in rank, usually consisting of a subject and predicate.

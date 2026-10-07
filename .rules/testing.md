@@ -36,6 +36,7 @@ tests/
   - `spec_tests/hed-examples/` - Example BIDS datasets
   - `spec_tests/hed-schemas/` - Official schema repository
 - Initialize: `git submodule update --init --recursive`
+- Unit tests that need a library schema use the hed-tests test schemas (testconflict, testclash, testminimal, testaux) from `spec_tests/hed-tests/json_test_data/test_schemas/hedxml/` through `tests/schema/util_test_schemas.py` (`load_test_schema`), never the deprecated testlib library; those tests skip when the submodule is not checked out. A test that needs a released library with a version history uses score.
 
 ## Running Tests
 

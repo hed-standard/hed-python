@@ -164,7 +164,7 @@ class SchemaLoaderWiki(SchemaLoader):
         s = s.lstrip("* ").strip()  # remove leading '* ' and any surrounding whitespace
         result = {}
 
-        # Check for a leading schema-attribute block in {}, e.g. {inLibrary=testlib}
+        # Check for a leading schema-attribute block in {}, e.g. {inLibrary=score}
         if s.startswith("{"):
             end_brace = s.find("}")
             if end_brace >= 0:

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<HED version="1.0.2" library="testlib" withStandard="8.2.0" unmerged="True">
+<HED version="1.0.2" library="testlocal" withStandard="8.2.0" unmerged="True">
    <prologue>This schema is the first official release that includes an xsd and requires unit class, unit modifier, value class, schema attribute and property sections.</prologue>
    <schema>
       <node>

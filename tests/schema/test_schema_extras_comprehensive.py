@@ -30,18 +30,18 @@ class TestSchemaExtrasAllFormats(unittest.TestCase):
         cls.test_data_dir = os.path.join(os.path.dirname(__file__), "../data/schema_tests/test_merge")
         cls.test_data_dir = os.path.normpath(cls.test_data_dir)
 
-        # Paths to all format versions of HED_testlib_4.0.0
-        cls.xml_path = os.path.join(cls.test_data_dir, "HED_testlib_4.0.0.xml")
-        cls.json_path = os.path.join(cls.test_data_dir, "HED_testlib_4.0.0.json")
-        cls.wiki_path = os.path.join(cls.test_data_dir, "HED_testlib_4.0.0.mediawiki")
-        cls.tsv_path = os.path.join(cls.test_data_dir, "HED_testlib_4.0.0")
+        # Paths to all format versions of HED_testlocal_4.0.0
+        cls.xml_path = os.path.join(cls.test_data_dir, "HED_testlocal_4.0.0.xml")
+        cls.json_path = os.path.join(cls.test_data_dir, "HED_testlocal_4.0.0.json")
+        cls.wiki_path = os.path.join(cls.test_data_dir, "HED_testlocal_4.0.0.mediawiki")
+        cls.tsv_path = os.path.join(cls.test_data_dir, "HED_testlocal_4.0.0")
 
-        # Expected totals for testlib 4.0.0 paired with 8.5.0
+        # Expected totals for testlocal 4.0.0 paired with 8.5.0
         # = library-specific + base-schema entries
         cls.expected_sources = 2  # 1 library + 1 base
         cls.expected_prefixes = 14  # 1 library + 13 base
         cls.expected_externals = 18  # 1 library + 17 base
-        cls.library_name = "testlib"
+        cls.library_name = "testlocal"
         cls.with_standard = "8.5.0"
 
     @classmethod

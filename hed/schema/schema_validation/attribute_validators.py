@@ -156,7 +156,7 @@ def unit_class_requires_numeric_check(hed_schema, tag_entry, attribute_name) -> 
     that carries a unit class MUST have `valueClass=numericClass`. Standard schemas before 8.5.0 (and
     libraries partnered with them) are not checked: 8.3.0 and earlier have `Sampling-rate/#` with a unit
     class and no value class. An unpartnered library has no standard version and is not checked either
-    (testlib 1.0.2 and the testunpart fixture carry the same historical omission).
+    (the testunpart fixture carries the same historical omission).
 
     Parameters:
         hed_schema (HedSchema): The schema to use for validation.

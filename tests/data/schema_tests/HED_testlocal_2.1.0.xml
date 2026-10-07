@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-<HED version="2.1.0" library="testlib" withStandard="8.4.0" unmerged="True">
-   <prologue>Conflicts: testlib_2.0.0 Violin-subsound1 and Violin-subsound2 and Violin-subsound3 have different parents. testlib_2.0.0 piano-subsound2 does not take value; testlib_2.2.0 Piano-subsound2 takes a value with a unit class.</prologue>
+<HED version="2.1.0" library="testlocal" withStandard="8.4.0" unmerged="True">
+   <prologue>Conflicts: testlocal_2.0.0 Violin-subsound1 and Violin-subsound2 and Violin-subsound3 have different parents. testlocal_2.0.0 piano-subsound2 does not take value; testlocal_2.2.0 Piano-subsound2 takes a value with a unit class.</prologue>
    <schema>
       <node>
          <name>BA-nonextension</name>

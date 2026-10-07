@@ -4,6 +4,7 @@ import hed.schema.schema_validation.validation_util as util
 from hed import load_schema_version
 from hed.errors import ErrorHandler, SchemaWarnings
 from hed.schema.hed_schema_entry import HedSchemaEntry, HedTagEntry
+from tests.schema.util_test_schemas import load_test_schema
 
 
 class Test(unittest.TestCase):
@@ -102,10 +103,10 @@ class Test(unittest.TestCase):
         self.assertEqual(util.schema_version_for_library(schema2, ""), "8.3.0")
         self.assertEqual(util.schema_version_for_library(schema2, None), "8.3.0")
 
-        schema3 = load_schema_version(["testlib_2.1.0", "score_2.1.0"])
-        self.assertEqual(util.schema_version_for_library(schema3, ""), "8.4.0")
-        self.assertEqual(util.schema_version_for_library(schema3, None), "8.4.0")
-        self.assertEqual(util.schema_version_for_library(schema3, "score"), "2.1.0")
-        self.assertEqual(util.schema_version_for_library(schema3, "testlib"), "2.1.0")
+        schema3 = load_test_schema(["testconflict_2.1.0", "testclash_1.0.0"])
+        self.assertEqual(util.schema_version_for_library(schema3, ""), "8.5.0")
+        self.assertEqual(util.schema_version_for_library(schema3, None), "8.5.0")
+        self.assertEqual(util.schema_version_for_library(schema3, "testconflict"), "2.1.0")
+        self.assertEqual(util.schema_version_for_library(schema3, "testclash"), "1.0.0")
 
         self.assertEqual(util.schema_version_for_library(schema3, "badlib"), None)

@@ -1,0 +1,17 @@
+hedId	rdfs:label	omn:SubClassOf	Attributes	dc:description
+HED_0011500	accelerationUnits	TestlocalUnitClass	defaultUnits=m-per-s^2	
+HED_0011501	angleUnits	TestlocalUnitClass	defaultUnits=radian	
+HED_0011502	areaUnits	TestlocalUnitClass	defaultUnits=m^2	
+HED_0011503	currencyUnits	TestlocalUnitClass	defaultUnits=$	Units indicating the worth of something.
+HED_0011504	electricPotentialUnits	TestlocalUnitClass	defaultUnits=uV	
+HED_0011505	frequencyUnits	TestlocalUnitClass	defaultUnits=Hz	
+HED_0011506	intensityUnits	TestlocalUnitClass	defaultUnits=dB	
+HED_0011507	jerkUnits	TestlocalUnitClass	defaultUnits=m-per-s^3	
+HED_0011508	magneticFieldUnits	TestlocalUnitClass	defaultUnits=T	
+HED_0011509	memorySizeUnits	TestlocalUnitClass	defaultUnits=B	
+HED_0011510	physicalLengthUnits	TestlocalUnitClass	defaultUnits=m	
+HED_0011511	speedUnits	TestlocalUnitClass	defaultUnits=m-per-s	
+HED_0011512	temperatureUnits	TestlocalUnitClass	defaultUnits=degree-Celsius	
+HED_0011513	timeUnits	TestlocalUnitClass	defaultUnits=s	
+HED_0011514	volumeUnits	TestlocalUnitClass	defaultUnits=m^3	
+HED_0011515	weightUnits	TestlocalUnitClass	defaultUnits=g	

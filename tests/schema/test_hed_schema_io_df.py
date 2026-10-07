@@ -8,6 +8,7 @@ from hed.errors import HedExceptions, HedFileError
 from hed.schema.hed_schema_io import from_dataframes, load_schema, load_schema_version
 from hed.schema.schema_io import df_constants as df_constants
 from hed.schema.schema_io.df_util import convert_filenames_to_dict, create_empty_dataframes
+from tests.schema.util_test_schemas import load_test_schema
 
 
 class TestHedSchemaDF(unittest.TestCase):
@@ -35,16 +36,16 @@ class TestHedSchemaDF(unittest.TestCase):
         reloaded_schema = load_schema(self.output_folder + "test_score.tsv")
         self.assertEqual(schema, reloaded_schema)
 
-        schema = load_schema_version("testlib_3.0.0")
-        schema.save_as_dataframes(self.output_folder + "test_testlib.tsv", save_merged=True)
+        schema = load_test_schema("testconflict_2.1.0")
+        schema.save_as_dataframes(self.output_folder + "test_library.tsv", save_merged=True)
 
-        reloaded_schema = load_schema(self.output_folder + "test_testlib.tsv")
+        reloaded_schema = load_schema(self.output_folder + "test_library.tsv")
         self.assertEqual(schema, reloaded_schema)
 
-        schema = load_schema_version("testlib_3.0.0")
-        schema.save_as_dataframes(self.output_folder + "test_testlib2.tsv", save_merged=False)
+        schema = load_test_schema("testconflict_2.1.0")
+        schema.save_as_dataframes(self.output_folder + "test_library2.tsv", save_merged=False)
 
-        reloaded_schema = load_schema(self.output_folder + "test_testlib2.tsv")
+        reloaded_schema = load_schema(self.output_folder + "test_library2.tsv")
         self.assertEqual(schema, reloaded_schema)
 
     def test_from_dataframes(self):
@@ -416,7 +417,7 @@ class TestHedSchemaDF(unittest.TestCase):
 
             # Test XML for library schema
             with self.subTest(format="XML_library"):
-                lib_schema = load_schema_version("testlib_3.0.0")
+                lib_schema = load_test_schema("testconflict_2.1.0")
                 lib_xml_path = os.path.join(tmpdir, "lib_schema.xml")
                 lib_schema.save_as_xml(lib_xml_path)
                 self._verify_lf_line_endings(lib_xml_path)
