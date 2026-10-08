@@ -32,13 +32,13 @@ def main(arg_list=None):
     args = parser.parse_args(arg_list)
 
     basepath = get_prerelease_path(args.repo_path, schema_name=args.schema_name, schema_version=args.schema_version)
-    if not os.path.isdir(basepath):
+    filenames = [name for name in convert_filenames_to_dict(basepath).values() if os.path.isfile(name)]
+    if not filenames:
         print(
             f"No prerelease TSV set at {basepath}. Run hed_update_schemas on the prerelease .mediawiki "
             "first (it writes the TSV set), or pass --set-ids to it."
         )
         return 1
-    filenames = list(convert_filenames_to_dict(basepath).values())
     set_ids = True
 
     return convert_and_update(filenames, set_ids)

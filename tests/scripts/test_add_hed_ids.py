@@ -41,6 +41,17 @@ class TestAddHedIds(unittest.TestCase):
         self.assertIn(expected, output.getvalue())
         self.assertIn("hed_update_schemas", output.getvalue())
 
+    def test_empty_tsv_folder_fails(self):
+        # The hedtsv/<name> folder exists but holds no TSV files: still no TSV set.
+        basename = self._prerelease("score", "1.1.0")
+        shutil.copy(os.path.join(SCHEMA_TESTS, "merge_tests", "HED_score_unmerged.mediawiki"), basename + ".mediawiki")
+        os.makedirs(get_prerelease_path(self.repo, "score", "1.1.0"))
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            result = main([self.repo, "score", "1.1.0"])
+        self.assertEqual(result, 1)
+        self.assertIn("No prerelease TSV set", output.getvalue())
+
     def test_unregistered_library_raises(self):
         # testlocal has no id_range in hed-schemas library_data.json, so no id can be assigned.
         schema = load_schema(os.path.join(SCHEMA_TESTS, "HED_testlocal_2.1.0.xml"))

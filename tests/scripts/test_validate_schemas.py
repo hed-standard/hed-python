@@ -28,6 +28,8 @@ class TestRequireIds(unittest.TestCase):
         schema._add_tag_to_dict("Tag-without-id", new_entry, HedSectionKey.Tags)
         del schema.units["month"].attributes[HedKey.HedID]
         schema.save_as_mediawiki(cls.candidate)
+        cls.candidate_json = os.path.join(cls.folder, "HED8.4.1.json")
+        schema.save_as_json(cls.candidate_json)
 
     @classmethod
     def tearDownClass(cls):
@@ -51,6 +53,14 @@ class TestRequireIds(unittest.TestCase):
         self.assertIn("2 schema element(s) have no hedId", output.getvalue())
         self.assertIn("tags: Tag-without-id", output.getvalue())
         self.assertIn("units: month", output.getvalue())
+
+    def test_json_input_is_checked(self):
+        # A .json path used to be ignored by the file grouping, so --require-ids passed without looking.
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(main([self.candidate_json, "--require-ids"]), 1)
+        self.assertIn("2 schema element(s) have no hedId", output.getvalue())
+        self.assertNotIn("Ignoring file", output.getvalue())
 
 
 if __name__ == "__main__":

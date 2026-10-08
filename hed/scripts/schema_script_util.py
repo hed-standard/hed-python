@@ -150,12 +150,13 @@ def sort_base_schemas(filenames, add_all_extensions=False):
     still allowing normalized extension comparisons.
 
     Example input:
-        ["test_schema.mediawiki", "hedtsv/test_schema/test_schema_Tag.tsv", "other_schema.XML"]
+        ["test_schema.mediawiki", "hedtsv/test_schema/test_schema_Tag.tsv", "other_schema.XML", "third.json"]
 
     Example output:
         {
             "test_schema": {".mediawiki": "test_schema.mediawiki", ".tsv": "hedtsv/.../test_schema_Tag.tsv"},
-            "other_schema": {".xml": "other_schema.XML"}
+            "other_schema": {".xml": "other_schema.XML"},
+            "third": {".json": "third.json"}
         }
 
     Parameters:
@@ -175,7 +176,7 @@ def sort_base_schemas(filenames, add_all_extensions=False):
             continue
         basename, extension = os.path.splitext(file_path)
         extension_lower = extension.lower()  # Normalize for comparison only
-        if extension_lower == ".xml" or extension_lower == ".mediawiki":
+        if extension_lower in (".xml", ".mediawiki", ".json"):
             schema_files[basename][extension_lower] = file_path
             continue
         elif extension_lower == ".tsv":
