@@ -317,6 +317,7 @@ class TestSchemaUtilityFunctions(TestHedBase):
         self.assertEqual(parse_conversion_factor("10e-6"), 1e-5)  # the 8.3.0 and 8.4.0 literal, read as written
         self.assertIsNone(parse_conversion_factor("ten"))
         self.assertIsNone(parse_conversion_factor("10^"))
+        self.assertIsNone(parse_conversion_factor("-1^0.5"))  # a complex result is not a factor
         self.assertIsNone(parse_conversion_factor(None))
 
     def test_caret_conversion_factors(self):

@@ -32,7 +32,7 @@ def parse_conversion_factor(text):
     try:
         if "^" in text:
             base, _, exponent = text.partition("^")
-            return float(base) ** float(exponent)
+            return math.pow(float(base), float(exponent))
         return float(text)
     except (ValueError, OverflowError, ZeroDivisionError):
         return None
