@@ -38,10 +38,10 @@ def _get_hedid_range(schema_name, df_key):
     if df_key == constants.STRUCT_KEY:
         raise NotImplementedError("Cannot assign hed_ids struct section")
 
-    library_data = get_library_data(schema_name)
-    if not library_data:
+    id_range = get_id_range(schema_name)
+    if not id_range:
         return set()
-    starting_id, ending_id = library_data["id_range"]
+    starting_id, ending_id = id_range
 
     start_object_range, end_object_range = object_type_id_offset[df_key]
     if df_key == constants.TAG_KEY:
@@ -54,6 +54,23 @@ def _get_hedid_range(schema_name, df_key):
         # Add one since the versions on hed-schemas are set to max_value - 1
         final_end = ending_id + 1
     return set(range(final_start, final_end))
+
+
+def get_id_range(schema_name):
+    """Return the hedId range registered for a schema in hed-schemas library_data.json, or None.
+
+    Parameters:
+        schema_name(str): The schema name ("" for the standard schema).
+
+    Returns:
+        tuple[int, int] or None: (first id, last id), or None when the schema has no entry or its
+            entry has no "id_range".
+    """
+    library_data = get_library_data(schema_name) or {}
+    id_range = library_data.get("id_range")
+    if not id_range or len(id_range) != 2:
+        return None
+    return int(id_range[0]), int(id_range[1])
 
 
 def _get_retired_ids(schema_name):
@@ -178,6 +195,13 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", assign_mis
     hedid_errors = []
     if not schema_name:
         schema_name = schema.library
+    if assign_missing_ids and not get_id_range(schema_name):
+        raise HedFileError(
+            HedExceptions.SCHEMA_LIBRARY_INVALID,
+            f"Cannot assign hedIds: '{schema_name or 'standard'}' has no id_range in hed-schemas "
+            "library_data.json. Register the schema there (on hed-schemas main) before assigning ids.",
+            schema.name,
+        )
     # 1. Verify existing HED ids don't conflict between schema/dataframes
     for df_key, df in dataframes.items():
         if df_key in constants.DF_EXTRAS:
@@ -205,14 +229,7 @@ def update_dataframes_from_schema(dataframes, schema, schema_name="", assign_mis
     output_dfs = Schema2DF().process_schema(schema, save_merged=False)
 
     if assign_missing_ids:
-        # 3: Add any HED ID's as needed to these generated dfs.
-        if not get_library_data(schema_name):
-            raise HedFileError(
-                HedExceptions.SCHEMA_LIBRARY_INVALID,
-                f"Cannot assign hedIds: '{schema_name or 'standard'}' has no id_range in hed-schemas "
-                "library_data.json. Register the schema there (on hed-schemas main) before assigning ids.",
-                schema.name,
-            )
+        # 3: Add any HED ID's as needed to these generated dfs (the range was checked above).
         # Retired ids are removed from the pool here, not in _get_hedid_range, so that step 1 still
         # accepts a spreadsheet that carries a retired id for an element removed in a later version.
         retired_ids = _get_retired_ids(schema_name)

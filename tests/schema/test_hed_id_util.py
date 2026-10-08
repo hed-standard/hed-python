@@ -282,6 +282,12 @@ class TestRetiredIds(unittest.TestCase):
         self.assertEqual(list(month_rows[constants.hed_id]), ["HED_0011645"])
         self.assertNotIn(f"HED_{self.RETIRED_UV:07d}", list(unit_df[constants.hed_id]))
 
+    def test_get_id_range(self):
+        self.assertEqual(hed_id_util.get_id_range(""), (10000, 39999))
+        self.assertEqual(hed_id_util.get_id_range("score"), (40000, 59999))
+        self.assertIsNone(hed_id_util.get_id_range("testlocal"))
+        self.assertEqual(hed_id_util._get_hedid_range("testlocal", constants.TAG_KEY), set())
+
     def test_assign_hed_ids_section_exhausted_range(self):
         # Three blank rows, two free ids: the third raises HedFileError naming the schema and section.
         df = pd.DataFrame({constants.name: ["A", "B", "C"], constants.hed_id: ["", "", ""]})
