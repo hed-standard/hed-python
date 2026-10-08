@@ -68,9 +68,10 @@ def convert_and_update(filenames, set_ids):
             print(get_printable_issue_string(e.issues, title="Issues updating schema:"))
             raise e
         schema_reloaded = from_dataframes(result)
+        # hed-schemas keeps the mediawiki, TSV and JSON unmerged and only the XML merged.
         schema_reloaded.save_as_mediawiki(basename + ".mediawiki")
         schema_reloaded.save_as_xml(basename + ".xml")
-        schema_reloaded.save_as_json(basename + ".json")
+        schema_reloaded.save_as_json(basename + ".json", save_merged=False)
 
         save_dataframes(source_df_filename, result)
         updated.append(basename)

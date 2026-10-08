@@ -86,6 +86,7 @@ class TestSortBaseSchemas(unittest.TestCase):
             "test_schema.mediawiki",
             os.path.normpath("hedtsv/test_schema/test_schema_Tag.tsv"),
             "other_schema.xml",
+            "third_schema.json",
             os.path.normpath("hedtsv/wrong_folder/wrong_name_Tag.tsv"),
             os.path.normpath("prerelease/hedtsv/test_schema/test_schema_Tag.tsv"),
             os.path.normpath("not_hedtsv/test_schema/test_schema_Tag.tsv"),
@@ -103,6 +104,7 @@ class TestSortBaseSchemas(unittest.TestCase):
             "test_schema.mediawiki",
             os.path.normpath("hedtsv/test_schema/test_schema_Tag.tsv"),
             "other_schema.xml",
+            "third_schema.json",
         ]
         expected = {
             "test_schema": {
@@ -110,6 +112,7 @@ class TestSortBaseSchemas(unittest.TestCase):
                 ".tsv": os.path.normpath("hedtsv/test_schema"),
             },
             "other_schema": {".xml": "other_schema.xml"},
+            "third_schema": {".json": "third_schema.json"},
         }
         with contextlib.redirect_stdout(io.StringIO()):
             result = sort_base_schemas(filenames)

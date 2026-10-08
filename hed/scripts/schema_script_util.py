@@ -4,7 +4,7 @@ import os.path
 from collections import defaultdict
 
 from hed.errors import HedFileError, get_printable_issue_string, separate_issues
-from hed.schema import from_dataframes, from_string, load_schema
+from hed.schema import HedKey, from_dataframes, from_string, load_schema
 from hed.schema.schema_comparer import SchemaComparer
 
 all_extensions = [".tsv", ".mediawiki", ".xml", ".json"]
@@ -87,6 +87,26 @@ def validate_schema(file_path, check_for_warnings=False):
     return validation_issues
 
 
+def missing_hed_ids(hed_schema):
+    """List the schema elements that carry no hedId.
+
+    Used by ``hed_validate_schemas --require-ids`` before a release: every element of a released
+    schema has a hedId, including the elements a partnered library takes from its standard schema.
+
+    Parameters:
+        hed_schema (HedSchema): The schema to inspect.
+
+    Returns:
+        list[str]: One ``"<section>: <name>"`` line per element without a hedId, in schema order.
+    """
+    missing = []
+    for section_key, section in hed_schema._sections.items():
+        for entry in section.all_entries:
+            if not entry.attributes.get(HedKey.HedID):
+                missing.append(f"{section_key.value}: {entry.name}")
+    return missing
+
+
 def add_extension(basename, extension):
     """Generate the final filename for a given extension.
 
@@ -130,12 +150,13 @@ def sort_base_schemas(filenames, add_all_extensions=False):
     still allowing normalized extension comparisons.
 
     Example input:
-        ["test_schema.mediawiki", "hedtsv/test_schema/test_schema_Tag.tsv", "other_schema.XML"]
+        ["test_schema.mediawiki", "hedtsv/test_schema/test_schema_Tag.tsv", "other_schema.XML", "third.json"]
 
     Example output:
         {
             "test_schema": {".mediawiki": "test_schema.mediawiki", ".tsv": "hedtsv/.../test_schema_Tag.tsv"},
-            "other_schema": {".xml": "other_schema.XML"}
+            "other_schema": {".xml": "other_schema.XML"},
+            "third": {".json": "third.json"}
         }
 
     Parameters:
@@ -155,7 +176,7 @@ def sort_base_schemas(filenames, add_all_extensions=False):
             continue
         basename, extension = os.path.splitext(file_path)
         extension_lower = extension.lower()  # Normalize for comparison only
-        if extension_lower == ".xml" or extension_lower == ".mediawiki":
+        if extension_lower in (".xml", ".mediawiki", ".json"):
             schema_files[basename][extension_lower] = file_path
             continue
         elif extension_lower == ".tsv":

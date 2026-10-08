@@ -711,9 +711,10 @@ def validate_tabular_cmd(
 @schema.command(name="validate")
 @click.argument("schema_path", type=click.Path(exists=True), nargs=-1, required=True)
 @click.option("--add-all-extensions", is_flag=True, help="Always verify all versions of the same schema are equal")
+@click.option("--require-ids", is_flag=True, help="Fail if any schema element has no hedId (release candidates)")
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose output")
 @click.pass_context
-def schema_validate_cmd(ctx, schema_path, add_all_extensions, verbose):
+def schema_validate_cmd(ctx, schema_path, add_all_extensions, require_ids, verbose):
     """Validate HED schema files.
 
     This command validates HED schema files for correctness, checking structure,
@@ -742,6 +743,8 @@ def schema_validate_cmd(ctx, schema_path, add_all_extensions, verbose):
     args = list(schema_path)
     if add_all_extensions:
         args.append("--add-all-extensions")
+    if require_ids:
+        args.append("--require-ids")
     if verbose:
         args.append("-v")
 
@@ -790,24 +793,26 @@ def schema_convert_cmd(ctx, schema_path, set_ids):
 @click.argument("schema_version")
 @click.pass_context
 def schema_add_ids_cmd(ctx, repo_path, schema_name, schema_version):
-    """Add HED IDs to a schema.
+    """Assign HED IDs to the prerelease schema elements that lack them.
 
-    This command adds unique HED IDs to schema elements that don't have them,
-    typically used during schema development and maintenance.
+    Maintainers run this once at release time on a prerelease in a hed-schemas
+    checkout; contributors never assign ids. Every element without a hedId gets
+    the lowest free id in the schema's library_data.json range, and all four
+    prerelease formats are rewritten.
 
     \b
     Examples:
-        # Add IDs to standard schema version 8.3.0
-        hedpy schema add-ids /path/to/hed-schemas standard 8.3.0
+        # Standard schema prerelease 8.5.0
+        hedpy schema add-ids /path/to/hed-schemas standard 8.5.0
 
-        # Add IDs to a library schema
-        hedpy schema add-ids /path/to/hed-schemas SCORE 1.0.0
+        # A library prerelease
+        hedpy schema add-ids /path/to/hed-schemas score 2.2.0
 
     \b
     Arguments:
         REPO_PATH: Path to hed-schemas repository
-        SCHEMA_NAME: Schema name (e.g., 'standard', 'SCORE')
-        SCHEMA_VERSION: Schema version to process (e.g., '8.3.0')
+        SCHEMA_NAME: Schema name ('standard' or the library name, e.g. 'score')
+        SCHEMA_VERSION: Prerelease version to process (e.g., '8.5.0')
     """
     from hed.scripts.add_hed_ids import main as add_ids_main
 

@@ -282,6 +282,23 @@ class TestRetiredIds(unittest.TestCase):
         self.assertEqual(list(month_rows[constants.hed_id]), ["HED_0011645"])
         self.assertNotIn(f"HED_{self.RETIRED_UV:07d}", list(unit_df[constants.hed_id]))
 
+    def test_get_id_range(self):
+        self.assertEqual(hed_id_util.get_id_range(""), (10000, 39999))
+        self.assertEqual(hed_id_util.get_id_range("score"), (40000, 59999))
+        self.assertIsNone(hed_id_util.get_id_range("testlocal"))
+        self.assertEqual(hed_id_util._get_hedid_range("testlocal", constants.TAG_KEY), set())
+
+    def test_assign_hed_ids_section_exhausted_range(self):
+        # Three blank rows, two free ids: the third raises HedFileError naming the schema and section.
+        df = pd.DataFrame({constants.name: ["A", "B", "C"], constants.hed_id: ["", "", ""]})
+        with self.assertRaises(HedFileError) as context:
+            assign_hed_ids_section(df, {42001, 42002}, schema_name="score", df_key=constants.TAG_KEY)
+        self.assertIn("score", context.exception.message)
+        self.assertIn(constants.TAG_KEY, context.exception.message)
+        self.assertIn("no free id", context.exception.message)
+        # The two ids before the failure were handed out lowest first.
+        self.assertEqual(list(df[constants.hed_id][:2]), ["HED_0042001", "HED_0042002"])
+
     @staticmethod
     def _schema_without_uv():
         schema = copy.deepcopy(hed_schema_global)
