@@ -242,6 +242,10 @@ class Test(unittest.TestCase):
         self.assertNotIn("SCHEMA_DUPLICATE_NODE", compliance_codes(clean))
 
         with_unit = util_create_schemas.load_schema_any_units(("** foo <nowiki>{conversionFactor=1.0}</nowiki>",))
+        caret = util_create_schemas.load_schema_any_units(("** foo <nowiki>{conversionFactor=10^-3}</nowiki>",))
+        self.assertEqual(
+            schema_attribute_validators.conversion_factor(caret, caret.units["foo"], "conversionFactor"), []
+        )
         issues = with_unit.check_compliance(error_handler=ErrorHandler(False))
         messages = [issue["message"] for issue in issues if issue["code"] == "SCHEMA_ATTRIBUTE_INVALID"]
         self.assertEqual(len(messages), 1)

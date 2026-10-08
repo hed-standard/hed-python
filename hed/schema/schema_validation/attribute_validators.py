@@ -21,6 +21,7 @@ from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import SchemaAttributeErrors, SchemaErrors, SchemaWarnings, ValidationErrors
 from hed.schema.hed_cache import get_hed_versions
 from hed.schema.hed_schema_constants import HedKey, HedSectionKey
+from hed.schema.hed_schema_entry import parse_conversion_factor
 from hed.schema.schema_validation.validation_util import schema_version_for_library
 
 
@@ -290,11 +291,9 @@ def conversion_factor(hed_schema, tag_entry, attribute_name) -> list:
         list[dict]: A list of issues from validating this attribute.
     """
     issues = []
-    cf = tag_entry.attributes.get(attribute_name, "1.0")
-    try:
-        cf = float(cf.replace("^", "e"))
-    except (ValueError, AttributeError):
-        pass
+    cf = parse_conversion_factor(tag_entry.attributes.get(attribute_name, "1.0"))
+    if cf is None:
+        cf = tag_entry.attributes.get(attribute_name)
     if not isinstance(cf, float) or cf <= 0.0:
         issues += ErrorHandler.format_error(
             SchemaAttributeErrors.SCHEMA_CONVERSION_FACTOR_NOT_POSITIVE, tag_entry.name, cf
