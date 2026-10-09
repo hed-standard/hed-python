@@ -306,6 +306,32 @@ class TestSchemaUtilityFunctions(TestHedBase):
         self.assertAlmostEqual(0.003, HedTag("Quantity/3 ms", hed_schema=schema).value_as_default_unit())
         self.assertEqual("s", HedTag("Duration/7", hed_schema=schema).default_unit.name)
 
+    def test_parse_conversion_factor(self):
+        from hed.schema.hed_schema_entry import parse_conversion_factor
+
+        self.assertEqual(parse_conversion_factor("10^-15"), 1e-15)
+        self.assertEqual(parse_conversion_factor("10^6"), 1e6)
+        self.assertEqual(parse_conversion_factor("2^3"), 8.0)
+        self.assertEqual(parse_conversion_factor("0.001"), 0.001)
+        self.assertEqual(parse_conversion_factor("1e-6"), 1e-6)
+        self.assertEqual(parse_conversion_factor("10e-6"), 1e-5)  # the 8.3.0 and 8.4.0 literal, read as written
+        self.assertIsNone(parse_conversion_factor("ten"))
+        self.assertIsNone(parse_conversion_factor("10^"))
+        self.assertIsNone(parse_conversion_factor("-1^0.5"))  # a complex result is not a factor
+        self.assertIsNone(parse_conversion_factor(None))
+
+    def test_caret_conversion_factors(self):
+        # 8.0.0 to 8.2.0 write the SI modifier factors as powers (10^-15): base ** exponent, not e-notation.
+        schema = load_schema_version("8.2.0")
+        self.assertEqual(schema.unit_modifiers["f"].attributes["conversionFactor"], "10^-15")
+        self.assertAlmostEqual(1e-15, HedTag("Duration/1 fs", hed_schema=schema).value_as_default_unit())
+        self.assertAlmostEqual(2e-6, HedTag("Duration/2 us", hed_schema=schema).value_as_default_unit())
+        self.assertAlmostEqual(3e6, HedTag("Frequency/3 MHz", hed_schema=schema).value_as_default_unit())
+        self.assertAlmostEqual(3e-6, HedTag("Speed/3 um-per-s", hed_schema=schema).value_as_default_unit())
+        # Decimal and e-notation factors are unchanged.
+        self.assertAlmostEqual(0.003, HedTag("Duration/3 ms", hed_schema=schema).value_as_default_unit())
+        self.assertAlmostEqual(3000.0, HedTag("Duration/3 ks", hed_schema=schema).value_as_default_unit())
+
     def test_compound_unit_conversion_factors(self):
         # A compound SI unit takes one modifier per component; the exponent applies to the prefixed component
         # and denominator exponents are negative (spec item 4). Exact values here use only modifiers whose

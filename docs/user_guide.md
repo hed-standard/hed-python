@@ -828,14 +828,14 @@ ______________________________________________________________________
 
 ### Schema release
 
-Once a schema has been developed and tested, these commands prepare it for official release. These operations are performed by the HED maintainers on schemas in the **prerelease directory** of the hed-schemas repository before moving them to the stable release directory.
+Once a schema has been developed and tested, these commands prepare it for official release. These operations are performed by the HED maintainers on schemas in the **prerelease directory** of the hed-schemas repository before moving them to the stable release directory. The full checklist, including the order for the standard schema and its partnered libraries and the file moves, is `RELEASE_GUIDE.md` in the [hed-schemas](https://github.com/hed-standard/hed-schemas) repository; the commands below are the hedtools part of it.
 
 #### Add HED IDs
 
 ```{index} HED IDs, schema; IDs, schema; release
 ```
 
-HED IDs are unique identifiers assigned to each schema term, enabling stable references across schema versions and format conversions. These IDs must be added before releasing a schema.
+HED IDs are unique identifiers assigned to each schema term, enabling stable references across schema versions and format conversions. New terms in a prerelease carry no ID; the maintainers assign them once, at release. Every element without an ID gets the lowest free ID in the schema's range from the hed-schemas `library_data.json` registry (retired IDs are never reused), and all four prerelease formats are rewritten.
 
 ```bash
 # Add IDs to a standard schema prerelease
@@ -843,12 +843,26 @@ hedpy schema add-ids /path/to/hed-schemas standard 8.5.0
 
 # Add IDs to a library schema prerelease
 hedpy schema add-ids /path/to/hed-schemas score 2.2.0
+
+# The same from the prerelease file itself
+hedpy schema convert /path/to/hed-schemas/standard_schema/prerelease/HED8.5.0.mediawiki --set-ids
 ```
+
+#### Check that every element has an ID
+
+A release candidate must carry an ID on every element. `--require-ids` lists each element without one and fails:
+
+```bash
+hedpy schema validate /path/to/hed-schemas/standard_schema/prerelease/HED8.5.0.mediawiki --add-all-extensions --require-ids
+```
+
+On a partnered library this also reports standard-schema elements without IDs, which means the library was regenerated against a prerelease of the standard: release the standard first and refresh the local schema cache before regenerating the library.
 
 **Requirements:**
 
 - Path must be to a hed-schemas repository clone
-- Schema name and version must match directory structure
+- Schema name and version must match directory structure, and the prerelease must have its TSV set (run `hedpy schema convert` on the `.mediawiki` first if not)
+- The schema must have an `id_range` in the hed-schemas `library_data.json` registry
 - **Only works on schemas in a prerelease directory**
 - Modifies all schema formats (XML, MEDIAWIKI, TSV, JSON) in-place
 - Should be run after all schema content changes are finalized
@@ -938,6 +952,9 @@ hedpy schema validate my_schema.xml --add-all-extensions
 ```bash
 # Add HED IDs
 hedpy schema add-ids /path/to/hed-schemas my_library 1.0.0
+
+# Confirm the formats agree and no element lacks an ID
+hedpy schema validate /path/to/hed-schemas/library_schemas/my_library/prerelease/HED_my_library_1.0.0.mediawiki --add-all-extensions --require-ids
 ```
 
 ______________________________________________________________________

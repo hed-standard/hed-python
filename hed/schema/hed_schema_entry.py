@@ -14,6 +14,30 @@ pluralize = inflect.engine()
 pluralize.defnoun("hertz", "hertz")
 
 
+def parse_conversion_factor(text):
+    """Parse a conversionFactor attribute value.
+
+    Schemas write the factor as a decimal (``0.001``), in e-notation (``1e-6``), or, in 8.0.0 to 8.2.0
+    and score 1.2.0, as a power with a caret (``10^-15``). The caret form is ``base ** exponent``;
+    reading it as e-notation would make ``10^-15`` ten times too large.
+
+    Parameters:
+        text (str or None): The attribute value.
+
+    Returns:
+        float or None: The factor, or None when the value cannot be parsed.
+    """
+    if not isinstance(text, str):
+        return None
+    try:
+        if "^" in text:
+            base, _, exponent = text.partition("^")
+            return math.pow(float(base), float(exponent))
+        return float(text)
+    except (ValueError, OverflowError, ZeroDivisionError):
+        return None
+
+
 class HedSchemaEntry:
     """A single node in the HED schema vocabulary.
 
@@ -370,10 +394,8 @@ class UnitEntry(HedSchemaEntry):
     @staticmethod
     def _parse_factor(attributes):
         """Return the conversionFactor in *attributes* as a float, or 1.0 when absent or unparsable."""
-        try:
-            return float(attributes.get(HedKey.ConversionFactor, "1.0").replace("^", "e"))
-        except (ValueError, AttributeError):
-            return 1.0
+        factor = parse_conversion_factor(attributes.get(HedKey.ConversionFactor, "1.0"))
+        return 1.0 if factor is None else factor
 
     def get_conversion_factor(self, unit_name):
         """Returns the conversion factor from combining this unit with the specified modifier
