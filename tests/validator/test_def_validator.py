@@ -87,12 +87,23 @@ class Test(unittest.TestCase):
         def_validator = DefValidator()
         def_validator.check_for_definitions(HedString(self.basic_definition_string, self.hed_schema))
         def_validator.check_for_definitions(HedString(self.placeholder_definition_string, self.hed_schema))
+        def_validator.check_for_definitions(
+            HedString("(Definition/TestNested,(Item/TestDef1,(Item/TestDef2,Item/TestDef3)))", self.hed_schema)
+        )
+        def_validator.check_for_definitions(
+            HedString(
+                "(Definition/TestSiblings/#,((Item/TestDef1,Acceleration/#),(Item/TestDef2,Item/TestDef3)))",
+                self.hed_schema,
+            )
+        )
 
         reordered = [
             "(Def-expand/TestDef,(Item/TestDef2,Item/TestDef1))",
             "(Def-expand/TestDef,(item/testdef2,Item/TestDef1))",
             "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef2,Acceleration/2471))",
             "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef2,Acceleration/2471)),Item/BasicTestTag1",
+            "(Def-expand/TestNested,((Item/TestDef3,Item/TestDef2),Item/TestDef1))",
+            "(Def-expand/TestSiblings/2471,((Item/TestDef3,Item/TestDef2),(Acceleration/2471,Item/TestDef1)))",
         ]
         for hed_string in reordered:
             def_issues = def_validator.validate_def_tags(HedString(hed_string, self.hed_schema))
@@ -103,6 +114,8 @@ class Test(unittest.TestCase):
             "(Def-expand/TestDef,(Item/TestDef2,Item/TestDef1,Item/TestDef1))",
             "(Def-expand/TestDef,(Item/TestDef2,(Item/TestDef1)))",
             "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef2,Acceleration/21))",
+            "(Def-expand/TestNested,((Item/TestDef3,Item/TestDef1),Item/TestDef2))",
+            "(Def-expand/TestSiblings/2471,((Item/TestDef3,Item/TestDef1),(Acceleration/2471,Item/TestDef2)))",
         ]
         for hed_string in still_invalid:
             def_issues = def_validator.validate_def_tags(HedString(hed_string, self.hed_schema))
