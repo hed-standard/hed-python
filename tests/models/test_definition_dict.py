@@ -58,6 +58,26 @@ class TestDefinitionDict(TestDefBase):
     placeholder_invalid_def_contents = "(Age/#,Item-count/#)"
     placeholder_invalid_def_string = f"(Definition/TestDefPlaceholder/#,{placeholder_invalid_def_contents})"
 
+    def test_identical_duplicate_definitions(self):
+        """A repeated definition is accepted when identical and reported when its contents differ."""
+        def_dict = DefinitionDict()
+        first = HedString("(Definition/Def1, (Item, Red))", self.hed_schema)
+        self.assertEqual(def_dict.check_for_definitions(first), [])
+        for repeat in [
+            "(Definition/Def1, (Item, Red))",
+            "(Definition/DEF1, (Red, Item))",
+        ]:
+            issues = def_dict.check_for_definitions(HedString(repeat, self.hed_schema))
+            self.assertEqual(issues, [], repeat)
+        self.assertEqual(len(def_dict.defs), 1)
+        for differs in [
+            "(Definition/Def1, (Item, Blue))",
+            "(Definition/Def1, (Item, Red, Blue))",
+            "(Definition/Def1/#, (Item, Age/#))",
+        ]:
+            issues = def_dict.check_for_definitions(HedString(differs, self.hed_schema))
+            self.assertEqual([issue["code"] for issue in issues], ["DEFINITION_INVALID"], differs)
+
     def test_definitions(self):
         test_strings = {
             "noGroupTag": "(Definition/InvalidDef0)",

@@ -180,9 +180,12 @@ class TestMergeGroups(unittest.TestCase):
             self.assertIsNotNone(forward.get_tag_entry(tag), tag)
         self.assertIn("testconflict 2.1.0", forward.prologue)
 
-    def test_duplicate_version_ignored(self):
-        twice = self._load(["testconflict_2.0.0", "testconflict_2.0.0"])
-        self.assertEqual(twice, self._load(["testconflict_2.0.0"]))
+    def test_schema_listed_twice_fails(self):
+        """A schema name may appear only once in a merge group, even with the same version (spec 3.1.2.4)."""
+        self._assert_fails(["testconflict_2.0.0", "testconflict_2.0.0"], mentions=["testconflict", "more than once"])
+        self._assert_fails(["8.5.0", "8.5.0"], mentions=["standard schema", "more than once"])
+        self._assert_fails(["sc:testconflict_2.0.0", "sc:testconflict_2.0.0"], mentions=["more than once"])
+        self.assertIsNotNone(self._load(["testconflict_2.0.0", "sc:testconflict_2.0.0"]))
 
     def test_two_versions_of_one_library_fail(self):
         self._assert_fails(["testconflict_2.0.0", "testconflict_2.1.0"], mentions=["testconflict", "2.0.0", "2.1.0"])

@@ -5,7 +5,7 @@ Loading a version specification has three separable steps, and this module owns 
 1. Resolve each version string to a file (``hed.schema.hed_schema_io`` and the cache).
 2. **Prepass** (:func:`resolve_group`): construct a loader for every file. Constructing a
    :class:`~hed.schema.schema_io.base2schema.SchemaLoader` reads only the header attributes, so
-   the group rules - duplicates, two versions of one schema, a single standard partner, an
+   the group rules - one listing per schema name, a single standard partner, an
    unpartnered library alone, a listed standard matching the partner - are decided and the load
    order chosen before any file body is parsed. A group that breaks a rule fails here.
 3. **Merge** (:func:`merge_group`): pick the base - a merged library file if the group has one
@@ -56,7 +56,7 @@ class GroupSpec:
         partner (str): The standard schema version the group's libraries are partnered with
             ("" only when the group is a single unpartnered library or a single standard).
         members (list[SchemaLoader]): Header-only loaders for the library schemas, in listed
-            order with duplicates and listed standards removed. Each is parsed by ``merge_group``.
+            order with listed standards removed. Each is parsed by ``merge_group``.
         base (SchemaLoader or None): The member whose file already contains the whole standard
             (a merged library file), or the lone standard/unpartnered schema when there are no
             partnered libraries. None means "copy the cached standard partner".
@@ -82,7 +82,7 @@ def resolve_group(loaders: list[SchemaLoader], name: str = "") -> GroupSpec:
     Raises:
         HedFileError: SCHEMA_LOAD_FAILED with one issue per violated rule (all rules are checked).
     """
-    members = _drop_duplicates(loaders)
+    members = list(loaders)
     issues = []
     issues += _check_one_version_per_schema(members)
     libraries = [loader for loader in members if loader.schema.library]
@@ -271,19 +271,12 @@ def element_differences(existing: HedSchemaEntry, entry: HedSchemaEntry) -> list
 # ---------------------------------------------------------------------------
 
 
-def _drop_duplicates(loaders):
-    """Keep the first loader for each (library, version) header pair (spec: duplicates are ignored)."""
-    seen = set()
-    kept = []
-    for loader in loaders:
-        key = (loader.schema.library, loader.schema.version_number)
-        if key not in seen:
-            seen.add(key)
-            kept.append(loader)
-    return kept
-
-
 def _check_one_version_per_schema(members):
+    """Report every schema name that is listed more than once in the group (spec 3.1.2.4).
+
+    The name is the header's ``library`` attribute ("" for the standard schema), so a file listed
+    twice, two versions of one library, and a copy of a library under another file name all fail.
+    """
     by_library = {}
     for loader in members:
         by_library.setdefault(loader.schema.library, []).append(loader.schema.version_number)
@@ -291,7 +284,10 @@ def _check_one_version_per_schema(members):
     for library, versions in by_library.items():
         if len(versions) > 1:
             what = f"library '{library}'" if library else "the standard schema"
-            issues.append(_rule_issue(f"Different versions of {what} in one merge group: {versions}"))
+            if len(set(versions)) == 1:
+                issues.append(_rule_issue(f"{what[0].upper()}{what[1:]} is listed more than once in one merge group"))
+            else:
+                issues.append(_rule_issue(f"Different versions of {what} in one merge group: {versions}"))
     return issues
 
 
