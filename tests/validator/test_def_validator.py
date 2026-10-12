@@ -82,6 +82,65 @@ class Test(unittest.TestCase):
         def_issues = def_validator.validate_def_tags(invalid_placeholder)
         self.assertTrue(bool(def_issues))
 
+    def test_def_expand_contents_in_any_order(self):
+        """The tags of a Def-expand group may be in a different order from the definition (issue #1455)."""
+        def_validator = DefValidator()
+        def_validator.check_for_definitions(HedString(self.basic_definition_string, self.hed_schema))
+        def_validator.check_for_definitions(HedString(self.placeholder_definition_string, self.hed_schema))
+        def_validator.check_for_definitions(
+            HedString("(Definition/TestNested,(Item/TestDef1,(Item/TestDef2,Item/TestDef3)))", self.hed_schema)
+        )
+        def_validator.check_for_definitions(
+            HedString(
+                "(Definition/TestSiblings/#,((Item/TestDef1,Acceleration/#),(Item/TestDef2,Item/TestDef3)))",
+                self.hed_schema,
+            )
+        )
+
+        reordered = [
+            "(Def-expand/TestDef,(Item/TestDef2,Item/TestDef1))",
+            "(Def-expand/TestDef,(item/testdef2,Item/TestDef1))",
+            "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef2,Acceleration/2471))",
+            "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef2,Acceleration/2471)),Item/BasicTestTag1",
+            "(Def-expand/TestNested,((Item/TestDef3,Item/TestDef2),Item/TestDef1))",
+            "(Def-expand/TestSiblings/2471,((Item/TestDef3,Item/TestDef2),(Acceleration/2471,Item/TestDef1)))",
+        ]
+        for hed_string in reordered:
+            def_issues = def_validator.validate_def_tags(HedString(hed_string, self.hed_schema))
+            self.assertEqual(def_issues, [], hed_string)
+
+        still_invalid = [
+            "(Def-expand/TestDef,(Item/TestDef2,Item/TestDef3))",
+            "(Def-expand/TestDef,(Item/TestDef2,Item/TestDef1,Item/TestDef1))",
+            "(Def-expand/TestDef,(Item/TestDef2,(Item/TestDef1)))",
+            "(Def-expand/TestDefPlaceholder/2471,(Item/TestDef2,Acceleration/21))",
+            "(Def-expand/TestNested,((Item/TestDef3,Item/TestDef1),Item/TestDef2))",
+            "(Def-expand/TestSiblings/2471,((Item/TestDef3,Item/TestDef1),(Acceleration/2471,Item/TestDef2)))",
+        ]
+        for hed_string in still_invalid:
+            def_issues = def_validator.validate_def_tags(HedString(hed_string, self.hed_schema))
+            self.assertTrue(def_issues, hed_string)
+            self.assertEqual(def_issues[0]["code"], "DEF_EXPAND_INVALID", hed_string)
+
+    def test_def_expand_order_with_released_schema(self):
+        """The reproduction from issue #1455 validates in both orders with HED 8.4.0."""
+        hed_schema = schema.load_schema_version("8.4.0")
+        def_dict = DefinitionDict(
+            [
+                "(Definition/SlowPresentation/#, (Condition-variable/Presentation, "
+                "Visual-presentation, Computer-screen, Temporal-rate/#))"
+            ],
+            hed_schema,
+        )
+        for hed_string in [
+            "Sensory-event, ((Def-expand/SlowPresentation/1 Hz, (Computer-screen, "
+            "Condition-variable/Presentation, Temporal-rate/1 Hz, Visual-presentation)), Onset)",
+            "Sensory-event, ((Def-expand/SlowPresentation/1 Hz, (Condition-variable/Presentation, "
+            "Visual-presentation, Computer-screen, Temporal-rate/1 Hz)), Onset)",
+        ]:
+            issues = HedString(hed_string, hed_schema, def_dict=def_dict).validate(allow_placeholders=False)
+            self.assertEqual(issues, [], hed_string)
+
     def test_duplicate_def(self):
         def_dict = DefinitionDict()
         def_string = HedString(self.placeholder_definition_string, self.hed_schema)

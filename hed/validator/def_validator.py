@@ -88,7 +88,9 @@ class DefValidator(DefinitionDict):
 
         # Check the special case of a definition without contents.
         def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder, return_copy_of_tag=True)
-        if is_def_expand_tag and def_expand_group != def_contents:
+        if is_def_expand_tag and self._order_independent_form(def_expand_group) != self._order_independent_form(
+            def_contents
+        ):
             return ErrorHandler.format_error(
                 ValidationErrors.HED_DEF_EXPAND_INVALID,
                 tag=def_tag,
@@ -97,6 +99,25 @@ class DefValidator(DefinitionDict):
             )
 
         return []
+
+    @staticmethod
+    def _order_independent_form(group) -> tuple:
+        """Return the tags and subgroups of a group as nested sorted tuples.
+
+        Two groups have the same form exactly when they contain the same tags (by short form with
+        any value or extension, ignoring case as HedTag equality does) and the same subgroups, in any
+        order. HedGroup equality is order-sensitive, so this form is what a Def-expand group is
+        compared against its definition with.
+
+        Parameters:
+            group (HedGroup): The group to convert.
+
+        Returns:
+            tuple: (sorted tuple of tag short forms, sorted tuple of subgroup forms).
+        """
+        tags = sorted(tag.short_tag.casefold() for tag in group.tags())
+        groups = sorted(DefValidator._order_independent_form(subgroup) for subgroup in group.groups())
+        return tuple(tags), tuple(groups)
 
     def validate_def_value_units(self, def_tag, hed_validator, allow_placeholders=False) -> list[dict]:
         """Equivalent to HedValidator.validate_units for the special case of a Def or Def-expand tag"""
