@@ -687,13 +687,14 @@ class TestHedSchemaUnmerged(unittest.TestCase):
         self.assertEqual([issue["code"] for issue in issues], [], f"Got: {issues}")
 
     def test_load_schema_version_merged_duplicates(self):
-        # testscoredupe_1.1.0 is score_1.1.0 under another file name: its header says library=score,
-        # version=1.1.0, so the group treats it as a duplicate and ignores it (spec 3.1.2.4).
-        ver4 = ["score_1.1.0", "testscoredupe_1.1.0"]
-        schemas = load_schema_version(ver4)
-        self.assertIsInstance(schemas, HedSchema)
-        self.assertEqual(schemas.version, "score_1.1.0")
-        self.assertEqual(schemas, load_schema_version("score_1.1.0"))
+        # A schema name may appear only once in a merge group (spec 3.1.2.4). testscoredupe_1.1.0 is
+        # score_1.1.0 under another file name: its header says library=score, version=1.1.0, so it
+        # is the same schema listed twice, exactly as listing score_1.1.0 twice is.
+        for versions in (["score_1.1.0", "testscoredupe_1.1.0"], ["score_1.1.0", "score_1.1.0"]):
+            with self.assertRaises(HedFileError) as context:
+                load_schema_version(versions)
+            self.assertEqual(context.exception.code, HedExceptions.SCHEMA_LOAD_FAILED, versions)
+            self.assertIn("listed more than once", context.exception.message, versions)
 
     def test_load_and_verify_tags(self):
         if not test_schemas_available():
@@ -1070,11 +1071,11 @@ class TestParseVersionList(unittest.TestCase):
             {"": "score", "ol": "ol:otherlib", "ul": "ul:anotherlib"},
         )
 
-    def test_duplicate_library_is_ignored(self):
-        """Duplicate versions in one merge group are ignored, not an error (spec 3.1.2.4)."""
-        self.assertEqual(parse_version_list(["score", "score"]), {"": "score"})
-        self.assertEqual(parse_version_list(["ol:otherlib", "ol:otherlib"]), {"ol": "ol:otherlib"})
-        self.assertEqual(parse_version_list(["score", "mylib", "score"]), {"": "score,mylib"})
+    def test_duplicate_library_is_kept(self):
+        """A repeated schema is kept so that loading the group reports it (spec 3.1.2.4)."""
+        self.assertEqual(parse_version_list(["score", "score"]), {"": "score,score"})
+        self.assertEqual(parse_version_list(["ol:otherlib", "ol:otherlib"]), {"ol": "ol:otherlib,otherlib"})
+        self.assertEqual(parse_version_list(["score", "mylib", "score"]), {"": "score,mylib,score"})
 
     def test_triple_prefixes(self):
         """Test that libraries with triple prefixes are handled correctly."""

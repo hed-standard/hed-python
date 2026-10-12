@@ -343,9 +343,8 @@ def parse_version_list(xml_version_list) -> dict:
                 f"Must specify schema version by number, found no version on {xml_version_list} schema.",
                 filename=None,
             )
-        # Duplicate versions in one merge group are ignored (spec 3.1.2.4).
-        if version not in out_versions[schema_namespace]:
-            out_versions[schema_namespace].append(version)
+        # A repeated schema is kept so the merge-group rules report it (spec 3.1.2.4).
+        out_versions[schema_namespace].append(version)
 
     out_versions = {
         key: ",".join(value) if not key else f"{key}:" + ",".join(value) for key, value in out_versions.items()

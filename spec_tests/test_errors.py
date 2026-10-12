@@ -11,7 +11,6 @@ from hed.schema import from_string
 from hed.validator import HedValidator
 
 skip_tests = {
-    "duplicate-schema-in-merge-group": "hed-tests 8b066c5 (spec 3.1.2.4, hed-specification PR #710): a schema name listed twice in a merge group is SCHEMA_LOAD_FAILED; hed_schema_io.parse_version_list still ignores the duplicate",
     # "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
     # "curly-braces-has-no-hed": "Need to fix issue #1006",
     # "character-invalid-non-printing appears": "Need to recheck how this is verified for textClass",
