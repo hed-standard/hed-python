@@ -164,14 +164,20 @@ class DefinitionDict:
                 def_issues += new_def_issues
                 continue
 
-            new_def_issues, context = self._validate_name_and_context(def_tag_name, error_handler)
-            if new_def_issues:
-                def_issues += new_def_issues
-                continue
-
-            self.defs[def_tag_name.casefold()] = DefinitionEntry(
+            context = error_handler.error_context if error_handler else []
+            new_entry = DefinitionEntry(
                 name=def_tag_name, contents=group_tag, takes_value=def_takes_value, source_context=context
             )
+            existing_entry = self.defs.get(def_tag_name.casefold())
+            if existing_entry is not None:
+                # A repeated definition is allowed when it is identical; differing contents are an error.
+                if existing_entry != new_entry:
+                    def_issues += ErrorHandler.format_error_with_context(
+                        error_handler, DefinitionErrors.DUPLICATE_DEFINITION, def_name=def_tag_name
+                    )
+                continue
+
+            self.defs[def_tag_name.casefold()] = new_entry
 
         return def_issues
 
@@ -181,18 +187,6 @@ class DefinitionDict:
         if def_takes_value:
             def_tag_name = def_tag_name[: -len("/#")]
         return def_tag_name, def_takes_value
-
-    def _validate_name_and_context(self, def_tag_name, error_handler):
-        if error_handler:
-            context = error_handler.error_context
-        else:
-            context = []
-        new_def_issues = []
-        if def_tag_name.casefold() in self.defs:
-            new_def_issues += ErrorHandler.format_error_with_context(
-                error_handler, DefinitionErrors.DUPLICATE_DEFINITION, def_name=def_tag_name
-            )
-        return new_def_issues, context
 
     @staticmethod
     def _validate_placeholders(def_tag_name, group, def_takes_value, error_handler):
