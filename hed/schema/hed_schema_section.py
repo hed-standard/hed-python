@@ -221,8 +221,16 @@ class HedSchemaUnitClassSection(HedSchemaSection):
     """The schema section containing unit classes."""
 
     def _check_if_duplicate(self, name_key, new_entry):
-        """Allow adding units to existing unit classes, using a placeholder one with no attributes."""
-        if name_key in self and len(new_entry.attributes) == 1 and HedKey.InLibrary in new_entry.attributes:
+        """Allow adding units to existing unit classes, using a placeholder with no attributes or description.
+
+        A redeclaration with a description is a duplicate, as one with attributes is (spec SCHEMA_LIBRARY_INVALID i).
+        """
+        if (
+            name_key in self
+            and len(new_entry.attributes) == 1
+            and HedKey.InLibrary in new_entry.attributes
+            and not new_entry.description
+        ):
             return self.all_names[name_key]
         return super()._check_if_duplicate(name_key, new_entry)
 

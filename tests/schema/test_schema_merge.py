@@ -7,7 +7,7 @@ import unittest
 
 from hed import schema
 from hed.errors import HedExceptions, HedFileError
-from hed.schema import HedKey, hed_cache, load_schema, load_schema_version
+from hed.schema import HedKey, from_string, hed_cache, load_schema, load_schema_version
 from hed.schema.hed_schema_io import _load_schema_version
 from hed.schema.schema_io.schema_merge import resolve_group
 from hed.schema.schema_io.xml2schema import SchemaLoaderXML
@@ -311,6 +311,60 @@ class TestMergeGroups(unittest.TestCase):
         # Nothing was parsed: the loaders still hold only their headers.
         for loader in loaders:
             self.assertEqual(len(loader.schema.tags.all_entries), 0)
+
+
+class TestPartnerUnitClassRedeclaration(unittest.TestCase):
+    """A library names a partner unit class only to add units; anything more is a duplicate (issue #1434)."""
+
+    @staticmethod
+    def _library(declaration):
+        q = "'''"
+        lines = [
+            'HED library="unitlib" version="1.0.0" withStandard="8.4.0" unmerged="true"',
+            "",
+            q + "Prologue" + q,
+            "",
+            "!# start schema",
+            "",
+            q + "Lib-tag" + q + " <nowiki>[A library tag.]</nowiki>",
+            "",
+            "!# end schema",
+            "",
+            q + "Unit classes" + q,
+            declaration,
+            "** fortnight <nowiki>{conversionFactor=1209600} [Fourteen days.]</nowiki>",
+            "",
+        ]
+        lines += [q + "Unit modifiers" + q, "", q + "Value classes" + q, "", q + "Schema attributes" + q, ""]
+        lines += [q + "Properties" + q, "", q + "Epilogue" + q, "", "!# end hed", ""]
+        return from_string("\n".join(lines), schema_format=".mediawiki")
+
+    @staticmethod
+    def _time_units_entries(loaded):
+        return [entry for entry in loaded.unit_classes.all_entries if entry.name == "timeUnits"]
+
+    def test_bare_redeclaration_adds_units_to_the_partner_class(self):
+        loaded = self._library("* timeUnits")
+        self.assertEqual(len(self._time_units_entries(loaded)), 1)
+        self.assertIn("fortnight", loaded.unit_classes["timeUnits"].units)
+        self.assertFalse(loaded.has_duplicates())
+        codes = {issue["code"] for issue in loaded.check_compliance(check_for_warnings=False)}
+        self.assertNotIn("SCHEMA_LIBRARY_INVALID", codes)
+
+    def test_redeclaration_with_content_is_a_duplicate(self):
+        cases = {
+            "description": "* timeUnits <nowiki>[Units of time.]</nowiki>",
+            "attribute": "* timeUnits <nowiki>{defaultUnits=s}</nowiki>",
+        }
+        for label, declaration in cases.items():
+            with self.subTest(content=label):
+                loaded = self._library(declaration)
+                self.assertEqual(loaded.has_duplicates(), "timeUnits")
+                self.assertIn("timeUnits", loaded.unit_classes.duplicate_names)
+                issues = loaded.check_compliance(check_for_warnings=False)
+                self.assertTrue(
+                    any(i["code"] == "SCHEMA_LIBRARY_INVALID" and "timeUnits" in i["message"] for i in issues)
+                )
 
 
 if __name__ == "__main__":
