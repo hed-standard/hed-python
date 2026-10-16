@@ -201,9 +201,9 @@ class TestRedundantUnits(unittest.TestCase):
         self.assertIn("'electricPotentialUnits'", message)
         self.assertIn("modifier 'u' + unit 'V'", message)
         self.assertEqual(duplicate_issues[0]["severity"], ErrorSeverity.ERROR)
-        # The prerelease warning is the only other issue; the clean timeUnits class is not flagged.
+        # No other issue: 8.5.0 is released (no prerelease warning) and the clean timeUnits class is not flagged.
         other_codes = [i["code"] for i in issues if i["code"] != "SCHEMA_DUPLICATE_NODE"]
-        self.assertEqual(other_codes, ["SCHEMA_PRERELEASE_VERSION_USED"])
+        self.assertEqual(other_codes, [])
 
     def test_850_fixture_summary(self):
         """The summary records the check and its one issue."""
@@ -375,19 +375,19 @@ class TestLibrarySchemaCompliance(unittest.TestCase):
         self.assertEqual(issues[0]["code"], "SCHEMA_PRERELEASE_VERSION_USED")
 
     def test_testlocal_compliance(self):
-        """HED_testlocal_4.0.0 should have only its two prerelease warnings."""
+        """HED_testlocal_4.0.0 should have only its library prerelease warning."""
         schema_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/test_merge/HED_testlocal_4.0.0.mediawiki"
         )
         hed_schema = schema.load_schema(schema_path)
         issues = hed_schema.check_compliance()
         prerelease_issues = [i for i in issues if i["code"] == "SCHEMA_PRERELEASE_VERSION_USED"]
-        # Expect exactly 2 prerelease issues: one for library, one for with_standard base partner
-        # (see hed/schema/schema_validation/compliance.py:193-211)
-        self.assertEqual(len(prerelease_issues), 2)
+        # Expect exactly 1 prerelease issue, for the library version; its partner 8.5.0 is released
+        # (see hed/schema/schema_validation/compliance.py:199-224)
+        self.assertEqual(len(prerelease_issues), 1)
         # The merged fixture carries the Prefixes, External annotations, and Sources rows that its
-        # annotations need, so the two prerelease warnings are the whole list.
-        self.assertEqual([i["code"] for i in issues], ["SCHEMA_PRERELEASE_VERSION_USED"] * 2, f"Got: {issues}")
+        # annotations need, so the prerelease warning is the whole list.
+        self.assertEqual([i["code"] for i in issues], ["SCHEMA_PRERELEASE_VERSION_USED"], f"Got: {issues}")
 
     def test_testunpart_no_unknown_attributes(self):
         """After loading, no entries in testunpart should have stale _unknown_attributes."""

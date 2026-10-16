@@ -802,8 +802,8 @@ def schema_add_ids_cmd(ctx, repo_path, schema_name, schema_version):
 
     \b
     Examples:
-        # Standard schema prerelease 8.5.0
-        hedpy schema add-ids /path/to/hed-schemas standard 8.5.0
+        # Standard schema prerelease 8.6.0
+        hedpy schema add-ids /path/to/hed-schemas standard 8.6.0
 
         # A library prerelease
         hedpy schema add-ids /path/to/hed-schemas score 2.2.0
@@ -812,7 +812,7 @@ def schema_add_ids_cmd(ctx, repo_path, schema_name, schema_version):
     Arguments:
         REPO_PATH: Path to hed-schemas repository
         SCHEMA_NAME: Schema name ('standard' or the library name, e.g. 'score')
-        SCHEMA_VERSION: Prerelease version to process (e.g., '8.5.0')
+        SCHEMA_VERSION: Prerelease version to process (e.g., '8.6.0')
     """
     from hed.scripts.add_hed_ids import main as add_ids_main
 
