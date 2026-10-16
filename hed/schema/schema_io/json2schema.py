@@ -48,6 +48,7 @@ class SchemaLoaderJSON(SchemaLoader):
 
     def _get_header_attributes(self, json_data):
         """Gets the schema attributes from the JSON root"""
+        self._check_is_schema_json(json_data)
         # Define the keys that are section keys (not header attributes)
         section_keys = {
             json_constants.TAGS_KEY,
@@ -72,6 +73,32 @@ class SchemaLoaderJSON(SchemaLoader):
                 header_attrs[key] = value
 
         return header_attrs
+
+    def _check_is_schema_json(self, json_data):
+        """Raise if the parsed JSON cannot be a HED schema: the root must be an object with a version key.
+
+        Only the version key is required here, so a damaged schema JSON with missing sections is not rejected here.
+
+        Parameters:
+            json_data: The parsed JSON value.
+
+        :raises HedFileError:
+            - INVALID_HED_FORMAT if the root is not an object or has no version key.
+        """
+        source = self.name if self.name else "JSON input"
+        if not isinstance(json_data, dict):
+            raise HedFileError(
+                HedExceptions.INVALID_HED_FORMAT,
+                f"{source} is not a HED schema JSON file: the root is not an object",
+                self.name,
+            )
+        if json_constants.VERSION_KEY not in json_data:
+            keys = ", ".join(json_data.keys()) if json_data else "none"
+            raise HedFileError(
+                HedExceptions.INVALID_HED_FORMAT,
+                f"{source} is not a HED schema JSON file: the root object has no version key (top-level keys: {keys})",
+                self.name,
+            )
 
     @staticmethod
     def _convert_to_internal_format(value):
