@@ -8,7 +8,7 @@ from hed.errors import HedExceptions, HedFileError
 from hed.schema.hed_schema_io import from_dataframes, load_schema, load_schema_version
 from hed.schema.schema_io import df_constants as df_constants
 from hed.schema.schema_io.df_util import convert_filenames_to_dict, create_empty_dataframes
-from tests.schema.util_test_schemas import load_test_schema
+from tests.schema.util_test_schemas import TEST_SCHEMAS_DIR, load_test_schema
 
 
 class TestHedSchemaDF(unittest.TestCase):
@@ -39,13 +39,15 @@ class TestHedSchemaDF(unittest.TestCase):
         schema = load_test_schema("testconflict_2.1.0")
         schema.save_as_dataframes(self.output_folder + "test_library.tsv", save_merged=True)
 
-        reloaded_schema = load_schema(self.output_folder + "test_library.tsv")
+        # The partner 8.5.0 must come from the same folder as the original's: the vendored hed-tests
+        # snapshot is a prerelease that lacks the hedIds the released 8.5.0 assigned.
+        reloaded_schema = load_schema(self.output_folder + "test_library.tsv", xml_folder=TEST_SCHEMAS_DIR)
         self.assertEqual(schema, reloaded_schema)
 
         schema = load_test_schema("testconflict_2.1.0")
         schema.save_as_dataframes(self.output_folder + "test_library2.tsv", save_merged=False)
 
-        reloaded_schema = load_schema(self.output_folder + "test_library2.tsv")
+        reloaded_schema = load_schema(self.output_folder + "test_library2.tsv", xml_folder=TEST_SCHEMAS_DIR)
         self.assertEqual(schema, reloaded_schema)
 
     def test_from_dataframes(self):
