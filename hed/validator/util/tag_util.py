@@ -5,6 +5,7 @@ import re
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 from hed.schema.hed_schema_constants import HedKey
+from hed.validator.reserved_checker import ReservedChecker
 
 
 class TagValidator:
@@ -27,7 +28,7 @@ class TagValidator:
 
         """
         validation_issues = []
-        validation_issues += self.check_tag_exists_in_schema(original_tag)
+        validation_issues += self.check_tag_exists_in_schema(original_tag, allow_placeholders)
         if not allow_placeholders:
             validation_issues += self.check_for_placeholder(original_tag, is_definition)
         validation_issues += self.check_tag_requires_child(original_tag)
@@ -39,27 +40,38 @@ class TagValidator:
     # Mostly internal functions to check individual types of errors
     # =========================================================================+
     @staticmethod
-    def check_tag_exists_in_schema(original_tag) -> list[dict]:
+    def check_tag_exists_in_schema(original_tag, allow_placeholders=True) -> list[dict]:
         """Report invalid tag or doesn't take a value.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
+            allow_placeholders (bool): False if check_for_placeholder already reports every '#' of the tag.
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
+
+        Notes:
+            - A reserved tag whose row in reserved_tags.json has noExtension may not be extended, although it
+              inherits extensionAllowed (specification 3.2.5): TAG_EXTENSION_INVALID, also for ``Onset/#``.
+            - ``#`` used as an extension of any other tag is PLACEHOLDER_INVALID, whether or not the parent
+              allows extension (specification 3.2.5 rule 5).
         """
         validation_issues = []
         if original_tag.is_basic_tag() or original_tag.is_takes_value_tag():
             return validation_issues
 
-        is_extension_tag = original_tag.has_attribute(HedKey.ExtensionAllowed)
-        if not is_extension_tag:
-            actual_error = None
-            if "#" in original_tag.extension:
-                actual_error = ValidationErrors.PLACEHOLDER_INVALID
+        if original_tag.short_base_tag in ReservedChecker.get_instance().no_extension_tags:
+            validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_EXTENSION_INVALID, tag=original_tag)
+        elif "#" in original_tag.extension:
+            if not allow_placeholders:
+                return validation_issues
             validation_issues += ErrorHandler.format_error(
-                ValidationErrors.TAG_EXTENSION_INVALID, tag=original_tag, actual_error=actual_error
+                ValidationErrors.TAG_EXTENSION_INVALID,
+                tag=original_tag,
+                actual_error=ValidationErrors.PLACEHOLDER_INVALID,
             )
+        elif not original_tag.has_attribute(HedKey.ExtensionAllowed):
+            validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_EXTENSION_INVALID, tag=original_tag)
         else:
             validation_issues += ErrorHandler.format_error(
                 ValidationErrors.TAG_EXTENDED,
@@ -78,9 +90,16 @@ class TagValidator:
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
+
+        Notes:
+            - A reserved tag whose row in reserved_tags.json has requireValue also needs a value: Delay and
+              Duration carry requireChild only from schema 8.3.0 (TAG_REQUIRES_CHILD b).
         """
         validation_issues = []
-        if original_tag.has_attribute(HedKey.RequireChild):
+        if original_tag.has_attribute(HedKey.RequireChild) or (
+            original_tag.is_basic_tag()
+            and original_tag.short_base_tag in ReservedChecker.get_instance().require_value_tags
+        ):
             validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_REQUIRES_CHILD, tag=original_tag)
         return validation_issues
 

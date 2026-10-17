@@ -85,6 +85,7 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
     issues += validator.check_attributes()
     issues += validator.check_duplicate_names()
     issues += validator.check_library_partner_rules()
+    issues += validator.check_reserved_tags_file()
     issues += validator.check_redundant_units()
     issues += validator.check_any_units_class()
     issues += validator.check_units_unique_across_classes()
@@ -385,38 +386,55 @@ class SchemaValidator:
     _PROPERTY_COMPARE_EXCLUDED = (HedKey.InLibrary, HedKey.HedID)
 
     def check_library_partner_rules(self):
-        """Check the rules a partnered library file follows (Appendix B SCHEMA_LIBRARY_INVALID j, k, l).
+        """Check the rules a library file follows (Appendix B SCHEMA_LIBRARY_INVALID j, k, l, m, n).
 
-        The rules depend on the file form, which ``HedSchema.unmerged_libraries`` records through loading:
-        j: an unmerged partnered library declares no Properties; l: an unmerged partnered library does not
-        use ``reserved``; k: a merged partnered library's Properties section equals its partner's.
+        Some rules depend on the file form, which ``HedSchema.unmerged_libraries`` records through loading:
+        j: an unmerged partnered library declares no Properties; k: a merged partnered library's Properties
+        section equals its partner's. The others hold for every library: l: no element of the library's own
+        carries ``reserved``; m: no tag of its own has a reserved tag's name; n (partnered only): no node of its
+        own sits under a reserved tag of the partner.
 
         Notes:
-            - A loaded unmerged file is the merge of the library with its partner; the entries that carry its
-              ``inLibrary`` value are the ones the file declared, so a Properties entry among them is reason j
-              and one with ``reserved`` is reason l.
+            - A library's own elements are every element of an unpartnered library, and the elements carrying
+              ``inLibrary`` in a partnered one (an unmerged file is stamped on loading, a merged file carries
+              the attribute). The partner's reserved tags in a merged file are therefore not affected.
             - A merged file keeps its own Properties section, compared entry by entry with the partner's
               (reason k): names, descriptions and attributes other than ``inLibrary`` and ``hedId``, which are
               tool bookkeeping. The partner is loaded through the schema cache; when it cannot be loaded the
               comparison is skipped, since compliance never raises.
-            - An unpartnered library is self-contained and may declare properties and use ``reserved``.
+            - An unpartnered library is self-contained and may declare properties.
+            - Reserved names are read from reserved_tags.json through ReservedChecker (the nine structural
+              tags) plus its list of the ten organizational ones.
         """
         self.summary.start_check(
             "library_partner_rules",
-            "Check a partnered library's Properties section and its use of the reserved attribute.",
+            "Check a library's Properties section, its use of the reserved attribute, and its tags that "
+            "share a reserved tag's name or sit under a reserved tag.",
         )
         issues = []
+        library = self.hed_schema.library
         with_standard = self.hed_schema.with_standard
-        if self.hed_schema.library and with_standard:
+        if library and with_standard:
             unmerged = self.hed_schema.unmerged_libraries
             if unmerged:
-                issues += self._check_unmerged_library_rules(unmerged, with_standard)
+                issues += self._check_unmerged_library_rules(unmerged)
             else:
-                issues += self._compare_properties_with_partner(self.hed_schema.library, with_standard)
+                issues += self._compare_properties_with_partner(library, with_standard)
+                issues += self._check_library_reserved_attribute(library)
+        elif library:
+            issues += self._check_library_reserved_attribute(library)
+        if library:
+            issues += self._check_library_reserved_names(library)
         self.summary.record_issues(len(issues))
         return issues
 
-    def _check_unmerged_library_rules(self, unmerged, with_standard):
+    def _is_own_library_entry(self, entry):
+        """Return True if *entry* is declared by the library file itself rather than its standard partner."""
+        if not self.hed_schema.with_standard:
+            return True
+        return HedKey.InLibrary in entry.attributes
+
+    def _check_unmerged_library_rules(self, unmerged):
         """Return the reason-j and reason-l issues for the entries declared by unmerged library files."""
         issues = []
         for section_key in HedSectionKey:
@@ -429,16 +447,147 @@ class SchemaValidator:
                         SchemaErrors.SCHEMA_LIBRARY_PROPERTIES_DECLARED,
                         entry.name,
                         library=library,
-                        with_standard=with_standard,
+                        with_standard=self.hed_schema.with_standard,
                     )
-                if entry.has_attribute(HedKey.Reserved):
+                if HedKey.Reserved in entry.attributes:
                     issues += self.error_handler.format_error_with_context(
-                        SchemaErrors.SCHEMA_LIBRARY_RESERVED,
-                        entry.name,
-                        library=library,
-                        with_standard=with_standard,
-                        section=section_key.name,
+                        SchemaErrors.SCHEMA_LIBRARY_RESERVED, entry.name, library=library, section=section_key.name
                     )
+        return issues
+
+    def _check_library_reserved_attribute(self, library):
+        """Return the reason-l issues of a merged partnered or an unpartnered library."""
+        issues = []
+        for section_key in HedSectionKey:
+            for entry in self.hed_schema[section_key].all_entries:
+                if self._is_own_library_entry(entry) and HedKey.Reserved in entry.attributes:
+                    issues += self.error_handler.format_error_with_context(
+                        SchemaErrors.SCHEMA_LIBRARY_RESERVED, entry.name, library=library, section=section_key.name
+                    )
+        return issues
+
+    def _check_library_reserved_names(self, library):
+        """Return the reason-m and reason-n issues: own tags with a reserved name or under a reserved tag."""
+        from hed.validator.reserved_checker import ReservedChecker  # noqa: PLC0415 (avoids an import cycle)
+
+        # Tag names match without regard to case, so a library 'task' or 'ONSET' is the reserved tag too.
+        reserved_names = ReservedChecker.get_instance().reserved_names_casefold
+        issues = []
+        for entry in self.hed_schema[HedSectionKey.Tags].all_entries:
+            if not self._is_own_library_entry(entry):
+                continue
+            # A '#' entry's short name is its parent's, so it is judged only by its parent below.
+            if not entry.name.endswith("/#") and entry.short_tag_name.casefold() in reserved_names:
+                issues += self.error_handler.format_error_with_context(
+                    SchemaErrors.SCHEMA_LIBRARY_RESERVED_NAME, entry.short_tag_name, library=library
+                )
+            parent = entry.parent
+            if (
+                self.hed_schema.with_standard
+                and parent is not None
+                and not self._is_own_library_entry(parent)
+                and parent.short_tag_name.casefold() in reserved_names
+            ):
+                issues += self.error_handler.format_error_with_context(
+                    SchemaErrors.SCHEMA_LIBRARY_UNDER_RESERVED,
+                    entry.short_tag_name,
+                    library=library,
+                    reserved_tag=parent.short_tag_name,
+                )
+        return issues
+
+    # Standard schema versions in which reserved_tags.json expects an attribute or tag (Appendix A.6,
+    # SCHEMA_RESERVED_INVALID a): reserved and Inset arrive in 8.2.0, as does topLevelTagGroup on Delay and
+    # Duration; the ten organizational tags carry reserved from 8.3.0.
+    _RESERVED_FROM = "8.2.0"
+    _ORGANIZATIONAL_RESERVED_FROM = "8.3.0"
+    _TAGS_FROM = {"Inset": "8.2.0"}
+    _TOP_LEVEL_FROM = {"Delay": "8.2.0", "Duration": "8.2.0"}
+
+    def check_reserved_tags_file(self):
+        """Check that a standard schema agrees with reserved_tags.json (Appendix B SCHEMA_RESERVED_INVALID a, b).
+
+        a: every row of the file's ``tags`` exists (``Inset`` from 8.2.0) with ``topLevelTagGroup`` (on ``Delay``
+        and ``Duration`` from 8.2.0) and, from 8.2.0, ``reserved``; ``Def`` and ``Def-expand`` exist and, from
+        8.2.0, carry ``reserved``; from 8.3.0 the ten organizational tags carry ``reserved``.
+        b: a reserved tag (one with ``reserved``, or one of the nineteen by name, since 8.0.0 and 8.1.0 carry no
+        ``reserved``) has no child other than ``#``.
+
+        Notes:
+            - Library schemas are not checked here: they may not carry ``reserved`` or define a reserved name
+              (check_library_partner_rules, SCHEMA_LIBRARY_INVALID l, m, n).
+            - Only standard schemas >= 8.0.0 are checked, the versions the file applies to (Appendix A.6).
+            - The released standard schemas 8.0.0 to 8.5.0 pass unchanged.
+        """
+        from hed.validator.reserved_checker import ReservedChecker  # noqa: PLC0415 (avoids an import cycle)
+
+        self.summary.start_check(
+            "reserved_tags_file",
+            "Check that a standard schema defines the tags of reserved_tags.json with the attributes they rely on.",
+        )
+        issues = []
+        if self.hed_schema.library:
+            self.summary.record_issues(0)
+            return issues
+        version_str = self.hed_schema.version_number
+        try:
+            version = Version(version_str)
+        except ValueError:
+            version = None
+        # The file applies to standard schema versions >= 8.0.0 only (Appendix A.6).
+        if version is None or version < Version("8.0.0"):
+            self.summary.record_issues(0)
+            return issues
+
+        def applies(from_version):
+            return from_version is None or version >= Version(from_version)
+
+        checker = ReservedChecker.get_instance()
+        tags = self.hed_schema[HedSectionKey.Tags]
+        self.summary.record_section(HedSectionKey.Tags, len(tags))
+        expected = {}  # tag name -> attributes the tag must carry
+        for name in sorted(checker.special_names):
+            if not applies(self._TAGS_FROM.get(name)):
+                continue
+            attributes = []
+            if applies(self._TOP_LEVEL_FROM.get(name)):
+                attributes.append(HedKey.TopLevelTagGroup)
+            if applies(self._RESERVED_FROM):
+                attributes.append(HedKey.Reserved)
+            expected[name] = attributes
+        for name in sorted(checker.value_forms.keys() - checker.special_names):
+            expected[name] = [HedKey.Reserved] if applies(self._RESERVED_FROM) else []
+        if applies(self._ORGANIZATIONAL_RESERVED_FROM):
+            for name in sorted(checker.ORGANIZATIONAL_TAGS):
+                expected[name] = [HedKey.Reserved]
+
+        for name, attributes in expected.items():
+            entry = tags.get(name)
+            if entry is None:
+                issues += self.error_handler.format_error_with_context(
+                    SchemaErrors.SCHEMA_RESERVED_TAG_MISSING, name, version=version_str
+                )
+                continue
+            for attribute in attributes:
+                if not entry.has_attribute(attribute):
+                    issues += self.error_handler.format_error_with_context(
+                        SchemaErrors.SCHEMA_RESERVED_ATTRIBUTE_MISSING, name, attribute=attribute, version=version_str
+                    )
+
+        for entry in tags.all_entries:
+            parent = entry.parent
+            if entry.name.endswith("/#") or parent is None:
+                continue
+            # By name as well as by attribute, casefolded: 8.0.0 and 8.1.0 carry no reserved attribute, and tag
+            # names match without regard to case.
+            if (
+                parent.has_attribute(HedKey.Reserved)
+                or parent.short_tag_name.casefold() in checker.reserved_names_casefold
+            ):
+                issues += self.error_handler.format_error_with_context(
+                    SchemaErrors.SCHEMA_RESERVED_HAS_CHILD, parent.short_tag_name, child=entry.short_tag_name
+                )
+        self.summary.record_issues(len(issues))
         return issues
 
     def _compare_properties_with_partner(self, library, with_standard):

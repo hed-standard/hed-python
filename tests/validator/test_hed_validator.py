@@ -111,11 +111,12 @@ class Test(unittest.TestCase):
         sidecar = Sidecar(json_path)
         issues = sidecar.validate(hed_schema)
         filtered_issues = [issue for issue in issues if issue["severity"] < ErrorSeverity.WARNING]
-        self.assertEqual(len(filtered_issues), 10)
+        # Ten definition errors, plus Experimental-condition/# twice: '#' as an extension is PLACEHOLDER_INVALID.
+        self.assertEqual(len(filtered_issues), 12)
         input_file = TabularInput(events_path, sidecar=sidecar)
 
         # The sidecar stage runs first and stops on its errors, so the file's rows are never checked and
-        # the sidecar's own issues (10 errors and 2 warnings) are all that is reported, once each.
+        # the sidecar's own issues (12 errors) are all that is reported, once each.
         validation_issues = input_file.validate(hed_schema)
         self.assertEqual(len(validation_issues), 12)
         self.assertEqual(

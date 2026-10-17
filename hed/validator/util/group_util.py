@@ -1,8 +1,7 @@
 """Validation of the HED tags as strings."""
 
 from hed.errors.error_reporter import ErrorHandler
-from hed.errors.error_types import TemporalErrors, ValidationErrors
-from hed.models.model_constants import DefTagNames
+from hed.errors.error_types import ValidationErrors
 from hed.schema.hed_schema_constants import HedKey
 from hed.validator.reserved_checker import ReservedChecker
 from hed.validator.util.dup_util import DuplicateChecker
@@ -102,7 +101,7 @@ class GroupValidator:
         return []
 
     def _check_reserved_group_requirements(self, group):
-        """This is called if group is top-level.
+        """Check a group against the row of its governing reserved tag (reserved_tags.json).
 
         Parameters:
             group (HedGroup) - the HED group to test for special tags.
@@ -137,12 +136,23 @@ class GroupValidator:
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
+
+        Notes:
+            - A tag is a tagGroup or topLevelTagGroup tag when its schema says so or its row in
+              reserved_tags.json does: schemas 8.0.0 and 8.1.0 carry neither attribute on Delay and Duration,
+              and the file supplies them (specification 3.2.8 rule 1).
         """
         validation_issues = GroupValidator._check_group_tag_attribute(original_tag_list, is_group)
         if len(validation_issues) > 0:
             return validation_issues
 
-        top_level_tags = [tag for tag in original_tag_list if tag.base_tag_has_attribute(HedKey.TopLevelTagGroup)]
+        reserved_checker = ReservedChecker.get_instance()
+        top_level_tags = [
+            tag
+            for tag in original_tag_list
+            if tag.base_tag_has_attribute(HedKey.TopLevelTagGroup)
+            or tag.short_base_tag in reserved_checker.top_group_tags
+        ]
         if not is_top_level:
             validation_issues += GroupValidator._check_no_top_tags(top_level_tags)
         return validation_issues
@@ -157,21 +167,16 @@ class GroupValidator:
         Returns:
             list: Validation issues. Each issue is a dictionary.
 
+        Notes:
+            - A reserved tag is reported with its row's ERROR_CODE; TAG_GROUP_ERROR otherwise.
         """
+        reserved_checker = ReservedChecker.get_instance()
         validation_issues = []
         for top_level_tag in tag_list:
-            actual_code = None
-            if top_level_tag.short_base_tag == DefTagNames.DEFINITION_KEY:
-                actual_code = ValidationErrors.DEFINITION_INVALID
-            elif top_level_tag.short_base_tag in DefTagNames.ALL_TIME_KEYS:
-                actual_code = ValidationErrors.TEMPORAL_TAG_ERROR  # May split this out if we switch error
-
-            if actual_code:
-                validation_issues += ErrorHandler.format_error(
-                    ValidationErrors.HED_TOP_LEVEL_TAG, tag=top_level_tag, actual_error=actual_code
-                )
-            else:
-                validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TOP_LEVEL_TAG, tag=top_level_tag)
+            actual_code = reserved_checker.get_error_code(top_level_tag.short_base_tag)
+            validation_issues += ErrorHandler.format_error(
+                ValidationErrors.HED_TOP_LEVEL_TAG, tag=top_level_tag, actual_error=actual_code
+            )
         return validation_issues
 
     @staticmethod
@@ -185,13 +190,21 @@ class GroupValidator:
         Returns:
             list: Validation issues. Each issue is a dictionary.
 
-        TODO: Incorporate the
+        Notes:
+            - The tagGroup attribute comes from the schema or from the tag's row in reserved_tags.json.
+            - A reserved tag is reported with its row's ERROR_CODE; TAG_GROUP_ERROR otherwise.
         """
+        if is_group:
+            return []
+        reserved_checker = ReservedChecker.get_instance()
         validation_issues = []
-        tag_group_tags = [tag for tag in tag_list if tag.base_tag_has_attribute(HedKey.TagGroup)]
-        for tag_group_tag in tag_group_tags:
-            if not is_group:
-                validation_issues += ErrorHandler.format_error(ValidationErrors.HED_TAG_GROUP_TAG, tag=tag_group_tag)
+        for tag in tag_list:
+            if tag.base_tag_has_attribute(HedKey.TagGroup) or tag.short_base_tag in reserved_checker.group_tags:
+                validation_issues += ErrorHandler.format_error(
+                    ValidationErrors.HED_TAG_GROUP_TAG,
+                    tag=tag,
+                    actual_error=reserved_checker.get_error_code(tag.short_base_tag),
+                )
         return validation_issues
 
     def check_for_required_tags(self, tags) -> list:
@@ -234,41 +247,6 @@ class GroupValidator:
                     ValidationErrors.TAG_NOT_UNIQUE, tag_namespace=unique_prefix
                 )
         return validation_issues
-
-    @staticmethod
-    def validate_duration_tags(hed_string_obj) -> list:
-        """Validate Duration/Delay tag groups
-
-        Parameters:
-            hed_string_obj (HedString): The HED string to check.
-
-        Returns:
-            list: Issues found in validating durations (i.e., extra tags or groups present, or a group missing)
-        """
-        duration_issues = []
-        for top_tag, group in hed_string_obj.find_top_level_tags(anchor_tags=DefTagNames.DURATION_KEYS):
-            top_level_tags = [
-                tag.short_base_tag
-                for tag in group.get_all_tags()
-                if tag.base_tag_has_attribute(HedKey.TopLevelTagGroup)
-            ]
-            # Skip onset/inset/offset
-            if any(tag in DefTagNames.TEMPORAL_KEYS for tag in top_level_tags):
-                continue
-            # This implicitly validates the duration/delay tag, as they're the only two allowed in the same group
-            # It should be impossible to have > 2 tags, but it's a good stopgap.
-            if len(top_level_tags) != len(group.tags()):
-                for tag in group.tags():
-                    if tag.short_base_tag not in top_level_tags:
-                        duration_issues += ErrorHandler.format_error(TemporalErrors.DURATION_HAS_OTHER_TAGS, tag=tag)
-                continue
-            if len(group.groups()) != 1:
-                duration_issues += ErrorHandler.format_error(
-                    TemporalErrors.DURATION_WRONG_NUMBER_GROUPS, top_tag, hed_string_obj.groups()
-                )
-                continue
-
-        return duration_issues
 
     def _validate_tags_in_hed_string(self, tags):
         """Validate the multi-tag properties in a HED string.

@@ -172,7 +172,6 @@ class ComplianceSummary:
         lines.append("  - HedID completeness (all entries should have IDs)")
         lines.append("  - Attributes must have exactly one range type")
         lines.append("  - Attributes must have at least one domain")
-        lines.append("  - Reserved tag semantics")
         lines.append("  - Prologue/epilogue existence for released schemas")
         lines.append("  - StringRange value validation")
         lines.append("=" * 70)

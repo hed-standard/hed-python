@@ -115,6 +115,7 @@ class TestDefinitionDict(TestDefBase):
                 "(Definition/InvalidDef1,(Item,Red),(Property,Blue))",
                 2,
                 ["Definition/InvalidDef1"],
+                actual_error=ValidationErrors.DEFINITION_INVALID,
             ),
             "extraValidTags": self.format_error(
                 ValidationErrors.HED_TAGS_NOT_ALLOWED, "Red", "(Definition/InvalidDefA,Red,Blue)"
@@ -130,25 +131,13 @@ class TestDefinitionDict(TestDefBase):
                 expected_count=1,
                 tag_list=["Age/#", "Item-count/#"],
             ),
+            # The part after the name is not a single '#' (DEFINITION_INVALID l), reported before characters.
             "invalidPlaceholderExtension": self.format_error(
-                ValidationErrors.INVALID_VALUE_CLASS_CHARACTER,
-                "Definition/InvalidDef1/this-part-is-not-allowed/#",
-                "/",
-                value_class="nameClass",
-                char_index=22,
-                char_set=NAME_SETS,
-                code_point="U+002F",
-                allows="nameClass allows " + NAME_SETS,
+                DefinitionErrors.INVALID_DEFINITION_EXTENSION, tag=0, def_name="InvalidDef1"
             ),
+            # The part after the name is not a single '#' (DEFINITION_INVALID l), reported before characters.
             "invalidPlaceholder": self.format_error(
-                ValidationErrors.INVALID_VALUE_CLASS_CHARACTER,
-                "Definition/InvalidDef1/InvalidPlaceholder",
-                "/",
-                value_class="nameClass",
-                char_index=22,
-                char_set=NAME_SETS,
-                code_point="U+002F",
-                allows="nameClass allows " + NAME_SETS,
+                DefinitionErrors.INVALID_DEFINITION_EXTENSION, tag=0, def_name="InvalidDef1"
             ),
             "defInGroup": self.format_error(
                 DefinitionErrors.DEF_TAG_IN_DEFINITION,
@@ -159,9 +148,10 @@ class TestDefinitionDict(TestDefBase):
                 ValidationErrors.HED_TAGS_NOT_ALLOWED,
                 tag=HedTag("Definition/ValidDefName", self.hed_schema),
                 group="(Definition/ValidDefName,(Def-expand/OkayDef,(White)))",
+                actual_error=ValidationErrors.DEFINITION_INVALID,
             ),
             "doublePoundSignPlaceholder": self.format_error(
-                DefinitionErrors.INVALID_DEFINITION_EXTENSION, tag=0, def_name="InvalidDef/##"
+                DefinitionErrors.INVALID_DEFINITION_EXTENSION, tag=0, def_name="InvalidDef"
             ),
             "doublePoundSignDiffPlaceholder": self.format_error(
                 DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, "InvalidDef", expected_count=1, tag_list=["Age/##"]

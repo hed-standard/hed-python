@@ -1,0 +1,41 @@
+---
+name: Reserved tags copy check
+
+# hed/validator/data/reserved_tags.json is a verbatim copy of the file hed-specification publishes
+# (its docs/source/_static/reserved_tags.json, served at
+# https://www.hedtags.org/hed-specification/_static/reserved_tags.json). The file has one home, so
+# this check fails when the copy drifts from hed-specification main. It runs when the copy or this
+# workflow changes and weekly, not on every pull request, so an unrelated change cannot start
+# failing because the specification moved.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - hed/validator/data/reserved_tags.json
+      - .github/workflows/reserved_tags.yaml
+  pull_request:
+    paths:
+      - hed/validator/data/reserved_tags.json
+      - .github/workflows/reserved_tags.yaml
+  schedule:
+    # Weekly on Sundays at 4:30 AM UTC, after the character sets check
+    - cron: '30 4 * * 0'
+
+permissions:
+  contents: read
+
+jobs:
+  copy-check:
+    name: Copy matches hed-specification main
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Compare with hed-specification main
+        run: |
+          curl -fsSL -o /tmp/reserved_tags.json \
+            https://raw.githubusercontent.com/hed-standard/hed-specification/main/docs/source/_static/reserved_tags.json
+          cmp /tmp/reserved_tags.json hed/validator/data/reserved_tags.json

@@ -95,7 +95,8 @@ class TestValueText(unittest.TestCase):
 
     def test_the_schema_row_is_compliant(self):
         codes = {issue["code"] for issue in self.schema_850.check_compliance()}
-        self.assertEqual(codes - {SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED}, set())
+        # The fixture is a fragment without the reserved tags (SCHEMA_RESERVED_INVALID a), not the point here.
+        self.assertEqual(codes - {SchemaWarnings.SCHEMA_PRERELEASE_VERSION_USED, "SCHEMA_RESERVED_INVALID"}, set())
 
 
 class TestDeclarationWinsGate(unittest.TestCase):

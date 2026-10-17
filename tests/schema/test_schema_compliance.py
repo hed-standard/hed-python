@@ -61,6 +61,7 @@ class TestComplianceSummary(unittest.TestCase):
             "attributes",
             "duplicate_names",
             "library_partner_rules",
+            "reserved_tags_file",
             "redundant_units",
             "any_units_class",
             "units_unique_across_classes",
@@ -202,7 +203,10 @@ class TestRedundantUnits(unittest.TestCase):
         self.assertIn("modifier 'u' + unit 'V'", message)
         self.assertEqual(duplicate_issues[0]["severity"], ErrorSeverity.ERROR)
         # No other issue: 8.5.0 is released (no prerelease warning) and the clean timeUnits class is not flagged.
-        other_codes = [i["code"] for i in issues if i["code"] != "SCHEMA_DUPLICATE_NODE"]
+        # The fixture is a fragment without the reserved tags, so SCHEMA_RESERVED_INVALID a is set aside.
+        other_codes = [
+            i["code"] for i in issues if i["code"] not in ("SCHEMA_DUPLICATE_NODE", "SCHEMA_RESERVED_INVALID")
+        ]
         self.assertEqual(other_codes, [])
 
     def test_850_fixture_summary(self):
@@ -497,28 +501,103 @@ class TestLibraryPartnerRules(unittest.TestCase):
         )
         self.assertIn("SCHEMA_LIBRARY_INVALID l", issues[0]["message"])
 
-    def test_unpartnered_library_may_declare_properties_and_use_reserved(self):
-        hed_schema = self.schema_from(
-            self.HEADER_UNPARTNERED,
-            [self.tag("NewTag") + " <nowiki>{reserved}</nowiki>"],
-            ["* boolProperty"],
-            ["* reserved <nowiki>{boolProperty}</nowiki>"],
-        )
+    def test_unpartnered_library_may_declare_properties(self):
+        hed_schema = self.schema_from(self.HEADER_UNPARTNERED, [self.tag("NewTag")], ["* boolProperty"])
         issues = hed_schema.check_compliance()
         self.assertEqual([i["code"] for i in issues], ["SCHEMA_PRERELEASE_VERSION_USED"], issues)
         # An unpartnered library's entries carry no inLibrary stamp: there is no partner to be told apart from.
         self.assertFalse(hed_schema.tags["NewTag"].has_attribute("inLibrary"))
         self.assertFalse(hed_schema.properties["boolProperty"].has_attribute("inLibrary"))
 
-    def test_l_does_not_apply_to_a_merged_file(self):
-        # Appendix B states reason l for the unmerged form only; a merged file's own tag may carry reserved.
+    def test_l_reserved_in_an_unpartnered_library(self):
+        # hed-specification decision 2026-10-14: no library schema, partnered or not, may carry reserved.
+        hed_schema = self.schema_from(
+            self.HEADER_UNPARTNERED,
+            [self.tag("NewTag") + " <nowiki>{reserved}</nowiki>"],
+            ["* boolProperty"],
+            ["* reserved <nowiki>{boolProperty}</nowiki>"],
+        )
+        issues = self.library_issues(hed_schema)
+        self.assertEqual(len(issues), 1, issues)
+        self.assertIn(
+            "'NewTag' in the Tags section of library 'testconflict' uses the reserved attribute", issues[0]["message"]
+        )
+        self.assertIn("SCHEMA_LIBRARY_INVALID l", issues[0]["message"])
+
+    def test_l_reserved_on_an_own_element_of_a_merged_file(self):
+        # In a merged file the library's own elements are those with inLibrary; the partner's keep reserved.
         tags = [
             self.tag("Event") + " <nowiki>[Something that happens at a given place and time.]</nowiki>",
             "* Rooted-tag <nowiki>{rooted=Event, inLibrary=testconflict, reserved}[A library subtree.]</nowiki>",
+            self.tag("Def") + " <nowiki>{reserved}[A partner tag that is reserved.]</nowiki>",
         ]
         attributes = ["* inLibrary <nowiki>{elementDomain, stringRange} [The library of this element.]</nowiki>"]
         hed_schema = self.schema_from(self.HEADER_MERGED, tags, self.PROPERTIES_840, attributes)
         self.assertEqual(hed_schema.unmerged_libraries, frozenset())
+        messages = [i["message"] for i in self.library_issues(hed_schema)]
+        self.assertEqual(len(messages), 1, messages)
+        self.assertIn("'Event/Rooted-tag' in the Tags section of library 'testconflict'", messages[0])
+        self.assertIn("SCHEMA_LIBRARY_INVALID l", messages[0])
+
+    def test_m_unpartnered_library_tag_with_a_reserved_name(self):
+        # Structural names come from reserved_tags.json (rows and valueForms), the other ten from the spec list.
+        tags = [self.tag("Onset"), self.tag("Def"), self.tag("Task"), self.tag("Ordinary-tag")]
+        messages = sorted(
+            i["message"] for i in self.library_issues(self.schema_from(self.HEADER_UNPARTNERED, tags, []))
+        )
+        self.assertEqual(len(messages), 3, messages)
+        for name, message in zip(["Def", "Onset", "Task"], messages, strict=True):
+            self.assertIn(f"Library 'testconflict' defines the tag '{name}'", message)
+            self.assertIn("SCHEMA_LIBRARY_INVALID m", message)
+
+    def test_m_reserved_name_in_another_case(self):
+        # Tag names match without regard to case, so 'task' and 'ONSET' are the reserved tags too.
+        tags = [self.tag("task"), self.tag("ONSET"), self.tag("Ordinary-tag")]
+        messages = sorted(
+            i["message"] for i in self.library_issues(self.schema_from(self.HEADER_UNPARTNERED, tags, []))
+        )
+        self.assertEqual(len(messages), 2, messages)
+        self.assertIn("defines the tag 'ONSET'", messages[0])
+        self.assertIn("defines the tag 'task'", messages[1])
+
+    def test_m_own_tag_of_a_merged_file_with_a_reserved_name(self):
+        tags = [
+            self.tag("Event") + " <nowiki>[Something that happens at a given place and time.]</nowiki>",
+            "* Task <nowiki>{rooted=Event, inLibrary=testconflict}[A library tag with a reserved name.]</nowiki>",
+        ]
+        attributes = ["* inLibrary <nowiki>{elementDomain, stringRange} [The library of this element.]</nowiki>"]
+        hed_schema = self.schema_from(self.HEADER_MERGED, tags, self.PROPERTIES_840, attributes)
+        messages = [i["message"] for i in self.library_issues(hed_schema)]
+        self.assertEqual(len(messages), 1, messages)
+        self.assertIn("defines the tag 'Task'", messages[0])
+        self.assertIn("SCHEMA_LIBRARY_INVALID m", messages[0])
+
+    def test_n_unmerged_library_rooted_under_a_reserved_tag(self):
+        hed_schema = self.schema_from(self.HEADER_UNMERGED, [self.tag("NewTag") + " {rooted=Onset}"], [])
+        messages = [i["message"] for i in self.library_issues(hed_schema)]
+        self.assertEqual(len(messages), 1, messages)
+        self.assertIn("Library 'testconflict' places 'NewTag' under the reserved tag 'Onset'", messages[0])
+        self.assertIn("SCHEMA_LIBRARY_INVALID n", messages[0])
+
+    def test_n_merged_library_node_under_a_reserved_tag(self):
+        tags = [
+            self.tag("Onset") + " <nowiki>[A partner tag.]</nowiki>",
+            "* Library-child <nowiki>{inLibrary=testconflict}[A library node under a reserved tag.]</nowiki>",
+        ]
+        attributes = ["* inLibrary <nowiki>{elementDomain, stringRange} [The library of this element.]</nowiki>"]
+        hed_schema = self.schema_from(self.HEADER_MERGED, tags, self.PROPERTIES_840, attributes)
+        messages = [i["message"] for i in self.library_issues(hed_schema)]
+        self.assertEqual(len(messages), 1, messages)
+        self.assertIn("places 'Library-child' under the reserved tag 'Onset'", messages[0])
+
+    def test_n_unmerged_library_rooted_under_a_reserved_tag_in_another_case(self):
+        hed_schema = self.schema_from(self.HEADER_UNMERGED, [self.tag("NewTag") + " {rooted=onset}"], [])
+        messages = [i["message"] for i in self.library_issues(hed_schema)]
+        self.assertEqual(len(messages), 1, messages)
+        self.assertIn("SCHEMA_LIBRARY_INVALID n", messages[0])
+
+    def test_n_unmerged_library_rooted_under_an_ordinary_tag_is_clean(self):
+        hed_schema = self.schema_from(self.HEADER_UNMERGED, [self.tag("NewTag") + " {rooted=Event}"], [])
         self.assertEqual(self.library_issues(hed_schema), [])
 
     def test_k_merged_file_property_carrying_in_library_is_an_extra_property(self):
@@ -546,6 +625,92 @@ class TestLibraryPartnerRules(unittest.TestCase):
     def test_unmerged_partnered_library_entries_are_stamped(self):
         hed_schema = self.schema_from(self.HEADER_UNMERGED, [self.tag("NewTag") + " {rooted=Event}"], [])
         self.assertEqual(hed_schema.tags["NewTag"].attributes.get("inLibrary"), "testconflict")
+
+
+class TestReservedTagsFile(unittest.TestCase):
+    """check_reserved_tags_file: a standard schema agrees with reserved_tags.json (SCHEMA_RESERVED_INVALID a, b).
+
+    The fixtures are the bundled HED8.4.0.xml with one change each.
+    """
+
+    ONSET = (
+        "<name>Onset</name>\n"
+        "                     <description>Marks the start of an ongoing event of temporal extent.</description>"
+    )
+    ONSET_TOP_LEVEL = "\n                     <attribute>\n                        <name>topLevelTagGroup</name>\n                     </attribute>"
+    TASK = (
+        "<name>Task</name>\n"
+        "               <description>An assigned piece of work, usually with a time allotment. A tag used to "
+        "indicate a linkage the structured activities performed as part of the experiment.</description>"
+    )
+    TASK_RESERVED = "\n               <attribute>\n                  <name>reserved</name>\n               </attribute>"
+
+    @classmethod
+    def setUpClass(cls):
+        path = os.path.join(os.path.dirname(schema.__file__), "schema_data", "HED8.4.0.xml")
+        with open(path, encoding="utf-8") as file:
+            cls.xml_840 = file.read()
+
+    @staticmethod
+    def reserved_messages(hed_schema):
+        return sorted(i["message"] for i in hed_schema.check_compliance() if i["code"] == "SCHEMA_RESERVED_INVALID")
+
+    def modified(self, old, new):
+        self.assertEqual(self.xml_840.count(old), 1, old)
+        return schema.from_string(self.xml_840.replace(old, new), schema_format=".xml")
+
+    def test_released_standard_schemas_pass(self):
+        for version in ["8.0.0", "8.1.0", "8.2.0", "8.3.0", "8.4.0", "8.5.0"]:
+            with self.subTest(version=version):
+                self.assertEqual(self.reserved_messages(schema.load_schema_version(version)), [])
+
+    def test_a_row_tag_missing(self):
+        messages = self.reserved_messages(self.modified("<name>Inset</name>", "<name>Inbetween</name>"))
+        self.assertEqual(len(messages), 1, messages)
+        self.assertIn("Standard schema 8.4.0 does not define 'Inset'", messages[0])
+        self.assertIn("SCHEMA_RESERVED_INVALID a", messages[0])
+
+    def test_a_row_tag_without_top_level_tag_group(self):
+        messages = self.reserved_messages(self.modified(self.ONSET + self.ONSET_TOP_LEVEL, self.ONSET))
+        self.assertEqual(len(messages), 1, messages)
+        self.assertIn("'Onset' lacks the topLevelTagGroup attribute", messages[0])
+
+    def test_a_organizational_tag_without_reserved(self):
+        messages = self.reserved_messages(self.modified(self.TASK + self.TASK_RESERVED, self.TASK))
+        self.assertEqual(len(messages), 1, messages)
+        self.assertIn("'Task' lacks the reserved attribute", messages[0])
+
+    def test_b_reserved_tag_with_a_child(self):
+        child = "\n<node><name>Onset-detail</name><description>Not allowed.</description></node>"
+        messages = self.reserved_messages(self.modified(self.ONSET, self.ONSET + child))
+        self.assertEqual(len(messages), 1, messages)
+        self.assertIn("The reserved tag 'Onset' has the child 'Onset-detail'", messages[0])
+        self.assertIn("SCHEMA_RESERVED_INVALID b", messages[0])
+
+    def test_b_reserved_tag_in_another_case_with_a_child_in_8_1_0(self):
+        # 8.1.0 carries no reserved attribute, so reason b finds the parent by name; the name match must not
+        # depend on case, since tag lookups do not.
+        path = os.path.join(os.path.dirname(schema.__file__), "schema_data", "HED8.1.0.xml")
+        with open(path, encoding="utf-8") as file:
+            xml_810 = file.read()
+        self.assertEqual(xml_810.count("<name>Onset</name>"), 1)
+        child = "<node><name>Onset-detail</name><description>Not allowed.</description></node>"
+        hed_schema = schema.from_string(
+            xml_810.replace("<name>Onset</name>", "<name>ONSET</name>" + child), schema_format=".xml"
+        )
+        messages = self.reserved_messages(hed_schema)
+        self.assertEqual(len(messages), 1, messages)
+        self.assertIn("The reserved tag 'ONSET' has the child 'Onset-detail'", messages[0])
+        self.assertIn("SCHEMA_RESERVED_INVALID b", messages[0])
+
+    def test_version_below_8_0_0_is_not_checked(self):
+        # The file applies to standard schemas >= 8.0.0 (Appendix A.6); a fragment below that is not checked.
+        w = "'''"
+        lines = ['HED version="1.0.0"', f"{w}Prologue{w}", "!# start schema", f"{w}Event{w}", "!# end schema"]
+        lines += [f"{w}{name}{w}" for name in ("Unit classes", "Unit modifiers", "Value classes", "Schema attributes")]
+        lines += [f"{w}Properties{w}", f"{w}Epilogue{w}", "!# end hed"]
+        hed_schema = schema.from_string("\n".join(lines), schema_format=".mediawiki")
+        self.assertEqual(self.reserved_messages(hed_schema), [])
 
 
 class TestExtrasColumnsCompliance(unittest.TestCase):

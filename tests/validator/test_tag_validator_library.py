@@ -393,7 +393,7 @@ class TestTagLevels3(TestHed3):
             "invalid1": [
                 {
                     "code": "DEFINITION_INVALID",
-                    "message": 'Tag "tl:Definition/InvalidDef" must be in a top level group but was found in another location.',
+                    "message": 'Tag "tl:Definition/InvalidDef" that must be in a group was found in another location.',
                     "severity": 1,
                 }
             ],

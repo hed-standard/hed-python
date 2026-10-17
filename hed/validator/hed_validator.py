@@ -279,10 +279,8 @@ class HedValidator:
                     validation_issues += self._def_validator.validate_def_value_units(
                         hed_tag, self, allow_placeholders=allow_placeholders
                     )
-                elif (hed_tag.short_base_tag == DefTagNames.DEFINITION_KEY) and hed_tag.extension.endswith("/#"):
-                    validation_issues += self.validate_units(
-                        hed_tag, hed_tag.extension[:-2], allow_placeholders=allow_placeholders
-                    )
+                elif hed_tag.short_base_tag == DefTagNames.DEFINITION_KEY:
+                    validation_issues += self._validate_definition_value(hed_tag, allow_placeholders)
                 elif allow_placeholders and hed_tag.is_unit_class_tag() and hed_tag.extension.startswith("# "):
                     # If placeholder is followed by units (e.g., "# m-per-s^2"), validate the units
                     validation_issues += self.validate_units(hed_tag, allow_placeholders=allow_placeholders)
@@ -290,3 +288,29 @@ class HedValidator:
                     validation_issues += self.validate_units(hed_tag, allow_placeholders=allow_placeholders)
 
         return validation_issues
+
+    def _validate_definition_value(self, definition_tag, allow_placeholders) -> list[dict]:
+        """Validate the two-part value of a Definition tag: a name, then optionally ``/#``.
+
+        Parameters:
+            definition_tag (HedTag): A Definition tag.
+            allow_placeholders (bool): Whether placeholders are allowed.
+
+        Returns:
+            list[dict]: DEFINITION_INVALID (reason l) if anything other than a single ``#`` follows the name,
+                otherwise the issues of the name as a value of its placeholder.
+
+        Notes:
+            - The second part is the ``placeholder`` form of ``valueForms`` in reserved_tags.json (specification
+              3.2.8.1); it is reported before the name's characters are checked, so ``Definition/MyDef/3`` is
+              DEFINITION_INVALID rather than CHARACTER_INVALID.
+        """
+        name, separator, second_part = definition_tag.extension.partition("/")
+        if separator and second_part != "#":
+            return error_reporter.ErrorHandler.format_error(
+                DefinitionErrors.INVALID_DEFINITION_EXTENSION, definition_tag, def_name=name
+            )
+        if allow_placeholders and "#" in name:
+            # A misplaced '#' in the name (Definition/MyDef#) is reported by DefinitionDict as DEFINITION_INVALID.
+            return []
+        return self.validate_units(definition_tag, name, allow_placeholders=allow_placeholders)

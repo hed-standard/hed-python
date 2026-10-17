@@ -550,29 +550,19 @@ class TestStagedValidation(unittest.TestCase):
         self.assertEqual(error_handler.error_context, [(ErrorContext.TABLE_NAME, "trials")])
 
     def test_value_column_whose_tag_has_no_unit_or_value_class(self):
-        """An extension-allowed template tag has no value class, so each value is checked as an extension."""
+        """A '#' written as an extension in a sidecar is PLACEHOLDER_INVALID (specification 3.2.5 rule 5)."""
         sidecar = _sidecar({"col": {"HED": "Item/#"}})
         rows = [
             ["onset", "duration", "col"],
             ["1.0", "0", "Widget"],
-            ["2.0", "0", "a b"],
-            ["3.0", "0", "a,b"],
-            ["4.0", "0", "a{b"],
+            ["2.0", "0", "a,b"],
         ]
         issues = _tabular(rows, sidecar).validate(self.schema, error_handler=ErrorHandler(check_for_warnings=True))
-        # Every value is an extension: the two with a bad character are errors, the others warn like the
-        # template itself does (the template's warning carries no row).
+        # The sidecar stage stops on the template's error, so no value is checked.
         self.assertEqual(
             [(issue["code"], issue.get(ErrorContext.ROW)) for issue in issues],
-            [
-                (ValidationErrors.TAG_EXTENDED, 2),
-                (ValidationErrors.TAG_EXTENDED, 3),
-                (ValidationErrors.CHARACTER_INVALID, 4),
-                (ValidationErrors.CHARACTER_INVALID, 5),
-                (ValidationErrors.TAG_EXTENDED, None),
-            ],
+            [(ValidationErrors.PLACEHOLDER_INVALID, None)],
         )
-        self.assertEqual(_tabular(rows[:3], sidecar).validate(self.schema, error_handler=ErrorHandler(False)), [])
 
     def test_prefix_template_with_only_a_warning_still_checks_the_values(self):
         """A column_prefix_dictionary template that only warns (an extension) does not skip its values."""
