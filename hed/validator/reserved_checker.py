@@ -82,6 +82,9 @@ class ReservedChecker:
         # The nine structural reserved tags: the rows plus the two-part tags Def and Def-expand.
         self.structural_names = frozenset(self.special_names | set(self.value_forms))
         self.reserved_names = self.structural_names | self.ORGANIZATIONAL_TAGS
+        # Schema tag names are matched without regard to case (HedSchemaTagSection.get casefolds its key), so
+        # a check that asks whether a schema's own spelling is a reserved name compares casefolded names.
+        self.reserved_names_casefold = frozenset(name.casefold() for name in self.reserved_names)
 
     def _get_special_tags_by_property(self, property_name):
         return {value["name"] for value in self.reserved_map.values() if value.get(property_name) is True}

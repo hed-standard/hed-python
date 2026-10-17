@@ -470,13 +470,14 @@ class SchemaValidator:
         """Return the reason-m and reason-n issues: own tags with a reserved name or under a reserved tag."""
         from hed.validator.reserved_checker import ReservedChecker  # noqa: PLC0415 (avoids an import cycle)
 
-        reserved_names = ReservedChecker.get_instance().reserved_names
+        # Tag names match without regard to case, so a library 'task' or 'ONSET' is the reserved tag too.
+        reserved_names = ReservedChecker.get_instance().reserved_names_casefold
         issues = []
         for entry in self.hed_schema[HedSectionKey.Tags].all_entries:
             if not self._is_own_library_entry(entry):
                 continue
             # A '#' entry's short name is its parent's, so it is judged only by its parent below.
-            if not entry.name.endswith("/#") and entry.short_tag_name in reserved_names:
+            if not entry.name.endswith("/#") and entry.short_tag_name.casefold() in reserved_names:
                 issues += self.error_handler.format_error_with_context(
                     SchemaErrors.SCHEMA_LIBRARY_RESERVED_NAME, entry.short_tag_name, library=library
                 )
@@ -485,7 +486,7 @@ class SchemaValidator:
                 self.hed_schema.with_standard
                 and parent is not None
                 and not self._is_own_library_entry(parent)
-                and parent.short_tag_name in reserved_names
+                and parent.short_tag_name.casefold() in reserved_names
             ):
                 issues += self.error_handler.format_error_with_context(
                     SchemaErrors.SCHEMA_LIBRARY_UNDER_RESERVED,
@@ -577,7 +578,12 @@ class SchemaValidator:
             parent = entry.parent
             if entry.name.endswith("/#") or parent is None:
                 continue
-            if parent.has_attribute(HedKey.Reserved) or parent.short_tag_name in checker.reserved_names:
+            # By name as well as by attribute, casefolded: 8.0.0 and 8.1.0 carry no reserved attribute, and tag
+            # names match without regard to case.
+            if (
+                parent.has_attribute(HedKey.Reserved)
+                or parent.short_tag_name.casefold() in checker.reserved_names_casefold
+            ):
                 issues += self.error_handler.format_error_with_context(
                     SchemaErrors.SCHEMA_RESERVED_HAS_CHILD, parent.short_tag_name, child=entry.short_tag_name
                 )

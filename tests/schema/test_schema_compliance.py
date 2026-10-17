@@ -550,6 +550,16 @@ class TestLibraryPartnerRules(unittest.TestCase):
             self.assertIn(f"Library 'testconflict' defines the tag '{name}'", message)
             self.assertIn("SCHEMA_LIBRARY_INVALID m", message)
 
+    def test_m_reserved_name_in_another_case(self):
+        # Tag names match without regard to case, so 'task' and 'ONSET' are the reserved tags too.
+        tags = [self.tag("task"), self.tag("ONSET"), self.tag("Ordinary-tag")]
+        messages = sorted(
+            i["message"] for i in self.library_issues(self.schema_from(self.HEADER_UNPARTNERED, tags, []))
+        )
+        self.assertEqual(len(messages), 2, messages)
+        self.assertIn("defines the tag 'ONSET'", messages[0])
+        self.assertIn("defines the tag 'task'", messages[1])
+
     def test_m_own_tag_of_a_merged_file_with_a_reserved_name(self):
         tags = [
             self.tag("Event") + " <nowiki>[Something that happens at a given place and time.]</nowiki>",
@@ -579,6 +589,12 @@ class TestLibraryPartnerRules(unittest.TestCase):
         messages = [i["message"] for i in self.library_issues(hed_schema)]
         self.assertEqual(len(messages), 1, messages)
         self.assertIn("places 'Library-child' under the reserved tag 'Onset'", messages[0])
+
+    def test_n_unmerged_library_rooted_under_a_reserved_tag_in_another_case(self):
+        hed_schema = self.schema_from(self.HEADER_UNMERGED, [self.tag("NewTag") + " {rooted=onset}"], [])
+        messages = [i["message"] for i in self.library_issues(hed_schema)]
+        self.assertEqual(len(messages), 1, messages)
+        self.assertIn("SCHEMA_LIBRARY_INVALID n", messages[0])
 
     def test_n_unmerged_library_rooted_under_an_ordinary_tag_is_clean(self):
         hed_schema = self.schema_from(self.HEADER_UNMERGED, [self.tag("NewTag") + " {rooted=Event}"], [])
@@ -669,6 +685,22 @@ class TestReservedTagsFile(unittest.TestCase):
         messages = self.reserved_messages(self.modified(self.ONSET, self.ONSET + child))
         self.assertEqual(len(messages), 1, messages)
         self.assertIn("The reserved tag 'Onset' has the child 'Onset-detail'", messages[0])
+        self.assertIn("SCHEMA_RESERVED_INVALID b", messages[0])
+
+    def test_b_reserved_tag_in_another_case_with_a_child_in_8_1_0(self):
+        # 8.1.0 carries no reserved attribute, so reason b finds the parent by name; the name match must not
+        # depend on case, since tag lookups do not.
+        path = os.path.join(os.path.dirname(schema.__file__), "schema_data", "HED8.1.0.xml")
+        with open(path, encoding="utf-8") as file:
+            xml_810 = file.read()
+        self.assertEqual(xml_810.count("<name>Onset</name>"), 1)
+        child = "<node><name>Onset-detail</name><description>Not allowed.</description></node>"
+        hed_schema = schema.from_string(
+            xml_810.replace("<name>Onset</name>", "<name>ONSET</name>" + child), schema_format=".xml"
+        )
+        messages = self.reserved_messages(hed_schema)
+        self.assertEqual(len(messages), 1, messages)
+        self.assertIn("The reserved tag 'ONSET' has the child 'Onset-detail'", messages[0])
         self.assertIn("SCHEMA_RESERVED_INVALID b", messages[0])
 
     def test_version_below_8_0_0_is_not_checked(self):
