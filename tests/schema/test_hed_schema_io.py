@@ -102,7 +102,8 @@ class TestHedSchema(unittest.TestCase):
         base_dir = os.path.join(os.path.dirname(__file__), "../data/schema_tests")
         schema_path = os.path.join(base_dir, "schema_utf8_dupe.mediawiki")
         schema = load_schema(schema_path)
-        issues = schema.check_compliance()
+        # The fixture is a fragment that defines no reserved tags (SCHEMA_RESERVED_INVALID a), not the point here.
+        issues = [i for i in schema.check_compliance() if i["code"] != "SCHEMA_RESERVED_INVALID"]
         # This can be 1 or 2, depending on if the "pre-release" warning shows up.
         self.assertTrue(1 <= len(issues) <= 2)
 

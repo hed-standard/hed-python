@@ -1,7 +1,13 @@
-"""Singleton checker that validates reserved HED tag usage rules loaded from reservedTags.json."""
+"""Singleton checker that validates reserved HED tag usage rules loaded from reserved_tags.json.
+
+``hed/validator/data/reserved_tags.json`` is a verbatim copy of ``reserved_tags.json`` as published by the HED
+specification (section 3.2.8, defined in Appendix A.6). The ``reserved_tags.yaml`` workflow fails when the copy
+drifts from hed-specification main. Every row of the file applies in every standard schema version >= 8.0.0
+(hed-specification decision 2026-10-15): its ``requireValue``, ``tagGroup`` and ``topLevelTagGroup`` fields
+supply what the 8.0.0 to 8.2.0 schemas lack on ``Delay`` and ``Duration``, so no check here takes a version.
+"""
 
 import json
-import math
 import os
 from collections import defaultdict
 from threading import Lock
@@ -15,7 +21,25 @@ class ReservedChecker:
 
     _instance = None
     _lock = Lock()
-    reserved_reqs_path = os.path.join(os.path.dirname(__file__), "data/reservedTags.json")
+    reserved_reqs_path = os.path.join(os.path.dirname(__file__), "data", "reserved_tags.json")
+
+    # The ten reserved tags that carry no rule beyond their schema attributes (specification 3.2.8, second
+    # paragraph). reserved_tags.json lists only the structural tags, so these are written out here rather than
+    # read from a bundled schema, whose contents could change between releases.
+    ORGANIZATIONAL_TAGS = frozenset(
+        {
+            "Collection",
+            "Condition-variable",
+            "Control-variable",
+            "Event-stream",
+            "Experimental-intertrial",
+            "Experimental-trial",
+            "Indicator-variable",
+            "Recording",
+            "Task",
+            "Time-block",
+        }
+    )
 
     def __new__(cls):
         if cls._instance is None:
@@ -28,8 +52,10 @@ class ReservedChecker:
     def _initialize(self):
         # Load the JSON file during the first instantiation
         if not hasattr(self, "reserved_map"):
-            with open(self.reserved_reqs_path) as file:
-                self.reserved_map = json.load(file)
+            with open(self.reserved_reqs_path, encoding="utf-8") as file:
+                data = json.load(file)
+            self.reserved_map = data["tags"]
+            self.value_forms = data["valueForms"]
         self._initialize_special_tags()
 
     @staticmethod
@@ -51,11 +77,26 @@ class ReservedChecker:
         self.top_group_tags = self._get_special_tags_by_property("topLevelTagGroup")
         self.requires_def_tags = self._get_special_tags_by_property("requiresDef")
         self.group_tags = self._get_special_tags_by_property("tagGroup")
-        self.timelineTags = self._get_special_tags_by_property("requiresTimeline")
-        self.no_splice_in_group = self._get_special_tags_by_property("noSpliceInGroup")
+        self.timeline_tags = self._get_special_tags_by_property("requiresTimeline")
+        self.allow_splice_in_group = self._get_special_tags_by_property("allowSpliceInGroup")
+        # The nine structural reserved tags: the rows plus the two-part tags Def and Def-expand.
+        self.structural_names = frozenset(self.special_names | set(self.value_forms))
+        self.reserved_names = self.structural_names | self.ORGANIZATIONAL_TAGS
 
     def _get_special_tags_by_property(self, property_name):
         return {value["name"] for value in self.reserved_map.values() if value.get(property_name) is True}
+
+    def get_error_code(self, tag_name) -> str | None:
+        """Return the ERROR_CODE of the row for a tag name, or None if the name is not a row.
+
+        Parameters:
+            tag_name (str): The short base tag name.
+
+        Returns:
+            str or None: The row's error code (specification 3.2.8 rule 6).
+        """
+        row = self.reserved_map.get(tag_name)
+        return row["ERROR_CODE"] if row else None
 
     def get_reserved(self, group):
         """Return the list of reserved tags found directly within the given HED group.
@@ -69,6 +110,26 @@ class ReservedChecker:
         """
         reserved_tags = [tag for tag in group.tags() if tag.short_base_tag in self.special_names]
         return reserved_tags
+
+    def get_governing_tag(self, reserved_tags):
+        """Return the tag whose row gives the group rules, or None if the reserved tags cannot share a group.
+
+        Parameters:
+            reserved_tags (list of HedTag): The reserved tags of one group, without duplicates.
+
+        Returns:
+            HedTag or None: The only tag, or, for two tags of which one lists the other in its ``secondaryWith``,
+                that other tag (specification 3.2.8 rule 3). None for any other combination.
+        """
+        if len(reserved_tags) == 1:
+            return reserved_tags[0]
+        if len(reserved_tags) == 2:
+            first, second = reserved_tags
+            if second.short_base_tag in self.reserved_map[first.short_base_tag].get("secondaryWith", []):
+                return second
+            if first.short_base_tag in self.reserved_map[second.short_base_tag].get("secondaryWith", []):
+                return first
+        return None
 
     @staticmethod
     def _get_duplicates(tag_list):
@@ -84,6 +145,11 @@ class ReservedChecker:
             group (HedTagGroup): A group to be checked.
             reserved_tags (list of HedTag): A list of reserved tags in this group.
 
+        Returns:
+            list: Validation issues. Each issue is a dictionary.
+
+        Notes:
+            - These are placement errors, reported as TAG_GROUP_ERROR (specification 3.2.8 rule 6).
         """
         # Make sure there are no duplicate reserved tags
         grouped = self._get_duplicates(reserved_tags)
@@ -93,111 +159,66 @@ class ReservedChecker:
                 ValidationErrors.HED_RESERVED_TAG_REPEATED, tag=grouped[multiples[0]][1], group=group
             )
         # Test compatibility among the reserved tags
-        for tag in reserved_tags:
-            incompatible_tag = self.get_incompatible(tag, reserved_tags)
-            if incompatible_tag:
-                return ErrorHandler.format_error(
-                    ValidationErrors.HED_TAGS_NOT_ALLOWED, tag=incompatible_tag[0], group=group
-                )
+        if self.get_governing_tag(reserved_tags) is None:
+            return ErrorHandler.format_error(
+                ValidationErrors.HED_TAGS_NOT_ALLOWED, tag=self._first_incompatible(reserved_tags), group=group
+            )
         return []
 
+    def _first_incompatible(self, reserved_tags):
+        """Return the first tag that a reserved tag of the group does not allow beside it, to name in the error."""
+        for tag in reserved_tags:
+            allowed = self.reserved_map[tag.short_base_tag]["otherAllowedNonDefTags"]
+            for other in reserved_tags:
+                if other is not tag and other.short_base_tag not in allowed:
+                    return other
+        return reserved_tags[-1]
+
     def check_tag_requirements(self, group, reserved_tags):
-        """Check the tag requirements within the group.
+        """Check the group against the row of its governing tag.
 
         Parameters:
             group (HedTagGroup): A group to be checked.
             reserved_tags (list of HedTag): A list of reserved tags in this group.
 
-        Notes:  This is only called when there are some reserved incompatible tags.
+        Returns:
+            list: Validation issues. Each issue is a dictionary.
+
+        Notes:
+            - Call this only after check_reserved_compatibility found no issue, so a governing tag exists.
+            - A missing or extra anchor and a wrong number of inner groups are content errors, reported with the
+              row's ERROR_CODE; a top-level tag the row does not allow is a placement error, reported as
+              TAG_GROUP_ERROR (specification 3.2.8 rule 6).
+            - An anchor is a Def tag or a Def-expand group; neither counts as an other tag or an inner group.
         """
-        [requires_defs, defs] = self.get_def_information(group, reserved_tags)
-        if len(requires_defs) > 1:
+        governing_tag = self.get_governing_tag(reserved_tags)
+        row = self.reserved_map[governing_tag.short_base_tag]
+        error_code = row["ERROR_CODE"]
+        anchors = group.find_def_tags(recursive=False, include_groups=1)
+        if row["requiresDef"] and len(anchors) != 1:
             return ErrorHandler.format_error(
-                ValidationErrors.HED_RESERVED_TAG_REPEATED, tag=requires_defs[0], group=group
+                TemporalErrors.ONSET_NO_DEF_TAG_FOUND, tag=governing_tag, actual_error=error_code
             )
-        if len(requires_defs) == 1 and len(defs) != 1:
-            return ErrorHandler.format_error(TemporalErrors.ONSET_NO_DEF_TAG_FOUND, tag=requires_defs[0])
+        if not row["requiresDef"] and anchors:
+            return ErrorHandler.format_error(
+                ValidationErrors.HED_TAGS_NOT_ALLOWED, tag=governing_tag, group=group, actual_error=error_code
+            )
 
-        if len(requires_defs) == 0 and len(defs) != 0:
-            return ErrorHandler.format_error(ValidationErrors.HED_TAGS_NOT_ALLOWED, tag=reserved_tags[0], group=group)
-
-        other_tags = [tag for tag in group.tags() if tag not in reserved_tags and tag not in defs]
-        if len(other_tags) > 0:
+        allowed = {governing_tag.short_base_tag, *row["otherAllowedNonDefTags"]}
+        other_tags = [tag for tag in group.tags() if tag not in anchors and tag.short_base_tag not in allowed]
+        if other_tags:
             return ErrorHandler.format_error(ValidationErrors.HED_TAGS_NOT_ALLOWED, tag=other_tags[0], group=group)
 
         # Check the subgroup requirements
-        other_groups = [group for group in group.groups() if group not in defs]
-        min_allowed, max_allowed = self.get_group_requirements(reserved_tags)
-        if not math.isinf(max_allowed) and len(other_groups) > max_allowed:
+        inner_groups = [subgroup for subgroup in group.groups() if subgroup not in anchors]
+        min_allowed = row["minNonDefSubgroups"]
+        max_allowed = row["maxNonDefSubgroups"]
+        if len(inner_groups) < min_allowed or (max_allowed is not None and len(inner_groups) > max_allowed):
             return ErrorHandler.format_error(
                 ValidationErrors.HED_RESERVED_TAG_GROUP_ERROR,
                 group=group,
-                group_count=str(len(other_groups)),
+                group_count=str(len(inner_groups)),
                 tag_list=reserved_tags,
-            )
-        if group.is_group and not math.isinf(max_allowed) and min_allowed > len(other_groups):
-            return ErrorHandler.format_error(
-                ValidationErrors.HED_RESERVED_TAG_GROUP_ERROR,
-                group=group,
-                group_count=str(len(other_groups)),
-                tag_list=reserved_tags,
+                actual_error=error_code,
             )
         return []
-
-    def get_group_requirements(self, reserved_tags) -> tuple[float, float]:
-        """Returns the maximum and minimum number of groups required for these reserved tags.
-
-        Parameters:
-            reserved_tags (list of HedTag): The reserved tags to be checked.
-
-        Returns:
-            tuple[float, float]: the maximum required and the minimum required.
-
-        """
-        max_allowed = float("inf")
-        min_allowed = float("-inf")
-        for tag in reserved_tags:
-            requirements = self.reserved_map[tag.short_base_tag]
-            this_min = requirements["minNonDefSubgroups"]
-            if this_min is not None and this_min > min_allowed:
-                min_allowed = this_min
-            this_max = requirements["maxNonDefSubgroups"]
-            if this_max is not None and this_max < max_allowed:
-                max_allowed = this_max
-        if max_allowed < min_allowed and len(reserved_tags) > 1:
-            min_allowed = max_allowed
-        return min_allowed, max_allowed
-
-    def get_def_information(self, group, reserved_tags) -> list[list]:
-        """Get definition information for reserved tags.
-
-        Parameters:
-            group (HedGroup): The HED group to check.
-            reserved_tags (list of HedTag): The reserved tags to process.
-
-        Returns:
-            list[list]: A list containing [requires_defs, defs].
-        """
-        requires_defs = [tag for tag in reserved_tags if tag.short_base_tag in self.requires_def_tags]
-        defs = group.find_def_tags(recursive=False, include_groups=1)
-        return [requires_defs, defs]
-
-    def get_incompatible(self, tag, reserved_tags) -> list:
-        """Return the list of tags that cannot be in the same group with tag.
-
-        Parameters:
-            tag (HedTag): Reserved tag to be tested.
-            reserved_tags (list of HedTag): Reserved tags (no duplicates).
-
-        Returns:
-            list[HedTag]: List of incompatible tags.
-
-        """
-        requirements = self.reserved_map[tag.short_base_tag]
-        other_allowed = requirements["otherAllowedNonDefTags"]
-        incompatible = [
-            this_tag for this_tag in reserved_tags if this_tag.short_base_tag not in other_allowed and this_tag != tag
-        ]
-        return incompatible
-
-    # Additional methods for other checks should be implemented here following similar patterns.

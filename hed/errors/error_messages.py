@@ -171,6 +171,11 @@ def val_error_group_for_reserved_tag(group, group_count, tag_list):
     )
 
 
+@hed_tag_error(ValidationErrors.HED_RESERVED_TAG_SPLICE, actual_code=ValidationErrors.TAG_GROUP_ERROR)
+def val_error_reserved_tag_splice(tag, group):
+    return f'The group "{group}" of reserved tag "{tag}" may not contain a column reference ({{column}}).'
+
+
 @hed_error(ValidationErrors.PARENTHESES_MISMATCH)
 def val_error_parentheses(opening_parentheses_count, closing_parentheses_count):
     return (

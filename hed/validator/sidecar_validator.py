@@ -6,13 +6,14 @@ import copy
 import itertools
 import re
 
-from hed.errors import ColumnErrors, DefinitionErrors, ErrorContext, ErrorHandler, SidecarErrors
+from hed.errors import ColumnErrors, DefinitionErrors, ErrorContext, ErrorHandler, SidecarErrors, ValidationErrors
 from hed.errors.error_reporter import check_for_any_errors, sort_issues
 from hed.models import df_util
 from hed.models.column_mapper import ColumnType
 from hed.models.column_metadata import ColumnMetadata
 from hed.models.hed_string import HedString
 from hed.models.model_constants import DefTagNames
+from hed.validator.reserved_checker import ReservedChecker
 
 COLUMN_REF_PATTERN = re.compile(r"\{([a-z_\-0-9]+)\}", re.IGNORECASE)
 
@@ -177,9 +178,8 @@ class SidecarValidator:
                 if len(hed_strings) > 1:
                     error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
 
-                error_handler.push_error_context(
-                    ErrorContext.HED_STRING, HedString(hed_string, hed_schema=self._schema)
-                )
+                hed_string_obj = HedString(hed_string, hed_schema=self._schema)
+                error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
                 invalid_locations = self._find_non_matching_braces(hed_string)
                 for loc in invalid_locations:
                     bad_symbol = hed_string[loc]
@@ -192,6 +192,8 @@ class SidecarValidator:
                 for match in sub_matches:
                     if match not in possible_column_refs:
                         new_issues += error_handler.format_error_with_context(ColumnErrors.INVALID_COLUMN_REF, match)
+                if sub_matches:
+                    new_issues += self._check_reserved_splices(hed_string_obj, error_handler)
 
                 error_handler.pop_error_context()
                 if len(hed_strings) > 1:
@@ -209,6 +211,37 @@ class SidecarValidator:
             for ref in refs:
                 if ref in found_column_references and ref != column_name:
                     issues += error_handler.format_error_with_context(ColumnErrors.NESTED_COLUMN_REF, column_name, ref)
+        return issues
+
+    @staticmethod
+    def _check_reserved_splices(hed_string_obj, error_handler):
+        """Report a column reference inside a group whose reserved tag does not allow one.
+
+        Parameters:
+            hed_string_obj (HedString): A sidecar string, column references not removed.
+            error_handler (ErrorHandler): The error handler to use for context.
+
+        Returns:
+            list[dict]: One issue per such group, with the code of the tag's row in reserved_tags.json.
+
+        Notes:
+            - A row with allowSpliceInGroup false (Definition, Event-context) forbids a ``{column}`` anywhere in
+              its group (specification 3.2.8 rule 5); other groups are checked after substitution.
+        """
+        reserved_checker = ReservedChecker.get_instance()
+        issues = []
+        for group in hed_string_obj.get_all_groups():
+            if "{" not in str(group):
+                continue
+            for tag in reserved_checker.get_reserved(group):
+                if tag.short_base_tag in reserved_checker.allow_splice_in_group:
+                    continue
+                issues += error_handler.format_error_with_context(
+                    ValidationErrors.HED_RESERVED_TAG_SPLICE,
+                    tag=tag,
+                    group=group,
+                    actual_error=reserved_checker.get_error_code(tag.short_base_tag),
+                )
         return issues
 
     @staticmethod

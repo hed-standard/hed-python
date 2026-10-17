@@ -50,11 +50,51 @@ def schema_error_library_properties_mismatch(tag, library, with_standard, differ
 
 
 @hed_error(SchemaErrors.SCHEMA_LIBRARY_RESERVED, actual_code=SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY)
-def schema_error_library_reserved(tag, library, with_standard, section):
+def schema_error_library_reserved(tag, library, section):
     return (
-        f"'{tag}' in the {section} section of library '{library}' uses the reserved attribute; an unmerged "
-        f"library partnered with HED {with_standard} may not, only a standard schema, an unpartnered library "
-        f"or a merged partnered library file may (specification Appendix B SCHEMA_LIBRARY_INVALID l)."
+        f"'{tag}' in the {section} section of library '{library}' uses the reserved attribute; no library schema "
+        f"may carry it on its own elements, only a standard schema (specification Appendix B "
+        f"SCHEMA_LIBRARY_INVALID l)."
+    )
+
+
+@hed_error(SchemaErrors.SCHEMA_LIBRARY_RESERVED_NAME, actual_code=SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY)
+def schema_error_library_reserved_name(tag, library):
+    return (
+        f"Library '{library}' defines the tag '{tag}', whose name is a reserved tag of a standard schema "
+        f"(specification Appendix B SCHEMA_LIBRARY_INVALID m)."
+    )
+
+
+@hed_error(SchemaErrors.SCHEMA_LIBRARY_UNDER_RESERVED, actual_code=SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY)
+def schema_error_library_under_reserved(tag, library, reserved_tag):
+    return (
+        f"Library '{library}' places '{tag}' under the reserved tag '{reserved_tag}'; a reserved tag has no "
+        f"child other than '#' (specification Appendix B SCHEMA_LIBRARY_INVALID n)."
+    )
+
+
+@hed_error(SchemaErrors.SCHEMA_RESERVED_TAG_MISSING, actual_code=SchemaErrors.SCHEMA_RESERVED_INVALID)
+def schema_error_reserved_tag_missing(tag, version):
+    return (
+        f"Standard schema {version} does not define '{tag}', which reserved_tags.json names for this version "
+        f"(specification Appendix B SCHEMA_RESERVED_INVALID a)."
+    )
+
+
+@hed_error(SchemaErrors.SCHEMA_RESERVED_ATTRIBUTE_MISSING, actual_code=SchemaErrors.SCHEMA_RESERVED_INVALID)
+def schema_error_reserved_attribute_missing(tag, attribute, version):
+    return (
+        f"'{tag}' lacks the {attribute} attribute, which the reserved-tag rules rely on in standard schema "
+        f"{version} (specification Appendix B SCHEMA_RESERVED_INVALID a)."
+    )
+
+
+@hed_error(SchemaErrors.SCHEMA_RESERVED_HAS_CHILD, actual_code=SchemaErrors.SCHEMA_RESERVED_INVALID)
+def schema_error_reserved_has_child(tag, child):
+    return (
+        f"The reserved tag '{tag}' has the child '{child}'; a reserved tag has no child other than '#' "
+        f"(specification Appendix B SCHEMA_RESERVED_INVALID b)."
     )
 
 

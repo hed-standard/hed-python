@@ -22,6 +22,7 @@ from hed.models.model_constants import DefTagNames, TopTagReturnType
 from hed.models.sidecar import Sidecar
 from hed.validator.hed_validator import HedValidator
 from hed.validator.onset_validator import OnsetValidator
+from hed.validator.reserved_checker import ReservedChecker
 from hed.validator.sidecar_validator import SidecarValidator
 from hed.validator.util.placeholder_util import placeholder_tag
 
@@ -61,7 +62,9 @@ class SpreadsheetValidator:
     """
 
     ONSET_TOLERANCE = 1e-7
-    TEMPORAL_ANCHORS = re.compile(r"|".join(map(re.escape, ["onset", "inset", "offset", "delay"])))
+    # The rows of reserved_tags.json with requiresTimeline (specification 3.2.8 rule 4): they need a row time.
+    TIMELINE_TAGS = frozenset(ReservedChecker.get_instance().timeline_tags)
+    TEMPORAL_ANCHORS = re.compile(r"|".join(map(re.escape, sorted(tag.casefold() for tag in TIMELINE_TAGS))))
 
     def __init__(self, hed_schema, def_dicts=None):
         """
@@ -192,6 +195,7 @@ class SpreadsheetValidator:
         if mapper is None:
             mapper = self._build_mapper(sidecar, column_names)
         columns = list(mapper._final_column_map.values())
+        prefix_columns = set(mapper.column_prefix_dictionary)
 
         # Stage 2: the column structure, then every value and categorical column's own values. A value
         # column that curly braces reference is checked here like any other, whether or not a row's
@@ -207,6 +211,7 @@ class SpreadsheetValidator:
                     error_handler,
                     row_offset=row_offset,
                     check_template=sidecar is None,
+                    from_prefix=column.column_name in prefix_columns,
                 )
             elif column.column_type == ColumnType.Categorical:
                 issues += self.validate_categorical_column(
@@ -277,7 +282,7 @@ class SpreadsheetValidator:
         return issues
 
     def validate_value_column(
-        self, column_name, template, distinct, error_handler, row_offset=0, check_template=False
+        self, column_name, template, distinct, error_handler, row_offset=0, check_template=False, from_prefix=False
     ) -> list[dict]:
         """Check each distinct value of a value column as the template's ``#`` tag with the value in place.
 
@@ -299,6 +304,10 @@ class SpreadsheetValidator:
             check_template (bool): If True, run the basic checks on the template itself first (with
                 placeholders allowed) and skip the values if it has an error. For a template that no
                 sidecar validation has covered.
+            from_prefix (bool): True if the template was built from a ``column_prefix_dictionary`` prefix
+                ending in ``/``. Its ``#`` was not written by the user but stands for the cell, so under an
+                extension-allowed tag it is the TAG_EXTENDED warning it always was, not the PLACEHOLDER_INVALID
+                that a ``#`` written as an extension is (specification 3.2.5 rule 5).
 
         Returns:
             list[dict]: The issues found, one per distinct bad value, each with ``row_count``.
@@ -311,6 +320,8 @@ class SpreadsheetValidator:
                 template_obj.remove_refs()
                 error_handler.push_error_context(ErrorContext.HED_STRING, template_obj)
                 template_issues = self._hed_validator.run_basic_checks(template_obj, allow_placeholders=True)
+                if from_prefix:
+                    template_issues = self._prefix_placeholder_as_extension(template_issues)
                 error_handler.add_context_and_filter(template_issues)
                 error_handler.pop_error_context()  # HedString
                 issues += template_issues
@@ -345,6 +356,24 @@ class SpreadsheetValidator:
         finally:
             error_handler.pop_error_context()  # Column
         return issues
+
+    @staticmethod
+    def _prefix_placeholder_as_extension(issues) -> list[dict]:
+        """Report the ``#`` of a prefix-built template as an extension (TAG_EXTENDED), not PLACEHOLDER_INVALID."""
+        result = []
+        for issue in issues:
+            tag = issue.get("source_tag")
+            if issue["code"] == ValidationErrors.PLACEHOLDER_INVALID and isinstance(tag, HedTag):
+                if tag.extension.endswith("#") and not tag.is_takes_value_tag():
+                    result += ErrorHandler.format_error(
+                        ValidationErrors.TAG_EXTENDED,
+                        tag=tag,
+                        index_in_tag=len(tag.org_base_tag),
+                        index_in_tag_end=None,
+                    )
+                    continue
+            result.append(issue)
+        return result
 
     @staticmethod
     def validate_categorical_column(column_name, keys, distinct, error_handler) -> list[dict]:
@@ -637,7 +666,7 @@ class SpreadsheetValidator:
             error_handler.push_error_context(ErrorContext.ROW, index + row_offset)
             error_handler.push_error_context(ErrorContext.HED_STRING, hed_obj)
             for tag in hed_obj.find_top_level_tags(
-                anchor_tags=DefTagNames.TIMELINE_KEYS, include_groups=TopTagReturnType.TAGS
+                anchor_tags=self.TIMELINE_TAGS, include_groups=TopTagReturnType.TAGS
             ):
                 issues += error_handler.format_error_with_context(TemporalErrors.TEMPORAL_TAG_NO_TIME, tag=tag)
             error_handler.pop_error_context()

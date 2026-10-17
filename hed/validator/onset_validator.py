@@ -3,6 +3,7 @@
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import TemporalErrors
 from hed.models.model_constants import DefTagNames
+from hed.validator.reserved_checker import ReservedChecker
 
 
 class OnsetValidator:
@@ -72,8 +73,11 @@ class OnsetValidator:
 
         Returns:
             list[dict]: The validation issues associated with the characters. Each issue is dictionary.
+
+        Notes:
+            - The banned tags are the rows of reserved_tags.json with requiresTimeline (specification 3.2.8 rule 4).
         """
-        banned_tag_list = DefTagNames.TIMELINE_KEYS
+        banned_tag_list = ReservedChecker.get_instance().timeline_tags
         issues = []
         for tag in hed_string.get_all_tags():
             if tag.short_base_tag in banned_tag_list:

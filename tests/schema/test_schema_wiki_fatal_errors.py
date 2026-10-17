@@ -113,5 +113,6 @@ class TestHedSchema(unittest.TestCase):
     def test_attribute_invalid(self):
         path = os.path.join(self.full_base_folder, "attribute_unknown1.mediawiki")
         schema = load_schema(path)
-        issues = schema.check_compliance()
+        # The fixture is a fragment that defines no reserved tags (SCHEMA_RESERVED_INVALID a), not the point here.
+        issues = [i for i in schema.check_compliance() if i["code"] != "SCHEMA_RESERVED_INVALID"]
         self.assertEqual(len(issues), 8)

@@ -14,12 +14,13 @@
 
 ### Code Quality
 
-| Workflow              | Triggers                                                                                                        | Python | Description                                                                                  |
-| --------------------- | --------------------------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------- |
-| `ruff.yaml`           | Push + PR to main                                                                                               | 3.12   | Ruff linter and formatter check (>=0.8.0)                                                    |
-| `typos.yaml`          | Push + PR to main                                                                                               | 3.10   | Spelling check (typos)                                                                       |
-| `mdformat.yaml`       | Push + PR to main                                                                                               | 3.12   | Markdown format check (docs/ and root \*.md)                                                 |
-| `character_sets.yaml` | Push + PR (path-filtered: hed/validator/data/character_sets.json, the workflow) + weekly (Sun 4am UTC) + manual | none   | Downloads hed-specification main's character_sets.json and fails if the package copy differs |
+| Workflow              | Triggers                                                                                                          | Python | Description                                                                                  |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------- |
+| `ruff.yaml`           | Push + PR to main                                                                                                 | 3.12   | Ruff linter and formatter check (>=0.8.0)                                                    |
+| `typos.yaml`          | Push + PR to main                                                                                                 | 3.10   | Spelling check (typos)                                                                       |
+| `mdformat.yaml`       | Push + PR to main                                                                                                 | 3.12   | Markdown format check (docs/ and root \*.md)                                                 |
+| `character_sets.yaml` | Push + PR (path-filtered: hed/validator/data/character_sets.json, the workflow) + weekly (Sun 4am UTC) + manual   | none   | Downloads hed-specification main's character_sets.json and fails if the package copy differs |
+| `reserved_tags.yaml`  | Push + PR (path-filtered: hed/validator/data/reserved_tags.json, the workflow) + weekly (Sun 4:30am UTC) + manual | none   | Downloads hed-specification main's reserved_tags.json and fails if the package copy differs  |
 
 ### Documentation
 

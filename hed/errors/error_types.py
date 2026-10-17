@@ -70,6 +70,8 @@ class ValidationErrors:
 
     HED_RESERVED_TAG_REPEATED = "HED_RESERVED_TAG_REPEATED"
     HED_RESERVED_TAG_GROUP_ERROR = "HED_RESERVED_TAG_GROUP_ERROR"
+    # A {column} reference in a group whose reserved tag does not allow one (spec 3.2.8 rule 5); the row's code.
+    HED_RESERVED_TAG_SPLICE = "HED_RESERVED_TAG_SPLICE"
     HED_TAG_REPEATED = "HED_TAG_REPEATED"
     HED_TAG_REPEATED_GROUP = "HED_TAG_REPEATED_GROUP"
 
@@ -125,10 +127,20 @@ class SchemaErrors:
     # Reported as SCHEMA_DUPLICATE_NODE: a unit derivable as modifier + another unit of its class (HED 8.5.0+)
     SCHEMA_REDUNDANT_UNIT = "SCHEMA_REDUNDANT_UNIT"
     # Reported as SCHEMA_LIBRARY_INVALID (specification Appendix B reasons j, k, l): a partnered library's
-    # Properties section and its use of the reserved attribute.
+    # Properties section and any library's use of the reserved attribute.
     SCHEMA_LIBRARY_PROPERTIES_DECLARED = "SCHEMA_LIBRARY_PROPERTIES_DECLARED"
     SCHEMA_LIBRARY_PROPERTIES_MISMATCH = "SCHEMA_LIBRARY_PROPERTIES_MISMATCH"
     SCHEMA_LIBRARY_RESERVED = "SCHEMA_LIBRARY_RESERVED"
+    # Reported as SCHEMA_LIBRARY_INVALID (reasons m and n): a library tag with a reserved name, and a library node
+    # placed under a reserved tag.
+    SCHEMA_LIBRARY_RESERVED_NAME = "SCHEMA_LIBRARY_RESERVED_NAME"
+    SCHEMA_LIBRARY_UNDER_RESERVED = "SCHEMA_LIBRARY_UNDER_RESERVED"
+    # A standard schema disagrees with reserved_tags.json (specification Appendix B SCHEMA_RESERVED_INVALID).
+    SCHEMA_RESERVED_INVALID = "SCHEMA_RESERVED_INVALID"
+    # Reported as SCHEMA_RESERVED_INVALID (reasons a and b).
+    SCHEMA_RESERVED_TAG_MISSING = "SCHEMA_RESERVED_TAG_MISSING"
+    SCHEMA_RESERVED_ATTRIBUTE_MISSING = "SCHEMA_RESERVED_ATTRIBUTE_MISSING"
+    SCHEMA_RESERVED_HAS_CHILD = "SCHEMA_RESERVED_HAS_CHILD"
 
 
 class SchemaWarnings:

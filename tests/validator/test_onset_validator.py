@@ -243,7 +243,7 @@ class Test(TestHedBase):
             [
                 {
                     "code": "TEMPORAL_TAG_ERROR",
-                    "message": 'Tag "Onset" must be in a top level group but was found in another location.',
+                    "message": 'Tag "Onset" that must be in a group was found in another location.',
                     "severity": 1,
                 }
             ],

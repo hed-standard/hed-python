@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from hed.models.model_constants import DefTagNames
 from hed.schema.hed_schema_constants import ANY_UNITS_CLASS, HedKey
+from hed.schema.hed_schema_entry import pluralize
 
 if TYPE_CHECKING:
     from hed.models.hed_group import HedGroup
@@ -382,6 +383,12 @@ class HedTag:
         Examples:
             'Duration/300 ms' will return .3
 
+        Notes:
+            - In a unit class where no unit has a conversionFactor (timeUnits in HED 8.0.0), a value in the
+              class's default unit, under any spelling (s, second, seconds), converts with factor 1; a
+              modified form (ms) or any other unit does not convert (specification 3.2.8.4 and
+              TEMPORAL_TAG_ERROR n).
+
         """
         tag_unit_classes = self.unit_classes
         stripped_value, unit, unit_entry = HedTag._get_tag_units_portion(self.extension, tag_unit_classes)
@@ -397,8 +404,42 @@ class HedTag:
             return None
         conversion_factor = unit_entry.get_conversion_factor(unit)
         if conversion_factor is None:
+            unit_class_entry = unit_entry.unit_class_entry
+            if unit_class_entry is not None and HedTag._is_default_unit_without_factors(unit_class_entry, unit):
+                return value
             return None
         return value * conversion_factor
+
+    @staticmethod
+    def _is_default_unit_without_factors(unit_class_entry, unit) -> bool:
+        """Return True if unit is an unmodified spelling of the default unit of a class without conversionFactors.
+
+        The default unit may be written as its symbol or its name, singular or plural (timeUnits in HED 8.0.0:
+        s, second, seconds). The name and the symbol are separate unit entries with nothing linking them, so
+        the SI units of the class stand in for the default unit when the default is one of them: in 8.0.0
+        second and s carry SIUnit and minute, hour and day do not. A modified form (ms) is never accepted,
+        since the modifiers of such a schema carry no factor either.
+        """
+        units = unit_class_entry.units
+        if any(entry.has_attribute(HedKey.ConversionFactor) for entry in units.values()):
+            return False
+        default_entry = units.get(unit_class_entry.has_attribute(HedKey.DefaultUnits, return_value=True))
+        if default_entry is None:
+            return False
+        for entry in units.values():
+            is_default = entry is default_entry or (
+                default_entry.has_attribute(HedKey.SIUnit) and entry.has_attribute(HedKey.SIUnit)
+            )
+            if is_default and unit in HedTag._unmodified_forms(entry):
+                return True
+        return False
+
+    @staticmethod
+    def _unmodified_forms(unit_entry) -> set[str]:
+        """Return the spellings of a unit with no SI modifier: its name, and its plural unless it is a symbol."""
+        if unit_entry.has_attribute(HedKey.UnitSymbol):
+            return {unit_entry.name}
+        return {unit_entry.name, pluralize.plural(unit_entry.name)}
 
     @property
     def unit_classes(self) -> dict:
