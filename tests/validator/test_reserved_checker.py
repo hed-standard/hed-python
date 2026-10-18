@@ -5,7 +5,7 @@ import json
 import os
 import unittest
 
-from hed import HedString, Sidecar, TabularInput, load_schema_version
+from hed import HedString, Sidecar, TabularInput, load_schema_version, schema
 from hed.errors import ErrorSeverity, ValidationErrors
 from hed.models import DefinitionDict
 from hed.validator import HedValidator
@@ -274,6 +274,46 @@ class TestDefaultUnit800(ReservedTestBase):
         )
         later = load_schema_version("8.1.0")
         self.assertEqual(HedString("Duration/2 minute", later).get_all_tags()[0].value_as_default_unit(), 120.0)
+
+    @staticmethod
+    def converted(hed_schema, texts):
+        """Return value_as_default_unit() of the single tag of each text."""
+        return {text: HedString(text, hed_schema).get_all_tags()[0].value_as_default_unit() for text in texts}
+
+    def test_weight_units_si_default(self):
+        """weightUnits (default g, SI): g, gram and grams convert as 1; pound and kg do not."""
+        values = self.converted(
+            self.schema, ("Weight/3 g", "Weight/3 gram", "Weight/3 grams", "Weight/3 pound", "Weight/3 kg")
+        )
+        self.assertEqual(
+            values,
+            {
+                "Weight/3 g": 3.0,
+                "Weight/3 gram": 3.0,
+                "Weight/3 grams": 3.0,
+                "Weight/3 pound": None,
+                "Weight/3 kg": None,
+            },
+        )
+
+    def test_speed_units_compound_default(self):
+        """speedUnits (default m-per-s, compound): m-per-s and no unit convert as 1; km-per-s does not."""
+        values = self.converted(self.schema, ("Speed/3 m-per-s", "Speed/3", "Speed/3 km-per-s"))
+        self.assertEqual(values, {"Speed/3 m-per-s": 3.0, "Speed/3": 3.0, "Speed/3 km-per-s": None})
+
+    def test_intensity_units_non_si_default(self):
+        """intensityUnits (default dB, not SI): dB converts as 1; the SI units candela and cd do not."""
+        # This case exists for the SI guard of HedTag._is_default_unit_without_factors: the Weight cases of
+        # test_weight_units_si_default cannot detect the guard being removed, because g is itself SI. No 8.0.0
+        # tag uses intensityUnits, so Weight's placeholder is given that class in a copy of the bundled schema.
+        path = os.path.join(os.path.dirname(schema.__file__), "schema_data", "HED8.0.0.xml")
+        with open(path, encoding="utf-8") as file:
+            text = file.read()
+        self.assertEqual(text.count("<value>weightUnits</value>"), 1)
+        text = text.replace("<value>weightUnits</value>", "<value>intensityUnits</value>")
+        intensity_schema = schema.from_string(text, schema_format=".xml")
+        values = self.converted(intensity_schema, ("Weight/3 dB", "Weight/3 candela", "Weight/3 cd"))
+        self.assertEqual(values, {"Weight/3 dB": 3.0, "Weight/3 candela": None, "Weight/3 cd": None})
 
 
 class TestTimelineBan(ReservedTestBase):
