@@ -131,26 +131,29 @@ class Test(unittest.TestCase):
     def test_get_hed_version_path_auto_refresh_downloads_missing_version(self):
         """get_hed_version_path downloads only the single requested version from GitHub.
 
-        Uses score 1.2.0, a released library version that hedtools does not bundle in
-        ``hed/schema/schema_data/`` (the bundle has score 1.0.0, 1.1.0, 2.0.0 and 2.1.0), so seeding the
-        fresh cache with the bundle cannot satisfy the lookup and the file must come from GitHub. score
-        lives in a normal ``hedxml/`` folder, so this exercises the real on-demand download path (manifest
-        fast path and REST API fallback alike). Only the listing for the relevant library and the one XML
-        file are fetched - not the entire catalog.
+        Every released lang and score version is bundled in ``hed/schema/schema_data/``, so the test
+        stands in a bundle of its own: a copy of the real one without ``HED_score_1.2.0.xml``. Seeding
+        the fresh cache from that bundle cannot satisfy the lookup and the file must come from GitHub.
+        score lives in a normal ``hedxml/`` folder, so this exercises the real on-demand download path
+        (manifest fast path and REST API fallback alike). Only the listing for the relevant library and
+        the one XML file are fetched - not the entire catalog.
         """
-        # Guard the premise: if this version is ever bundled, the test stops exercising the download.
-        self.assertFalse(
-            os.path.isfile(os.path.join(hed_cache.INSTALLED_CACHE_LOCATION, "HED_score_1.2.0.xml")),
-            "score 1.2.0 is now bundled; pick an unbundled released version for this test",
-        )
+        # A bundle without the requested version, so the lookup cannot be satisfied locally.
+        fake_bundle = os.path.join(os.path.dirname(self.hed_cache_dir), "schema_bundle_auto_refresh/")
+        if os.path.exists(fake_bundle):
+            shutil.rmtree(fake_bundle)
+        shutil.copytree(hed_cache.INSTALLED_CACHE_LOCATION, fake_bundle)
+        os.remove(os.path.join(fake_bundle, "HED_score_1.2.0.xml"))
         # Use a fresh cache directory so the version is definitely not present
         fresh_cache = os.path.join(os.path.dirname(self.hed_cache_dir), "schema_cache_auto_refresh/")
         if os.path.exists(fresh_cache):
             shutil.rmtree(fresh_cache)
         os.makedirs(fresh_cache)
         saved = hed_cache.HED_CACHE_DIRECTORY
+        saved_bundle = hed_cache.INSTALLED_CACHE_LOCATION
         try:
             hed_cache.HED_CACHE_DIRECTORY = fresh_cache
+            hed_cache.INSTALLED_CACHE_LOCATION = fake_bundle
             result = hed_cache.get_hed_version_path("1.2.0", library_name="score")
             self.assertIsNotNone(result, "get_hed_version_path should download score 1.2.0 from GitHub on demand")
             self.assertTrue(os.path.exists(result))
@@ -170,7 +173,9 @@ class Test(unittest.TestCase):
             )
         finally:
             hed_cache.HED_CACHE_DIRECTORY = saved
+            hed_cache.INSTALLED_CACHE_LOCATION = saved_bundle
             shutil.rmtree(fresh_cache, ignore_errors=True)
+            shutil.rmtree(fake_bundle, ignore_errors=True)
 
 
 class TestLocal(unittest.TestCase):
