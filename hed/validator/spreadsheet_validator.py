@@ -1,4 +1,4 @@
-"""Validates HED annotations in tabular data in four stopping stages."""
+"""Validates HED annotations in tabular data in stopping stages."""
 
 from __future__ import annotations
 
@@ -33,10 +33,13 @@ PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 
 
 class SpreadsheetValidator:
-    """Validates HED annotations in tabular data against a HED schema, in four stages.
+    """Validates HED annotations in tabular data against a HED schema, in four stages after a header check.
 
     The stages run in order and each stops the run when it finds an error (never on a warning alone):
 
+    0. **Column names**: a :class:`~hed.models.base_input.BaseInput` whose header repeats a column name gets
+       one TABULAR_INVALID per repeated name (``duplicate_columns``) and nothing else: neither the sidecar
+       nor any row is checked or assembled (specification 3.2.10). Other column sources cannot repeat a name.
     1. **Sidecar**: every template and categorical string of the sidecar (``SidecarValidator``). A sidecar
        string is a fragment of a row, so the required-tag check waits for assembly.
     2. **Column values**: the column structure (mapper issues, sidecar references to columns the table
@@ -97,7 +100,10 @@ class SpreadsheetValidator:
         validate_sidecar=True,
         def_dicts=None,
     ) -> list[dict]:
-        """Run the four stages on a column source, stopping at the first stage that finds an error.
+        """Run the stages on a column source, stopping at the first stage that finds an error.
+
+        A BaseInput whose header repeats a column name is reported by stage 0 alone: one TABULAR_INVALID per
+        repeated name, in order of its second appearance, with the COLUMN and (when ``name``) FILE_NAME context.
 
         Parameters:
             source (ColumnSource): The table to validate. A BaseInput (TabularInput, SpreadsheetInput) or any
@@ -159,6 +165,10 @@ class SpreadsheetValidator:
             # Strings and lists of strings need the schema to become definitions.
             extra_def_dicts = DefinitionDict(extra_def_dicts, hed_schema=self._schema)
 
+        # Stage 0: a repeated column name stops the run before the sidecar, as in hed-javascript.
+        if isinstance(source, BaseInput) and source.duplicate_columns:
+            return self._report_duplicate_columns(source.duplicate_columns, name, error_handler)
+
         issues = []
         # Stage 1 runs before this table's FILE_NAME context is pushed so that its issues carry the
         # sidecar's own name. With no name here, the caller manages the location context for both.
@@ -181,6 +191,22 @@ class SpreadsheetValidator:
         finally:
             if name:
                 error_handler.pop_error_context()
+
+    @staticmethod
+    def _report_duplicate_columns(column_names, name, error_handler) -> list[dict]:
+        """Stage 0: one TABULAR_INVALID per repeated column name, kept in the given order (not sorted)."""
+        issues = []
+        if name:
+            error_handler.push_error_context(ErrorContext.FILE_NAME, name)
+        try:
+            for column_name in column_names:
+                error_handler.push_error_context(ErrorContext.COLUMN, column_name)
+                issues += error_handler.format_error_with_context(ValidationErrors.TABULAR_INVALID, column_name)
+                error_handler.pop_error_context()
+        finally:
+            if name:
+                error_handler.pop_error_context()
+        return issues
 
     def _validate_source(self, source, sidecar, extra_def_dicts, error_handler, row_offset, issues) -> list[dict]:
         """Stages 2 to 4, run with the FILE_NAME context (if any) already pushed."""

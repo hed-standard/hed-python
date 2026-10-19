@@ -154,7 +154,8 @@ class ColumnMapper:
         Returns:
             list[dict]: A list of dicts, one per issue.
         """
-        # We don't have any checks right now if blank/duplicate is allowed
+        # Blank names are allowed unless the caller says otherwise; repeated names are not checked here
+        # (BaseInput.duplicate_columns records them and validation reports TABULAR_INVALID).
         if allow_blank_names:
             return []
 

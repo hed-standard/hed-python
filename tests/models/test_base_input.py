@@ -1,6 +1,7 @@
 import io
 import os
 import shutil
+import socket
 import unittest
 
 import numpy as np
@@ -194,3 +195,108 @@ class TestCombineDataframe(unittest.TestCase):
         result = BaseInput.combine_dataframe(loaded_df)
         expected = pd.Series(["apple, guitar", "elephant, harmonica", "cherry, fox", "", ""])
         self.assertTrue(result.equals(expected))
+
+
+class TestDuplicateColumns(unittest.TestCase):
+    """duplicate_columns: the names a header repeats, read before pandas suffixes them (TABULAR_INVALID)."""
+
+    @staticmethod
+    def _text(header, rows=("1\t2\t3\t4",)):
+        return "\n".join([header, *rows]) + "\n"
+
+    def test_from_path(self):
+        path = os.path.realpath(
+            os.path.join(os.path.dirname(__file__), "../data/spreadsheet_validator_tests/duplicate_columns.tsv")
+        )
+        input_file = BaseInput(path)
+        self.assertEqual(input_file.duplicate_columns, ["trial"])
+        # The dataframe is still loaded; pandas' suffix names the second column internally.
+        self.assertEqual(input_file.columns, ["onset", "duration", "trial", "trial.1"])
+        self.assertEqual(list(input_file.dataframe["trial.1"]), ["stop", "go"])
+
+    def test_from_bytes_and_string_io(self):
+        text = self._text("onset\tduration\ttrial\ttrial")
+        for file in (io.BytesIO(text.encode("utf-8")), io.StringIO(text)):
+            input_file = BaseInput(file, file_type=".tsv")
+            self.assertEqual(input_file.duplicate_columns, ["trial"])
+            self.assertEqual(input_file.columns, ["onset", "duration", "trial", "trial.1"])
+            self.assertEqual(len(input_file.dataframe), 1)
+
+    def test_file_like_read_from_its_position(self):
+        text = self._text("onset\tduration\ttrial\ttrial")
+        file = io.StringIO("skipped\n" + text)
+        file.readline()
+        input_file = BaseInput(file, file_type=".tsv")
+        self.assertEqual(input_file.duplicate_columns, ["trial"])
+        self.assertEqual(len(input_file.dataframe), 1)
+
+    def test_from_non_seekable_stream(self):
+        # A socket file cannot seek on any platform (a pipe can, inside its buffer, on Windows).
+        sender, receiver = socket.socketpair()
+        with sender, receiver:
+            sender.sendall(self._text("trial\tHED\ttrial\tHED").encode("utf-8"))
+            sender.shutdown(socket.SHUT_WR)
+            with receiver.makefile("rb") as reader:
+                self.assertFalse(reader.seekable())
+                input_file = BaseInput(reader, file_type=".tsv")
+        self.assertEqual(input_file.duplicate_columns, ["trial", "HED"])
+        self.assertEqual(input_file.columns, ["trial", "HED", "trial.1", "HED.1"])
+        self.assertEqual(len(input_file.dataframe), 1)
+
+    def test_bom_blank_line_and_crlf(self):
+        text = "\ufeff\r\nonset\tduration\ttrial\ttrial\r\n1\t2\t3\t4\r\n"
+        input_file = BaseInput(io.BytesIO(text.encode("utf-8")), file_type=".tsv")
+        self.assertEqual(input_file.duplicate_columns, ["trial"])
+        self.assertEqual(input_file.columns, ["onset", "duration", "trial", "trial.1"])
+
+    def test_names_are_trimmed(self):
+        input_file = BaseInput(io.StringIO(self._text("onset \t duration\ttrial \ttrial")), file_type=".tsv")
+        self.assertEqual(input_file.duplicate_columns, ["trial"])
+        self.assertEqual(input_file.columns, ["onset", "duration", "trial", "trial.1"])
+        unique = BaseInput(io.StringIO(self._text("onset \tduration\ttrial \tHED")), file_type=".tsv")
+        self.assertEqual(unique.duplicate_columns, [])
+        self.assertEqual(unique.columns, ["onset", "duration", "trial", "HED"])
+
+    def test_order_and_count(self):
+        input_file = BaseInput(io.StringIO(self._text("b\ta\ta\tb\tb")), file_type=".tsv")
+        # Each name once, in order of its second appearance.
+        self.assertEqual(input_file.duplicate_columns, ["a", "b"])
+        self.assertEqual(input_file.columns, ["b", "a", "a.1", "b.1", "b.2"])
+
+    def test_no_repeats(self):
+        input_file = BaseInput(io.StringIO(self._text("trial\ttrial_type\tHED", ("1\t2\t3",))), file_type=".tsv")
+        self.assertEqual(input_file.duplicate_columns, [])
+        self.assertEqual(self._blank_repeats().duplicate_columns, [])
+
+    def _blank_repeats(self):
+        # Blank names have their own rule (allow_blank_names) and are not counted as repeats.
+        return BaseInput(io.StringIO(self._text("onset\t\t\tHED")), file_type=".tsv")
+
+    def test_no_column_names(self):
+        input_file = BaseInput(
+            io.StringIO(self._text("trial\ttrial\ttrial\ttrial")), file_type=".tsv", has_column_names=False
+        )
+        self.assertEqual(input_file.duplicate_columns, [])
+        self.assertEqual(len(input_file.dataframe), 2)
+
+    def test_from_dataframe(self):
+        frame = pd.DataFrame([["1", "go", "stop"]], columns=["onset", "trial ", "trial"])
+        input_file = BaseInput(frame)
+        self.assertEqual(input_file.duplicate_columns, ["trial"])
+        self.assertEqual(input_file.columns, ["onset", "trial", "trial.1"])
+        # The caller's frame keeps its own labels.
+        self.assertEqual(list(frame.columns), ["onset", "trial ", "trial"])
+
+    def test_from_excel(self):
+        import openpyxl
+
+        workbook = openpyxl.Workbook()
+        worksheet = workbook.active
+        worksheet.append(["onset", "trial", "HED ", "trial", "HED"])
+        worksheet.append(["1", "go", "Red", "stop", "Blue"])
+        buffer = io.BytesIO()
+        workbook.save(buffer)
+        buffer.seek(0)
+        input_file = BaseInput(buffer, file_type=".xlsx")
+        self.assertEqual(input_file.duplicate_columns, ["trial", "HED"])
+        self.assertEqual(input_file.columns, ["onset", "trial", "HED", "trial.1", "HED.1"])

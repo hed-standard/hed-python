@@ -223,7 +223,7 @@ issues = tabular.validate(schema)
 def_dict = tabular.get_def_dict(schema)
 ```
 
-Validation of a tabular file runs in four stages, and stops at the first stage that finds an error (a warning alone never stops it):
+Validation of a tabular file runs in four stages, and stops at the first stage that finds an error (a warning alone never stops it). Before them, a header that repeats a column name (`trial`, `trial`) gives one `TABULAR_INVALID` per repeated name and nothing else; `tabular.duplicate_columns` lists those names. Column names are the header cells with surrounding whitespace removed.
 
 1. **Sidecar**: every template and categorical annotation in the sidecar. Pass `validate_sidecar=False` if you have already validated the sidecar yourself.
 2. **Column values**: each value column's distinct values against the units or value class of the template's `#` tag, and each categorical column's values against its sidecar keys. A value that appears in many rows is checked once and reported at its first row, with the number of rows in the issue's `row_count`.
