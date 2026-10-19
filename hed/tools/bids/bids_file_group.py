@@ -273,7 +273,8 @@ class BidsFileGroup:
                 continue
             tsv_obj.set_sidecar(self._get_tsv_sidecar(root_path, tsv_obj))
             try:
-                column_headers = list(pd.read_csv(file_path, sep="\t", nrows=0).columns)
+                # Trimmed as BaseInput trims its column names, so a header cell "HED " is the HED column.
+                column_headers = [str(name).strip() for name in pd.read_csv(file_path, sep="\t", nrows=0).columns]
             except Exception as e:
                 self.bad_files[file_path] = f"{file_path} does not have a valid column header: {str(e)}"
                 continue

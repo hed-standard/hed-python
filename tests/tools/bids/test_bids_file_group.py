@@ -125,6 +125,28 @@ class Test(unittest.TestCase):
         self.assertEqual(repeated["ec_column"], "trial")
         self.assertTrue(repeated["ec_filename"].endswith("sub-002_task-FacePerception_run-1_events.tsv"))
 
+    def test_trimmed_hed_header_found_without_sidecar(self):
+        """Discovery trims header cells as BaseInput does: a sidecar-free file headed `HED \\t HED` has HED
+        columns, so it is validated and its repeated name is TABULAR_INVALID."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root_path = os.path.join(temp_dir, "dataset")
+            shutil.copytree(self.root_path, root_path)
+            events_path = os.path.join(root_path, "sub-002", "eeg", "sub-002_task-FacePerception_run-1_events.tsv")
+            with open(events_path, "w", encoding="utf-8", newline="") as fp:
+                fp.write("onset\tduration\tHED \t HED\n1.0\t0\tRed\tBlue\n")
+            # Only the .tsv files, so no data file has a sidecar.
+            file_paths = io_util.get_file_list(
+                root_path, extensions=[".tsv"], exclude_dirs=self.exclude_dirs, name_suffix=["_events"]
+            )
+            events = BidsFileGroup(root_path, file_paths, "events")
+            has_hed = [data_obj.file_path for data_obj in events.datafile_dict.values() if data_obj.has_hed]
+            issues = events.validate_datafiles(load_schema_version("8.4.0"))
+
+        self.assertEqual(len(has_hed), 1)
+        self.assertTrue(has_hed[0].endswith("sub-002_task-FacePerception_run-1_events.tsv"))
+        self.assertEqual([issue["code"] for issue in issues], ["TABULAR_INVALID"])
+        self.assertEqual(issues[0]["ec_column"], "HED")
+
     def test_summarize(self):
         events = BidsFileGroup(self.root_path, self.file_paths, "events")
         info = events.summarize()
