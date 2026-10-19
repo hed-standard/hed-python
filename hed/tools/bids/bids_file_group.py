@@ -8,6 +8,7 @@ import re
 import pandas as pd
 
 from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
+from hed.errors.exceptions import HedFileError
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
@@ -195,6 +196,7 @@ class BidsFileGroup:
             logger.debug(f"Validating data file {i}/{len(hed_files)}: {os.path.basename(data_obj.file_path)}")
 
             sidecar = data_obj.sidecar
+            sidecar_has_errors = False
             if sidecar is not None and id(sidecar) not in group_sidecars:
                 key = json.dumps(sidecar.loaded_dict, sort_keys=True)
                 if key not in merged_sidecar_errors:
@@ -203,12 +205,24 @@ class BidsFileGroup:
                     )
                     merged_sidecar_errors[key] = check_for_any_errors(sidecar_issues)
                     issues += sidecar_issues
-                if merged_sidecar_errors[key]:
-                    logger.debug(f"Skipping {os.path.basename(data_obj.file_path)}: its merged sidecar has errors")
-                    continue
+                sidecar_has_errors = merged_sidecar_errors[key]
 
             had_contents = data_obj.contents
-            data_obj.set_contents(overwrite=False)
+            # A file whose merged sidecar has errors is skipped, unless its header repeats a column name:
+            # validate then reports only TABULAR_INVALID (stage 0) and checks no row against the sidecar.
+            # A file that cannot even be loaded (a blank column name) is skipped as it was before loading.
+            try:
+                data_obj.set_contents(overwrite=False)
+            except HedFileError:
+                if not sidecar_has_errors:
+                    raise
+                logger.debug(f"Skipping {os.path.basename(data_obj.file_path)}: its merged sidecar has errors")
+                continue
+            if sidecar_has_errors and not data_obj.contents.duplicate_columns:
+                logger.debug(f"Skipping {os.path.basename(data_obj.file_path)}: its merged sidecar has errors")
+                if not had_contents:
+                    data_obj.clear_contents()
+                continue
             file_issues = data_obj.contents.validate(
                 hed_schema,
                 extra_def_dicts=extra_def_dicts,
@@ -267,7 +281,8 @@ class BidsFileGroup:
                 continue
             tsv_obj.set_sidecar(self._get_tsv_sidecar(root_path, tsv_obj))
             try:
-                column_headers = list(pd.read_csv(file_path, sep="\t", nrows=0).columns)
+                # Trimmed as BaseInput trims its column names, so a header cell "HED " is the HED column.
+                column_headers = [str(name).strip() for name in pd.read_csv(file_path, sep="\t", nrows=0).columns]
             except Exception as e:
                 self.bad_files[file_path] = f"{file_path} does not have a valid column header: {str(e)}"
                 continue

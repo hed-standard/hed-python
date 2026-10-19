@@ -237,6 +237,11 @@ def val_error_extra_column(column_name):
     )
 
 
+@hed_error(ValidationErrors.TABULAR_INVALID)
+def val_error_tabular_invalid(column_name):
+    return f"Column '{column_name}' appears more than once in the first line (the column names) of the tabular file."
+
+
 @hed_error(ValidationErrors.SIDECAR_AND_OTHER_COLUMNS)
 def val_error_sidecar_with_column(column_names):
     return f"You cannot use a column name in curly braces and to designate a tag column. Found {column_names}."

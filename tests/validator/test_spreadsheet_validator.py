@@ -9,6 +9,7 @@ import pandas as pd
 from hed import Sidecar, SpreadsheetInput, TabularInput, load_schema, load_schema_version
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ErrorContext, ValidationErrors
+from hed.models.column_source import ListColumnSource
 from hed.validator import SpreadsheetValidator
 
 
@@ -361,3 +362,58 @@ class TestSpreadsheetValidation(unittest.TestCase):
         self.assertIn(ValidationErrors.TAG_INVALID, codes)
         self.assertNotIn(ValidationErrors.TEMPORAL_TAG_ERROR, codes)
         self.assertEqual(error_handler.error_context, [])
+
+
+class TestDuplicateColumns(unittest.TestCase):
+    """Stage 0: a header that repeats a column name is TABULAR_INVALID and nothing else (spec 3.2.10)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.schema = load_schema_version("8.4.0")
+        cls.fixture = os.path.realpath(
+            os.path.join(os.path.dirname(__file__), "../data/spreadsheet_validator_tests/duplicate_columns.tsv")
+        )
+
+    def _validate(self, tabular):
+        error_handler = ErrorHandler(check_for_warnings=True)
+        issues = tabular.validate(self.schema, error_handler=error_handler)
+        self.assertEqual(error_handler.error_context, [])
+        return issues
+
+    def test_repeated_hed_columns(self):
+        text = "response\tresponse\tHED\tHED\nx\ty\tInvalidTagXYZ\tRed\n"
+        issues = self._validate(TabularInput(io.StringIO(text), name="events.tsv"))
+        # One issue per repeated name, in order of its second appearance; the invalid tag is never checked.
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID] * 2)
+        self.assertEqual([issue[ErrorContext.COLUMN] for issue in issues], ["response", "HED"])
+        self.assertEqual([issue[ErrorContext.FILE_NAME] for issue in issues], ["events.tsv"] * 2)
+        self.assertNotIn(ErrorContext.ROW, issues[0])
+        self.assertIn("'response' appears more than once", issues[0]["message"])
+
+    def test_repeated_column_with_sidecar(self):
+        # The sidecar has an invalid tag too; the repeated column is reported before the sidecar stage.
+        sidecar = Sidecar(io.StringIO(json.dumps({"trial": {"HED": {"go": "Red", "stop": "InvalidTagXYZ"}}})))
+        issues = self._validate(TabularInput(self.fixture, sidecar=sidecar))
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues[0]["code"], ValidationErrors.TABULAR_INVALID)
+        self.assertEqual(issues[0][ErrorContext.COLUMN], "trial")
+        self.assertEqual(issues[0][ErrorContext.FILE_NAME], self.fixture)
+
+    def test_empty_name_drops_file_context(self):
+        tabular = TabularInput(io.StringIO("HED\tHED\nRed\tBlue\n"), name="events.tsv")
+        issues = tabular.validate(self.schema, name="")
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID])
+        self.assertNotIn(ErrorContext.FILE_NAME, issues[0])
+
+    def test_single_columns_not_reported(self):
+        sidecar = Sidecar(io.StringIO(json.dumps({"trial": {"HED": {"go": "Red", "stop": "Blue"}}})))
+        text = "onset\tduration\ttrial\ttrial_type\tHED\n1.0\t0\tgo\tx\tGreen\n"
+        issues = self._validate(TabularInput(io.StringIO(text), sidecar=sidecar))
+        self.assertNotIn(ValidationErrors.TABULAR_INVALID, [issue["code"] for issue in issues])
+
+    def test_list_column_source_unaffected(self):
+        source = ListColumnSource({"trial": ["go"], "trial.1": ["stop"], "HED": ["Red"]})
+        issues = SpreadsheetValidator(self.schema).validate(
+            source, error_handler=ErrorHandler(check_for_warnings=False)
+        )
+        self.assertEqual(issues, [])

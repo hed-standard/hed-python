@@ -2,6 +2,7 @@
 Superclass representing a basic columnar file.
 """
 
+import io
 import os
 
 import openpyxl
@@ -53,10 +54,13 @@ class BaseInput:
             - file is blank.
             - An invalid dataframe was passed with size 0.
             - An invalid extension was provided.
-            - A duplicate or empty column name appears.
+            - A blank column name appears and allow_blank_names is False (BAD_COLUMN_NAMES).
             - Cannot open the indicated file.
             - The specified worksheet name does not exist.
             - If the sidecar file or tabular file had invalid format and could not be read.
+
+            A repeated column name does not raise: it is recorded in ``duplicate_columns`` and ``validate``
+            reports it as TABULAR_INVALID.
 
         """
         if mapper is None:
@@ -68,6 +72,7 @@ class BaseInput:
         self._loaded_workbook = None
         self._worksheet_name = worksheet_name
         self._dataframe = None
+        self._duplicate_columns = []
 
         input_type = file_type
         if isinstance(file, str):
@@ -82,7 +87,7 @@ class BaseInput:
         if column_issues:
             raise HedFileError(
                 HedExceptions.BAD_COLUMN_NAMES,
-                "Duplicate or blank columns found. See issues.",
+                "Blank column names found. See issues.",
                 self.name,
                 issues=column_issues,
             )
@@ -164,6 +169,16 @@ class BaseInput:
     def has_column_names(self) -> bool:
         """True if dataframe has column names."""
         return self._has_column_names
+
+    @property
+    def duplicate_columns(self) -> list[str]:
+        """The column names that appear more than once in the header, each once, in order of its second appearance.
+
+        Names are compared after surrounding whitespace is removed; blank names are not counted. Read from the
+        header itself, so a repeated name is listed under its own name, not the suffixed name the loaded dataframe
+        gives its second column. Empty when the file has no column names.
+        """
+        return self._duplicate_columns
 
     @property
     def loaded_workbook(self):
@@ -279,7 +294,9 @@ class BaseInput:
     def columns(self) -> list[str]:
         """Returns a list of the column names.
 
-            Empty if no column names.
+            Empty if no column names. The names are the header cells with surrounding whitespace removed;
+            a name repeated in the header is suffixed in the second column it names (``trial.1``), as pandas does,
+            and is listed in ``duplicate_columns``.
 
         Returns:
             list: The column names.
@@ -371,8 +388,9 @@ class BaseInput:
     ) -> list[dict]:
         """Validate this file with a SpreadsheetValidator and return all issues.
 
-        The validator runs four stages and stops at the first stage that finds an error: the sidecar,
-        each column's own values, the HED column, and the assembled rows. See
+        The validator runs five stages and stops at the first stage that finds an error: the column names
+        (a repeated name is TABULAR_INVALID), the sidecar, each column's own values, the HED column, and the
+        assembled rows. See
         :class:`~hed.validator.spreadsheet_validator.SpreadsheetValidator`.
 
         Parameters:
@@ -448,6 +466,95 @@ class BaseInput:
             if isinstance(column, str):
                 return True
         return False
+
+    @staticmethod
+    def _trimmed_names(names) -> list:
+        """Return the names with surrounding whitespace removed; a label that is not a string is unchanged."""
+        return [name.strip() if isinstance(name, str) else name for name in names]
+
+    @staticmethod
+    def _repeated_names(names) -> list[str]:
+        """Return each non-blank string name that appears more than once, in order of its second appearance."""
+        seen = set()
+        repeated = []
+        for name in names:
+            if not isinstance(name, str) or not name:
+                continue
+            if name in seen and name not in repeated:
+                repeated.append(name)
+            seen.add(name)
+        return repeated
+
+    @staticmethod
+    def _unique_names(names) -> list:
+        """Return the names with each repeat of a string name suffixed ``.1``, ``.2``, ... as pandas reads a header."""
+        taken = set()
+        unique = []
+        for name in names:
+            new_name = name
+            suffix = 0
+            while isinstance(name, str) and new_name in taken:
+                suffix += 1
+                new_name = f"{name}.{suffix}"
+            taken.add(new_name)
+            unique.append(new_name)
+        return unique
+
+    def _set_column_names(self, names, header_cells=None):
+        """Name the dataframe's columns with the trimmed names and record the repeated ones.
+
+        Parameters:
+            names (list): The dataframe's column labels as loaded.
+            header_cells (list or None): The cells of a text file's header record, from which the repeats are
+                read because pandas has already suffixed them in names. None reads the repeats from names.
+        """
+        names = self._trimmed_names(names)
+        self._duplicate_columns = self._repeated_names(
+            names if header_cells is None else self._trimmed_names(header_cells)
+        )
+        self._dataframe.columns = self._unique_names(names)
+
+    @staticmethod
+    def _read_header_cells(file):
+        """Return the cells of a text file's header record and the file to hand to pandas.
+
+        The header is read by pandas as a data row (``header=None``), so its cells are parsed exactly as the
+        dataframe's header is (blank lines skipped, BOM removed, quotes removed, a quoted cell may span
+        lines) but are not yet suffixed. A file-like object is returned to where it was; one that cannot
+        seek or report its position is read into memory first.
+
+        Parameters:
+            file (str, os.PathLike or file-like): Path to the text file or a binary or text file-like object.
+
+        Returns:
+            tuple: The header cells (list[str]) and the file or in-memory copy for pandas.
+        """
+        if isinstance(file, (str, os.PathLike)):
+            return BaseInput._first_record_cells(file), file
+        position = None
+        if hasattr(file, "seekable") and file.seekable():
+            try:
+                position = file.tell()
+            except OSError:
+                pass  # A text file advanced with next() cannot tell its position, but can still be read.
+        if position is None:
+            contents = file.read()
+            file = io.BytesIO(contents) if isinstance(contents, bytes) else io.StringIO(contents)
+            position = 0
+        cells = BaseInput._first_record_cells(file)
+        file.seek(position)
+        return cells, file
+
+    @staticmethod
+    def _first_record_cells(file) -> list[str]:
+        """Return the cells of the first record pandas reads from file, or [] if there is none."""
+        try:
+            first = pd.read_csv(
+                file, delimiter="\t", header=None, nrows=1, dtype=str, keep_default_na=False, skip_blank_lines=True
+            )
+        except pd.errors.EmptyDataError:
+            return []
+        return list(first.iloc[0]) if len(first) else []
 
     def assemble(self, mapper=None, skip_curly_braces=False) -> pd.DataFrame:
         """Assembles the HED strings.
@@ -580,6 +687,8 @@ class BaseInput:
             # keeps it missing.
             self._dataframe = file.astype(object).fillna("n/a").astype(str)
             self._has_column_names = self._dataframe_has_names(self._dataframe)
+            if self._has_column_names:
+                self._set_column_names(self._dataframe.columns)
             return
 
         # Check for empty file or None
@@ -627,6 +736,8 @@ class BaseInput:
             self._loaded_workbook = openpyxl.load_workbook(file)
             loaded_worksheet = self.get_worksheet(self._worksheet_name)
             self._dataframe = self._get_dataframe_from_worksheet(loaded_worksheet, has_column_names)
+            if has_column_names:
+                self._set_column_names(self._dataframe.columns)
         except Exception as e:
             raise HedFileError(
                 HedExceptions.INVALID_FILE_FORMAT, f"Failed to load Excel file: {str(e)}", self.name
@@ -659,12 +770,17 @@ class BaseInput:
             - Skips blank lines during parsing
             - Uses specific na_values configuration ("", "null")
             - Handles pandas.errors.EmptyDataError for files with no data
+            - With a header, the header record is read first so that repeated names are known before
+              pandas suffixes them (``duplicate_columns``); the column names are the trimmed header cells
         """
         if isinstance(file, str) and os.path.exists(file) and os.path.getsize(file) == 0:
             self._dataframe = pd.DataFrame()  # Handle empty file
             return
 
         try:
+            header_cells = None
+            if pandas_header is not None:
+                header_cells, file = self._read_header_cells(file)
             self._dataframe = pd.read_csv(
                 file,
                 delimiter="\t",
@@ -678,6 +794,8 @@ class BaseInput:
             # None and NULL, which pandas would otherwise read as missing, is a value and is validated as one,
             # as it is when a DataFrame is passed in.
             self._dataframe = self._dataframe.fillna("n/a")
+            if header_cells is not None:
+                self._set_column_names(self._dataframe.columns, header_cells)
         except pd.errors.EmptyDataError:
             self._dataframe = pd.DataFrame()  # Handle case where file has no data
         except Exception as e:

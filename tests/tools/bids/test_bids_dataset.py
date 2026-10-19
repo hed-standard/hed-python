@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 import unittest
 
 from hed.models.sidecar import Sidecar
@@ -330,6 +331,22 @@ class Test(unittest.TestCase):
             "BidsDataset with libraries summary hed_schema_versions list has 2 schemas",
         )
         self.assertTrue("dataset" in summary2)
+
+    def test_validate_repeated_column(self):
+        """A repeated column name in one events file is TABULAR_INVALID for that file and nothing else."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = os.path.join(temp_dir, "dataset")
+            shutil.copytree(self.root_path, root)
+            events = os.path.join(root, "sub-002", "eeg", "sub-002_task-FacePerception_run-1_events.tsv")
+            with open(events, encoding="utf-8", newline="") as fp:
+                header, rest = fp.read().split("\n", 1)
+            self.assertIn("\trep_lag\t", header)
+            with open(events, "w", encoding="utf-8", newline="") as fp:
+                fp.write(header.replace("\trep_lag\t", "\ttrial\t") + "\n" + rest)
+            issues = BidsDataset(root).validate(check_for_warnings=False)
+        self.assertEqual([issue["code"] for issue in issues], ["TABULAR_INVALID"])
+        self.assertEqual(issues[0]["ec_column"], "trial")
+        self.assertTrue(issues[0]["ec_filename"].endswith("sub-002_task-FacePerception_run-1_events.tsv"))
 
 
 if __name__ == "__main__":
