@@ -521,7 +521,7 @@ class BaseInput:
         The header is read by pandas as a data row (``header=None``), so its cells are parsed exactly as the
         dataframe's header is (blank lines skipped, BOM removed, quotes removed, a quoted cell may span
         lines) but are not yet suffixed. A file-like object is returned to where it was; one that cannot
-        seek is read into memory first.
+        seek or report its position is read into memory first.
 
         Parameters:
             file (str, os.PathLike or file-like): Path to the text file or a binary or text file-like object.
@@ -531,10 +531,16 @@ class BaseInput:
         """
         if isinstance(file, (str, os.PathLike)):
             return BaseInput._first_record_cells(file), file
-        if not (hasattr(file, "seekable") and file.seekable()):
+        position = None
+        if hasattr(file, "seekable") and file.seekable():
+            try:
+                position = file.tell()
+            except OSError:
+                pass  # A text file advanced with next() cannot tell its position, but can still be read.
+        if position is None:
             contents = file.read()
             file = io.BytesIO(contents) if isinstance(contents, bytes) else io.StringIO(contents)
-        position = file.tell()
+            position = 0
         cells = BaseInput._first_record_cells(file)
         file.seek(position)
         return cells, file

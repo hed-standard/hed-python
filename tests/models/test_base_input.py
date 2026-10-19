@@ -243,6 +243,16 @@ class TestDuplicateColumns(unittest.TestCase):
         self.assertEqual(input_file.columns, ["trial", "HED", "trial.1", "HED.1"])
         self.assertEqual(len(input_file.dataframe), 1)
 
+    def test_text_stream_advanced_with_next(self):
+        # TextIOWrapper.tell() fails after next(); the rest of the stream is still read from where it is.
+        text = "preamble\n" + self._text("trial\ttrial\tHED", ("a\tb\tRed",))
+        stream = io.TextIOWrapper(io.BytesIO(text.encode("utf-8")), encoding="utf-8")
+        next(stream)
+        input_file = BaseInput(stream, file_type=".tsv")
+        self.assertEqual(input_file.duplicate_columns, ["trial"])
+        self.assertEqual(input_file.columns, ["trial", "trial.1", "HED"])
+        self.assertEqual(len(input_file.dataframe), 1)
+
     def test_bom_blank_line_and_crlf(self):
         text = "\ufeff\r\nonset\tduration\ttrial\ttrial\r\n1\t2\t3\t4\r\n"
         input_file = BaseInput(io.BytesIO(text.encode("utf-8")), file_type=".tsv")
