@@ -8,6 +8,7 @@ import re
 import pandas as pd
 
 from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
+from hed.errors.exceptions import HedFileError
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
@@ -207,9 +208,16 @@ class BidsFileGroup:
                 sidecar_has_errors = merged_sidecar_errors[key]
 
             had_contents = data_obj.contents
-            data_obj.set_contents(overwrite=False)
             # A file whose merged sidecar has errors is skipped, unless its header repeats a column name:
             # validate then reports only TABULAR_INVALID (stage 0) and checks no row against the sidecar.
+            # A file that cannot even be loaded (a blank column name) is skipped as it was before loading.
+            try:
+                data_obj.set_contents(overwrite=False)
+            except HedFileError:
+                if not sidecar_has_errors:
+                    raise
+                logger.debug(f"Skipping {os.path.basename(data_obj.file_path)}: its merged sidecar has errors")
+                continue
             if sidecar_has_errors and not data_obj.contents.duplicate_columns:
                 logger.debug(f"Skipping {os.path.basename(data_obj.file_path)}: its merged sidecar has errors")
                 if not had_contents:
