@@ -87,7 +87,7 @@ class BaseInput:
         if column_issues:
             raise HedFileError(
                 HedExceptions.BAD_COLUMN_NAMES,
-                "Duplicate or blank columns found. See issues.",
+                "Blank column names found. See issues.",
                 self.name,
                 issues=column_issues,
             )
