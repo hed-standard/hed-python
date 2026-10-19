@@ -195,6 +195,7 @@ class BidsFileGroup:
             logger.debug(f"Validating data file {i}/{len(hed_files)}: {os.path.basename(data_obj.file_path)}")
 
             sidecar = data_obj.sidecar
+            sidecar_has_errors = False
             if sidecar is not None and id(sidecar) not in group_sidecars:
                 key = json.dumps(sidecar.loaded_dict, sort_keys=True)
                 if key not in merged_sidecar_errors:
@@ -203,12 +204,17 @@ class BidsFileGroup:
                     )
                     merged_sidecar_errors[key] = check_for_any_errors(sidecar_issues)
                     issues += sidecar_issues
-                if merged_sidecar_errors[key]:
-                    logger.debug(f"Skipping {os.path.basename(data_obj.file_path)}: its merged sidecar has errors")
-                    continue
+                sidecar_has_errors = merged_sidecar_errors[key]
 
             had_contents = data_obj.contents
             data_obj.set_contents(overwrite=False)
+            # A file whose merged sidecar has errors is skipped, unless its header repeats a column name:
+            # validate then reports only TABULAR_INVALID (stage 0) and checks no row against the sidecar.
+            if sidecar_has_errors and not data_obj.contents.duplicate_columns:
+                logger.debug(f"Skipping {os.path.basename(data_obj.file_path)}: its merged sidecar has errors")
+                if not had_contents:
+                    data_obj.clear_contents()
+                continue
             file_issues = data_obj.contents.validate(
                 hed_schema,
                 extra_def_dicts=extra_def_dicts,
