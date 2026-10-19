@@ -257,6 +257,23 @@ class TestDuplicateColumns(unittest.TestCase):
         self.assertEqual(unique.duplicate_columns, [])
         self.assertEqual(unique.columns, ["onset", "duration", "trial", "HED"])
 
+    def test_quoted_header_cells(self):
+        # The header is parsed as pandas parses it: quotes are removed before names are compared.
+        mixed = BaseInput(io.StringIO(self._text('trial\t"trial"\tHED', ("a\tb\tRed",))), file_type=".tsv")
+        self.assertEqual(mixed.duplicate_columns, ["trial"])
+        self.assertEqual(mixed.columns, ["trial", "trial.1", "HED"])
+        quoted = BaseInput(io.StringIO(self._text('"trial"\t"trial"\tHED', ("a\tb\tRed",))), file_type=".tsv")
+        self.assertEqual(quoted.duplicate_columns, ["trial"])
+        self.assertEqual(quoted.columns, ["trial", "trial.1", "HED"])
+
+    def test_multiline_quoted_header(self):
+        # A quoted cell may hold a line break; the header record then spans two lines.
+        text = self._text('"trial\nnote"\ttrial\ttrial', ("a\tb\tc",))
+        input_file = BaseInput(io.BytesIO(text.encode("utf-8")), file_type=".tsv")
+        self.assertEqual(input_file.duplicate_columns, ["trial"])
+        self.assertEqual(input_file.columns, ["trial\nnote", "trial", "trial.1"])
+        self.assertEqual(len(input_file.dataframe), 1)
+
     def test_order_and_count(self):
         input_file = BaseInput(io.StringIO(self._text("b\ta\ta\tb\tb")), file_type=".tsv")
         # Each name once, in order of its second appearance.

@@ -505,7 +505,7 @@ class BaseInput:
 
         Parameters:
             names (list): The dataframe's column labels as loaded.
-            header_cells (list or None): The raw cells of a text file's header line, from which the repeats are
+            header_cells (list or None): The cells of a text file's header record, from which the repeats are
                 read because pandas has already suffixed them in names. None reads the repeats from names.
         """
         names = self._trimmed_names(names)
@@ -516,10 +516,12 @@ class BaseInput:
 
     @staticmethod
     def _read_header_cells(file):
-        """Return the cells of a text file's header line and the file to hand to pandas.
+        """Return the cells of a text file's header record and the file to hand to pandas.
 
-        The header line is the first line that is not blank, as pandas skips blank lines. A file-like object
-        is returned to where it was; one that cannot seek is read into memory first.
+        The header is read by pandas as a data row (``header=None``), so its cells are parsed exactly as the
+        dataframe's header is (blank lines skipped, BOM removed, quotes removed, a quoted cell may span
+        lines) but are not yet suffixed. A file-like object is returned to where it was; one that cannot
+        seek is read into memory first.
 
         Parameters:
             file (str, os.PathLike or file-like): Path to the text file or a binary or text file-like object.
@@ -528,31 +530,25 @@ class BaseInput:
             tuple: The header cells (list[str]) and the file or in-memory copy for pandas.
         """
         if isinstance(file, (str, os.PathLike)):
-            with open(file, "rb") as fp:
-                return BaseInput._first_line_cells(fp), file
+            return BaseInput._first_record_cells(file), file
         if not (hasattr(file, "seekable") and file.seekable()):
             contents = file.read()
             file = io.BytesIO(contents) if isinstance(contents, bytes) else io.StringIO(contents)
         position = file.tell()
-        cells = BaseInput._first_line_cells(file)
+        cells = BaseInput._first_record_cells(file)
         file.seek(position)
         return cells, file
 
     @staticmethod
-    def _first_line_cells(fp) -> list[str]:
-        """Return the tab-separated cells of the first non-blank line read from fp, without a leading BOM."""
-        first = True
-        while line := fp.readline():
-            if isinstance(line, bytes):
-                line = line.decode("utf-8", errors="replace")
-            if first:
-                line = line.removeprefix("\ufeff")
-                first = False
-            line = line.rstrip("\r\n")
-            # pandas reads a line holding a tab as a row of empty cells, not as a blank line.
-            if line.strip() or "\t" in line:
-                return line.split("\t")
-        return []
+    def _first_record_cells(file) -> list[str]:
+        """Return the cells of the first record pandas reads from file, or [] if there is none."""
+        try:
+            first = pd.read_csv(
+                file, delimiter="\t", header=None, nrows=1, dtype=str, keep_default_na=False, skip_blank_lines=True
+            )
+        except pd.errors.EmptyDataError:
+            return []
+        return list(first.iloc[0]) if len(first) else []
 
     def assemble(self, mapper=None, skip_curly_braces=False) -> pd.DataFrame:
         """Assembles the HED strings.
@@ -768,7 +764,7 @@ class BaseInput:
             - Skips blank lines during parsing
             - Uses specific na_values configuration ("", "null")
             - Handles pandas.errors.EmptyDataError for files with no data
-            - With a header, the raw header line is read first so that repeated names are known before
+            - With a header, the header record is read first so that repeated names are known before
               pandas suffixes them (``duplicate_columns``); the column names are the trimmed header cells
         """
         if isinstance(file, str) and os.path.exists(file) and os.path.getsize(file) == 0:
