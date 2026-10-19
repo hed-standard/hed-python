@@ -8,6 +8,8 @@ import pandas as pd
 from hed import schema
 from hed.errors import HedFileError
 from hed.models import Sidecar, SpreadsheetInput, TabularInput
+from hed.models.base_input import BaseInput
+from hed.models.column_mapper import ColumnMapper
 
 
 class Test(unittest.TestCase):
@@ -243,6 +245,42 @@ class Test(unittest.TestCase):
             test_output_name, worksheet_name="LKT 8HED3", tag_columns=[4], has_column_names=False
         )
         self.assertTrue(excel_book.dataframe.equals(reloaded_df.dataframe))
+
+
+class TestTrimmedSelectors(unittest.TestCase):
+    """Header names are trimmed, so name selectors are trimmed too and still select their columns."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.schema = schema.load_schema_version("8.4.0")
+        cls.text = " HED tags \t Event label \tother\nRed\tgo\tx\n"
+
+    def _input(self, **kwargs):
+        return SpreadsheetInput(io.BytesIO(self.text.encode("utf-8")), file_type=".tsv", **kwargs)
+
+    def test_tag_columns(self):
+        spreadsheet = self._input(tag_columns=[" HED tags "])
+        self.assertEqual(spreadsheet.columns, ["HED tags", "Event label", "other"])
+        self.assertEqual(spreadsheet._mapper.get_tag_columns(), ["HED tags"])
+        self.assertEqual(spreadsheet.validate(self.schema), [])
+        self.assertEqual(list(spreadsheet.series_a), ["Red"])
+
+    def test_optional_tag_columns_and_setters(self):
+        mappers = [ColumnMapper(optional_tag_columns=[" HED tags "]), ColumnMapper()]
+        mappers[1].set_tag_columns(optional_tag_columns=["HED tags "], finalize_mapping=False)
+        for mapper in mappers:
+            base_input = BaseInput(io.BytesIO(self.text.encode("utf-8")), file_type=".tsv", mapper=mapper)
+            self.assertEqual(base_input._mapper.get_tag_columns(), ["HED tags"])
+            self.assertEqual(list(base_input.series_a), ["Red"])
+
+    def test_column_prefix_dictionary(self):
+        spreadsheet = self._input(tag_columns=["HED tags "], column_prefix_dictionary={" Event label": "Label/"})
+        self.assertEqual(spreadsheet.validate(self.schema), [])
+        self.assertEqual(sorted(spreadsheet.series_a[0].split(", ")), ["Label/go", "Red"])
+        mapper = ColumnMapper(tag_columns=["HED tags"])
+        mapper.set_column_prefix_dictionary({"Event label ": "Label/"}, finalize_mapping=False)
+        base_input = BaseInput(io.BytesIO(self.text.encode("utf-8")), file_type=".tsv", mapper=mapper)
+        self.assertEqual(sorted(base_input.series_a[0].split(", ")), ["Label/go", "Red"])
 
 
 if __name__ == "__main__":

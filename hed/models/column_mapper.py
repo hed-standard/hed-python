@@ -80,13 +80,13 @@ class ColumnMapper:
         self._warn_on_missing_column = warn_on_missing_column
         if tag_columns is None:
             tag_columns = []
-        self._tag_columns = tag_columns
+        self._tag_columns = self._trimmed_selectors(tag_columns)
         if optional_tag_columns is None:
             optional_tag_columns = []
-        self._optional_tag_columns = optional_tag_columns
+        self._optional_tag_columns = self._trimmed_selectors(optional_tag_columns)
         if column_prefix_dictionary is None:
             column_prefix_dictionary = {}
-        self._column_prefix_dictionary = column_prefix_dictionary
+        self._column_prefix_dictionary = self._trimmed_selectors(column_prefix_dictionary)
 
         self._na_patterns = ["n/a", "nan"]
         self._sidecar = None
@@ -227,8 +227,8 @@ class ColumnMapper:
             tag_columns = []
         if optional_tag_columns is None:
             optional_tag_columns = []
-        self._tag_columns = tag_columns
-        self._optional_tag_columns = optional_tag_columns
+        self._tag_columns = self._trimmed_selectors(tag_columns)
+        self._optional_tag_columns = self._trimmed_selectors(optional_tag_columns)
         if finalize_mapping:
             self._finalize_mapping()
 
@@ -253,9 +253,23 @@ class ColumnMapper:
 
     def set_column_prefix_dictionary(self, column_prefix_dictionary, finalize_mapping=True):
         """Set the column prefix dictionary."""
-        self._column_prefix_dictionary = column_prefix_dictionary
+        self._column_prefix_dictionary = self._trimmed_selectors(column_prefix_dictionary)
         if finalize_mapping:
             self._finalize_mapping()
+
+    @staticmethod
+    def _trimmed_selectors(selectors):
+        """Return column selectors with each name trimmed, as BaseInput trims header names; numbers are unchanged.
+
+        Parameters:
+            selectors (list or dict): Column numbers or names, or a dict keyed by them.
+
+        Returns:
+            list or dict: A new list, or a new dict with the same values.
+        """
+        if isinstance(selectors, dict):
+            return {key.strip() if isinstance(key, str) else key: value for key, value in selectors.items()}
+        return [item.strip() if isinstance(item, str) else item for item in selectors]
 
     @staticmethod
     def _get_sidecar_basic_map(column_map, column_data):
