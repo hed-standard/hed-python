@@ -530,7 +530,7 @@ def onset_duration_has_other_tags(tag):
 
 @hed_error(ColumnErrors.INVALID_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
 def invalid_column_ref(bad_ref):
-    return f"The column '{bad_ref}' is unknown or does not have HED annotations.'"
+    return f"The column '{bad_ref}' is unknown or does not have HED annotations."
 
 
 @hed_error(ColumnErrors.SELF_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
