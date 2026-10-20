@@ -247,40 +247,37 @@ class Test(unittest.TestCase):
         self.assertTrue(excel_book.dataframe.equals(reloaded_df.dataframe))
 
 
-class TestTrimmedSelectors(unittest.TestCase):
-    """Header names are trimmed, so name selectors are trimmed too and still select their columns."""
+class TestExactSelectors(unittest.TestCase):
+    """Column names are not trimmed, so a name selector selects a column only when it matches exactly."""
 
     @classmethod
     def setUpClass(cls):
-        cls.schema = schema.load_schema_version("8.4.0")
-        cls.text = " HED tags \t Event label \tother\nRed\tgo\tx\n"
+        cls.text = "HED tags\tEvent label\tother\nRed\tgo\tx\n"
 
-    def _input(self, **kwargs):
-        return SpreadsheetInput(io.BytesIO(self.text.encode("utf-8")), file_type=".tsv", **kwargs)
+    def _base_input(self, mapper):
+        return BaseInput(io.BytesIO(self.text.encode("utf-8")), file_type=".tsv", mapper=mapper)
 
-    def test_tag_columns(self):
-        spreadsheet = self._input(tag_columns=[" HED tags "])
-        self.assertEqual(spreadsheet.columns, ["HED tags", "Event label", "other"])
-        self.assertEqual(spreadsheet._mapper.get_tag_columns(), ["HED tags"])
-        self.assertEqual(spreadsheet.validate(self.schema), [])
-        self.assertEqual(list(spreadsheet.series_a), ["Red"])
-
-    def test_optional_tag_columns_and_setters(self):
-        mappers = [ColumnMapper(optional_tag_columns=[" HED tags "]), ColumnMapper()]
-        mappers[1].set_tag_columns(optional_tag_columns=["HED tags "], finalize_mapping=False)
-        for mapper in mappers:
-            base_input = BaseInput(io.BytesIO(self.text.encode("utf-8")), file_type=".tsv", mapper=mapper)
-            self.assertEqual(base_input._mapper.get_tag_columns(), ["HED tags"])
-            self.assertEqual(list(base_input.series_a), ["Red"])
-
-    def test_column_prefix_dictionary(self):
-        spreadsheet = self._input(tag_columns=["HED tags "], column_prefix_dictionary={" Event label": "Label/"})
-        self.assertEqual(spreadsheet.validate(self.schema), [])
-        self.assertEqual(sorted(spreadsheet.series_a[0].split(", ")), ["Label/go", "Red"])
-        mapper = ColumnMapper(tag_columns=["HED tags"])
-        mapper.set_column_prefix_dictionary({"Event label ": "Label/"}, finalize_mapping=False)
-        base_input = BaseInput(io.BytesIO(self.text.encode("utf-8")), file_type=".tsv", mapper=mapper)
+    def test_exact_selectors_select(self):
+        mapper = ColumnMapper(tag_columns=["HED tags"], column_prefix_dictionary={"Event label": "Label/"})
+        base_input = self._base_input(mapper)
+        self.assertEqual(base_input._mapper.get_tag_columns(), ["HED tags"])
         self.assertEqual(sorted(base_input.series_a[0].split(", ")), ["Label/go", "Red"])
+
+    def test_padded_selectors_do_not_select(self):
+        mappers = [
+            ColumnMapper(tag_columns=[" HED tags "]),
+            ColumnMapper(optional_tag_columns=["HED tags "]),
+            ColumnMapper(column_prefix_dictionary={" Event label": "Label/"}),
+        ]
+        mappers.append(ColumnMapper())
+        mappers[-1].set_tag_columns(tag_columns=["HED tags "])
+        for mapper in mappers:
+            base_input = self._base_input(mapper)
+            self.assertEqual(base_input._mapper.get_tag_columns(), [])
+            self.assertEqual(list(base_input.series_a), [""])
+        # A required tag column that matches no name is reported as missing.
+        issues = self._base_input(ColumnMapper(tag_columns=[" HED tags "]))._mapper.check_for_mapping_issues()
+        self.assertEqual([issue["code"] for issue in issues], ["HED_MISSING_REQUIRED_COLUMN"])
 
 
 if __name__ == "__main__":
