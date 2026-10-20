@@ -55,7 +55,6 @@ class Test(unittest.TestCase):
             has_column_names=True,
             name="face_sub1_events",
             mapper=mapper1,
-            allow_blank_names=False,
         )
         cls.input_data2 = BaseInput(events_path, file_type=".tsv", has_column_names=True, name="face_sub2_events")
 
@@ -197,6 +196,20 @@ class TestCombineDataframe(unittest.TestCase):
         self.assertTrue(result.equals(expected))
 
 
+def _excel_input(*rows):
+    """Return a BaseInput read from an in-memory workbook holding the given rows."""
+    import openpyxl
+
+    workbook = openpyxl.Workbook()
+    worksheet = workbook.active
+    for row in rows:
+        worksheet.append(row)
+    buffer = io.BytesIO()
+    workbook.save(buffer)
+    buffer.seek(0)
+    return BaseInput(buffer, file_type=".xlsx")
+
+
 class TestDuplicateColumns(unittest.TestCase):
     """duplicate_columns: the names a header repeats, read before pandas suffixes them (TABULAR_INVALID)."""
 
@@ -259,13 +272,12 @@ class TestDuplicateColumns(unittest.TestCase):
         self.assertEqual(input_file.duplicate_columns, ["trial"])
         self.assertEqual(input_file.columns, ["onset", "duration", "trial", "trial.1"])
 
-    def test_names_are_trimmed(self):
+    def test_names_are_kept_as_read(self):
+        # Names are compared exactly: "trial " beside "trial" is one padded name, not a repeat.
         input_file = BaseInput(io.StringIO(self._text("onset \t duration\ttrial \ttrial")), file_type=".tsv")
-        self.assertEqual(input_file.duplicate_columns, ["trial"])
-        self.assertEqual(input_file.columns, ["onset", "duration", "trial", "trial.1"])
-        unique = BaseInput(io.StringIO(self._text("onset \tduration\ttrial \tHED")), file_type=".tsv")
-        self.assertEqual(unique.duplicate_columns, [])
-        self.assertEqual(unique.columns, ["onset", "duration", "trial", "HED"])
+        self.assertEqual(input_file.duplicate_columns, [])
+        self.assertEqual(input_file.padded_columns, ["onset ", " duration", "trial "])
+        self.assertEqual(input_file.columns, ["onset ", " duration", "trial ", "trial"])
 
     def test_quoted_header_cells(self):
         # The header is parsed as pandas parses it: quotes are removed before names are compared.
@@ -296,7 +308,7 @@ class TestDuplicateColumns(unittest.TestCase):
         self.assertEqual(self._blank_repeats().duplicate_columns, [])
 
     def _blank_repeats(self):
-        # Blank names have their own rule (allow_blank_names) and are not counted as repeats.
+        # Blank names have their own rule (blank_columns) and are not counted as repeats.
         return BaseInput(io.StringIO(self._text("onset\t\t\tHED")), file_type=".tsv")
 
     def test_no_column_names(self):
@@ -307,23 +319,82 @@ class TestDuplicateColumns(unittest.TestCase):
         self.assertEqual(len(input_file.dataframe), 2)
 
     def test_from_dataframe(self):
-        frame = pd.DataFrame([["1", "go", "stop"]], columns=["onset", "trial ", "trial"])
+        frame = pd.DataFrame([["1", "go", "stop", "x"]], columns=["onset", "trial ", "trial", "trial"])
         input_file = BaseInput(frame)
         self.assertEqual(input_file.duplicate_columns, ["trial"])
-        self.assertEqual(input_file.columns, ["onset", "trial", "trial.1"])
+        self.assertEqual(input_file.padded_columns, ["trial "])
+        self.assertEqual(input_file.columns, ["onset", "trial ", "trial", "trial.1"])
         # The caller's frame keeps its own labels.
-        self.assertEqual(list(frame.columns), ["onset", "trial ", "trial"])
+        self.assertEqual(list(frame.columns), ["onset", "trial ", "trial", "trial"])
 
     def test_from_excel(self):
-        import openpyxl
+        input_file = _excel_input(["onset", "trial", "HED ", "trial", "HED"], ["1", "go", "Red", "stop", "Blue"])
+        self.assertEqual(input_file.duplicate_columns, ["trial"])
+        self.assertEqual(input_file.padded_columns, ["HED "])
+        self.assertEqual(input_file.columns, ["onset", "trial", "HED ", "trial.1", "HED"])
 
-        workbook = openpyxl.Workbook()
-        worksheet = workbook.active
-        worksheet.append(["onset", "trial", "HED ", "trial", "HED"])
-        worksheet.append(["1", "go", "Red", "stop", "Blue"])
-        buffer = io.BytesIO()
-        workbook.save(buffer)
-        buffer.seek(0)
-        input_file = BaseInput(buffer, file_type=".xlsx")
-        self.assertEqual(input_file.duplicate_columns, ["trial", "HED"])
-        self.assertEqual(input_file.columns, ["onset", "trial", "HED", "trial.1", "HED.1"])
+
+class TestPaddedAndBlankColumns(unittest.TestCase):
+    """padded_columns and blank_columns: TABULAR_INVALID (b) and (c), read from the header as written."""
+
+    @staticmethod
+    def _text_input(header, rows=("1\t2\t3",)):
+        return BaseInput(io.StringIO("\n".join([header, *rows]) + "\n"), file_type=".tsv")
+
+    def test_padded_names(self):
+        input_file = self._text_input("onset\tduration\t HED")
+        self.assertEqual(input_file.padded_columns, [" HED"])
+        self.assertEqual(input_file.blank_columns, [])
+        # A tab inside a quoted cell is part of the name, and pads it.
+        tab = self._text_input('"trial\t"\tx\tHED', ("a\tb\tc",))
+        self.assertEqual(tab.padded_columns, ["trial\t"])
+
+    def test_padded_and_repeated_is_padded_once(self):
+        input_file = self._text_input("trial \ttrial \tHED")
+        self.assertEqual(input_file.padded_columns, ["trial "])
+        self.assertEqual(input_file.duplicate_columns, [])
+
+    def test_whitespace_only_name_is_padded_not_blank(self):
+        input_file = self._text_input("onset\t \tHED")
+        self.assertEqual(input_file.padded_columns, [" "])
+        self.assertEqual(input_file.blank_columns, [])
+
+    def test_non_breaking_space_is_not_padding(self):
+        input_file = self._text_input("onset\ttrial\u00a0\tHED")
+        self.assertEqual(input_file.padded_columns, [])
+        self.assertEqual(input_file.columns, ["onset", "trial\u00a0", "HED"])
+
+    def test_inner_blank_is_not_padding(self):
+        input_file = self._text_input("onset\ttrial type\tHED")
+        self.assertEqual(input_file.padded_columns, [])
+
+    def test_blank_last_name_from_trailing_tab(self):
+        input_file = self._text_input("onset\tduration\tHED\t", ("1\t2\tRed\t",))
+        self.assertEqual(input_file.blank_columns, [3])
+        self.assertEqual(input_file.columns, ["onset", "duration", "HED", ""])
+
+    def test_blank_middle_and_two_blanks(self):
+        middle = self._text_input("onset\t\tHED")
+        self.assertEqual(middle.blank_columns, [1])
+        two = self._text_input("onset\t\t\tHED", ("1\t2\t3\t4",))
+        self.assertEqual(two.blank_columns, [1, 2])
+        self.assertEqual(two.duplicate_columns, [])
+
+    def test_blank_from_excel(self):
+        input_file = _excel_input(["onset", None, "HED"], ["1", "x", "Red"])
+        self.assertEqual(input_file.blank_columns, [1])
+
+    def test_dataframe_labels_are_literal(self):
+        # A label pandas would give an empty header cell is an ordinary name; "", None and NaN are blank.
+        frame = pd.DataFrame([["1", "a", "b", "c", "d"]], columns=["onset", "Unnamed: 1", "", None, np.nan])
+        input_file = BaseInput(frame)
+        self.assertEqual(input_file.blank_columns, [2, 3, 4])
+        self.assertEqual(input_file.padded_columns, [])
+        self.assertEqual(input_file.duplicate_columns, [])
+        suffixed = BaseInput(pd.DataFrame([["1", "a", "b"]], columns=["onset", "trial", "trial.1"]))
+        self.assertEqual(suffixed.duplicate_columns, [])
+
+    def test_no_column_names(self):
+        input_file = BaseInput(io.StringIO(" a\t\tb \n1\t2\t3\n"), file_type=".tsv", has_column_names=False)
+        self.assertEqual(input_file.padded_columns, [])
+        self.assertEqual(input_file.blank_columns, [])

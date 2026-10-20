@@ -87,6 +87,10 @@ class ValidationErrors:
     HED_TAGS_NOT_ALLOWED = "HED_TAGS_NOT_ALLOWED"
 
     HED_GROUP_EMPTY = "HED_GROUP_EMPTY"
+
+    # Reported as TABULAR_INVALID (specification Appendix B reasons b and c).
+    TABULAR_COLUMN_NAME_PADDED = "TABULAR_COLUMN_NAME_PADDED"
+    TABULAR_COLUMN_NAME_BLANK = "TABULAR_COLUMN_NAME_BLANK"
     # end internal codes
 
     # Still being worked on below this line
@@ -96,6 +100,7 @@ class ValidationErrors:
 
     DUPLICATE_COLUMN_IN_LIST = "DUPLICATE_COLUMN_IN_LIST"
     DUPLICATE_COLUMN_BETWEEN_SOURCES = "DUPLICATE_COLUMN_BETWEEN_SOURCES"
+    # No longer reported (a blank column name is TABULAR_COLUMN_NAME_BLANK); kept so existing imports work.
     HED_BLANK_COLUMN = "HED_BLANK_COLUMN"
 
     INVALID_VALUE_CLASS_CHARACTER = "INVALID_VALUE_CLASS_CHARACTER"
@@ -118,6 +123,8 @@ class SidecarErrors:
     SIDECAR_HED_USED = "SIDECAR_HED_USED"
     SIDECAR_NA_USED = "SIDECAR_NA_USED"
     SIDECAR_BRACES_INVALID = "SIDECAR_BRACES_INVALID"
+    # Reported as SIDECAR_INVALID (specification Appendix B reason d).
+    SIDECAR_KEY_PADDED = "SIDECAR_KEY_PADDED"
 
 
 class SchemaErrors:

@@ -11,7 +11,6 @@ from hed.errors.error_types import ValidationErrors
 from hed.models.column_metadata import ColumnMetadata, ColumnType
 from hed.models.definition_dict import DefinitionDict
 
-PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 NO_WARN_COLUMNS = ["onset", "duration"]
 
 
@@ -143,31 +142,6 @@ class ColumnMapper:
 
         return final_transformers, need_categorical
 
-    @staticmethod
-    def check_for_blank_names(column_map, allow_blank_names) -> list[dict]:
-        """Validate there are no blank column names.
-
-        Parameters:
-            column_map (iterable): A list of column names.
-            allow_blank_names (bool): Only find issues if True.
-
-        Returns:
-            list[dict]: A list of dicts, one per issue.
-        """
-        # Blank names are allowed unless the caller says otherwise; repeated names are not checked here
-        # (BaseInput.duplicate_columns records them and validation reports TABULAR_INVALID).
-        if allow_blank_names:
-            return []
-
-        issues = []
-
-        for column_number, name in enumerate(column_map):
-            if name is None or not name or name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
-                issues += ErrorHandler.format_error(ValidationErrors.HED_BLANK_COLUMN, column_number)
-                continue
-
-        return issues
-
     def _set_sidecar(self, sidecar):
         """Set the sidecar this column mapper uses.
 
@@ -270,8 +244,6 @@ class ColumnMapper:
                     column_entry.column_name = column_name
                     basic_final_map[column_name] = column_entry
                     continue
-                elif isinstance(column_name, str) and column_name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
-                    continue
                 unhandled_cols.append(column_name)
 
         return basic_final_map, unhandled_cols
@@ -363,11 +335,11 @@ class ColumnMapper:
             issues += ErrorHandler.format_error(error_type, duplicate, self._column_map.get(duplicate), list_names)
         return issues
 
-    def check_for_mapping_issues(self, allow_blank_names=False) -> list[dict]:
+    def check_for_mapping_issues(self) -> list[dict]:
         """Find all issues given the current column_map, tag_columns, etc.
 
-        Parameters:
-            allow_blank_names (bool): Only flag blank names if False.
+        Blank, padded and repeated column names are not checked here; validation reports them as
+        TABULAR_INVALID before the mapping is looked at.
 
         Returns:
             list[dict]: All issues found as a list of dicts.
@@ -394,7 +366,6 @@ class ColumnMapper:
                 if column not in fully_combined_list:
                     issues += ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_COLUMN, column)
 
-        issues += self.check_for_blank_names(self._column_map.values(), allow_blank_names=allow_blank_names)
         return issues
 
     def _finalize_mapping(self):

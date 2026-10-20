@@ -125,39 +125,41 @@ class Test(unittest.TestCase):
         self.assertEqual(repeated["ec_column"], "trial")
         self.assertTrue(repeated["ec_filename"].endswith("sub-002_task-FacePerception_run-1_events.tsv"))
 
-    def test_unloadable_file_with_bad_merged_sidecar_is_skipped(self):
-        """A file whose merged sidecar has errors and whose header has a blank name (TabularInput refuses
-        to load it) is skipped as before: validation does not raise and the sidecar issue is returned."""
+    def test_padded_or_blank_column_reported_despite_bad_merged_sidecar(self):
+        """A file whose merged sidecar has errors is skipped, but a padded or blank column name in its header
+        is still TABULAR_INVALID (a blank name no longer stops the file from loading)."""
         source = os.path.realpath(
             os.path.join(os.path.dirname(__file__), "../../data/bids_tests/eeg_ds003645s_hed_inheritance")
         )
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root_path = os.path.join(temp_dir, "dataset")
-            shutil.copytree(source, root_path)
-            events_path = os.path.join(root_path, "sub-002", "sub-002_task-FacePerception_run-1_events.tsv")
-            with open(events_path, encoding="utf-8", newline="") as fp:
-                header, rest = fp.read().split("\n", 1)
-            self.assertIn("\trep_lag\t", header)
-            with open(events_path, "w", encoding="utf-8", newline="") as fp:
-                fp.write(header.replace("\trep_lag\t", "\t\t") + "\n" + rest)
+        for replacement, column in (("\trep_lag \t", "rep_lag "), ("\t\t", None)):
+            with self.subTest(replacement=replacement), tempfile.TemporaryDirectory() as temp_dir:
+                root_path = os.path.join(temp_dir, "dataset")
+                shutil.copytree(source, root_path)
+                events_path = os.path.join(root_path, "sub-002", "sub-002_task-FacePerception_run-1_events.tsv")
+                with open(events_path, encoding="utf-8", newline="") as fp:
+                    header, rest = fp.read().split("\n", 1)
+                self.assertIn("\trep_lag\t", header)
+                with open(events_path, "w", encoding="utf-8", newline="") as fp:
+                    fp.write(header.replace("\trep_lag\t", replacement) + "\n" + rest)
 
-            file_paths = io_util.get_file_list(
-                root_path, extensions=[".tsv", ".json"], exclude_dirs=self.exclude_dirs, name_suffix=["_events"]
-            )
-            events = BidsFileGroup(root_path, file_paths, "events")
-            group_sidecars = {id(sidecar.contents) for sidecar in events.sidecar_dict.values()}
-            for data_obj in events.datafile_dict.values():
-                if "sub-002" in data_obj.file_path and id(data_obj.sidecar) not in group_sidecars:
-                    data_obj.sidecar.loaded_dict["bad_column"] = {"HED": {"x": "InvalidTagXYZ"}}
-            # Before the skip path caught the load failure, this raised HedFileError and lost the issues.
-            issues = events.validate_datafiles(load_schema_version("8.4.0"))
+                file_paths = io_util.get_file_list(
+                    root_path, extensions=[".tsv", ".json"], exclude_dirs=self.exclude_dirs, name_suffix=["_events"]
+                )
+                events = BidsFileGroup(root_path, file_paths, "events")
+                group_sidecars = {id(sidecar.contents) for sidecar in events.sidecar_dict.values()}
+                for data_obj in events.datafile_dict.values():
+                    if "sub-002" in data_obj.file_path and id(data_obj.sidecar) not in group_sidecars:
+                        data_obj.sidecar.loaded_dict["bad_column"] = {"HED": {"x": "InvalidTagXYZ"}}
+                issues = events.validate_datafiles(load_schema_version("8.4.0"))
 
-        self.assertEqual([issue["code"] for issue in issues], ["TAG_INVALID"])
-        self.assertEqual(issues[0]["ec_sidecarColumnName"], "bad_column")
+                self.assertEqual(sorted(issue["code"] for issue in issues), ["TABULAR_INVALID", "TAG_INVALID"])
+                bad_name = next(issue for issue in issues if issue["code"] == "TABULAR_INVALID")
+                self.assertEqual(bad_name.get("ec_column"), column)
+                self.assertTrue(bad_name["ec_filename"].endswith("sub-002_task-FacePerception_run-1_events.tsv"))
 
-    def test_trimmed_hed_header_found_without_sidecar(self):
-        """Discovery trims header cells as BaseInput does: a sidecar-free file headed `HED \\t HED` has HED
-        columns, so it is validated and its repeated name is TABULAR_INVALID."""
+    def test_padded_hed_header_found_without_sidecar(self):
+        """Discovery trims header cells only to find HED: a sidecar-free file headed `HED \\t HED` has HED
+        columns, so it is validated, and each padded name is TABULAR_INVALID."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root_path = os.path.join(temp_dir, "dataset")
             shutil.copytree(self.root_path, root_path)
@@ -174,8 +176,8 @@ class Test(unittest.TestCase):
 
         self.assertEqual(len(has_hed), 1)
         self.assertTrue(has_hed[0].endswith("sub-002_task-FacePerception_run-1_events.tsv"))
-        self.assertEqual([issue["code"] for issue in issues], ["TABULAR_INVALID"])
-        self.assertEqual(issues[0]["ec_column"], "HED")
+        self.assertEqual([issue["code"] for issue in issues], ["TABULAR_INVALID", "TABULAR_INVALID"])
+        self.assertEqual([issue["ec_column"] for issue in issues], ["HED ", " HED"])
 
     def test_summarize(self):
         events = BidsFileGroup(self.root_path, self.file_paths, "events")

@@ -14,8 +14,60 @@ from __future__ import annotations
 import numbers
 from typing import Protocol, runtime_checkable
 
+from hed.models.model_constants import NAME_WHITESPACE
+
 # Cell texts that mean "no value here". None and float NaN are also missing.
 MISSING_VALUES = frozenset(["", "n/a"])
+
+
+def is_padded(name) -> bool:
+    """Return True if a column name or sidecar key begins or ends with whitespace (``NAME_WHITESPACE``).
+
+    A name made only of whitespace is padded. A label that is not a string is never padded.
+    """
+    return isinstance(name, str) and bool(name) and (name[0] in NAME_WHITESPACE or name[-1] in NAME_WHITESPACE)
+
+
+def is_blank_name(name) -> bool:
+    """Return True if a column name is blank: the empty string, None, or a NaN label."""
+    if name is None:
+        return True
+    if isinstance(name, str):
+        return name == ""
+    return isinstance(name, numbers.Real) and bool(name != name)
+
+
+def check_column_names(names) -> tuple[list, list[int], list]:
+    """Find the column names that break the column-name rules (TABULAR_INVALID b, c and a).
+
+    Names are compared exactly as given; nothing is trimmed.
+
+    Parameters:
+        names (list): The column names exactly as the table holds them, repeats included.
+
+    Returns:
+        tuple: Three lists.
+            - padded: each distinct name that begins or ends with whitespace, in header order (reason b).
+            - blank: the 0-based position of each blank name, in header order (reason c).
+            - repeated: each other string name that appears more than once, in order of its second
+              appearance (reason a). A padded name that is also repeated is listed only as padded, and
+              blank names are never repeats.
+    """
+    padded = []
+    blank = []
+    repeated = []
+    seen = set()
+    for position, name in enumerate(names):
+        if is_blank_name(name):
+            blank.append(position)
+        elif is_padded(name):
+            if name not in padded:
+                padded.append(name)
+        elif isinstance(name, str):
+            if name in seen and name not in repeated:
+                repeated.append(name)
+            seen.add(name)
+    return padded, blank, repeated
 
 
 def distinct_values(values) -> dict[str, list[int]]:
@@ -68,7 +120,11 @@ class ColumnSource(Protocol):
     """
 
     def column_names(self) -> list:
-        """Return the column names in table order (column numbers if the table has no names)."""
+        """Return the column names in table order (column numbers if the table has no names).
+
+        The names are exactly as the table holds them: not trimmed and not de-duplicated, so that
+        validation can report a padded, blank or repeated name (:func:`check_column_names`).
+        """
         ...
 
     def distinct_values(self, column_name) -> dict[str, list[int]]:

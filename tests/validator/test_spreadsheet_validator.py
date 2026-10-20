@@ -417,3 +417,76 @@ class TestDuplicateColumns(unittest.TestCase):
             source, error_handler=ErrorHandler(check_for_warnings=False)
         )
         self.assertEqual(issues, [])
+
+
+class _NamedColumnSource(ListColumnSource):
+    """A column source whose names are given as a list, so it can hold repeated, padded and blank names
+    (as an NWB table can); the cells are taken from the first column of that name."""
+
+    def __init__(self, names, columns):
+        super().__init__(columns)
+        self._names = list(names)
+
+    def column_names(self) -> list:
+        return list(self._names)
+
+
+class TestPaddedAndBlankColumns(unittest.TestCase):
+    """Stage 0: padded (b), blank (c) and repeated (a) column names, in that order, and nothing else."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.schema = load_schema_version("8.4.0")
+
+    def _validate(self, tabular, **kwargs):
+        error_handler = ErrorHandler(check_for_warnings=True)
+        issues = tabular.validate(self.schema, error_handler=error_handler, **kwargs)
+        self.assertEqual(error_handler.error_context, [])
+        return issues
+
+    def test_padded_name_stops_before_sidecar(self):
+        # The sidecar has an invalid tag; the padded name is reported first and alone.
+        sidecar = Sidecar(io.StringIO(json.dumps({"trial": {"HED": {"go": "InvalidTagXYZ"}}})))
+        text = "onset\tduration\ttrial \tHED\n1.0\t0\tgo\tInvalidTagXYZ\n"
+        issues = self._validate(TabularInput(io.StringIO(text), sidecar=sidecar, name="events.tsv"))
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID])
+        self.assertEqual(issues[0][ErrorContext.COLUMN], "trial ")
+        self.assertEqual(issues[0][ErrorContext.FILE_NAME], "events.tsv")
+        self.assertIn("'trial '", issues[0]["message"])
+        self.assertIn("begins or ends with whitespace", issues[0]["message"])
+
+    def test_blank_name_reported_by_position(self):
+        issues = self._validate(TabularInput(io.StringIO("onset\t\tHED\t\n1.0\tx\tRed\ty\n"), name="events.tsv"))
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID] * 2)
+        self.assertIn("Column 2 ", issues[0]["message"])
+        self.assertIn("Column 4 ", issues[1]["message"])
+        self.assertNotIn(ErrorContext.COLUMN, issues[0])
+
+    def test_order_padded_blank_repeated(self):
+        text = "trial\ttrial\t\tHED \tonset\n1\t2\t3\tRed\t4\n"
+        issues = self._validate(SpreadsheetInput(io.StringIO(text), file_type=".tsv", tag_columns=["HED "]))
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID] * 3)
+        self.assertIn("'HED '", issues[0]["message"])
+        self.assertIn("Column 3 ", issues[1]["message"])
+        self.assertIn("'trial' appears more than once", issues[2]["message"])
+
+    def test_spreadsheet_without_names_not_checked(self):
+        text = " a\t\tRed\n b\tx\tBlue\n"
+        spreadsheet = SpreadsheetInput(io.StringIO(text), file_type=".tsv", tag_columns=[2], has_column_names=False)
+        self.assertEqual(self._validate(spreadsheet), [])
+
+    def test_plain_column_source(self):
+        names = ["onset", "trial", "trial", " HED", ""]
+        source = _NamedColumnSource(names, {"onset": [1.0], "trial": ["go"], " HED": ["Red"], "": ["x"]})
+        issues = SpreadsheetValidator(self.schema).validate(source, error_handler=ErrorHandler(), name="table")
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID] * 3)
+        self.assertEqual(issues[0][ErrorContext.COLUMN], " HED")
+        self.assertIn("Column 5 ", issues[1]["message"])
+        self.assertEqual(issues[2][ErrorContext.COLUMN], "trial")
+        self.assertEqual([issue[ErrorContext.FILE_NAME] for issue in issues], ["table"] * 3)
+
+    def test_unnamed_dataframe_label_is_ordinary(self):
+        # A DataFrame's labels are taken literally: "Unnamed: 1" is a name, not a blank cell.
+        frame = pd.DataFrame({"onset": ["1.0"], "Unnamed: 1": ["x"], "HED": ["Red"]})
+        issues = self._validate(TabularInput(frame))
+        self.assertNotIn(ValidationErrors.TABULAR_INVALID, [issue["code"] for issue in issues])
