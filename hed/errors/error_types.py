@@ -91,6 +91,8 @@ class ValidationErrors:
     # Reported as TABULAR_INVALID (specification Appendix B reasons b and c).
     TABULAR_COLUMN_NAME_PADDED = "TABULAR_COLUMN_NAME_PADDED"
     TABULAR_COLUMN_NAME_BLANK = "TABULAR_COLUMN_NAME_BLANK"
+    # Reported as TABULAR_INVALID (reason d): a value with leading or trailing whitespace in an annotated column.
+    TABULAR_VALUE_PADDED = "TABULAR_VALUE_PADDED"
     # end internal codes
 
     # Still being worked on below this line
@@ -125,6 +127,9 @@ class SidecarErrors:
     SIDECAR_BRACES_INVALID = "SIDECAR_BRACES_INVALID"
     # Reported as SIDECAR_INVALID (specification Appendix B reason d).
     SIDECAR_KEY_PADDED = "SIDECAR_KEY_PADDED"
+    # Reported as SIDECAR_INVALID (reason e): a key under "HED" in a categorical entry with leading or trailing
+    # whitespace.
+    SIDECAR_CATEGORY_KEY_PADDED = "SIDECAR_CATEGORY_KEY_PADDED"
 
 
 class SchemaErrors:
