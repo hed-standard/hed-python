@@ -307,10 +307,20 @@ class BaseInput:
 
         Raises:
             OSError: If the file cannot be opened.
+            csv.Error: If a column name or cell holds a tab or line break, which a TSV file cannot hold.
+
+        Notes:
+            Double quotes are written as ordinary characters, as the file is read (see ``_load_text_file``), so a
+            file written here reads back with the same column names and cells.
         """
         dataframe = self._dataframe
         csv_string_if_filename_none = dataframe.to_csv(
-            file, sep="\t", index=False, header=self._has_column_names, lineterminator="\n"
+            file,
+            sep="\t",
+            index=False,
+            header=self._has_column_names,
+            lineterminator="\n",
+            quoting=csv.QUOTE_NONE,
         )
         return csv_string_if_filename_none
 

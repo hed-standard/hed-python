@@ -1,3 +1,4 @@
+import csv
 import io
 import os
 import shutil
@@ -307,6 +308,21 @@ class TestDuplicateColumns(unittest.TestCase):
         tabular = TabularInput(io.StringIO('onset\tHED\n1\t"Red"\n'))
         issues = tabular.validate(load_schema_version("8.4.0"))
         self.assertEqual([issue["code"] for issue in issues], ["CHARACTER_INVALID", "CHARACTER_INVALID"])
+
+    def test_quotes_survive_save_and_reload(self):
+        text = 'onset\tsay "x"\tHED\n1\tsay "go"\tRed\n2\t"quoted"\tBlue\n'
+        original = BaseInput(io.StringIO(text), file_type=".tsv")
+        saved = original.to_csv()
+        self.assertEqual(saved, text)
+        reloaded = BaseInput(io.StringIO(saved), file_type=".tsv")
+        self.assertEqual(reloaded.columns, ["onset", 'say "x"', "HED"])
+        self.assertTrue(reloaded.dataframe.equals(original.dataframe))
+
+    def test_save_refuses_a_tab_in_a_cell(self):
+        # A TSV file cannot hold a tab inside a cell when quotes are ordinary characters.
+        input_file = BaseInput(pd.DataFrame([["1", "a\tb"]], columns=["onset", "note"]))
+        with self.assertRaises(csv.Error):
+            input_file.to_csv()
 
     def test_quoted_tab_splits_the_cell(self):
         # The extra cell of the row is dropped, as hed-javascript drops it; the BIDS validator reports the row.
