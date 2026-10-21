@@ -1,5 +1,6 @@
 """A group of BIDS files with specified suffix name."""
 
+import csv
 import json
 import logging
 import os
@@ -286,9 +287,8 @@ class BidsFileGroup:
             try:
                 # Trimmed only to decide whether the file carries HED, so a header cell "HED " is validated
                 # (and reported as a padded name) rather than skipped. The loaded column names are not trimmed.
-                column_headers = [
-                    str(name).strip(NAME_WHITESPACE) for name in pd.read_csv(file_path, sep="\t", nrows=0).columns
-                ]
+                header = pd.read_csv(file_path, sep="\t", nrows=0, quoting=csv.QUOTE_NONE).columns
+                column_headers = [str(name).strip(NAME_WHITESPACE) for name in header]
             except Exception as e:
                 self.bad_files[file_path] = f"{file_path} does not have a valid column header: {str(e)}"
                 continue

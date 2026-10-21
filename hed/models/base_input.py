@@ -2,6 +2,7 @@
 Superclass representing a basic columnar file.
 """
 
+import csv
 import io
 import os
 import warnings
@@ -531,9 +532,9 @@ class BaseInput:
         """Return the cells of a text file's header record and the file to hand to pandas.
 
         The header is read by pandas as a data row (``header=None``), so its cells are parsed exactly as the
-        dataframe's header is (blank lines skipped, BOM removed, quotes removed, a quoted cell may span
-        lines) but are not yet suffixed. A file-like object is returned to where it was; one that cannot
-        seek or report its position is read into memory first.
+        dataframe's header is (blank lines skipped, BOM removed, a double quote kept as an ordinary character)
+        but are not yet suffixed. A file-like object is returned to where it was; one that cannot seek or
+        report its position is read into memory first.
 
         Parameters:
             file (str, os.PathLike or file-like): Path to the text file or a binary or text file-like object.
@@ -562,7 +563,14 @@ class BaseInput:
         """Return the cells of the first record pandas reads from file, or [] if there is none."""
         try:
             first = pd.read_csv(
-                file, delimiter="\t", header=None, nrows=1, dtype=str, keep_default_na=False, skip_blank_lines=True
+                file,
+                delimiter="\t",
+                header=None,
+                nrows=1,
+                dtype=str,
+                keep_default_na=False,
+                skip_blank_lines=True,
+                quoting=csv.QUOTE_NONE,
             )
         except pd.errors.EmptyDataError:
             return []
@@ -813,6 +821,10 @@ class BaseInput:
             - With a header, the header record is read first so that blank and repeated names are known before
               pandas renames them (``blank_columns``, ``duplicate_columns``); the column names are the header
               cells exactly as read
+            - Double quotes are ordinary characters, as in hed-javascript and the BIDS validator: a line is split
+              on every tab, a quoted cell keeps its quotes (a quote in a HED string is CHARACTER_INVALID), and a
+              quoted cell holding a tab is two cells. A row with more cells than the header loses the extra
+              cells (pandas warns); the BIDS validator reports such a row
         """
         if isinstance(file, str) and os.path.exists(file) and os.path.getsize(file) == 0:
             self._dataframe = pd.DataFrame()  # Handle empty file
@@ -830,6 +842,8 @@ class BaseInput:
                 dtype=str,
                 keep_default_na=False,
                 na_values=("", "n/a"),
+                quoting=csv.QUOTE_NONE,
+                index_col=False,
             )
             # Only an empty cell and n/a are missing (BIDS). Every other cell text, including nan, NaN, NA,
             # None and NULL, which pandas would otherwise read as missing, is a value and is validated as one,

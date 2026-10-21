@@ -280,21 +280,40 @@ class TestDuplicateColumns(unittest.TestCase):
         self.assertEqual(input_file.columns, ["onset ", " duration", "trial ", "trial"])
 
     def test_quoted_header_cells(self):
-        # The header is parsed as pandas parses it: quotes are removed before names are compared.
+        # A double quote is an ordinary character (as in hed-javascript and the BIDS validator).
         mixed = BaseInput(io.StringIO(self._text('trial\t"trial"\tHED', ("a\tb\tRed",))), file_type=".tsv")
-        self.assertEqual(mixed.duplicate_columns, ["trial"])
-        self.assertEqual(mixed.columns, ["trial", "trial.1", "HED"])
+        self.assertEqual(mixed.duplicate_columns, [])
+        self.assertEqual(mixed.columns, ["trial", '"trial"', "HED"])
         quoted = BaseInput(io.StringIO(self._text('"trial"\t"trial"\tHED', ("a\tb\tRed",))), file_type=".tsv")
-        self.assertEqual(quoted.duplicate_columns, ["trial"])
-        self.assertEqual(quoted.columns, ["trial", "trial.1", "HED"])
+        self.assertEqual(quoted.duplicate_columns, ['"trial"'])
+        padded = BaseInput(io.StringIO(self._text('"trial "\tHED', ("a\tRed",))), file_type=".tsv")
+        self.assertEqual(padded.padded_columns, [])
+        self.assertEqual(padded.columns, ['"trial "', "HED"])
 
-    def test_multiline_quoted_header(self):
-        # A quoted cell may hold a line break; the header record then spans two lines.
+    def test_quotes_do_not_join_lines(self):
+        # A quote does not open a cell that spans lines: the header is the first line, split on tabs.
         text = self._text('"trial\nnote"\ttrial\ttrial', ("a\tb\tc",))
-        input_file = BaseInput(io.BytesIO(text.encode("utf-8")), file_type=".tsv")
-        self.assertEqual(input_file.duplicate_columns, ["trial"])
-        self.assertEqual(input_file.columns, ["trial\nnote", "trial", "trial.1"])
-        self.assertEqual(len(input_file.dataframe), 1)
+        with self.assertWarns(pd.errors.ParserWarning):  # the later lines have more cells than the header
+            input_file = BaseInput(io.BytesIO(text.encode("utf-8")), file_type=".tsv")
+        self.assertEqual(input_file.columns, ['"trial'])
+        self.assertEqual(input_file.duplicate_columns, [])
+
+    def test_quoted_data_cells(self):
+        text = 'onset\tnote\tHED\n1\t"a, b"\t"Red"\n2\t"open\tBlue\n'
+        input_file = BaseInput(io.StringIO(text), file_type=".tsv")
+        self.assertEqual(list(input_file.dataframe["note"]), ['"a, b"', '"open'])
+        self.assertEqual(list(input_file.dataframe["HED"]), ['"Red"', "Blue"])
+        # A quote is an invalid HED character, so a quoted HED cell is reported rather than unquoted.
+        tabular = TabularInput(io.StringIO('onset\tHED\n1\t"Red"\n'))
+        issues = tabular.validate(load_schema_version("8.4.0"))
+        self.assertEqual([issue["code"] for issue in issues], ["CHARACTER_INVALID", "CHARACTER_INVALID"])
+
+    def test_quoted_tab_splits_the_cell(self):
+        # The extra cell of the row is dropped, as hed-javascript drops it; the BIDS validator reports the row.
+        text = 'onset\tnote\tHED\n1\t"a\tb"\tRed\n'
+        with self.assertWarns(pd.errors.ParserWarning):
+            input_file = BaseInput(io.StringIO(text), file_type=".tsv")
+        self.assertEqual(input_file.dataframe.iloc[0].tolist(), ["1", '"a', 'b"'])
 
     def test_order_and_count(self):
         input_file = BaseInput(io.StringIO(self._text("b\ta\ta\tb\tb")), file_type=".tsv")
@@ -345,9 +364,9 @@ class TestPaddedAndBlankColumns(unittest.TestCase):
         input_file = self._text_input("onset\tduration\t HED")
         self.assertEqual(input_file.padded_columns, [" HED"])
         self.assertEqual(input_file.blank_columns, [])
-        # A tab inside a quoted cell is part of the name, and pads it.
-        tab = self._text_input('"trial\t"\tx\tHED', ("a\tb\tc",))
-        self.assertEqual(tab.padded_columns, ["trial\t"])
+        # In a text file a tab always separates cells, so only a label from a DataFrame or Excel holds one.
+        tab = BaseInput(pd.DataFrame([["a", "b", "Red"]], columns=["trial\t", "x\r", "HED"]))
+        self.assertEqual(tab.padded_columns, ["trial\t", "x\r"])
 
     def test_padded_and_repeated_is_padded_once(self):
         input_file = self._text_input("trial \ttrial \tHED")
