@@ -2,8 +2,10 @@
 Superclass representing a basic columnar file.
 """
 
+import csv
 import io
 import os
+import warnings
 
 import openpyxl
 import pandas as pd
@@ -11,7 +13,7 @@ import pandas as pd
 from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.models.column_mapper import ColumnMapper
 from hed.models.column_metadata import ColumnMetadata
-from hed.models.column_source import distinct_values
+from hed.models.column_source import check_column_names, column_name_text, distinct_values
 from hed.models.definition_dict import DefinitionDict
 from hed.models.df_util import _handle_curly_braces_refs, filter_series_by_onset
 
@@ -30,12 +32,17 @@ class BaseInput:
         has_column_names=True,
         mapper=None,
         name=None,
-        allow_blank_names=True,
+        allow_blank_names=None,
     ):
         """Constructor for the BaseInput class.
 
         Parameters:
-            file (str or file-like or pd.Dataframe): An xlsx/tsv file to open.
+            file (str or file-like or pd.Dataframe): An xlsx/tsv file to open. A DataFrame's column labels are
+                taken literally, except that each is converted to text as an Excel header cell is (``1`` or
+                ``1.0`` becomes ``"1"``; None or NaN becomes ``""``, a blank name). A DataFrame already read with
+                pandas has lost its original header (pandas renames an empty name to ``Unnamed: N`` and suffixes
+                a repeated one, ``trial.1``), so its blank and repeated names cannot be found. Pass the file path
+                or a text stream to have them checked.
             file_type (str or None): ".xlsx" (Excel), ".tsv" or ".txt" (tab-separated text).
                 Derived from file if file is a filename. Ignored if pandas dataframe.
             worksheet_name (str or None): Name of Excel workbook worksheet name to use.
@@ -45,7 +52,8 @@ class BaseInput:
             mapper (ColumnMapper or None): Indicates which columns have HED tags.
                 See SpreadsheetInput or TabularInput for examples of how to use built-in a ColumnMapper.
             name (str or None): Optional field for how this file will report errors.
-            allow_blank_names(bool): If True, column names can be blank
+            allow_blank_names: Deprecated and ignored (removed in hedtools 2.0.0). A blank column name no
+                longer raises; ``validate`` reports it as TABULAR_INVALID.
 
         Raises:
              HedFileError: For various issues.
@@ -54,15 +62,22 @@ class BaseInput:
             - file is blank.
             - An invalid dataframe was passed with size 0.
             - An invalid extension was provided.
-            - A blank column name appears and allow_blank_names is False (BAD_COLUMN_NAMES).
             - Cannot open the indicated file.
             - The specified worksheet name does not exist.
             - If the sidecar file or tabular file had invalid format and could not be read.
 
-            A repeated column name does not raise: it is recorded in ``duplicate_columns`` and ``validate``
+            Column names are kept exactly as read. A padded, blank or repeated column name does not raise: it
+            is recorded in ``padded_columns``, ``blank_columns`` or ``duplicate_columns`` and ``validate``
             reports it as TABULAR_INVALID.
 
         """
+        if allow_blank_names is not None:
+            warnings.warn(
+                "The allow_blank_names= parameter of BaseInput is deprecated, ignored, and will be removed in "
+                "hedtools 2.0.0; a blank column name is reported as TABULAR_INVALID by validate.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         if mapper is None:
             mapper = ColumnMapper()
         self._mapper = mapper
@@ -72,6 +87,8 @@ class BaseInput:
         self._loaded_workbook = None
         self._worksheet_name = worksheet_name
         self._dataframe = None
+        self._padded_columns = []
+        self._blank_columns = []
         self._duplicate_columns = []
 
         input_type = file_type
@@ -82,15 +99,6 @@ class BaseInput:
                 self._name = file
 
         self._open_dataframe_file(file, has_column_names, input_type)
-
-        column_issues = ColumnMapper.check_for_blank_names(self.columns, allow_blank_names=allow_blank_names)
-        if column_issues:
-            raise HedFileError(
-                HedExceptions.BAD_COLUMN_NAMES,
-                "Blank column names found. See issues.",
-                self.name,
-                issues=column_issues,
-            )
 
         self.reset_mapper(mapper)
 
@@ -174,11 +182,27 @@ class BaseInput:
     def duplicate_columns(self) -> list[str]:
         """The column names that appear more than once in the header, each once, in order of its second appearance.
 
-        Names are compared after surrounding whitespace is removed; blank names are not counted. Read from the
-        header itself, so a repeated name is listed under its own name, not the suffixed name the loaded dataframe
-        gives its second column. Empty when the file has no column names.
+        Names are compared exactly; padded names (``padded_columns``) and blank names (``blank_columns``) are not
+        counted. Read from the header itself, so a repeated name is listed under its own name, not the suffixed
+        name the loaded dataframe gives its second column. Empty when the file has no column names.
         """
         return self._duplicate_columns
+
+    @property
+    def padded_columns(self) -> list[str]:
+        """The column names that begin or end with whitespace (blank, tab, LF, CR), each once, in header order.
+
+        A name made only of whitespace is padded, not blank. Empty when the file has no column names.
+        """
+        return self._padded_columns
+
+    @property
+    def blank_columns(self) -> list[int]:
+        """The 0-based positions of the blank column names (empty; a None or NaN label counts as empty), in header order.
+
+        A first line that ends with a tab has a blank last name. Empty when the file has no column names.
+        """
+        return self._blank_columns
 
     @property
     def loaded_workbook(self):
@@ -283,10 +307,20 @@ class BaseInput:
 
         Raises:
             OSError: If the file cannot be opened.
+            csv.Error: If a column name or cell holds a tab or line break, which a TSV file cannot hold.
+
+        Notes:
+            Double quotes are written as ordinary characters, as the file is read (see ``_load_text_file``), so a
+            file written here reads back with the same column names and cells.
         """
         dataframe = self._dataframe
         csv_string_if_filename_none = dataframe.to_csv(
-            file, sep="\t", index=False, header=self._has_column_names, lineterminator="\n"
+            file,
+            sep="\t",
+            index=False,
+            header=self._has_column_names,
+            lineterminator="\n",
+            quoting=csv.QUOTE_NONE,
         )
         return csv_string_if_filename_none
 
@@ -294,7 +328,8 @@ class BaseInput:
     def columns(self) -> list[str]:
         """Returns a list of the column names.
 
-            Empty if no column names. The names are the header cells with surrounding whitespace removed;
+            Empty if no column names. The names are the header cells exactly as read, as text (an empty cell is
+            ``""``; an Excel cell or DataFrame label ``1`` is ``"1"``);
             a name repeated in the header is suffixed in the second column it names (``trial.1``), as pandas does,
             and is listed in ``duplicate_columns``.
 
@@ -389,7 +424,7 @@ class BaseInput:
         """Validate this file with a SpreadsheetValidator and return all issues.
 
         The validator runs five stages and stops at the first stage that finds an error: the column names
-        (a repeated name is TABULAR_INVALID), the sidecar, each column's own values, the HED column, and the
+        (a padded, blank or repeated name is TABULAR_INVALID), the sidecar, each column's own values, the HED column, and the
         assembled rows. See
         :class:`~hed.validator.spreadsheet_validator.SpreadsheetValidator`.
 
@@ -468,32 +503,15 @@ class BaseInput:
         return False
 
     @staticmethod
-    def _trimmed_names(names) -> list:
-        """Return the names with surrounding whitespace removed; a label that is not a string is unchanged."""
-        return [name.strip() if isinstance(name, str) else name for name in names]
-
-    @staticmethod
-    def _repeated_names(names) -> list[str]:
-        """Return each non-blank string name that appears more than once, in order of its second appearance."""
-        seen = set()
-        repeated = []
-        for name in names:
-            if not isinstance(name, str) or not name:
-                continue
-            if name in seen and name not in repeated:
-                repeated.append(name)
-            seen.add(name)
-        return repeated
-
-    @staticmethod
     def _unique_names(names) -> list:
-        """Return the names with each repeat of a string name suffixed ``.1``, ``.2``, ... as pandas reads a header."""
+        """Return the names with each repeat of a non-blank string name suffixed ``.1``, ``.2``, ... as pandas
+        reads a header. Blank names and labels that are not strings are left as they are."""
         taken = set()
         unique = []
         for name in names:
             new_name = name
             suffix = 0
-            while isinstance(name, str) and new_name in taken:
+            while isinstance(name, str) and name and new_name in taken:
                 suffix += 1
                 new_name = f"{name}.{suffix}"
             taken.add(new_name)
@@ -501,17 +519,22 @@ class BaseInput:
         return unique
 
     def _set_column_names(self, names, header_cells=None):
-        """Name the dataframe's columns with the trimmed names and record the repeated ones.
+        """Name the dataframe's columns as read, as text, and record the padded, blank and repeated names.
+
+        Each name is converted to text with ``column_name_text`` (an Excel cell or DataFrame label ``1`` or
+        ``1.0`` becomes ``"1"``, None or NaN becomes ``""``) and is otherwise used exactly as read.
 
         Parameters:
             names (list): The dataframe's column labels as loaded.
-            header_cells (list or None): The cells of a text file's header record, from which the repeats are
-                read because pandas has already suffixed them in names. None reads the repeats from names.
+            header_cells (list or None): The cells of a text file's header record, used instead of names
+                because pandas has already renamed a blank cell (``Unnamed: N``) and suffixed a repeat in names.
+                None uses names as they are (Excel and DataFrame input).
         """
-        names = self._trimmed_names(names)
-        self._duplicate_columns = self._repeated_names(
-            names if header_cells is None else self._trimmed_names(header_cells)
-        )
+        names = list(names)
+        if header_cells is not None and len(header_cells) == len(names):
+            names = list(header_cells)
+        names = [column_name_text(name) for name in names]
+        self._padded_columns, self._blank_columns, self._duplicate_columns = check_column_names(names)
         self._dataframe.columns = self._unique_names(names)
 
     @staticmethod
@@ -519,9 +542,9 @@ class BaseInput:
         """Return the cells of a text file's header record and the file to hand to pandas.
 
         The header is read by pandas as a data row (``header=None``), so its cells are parsed exactly as the
-        dataframe's header is (blank lines skipped, BOM removed, quotes removed, a quoted cell may span
-        lines) but are not yet suffixed. A file-like object is returned to where it was; one that cannot
-        seek or report its position is read into memory first.
+        dataframe's header is (blank lines skipped, BOM removed, a double quote kept as an ordinary character)
+        but are not yet suffixed. A file-like object is returned to where it was; one that cannot seek or
+        report its position is read into memory first.
 
         Parameters:
             file (str, os.PathLike or file-like): Path to the text file or a binary or text file-like object.
@@ -550,7 +573,14 @@ class BaseInput:
         """Return the cells of the first record pandas reads from file, or [] if there is none."""
         try:
             first = pd.read_csv(
-                file, delimiter="\t", header=None, nrows=1, dtype=str, keep_default_na=False, skip_blank_lines=True
+                file,
+                delimiter="\t",
+                header=None,
+                nrows=1,
+                dtype=str,
+                keep_default_na=False,
+                skip_blank_lines=True,
+                quoting=csv.QUOTE_NONE,
             )
         except pd.errors.EmptyDataError:
             return []
@@ -559,13 +589,23 @@ class BaseInput:
     def assemble(self, mapper=None, skip_curly_braces=False) -> pd.DataFrame:
         """Assembles the HED strings.
 
+        ``dataframe_a``, ``series_a`` and ``series_filtered`` assemble through this method, so the rule below
+        holds for them too.
+
         Parameters:
             mapper (ColumnMapper or None): Generally pass none here unless you want special behavior.
             skip_curly_braces (bool): If True, don't plug in curly brace values into columns.
 
         Returns:
             pd.Dataframe: The assembled dataframe.
+
+        Raises:
+            HedFileError: BAD_COLUMN_NAMES if a column name is padded, blank or repeated (``padded_columns``,
+                ``blank_columns``, ``duplicate_columns``). Such a table cannot be assembled correctly (a padded
+                ``HED`` column, for example, would be ignored), so it is refused rather than assembled wrongly.
+                ``validate`` reports these names as TABULAR_INVALID and never reaches assembly for them.
         """
+        self._check_names_for_assembly()
         if mapper is None:
             mapper = self._mapper
 
@@ -576,6 +616,24 @@ class BaseInput:
         refs = self.get_column_refs()
         column_names = list(transformers)
         return _handle_curly_braces_refs(all_columns, refs, column_names)
+
+    def _check_names_for_assembly(self):
+        """Raise BAD_COLUMN_NAMES if a column name is padded, blank or repeated; see ``assemble``."""
+        if not (self._padded_columns or self._blank_columns or self._duplicate_columns):
+            return
+        problems = []
+        if self._padded_columns:
+            problems.append(f"padded {self._padded_columns!r}")
+        if self._blank_columns:
+            problems.append(f"blank at columns {[position + 1 for position in self._blank_columns]!r}")
+        if self._duplicate_columns:
+            problems.append(f"repeated {self._duplicate_columns!r}")
+        raise HedFileError(
+            HedExceptions.BAD_COLUMN_NAMES,
+            f"Cannot assemble rows: column names are {'; '.join(problems)}. "
+            "Validate the file for the TABULAR_INVALID details.",
+            self.name,
+        )
 
     def _handle_transforms(self, mapper) -> pd.DataFrame:
         """Apply transformations to the dataframe using the provided mapper.
@@ -770,8 +828,13 @@ class BaseInput:
             - Skips blank lines during parsing
             - Uses specific na_values configuration ("", "null")
             - Handles pandas.errors.EmptyDataError for files with no data
-            - With a header, the header record is read first so that repeated names are known before
-              pandas suffixes them (``duplicate_columns``); the column names are the trimmed header cells
+            - With a header, the header record is read first so that blank and repeated names are known before
+              pandas renames them (``blank_columns``, ``duplicate_columns``); the column names are the header
+              cells exactly as read
+            - Double quotes are ordinary characters, as in hed-javascript and the BIDS validator: a line is split
+              on every tab, a quoted cell keeps its quotes (a quote in a HED string is CHARACTER_INVALID), and a
+              quoted cell holding a tab is two cells. A row with more cells than the header loses the extra
+              cells (pandas warns); the BIDS validator reports such a row
         """
         if isinstance(file, str) and os.path.exists(file) and os.path.getsize(file) == 0:
             self._dataframe = pd.DataFrame()  # Handle empty file
@@ -789,6 +852,8 @@ class BaseInput:
                 dtype=str,
                 keep_default_na=False,
                 na_values=("", "n/a"),
+                quoting=csv.QUOTE_NONE,
+                index_col=False,
             )
             # Only an empty cell and n/a are missing (BIDS). Every other cell text, including nan, NaN, NA,
             # None and NULL, which pandas would otherwise read as missing, is a value and is validated as one,

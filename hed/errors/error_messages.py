@@ -242,6 +242,19 @@ def val_error_tabular_invalid(column_name):
     return f"Column '{column_name}' appears more than once in the first line (the column names) of the tabular file."
 
 
+@hed_error(ValidationErrors.TABULAR_COLUMN_NAME_PADDED, actual_code=ValidationErrors.TABULAR_INVALID)
+def val_error_tabular_column_name_padded(column_name):
+    return (
+        f"Column name {column_name!r} in the first line (the column names) of the tabular file begins or ends "
+        "with whitespace."
+    )
+
+
+@hed_error(ValidationErrors.TABULAR_COLUMN_NAME_BLANK, actual_code=ValidationErrors.TABULAR_INVALID)
+def val_error_tabular_column_name_blank(column_number):
+    return f"Column {column_number} of the first line (the column names) of the tabular file has a blank name."
+
+
 @hed_error(ValidationErrors.SIDECAR_AND_OTHER_COLUMNS)
 def val_error_sidecar_with_column(column_names):
     return f"You cannot use a column name in curly braces and to designate a tag column. Found {column_names}."
@@ -405,6 +418,11 @@ def sidecar_na_used(column_name):
     return f"Invalid category key 'n/a' found in column {column_name}."
 
 
+@hed_error(SidecarErrors.SIDECAR_KEY_PADDED, actual_code=ValidationErrors.SIDECAR_INVALID)
+def sidecar_key_padded(key_name):
+    return f"Top-level sidecar key {key_name!r} begins or ends with whitespace."
+
+
 @hed_tag_error(DefinitionErrors.DEF_TAG_IN_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)
 def def_error_def_tag_in_definition(tag, def_name):
     return f"Invalid tag {tag} found in definition for {def_name}. Def, Def-expand, and Definition tags cannot be in definitions."
@@ -530,7 +548,7 @@ def onset_duration_has_other_tags(tag):
 
 @hed_error(ColumnErrors.INVALID_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)
 def invalid_column_ref(bad_ref):
-    return f"The column '{bad_ref}' is unknown or does not have HED annotations.'"
+    return f"The column '{bad_ref}' is unknown or does not have HED annotations."
 
 
 @hed_error(ColumnErrors.SELF_COLUMN_REF, actual_code=SidecarErrors.SIDECAR_BRACES_INVALID)

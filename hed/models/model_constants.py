@@ -2,6 +2,10 @@
 
 from enum import IntEnum
 
+# The whitespace that may not begin or end a column name or a top-level sidecar key (specification 3.2.10):
+# blank, tab, line feed and carriage return only. A non-breaking space is not padding.
+NAME_WHITESPACE = " \t\n\r"
+
 
 class TopTagReturnType(IntEnum):
     """Return-type selector for :meth:`~hed.models.HedString.find_top_level_tags`.

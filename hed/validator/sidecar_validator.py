@@ -11,6 +11,7 @@ from hed.errors.error_reporter import check_for_any_errors, sort_issues
 from hed.models import df_util
 from hed.models.column_mapper import ColumnType
 from hed.models.column_metadata import ColumnMetadata
+from hed.models.column_source import is_padded
 from hed.models.hed_string import HedString
 from hed.models.model_constants import DefTagNames
 from hed.validator.reserved_checker import ReservedChecker
@@ -150,8 +151,19 @@ class SidecarValidator:
 
         Returns:
             list[dict]: A list of issues found with the structure.
+
+        Notes:
+            A top-level key that begins or ends with whitespace is SIDECAR_INVALID, whether or not its entry
+            has a ``"HED"`` key, and is reported before the entries' own structure.
         """
         all_validation_issues = []
+        for column_name in sidecar.loaded_dict:
+            if is_padded(column_name):
+                error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
+                all_validation_issues += error_handler.format_error_with_context(
+                    SidecarErrors.SIDECAR_KEY_PADDED, column_name
+                )
+                error_handler.pop_error_context()
         for column_name, dict_for_entry in sidecar.loaded_dict.items():
             error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, column_name)
             all_validation_issues += self._validate_column_structure(column_name, dict_for_entry, error_handler)

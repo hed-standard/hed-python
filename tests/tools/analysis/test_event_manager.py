@@ -242,6 +242,13 @@ class Test(unittest.TestCase):
         self.assertTrue(all("Black" in item for item in base[0:1]))
         self.assertTrue(all("Red" in item for item in base[0:1]))
 
+    def test_bad_column_names_refused(self):
+        # A padded HED column would otherwise be ignored and every event would come out empty.
+        tabular = TabularInput(io.StringIO("onset\tHED \n1\tRed\n2\tBlue\n"))
+        with self.assertRaises(HedFileError) as context:
+            EventManager(tabular, self.schema)
+        self.assertEqual(context.exception.code, "BAD_COLUMN_NAMES")
+
 
 if __name__ == "__main__":
     unittest.main()

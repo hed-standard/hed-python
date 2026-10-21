@@ -24,7 +24,8 @@ class EventManager:
             extra_defs (DefinitionDict):  Extra definitions not included in the input_data information.
 
         Raises:
-            HedFileError: If there are any unmatched offsets.
+            HedFileError: If there are any unmatched offsets, or (BAD_COLUMN_NAMES) if a column name of
+                input_data is padded, blank or repeated, since its rows cannot be assembled.
 
         Notes:  Keeps the events of temporal extend by their starting index in events file. These events
         are separated from the rest of the annotations, which are contained in self.hed_strings.

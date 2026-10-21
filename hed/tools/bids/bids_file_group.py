@@ -1,5 +1,6 @@
 """A group of BIDS files with specified suffix name."""
 
+import csv
 import json
 import logging
 import os
@@ -9,6 +10,7 @@ import pandas as pd
 
 from hed.errors.error_reporter import ErrorHandler, check_for_any_errors
 from hed.errors.exceptions import HedFileError
+from hed.models.model_constants import NAME_WHITESPACE
 from hed.tools.analysis.tabular_summary import TabularSummary
 from hed.tools.bids.bids_sidecar_file import BidsSidecarFile
 from hed.tools.bids.bids_tabular_file import BidsTabularFile
@@ -208,9 +210,9 @@ class BidsFileGroup:
                 sidecar_has_errors = merged_sidecar_errors[key]
 
             had_contents = data_obj.contents
-            # A file whose merged sidecar has errors is skipped, unless its header repeats a column name:
-            # validate then reports only TABULAR_INVALID (stage 0) and checks no row against the sidecar.
-            # A file that cannot even be loaded (a blank column name) is skipped as it was before loading.
+            # A file whose merged sidecar has errors is skipped, unless its header has a padded, blank or
+            # repeated column name: validate then reports only TABULAR_INVALID (stage 0) and checks no row
+            # against the sidecar. A file that cannot even be loaded is skipped as it was before loading.
             try:
                 data_obj.set_contents(overwrite=False)
             except HedFileError:
@@ -218,7 +220,9 @@ class BidsFileGroup:
                     raise
                 logger.debug(f"Skipping {os.path.basename(data_obj.file_path)}: its merged sidecar has errors")
                 continue
-            if sidecar_has_errors and not data_obj.contents.duplicate_columns:
+            contents = data_obj.contents
+            bad_names = contents.padded_columns or contents.blank_columns or contents.duplicate_columns
+            if sidecar_has_errors and not bad_names:
                 logger.debug(f"Skipping {os.path.basename(data_obj.file_path)}: its merged sidecar has errors")
                 if not had_contents:
                     data_obj.clear_contents()
@@ -281,8 +285,10 @@ class BidsFileGroup:
                 continue
             tsv_obj.set_sidecar(self._get_tsv_sidecar(root_path, tsv_obj))
             try:
-                # Trimmed as BaseInput trims its column names, so a header cell "HED " is the HED column.
-                column_headers = [str(name).strip() for name in pd.read_csv(file_path, sep="\t", nrows=0).columns]
+                # Trimmed only to decide whether the file carries HED, so a header cell "HED " is validated
+                # (and reported as a padded name) rather than skipped. The loaded column names are not trimmed.
+                header = pd.read_csv(file_path, sep="\t", nrows=0, quoting=csv.QUOTE_NONE).columns
+                column_headers = [str(name).strip(NAME_WHITESPACE) for name in header]
             except Exception as e:
                 self.bad_files[file_path] = f"{file_path} does not have a valid column header: {str(e)}"
                 continue

@@ -14,7 +14,7 @@ from hed.errors.error_types import ErrorContext, TemporalErrors, ValidationError
 from hed.models import df_util
 from hed.models.base_input import BaseInput
 from hed.models.column_mapper import ColumnMapper, ColumnType
-from hed.models.column_source import ColumnSource
+from hed.models.column_source import ColumnSource, check_column_names
 from hed.models.definition_dict import DefinitionDict
 from hed.models.hed_string import HedString
 from hed.models.hed_tag import HedTag
@@ -26,8 +26,6 @@ from hed.validator.reserved_checker import ReservedChecker
 from hed.validator.sidecar_validator import SidecarValidator
 from hed.validator.util.placeholder_util import placeholder_tag
 
-PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
-
 # Each issue found by a distinct-value stage carries ROW_COUNT_KEY (defined in error_reporter, whose printers
 # show it): how many rows hold the value reported.
 
@@ -37,9 +35,11 @@ class SpreadsheetValidator:
 
     The stages run in order and each stops the run when it finds an error (never on a warning alone):
 
-    0. **Column names**: a :class:`~hed.models.base_input.BaseInput` whose header repeats a column name gets
-       one TABULAR_INVALID per repeated name (``duplicate_columns``) and nothing else: neither the sidecar
-       nor any row is checked or assembled (specification 3.2.10). Other column sources cannot repeat a name.
+    0. **Column names**: a table with a padded, blank or repeated column name gets one TABULAR_INVALID per
+       such name and nothing else: neither the sidecar nor any row is checked or assembled (specification
+       3.2.10). Names are compared exactly. A :class:`~hed.models.base_input.BaseInput` supplies the names it
+       recorded from its header (``padded_columns``, ``blank_columns``, ``duplicate_columns``); for any other
+       column source they are found in ``column_names()``.
     1. **Sidecar**: every template and categorical string of the sidecar (``SidecarValidator``). A sidecar
        string is a fragment of a row, so the required-tag check waits for assembly.
     2. **Column values**: the column structure (mapper issues, sidecar references to columns the table
@@ -102,8 +102,9 @@ class SpreadsheetValidator:
     ) -> list[dict]:
         """Run the stages on a column source, stopping at the first stage that finds an error.
 
-        A BaseInput whose header repeats a column name is reported by stage 0 alone: one TABULAR_INVALID per
-        repeated name, in order of its second appearance, with the COLUMN and (when ``name``) FILE_NAME context.
+        A table with a padded, blank or repeated column name is reported by stage 0 alone: one TABULAR_INVALID
+        per padded name, then per blank name, then per repeated name, with the FILE_NAME context when ``name``
+        is given (see ``validate_column_names``).
 
         Parameters:
             source (ColumnSource): The table to validate. A BaseInput (TabularInput, SpreadsheetInput) or any
@@ -165,9 +166,19 @@ class SpreadsheetValidator:
             # Strings and lists of strings need the schema to become definitions.
             extra_def_dicts = DefinitionDict(extra_def_dicts, hed_schema=self._schema)
 
-        # Stage 0: a repeated column name stops the run before the sidecar, as in hed-javascript.
-        if isinstance(source, BaseInput) and source.duplicate_columns:
-            return self._report_duplicate_columns(source.duplicate_columns, name, error_handler)
+        # Stage 0: a padded, blank or repeated column name stops the run before the sidecar.
+        if isinstance(source, BaseInput):
+            padded, blank, repeated = source.padded_columns, source.blank_columns, source.duplicate_columns
+        else:
+            padded, blank, repeated = check_column_names(source.column_names())
+        if padded or blank or repeated:
+            if name:
+                error_handler.push_error_context(ErrorContext.FILE_NAME, name)
+            try:
+                return self.validate_column_names(padded, blank, repeated, error_handler)
+            finally:
+                if name:
+                    error_handler.pop_error_context()
 
         issues = []
         # Stage 1 runs before this table's FILE_NAME context is pushed so that its issues carry the
@@ -193,19 +204,33 @@ class SpreadsheetValidator:
                 error_handler.pop_error_context()
 
     @staticmethod
-    def _report_duplicate_columns(column_names, name, error_handler) -> list[dict]:
-        """Stage 0: one TABULAR_INVALID per repeated column name, kept in the given order (not sorted)."""
+    def validate_column_names(padded, blank, repeated, error_handler) -> list[dict]:
+        """Stage 0: report the column names that break the column-name rules, as TABULAR_INVALID.
+
+        The issues are kept in the order given (not sorted): (b) each padded name, then (c) each blank name,
+        then (a) each repeated name. A padded or repeated name carries the COLUMN context; a blank name has no
+        name to give, so its message names its 1-based position instead.
+
+        Parameters:
+            padded (list): The padded names, as :func:`~hed.models.column_source.check_column_names` returns them.
+            blank (list[int]): The 0-based positions of the blank names.
+            repeated (list): The repeated names.
+            error_handler (ErrorHandler): Holds context.
+
+        Returns:
+            list[dict]: The issues found.
+        """
         issues = []
-        if name:
-            error_handler.push_error_context(ErrorContext.FILE_NAME, name)
-        try:
-            for column_name in column_names:
-                error_handler.push_error_context(ErrorContext.COLUMN, column_name)
-                issues += error_handler.format_error_with_context(ValidationErrors.TABULAR_INVALID, column_name)
-                error_handler.pop_error_context()
-        finally:
-            if name:
-                error_handler.pop_error_context()
+        for column_name in padded:
+            error_handler.push_error_context(ErrorContext.COLUMN, column_name)
+            issues += error_handler.format_error_with_context(ValidationErrors.TABULAR_COLUMN_NAME_PADDED, column_name)
+            error_handler.pop_error_context()
+        for position in blank:
+            issues += error_handler.format_error_with_context(ValidationErrors.TABULAR_COLUMN_NAME_BLANK, position + 1)
+        for column_name in repeated:
+            error_handler.push_error_context(ErrorContext.COLUMN, column_name)
+            issues += error_handler.format_error_with_context(ValidationErrors.TABULAR_INVALID, column_name)
+            error_handler.pop_error_context()
         return issues
 
     def _validate_source(self, source, sidecar, extra_def_dicts, error_handler, row_offset, issues) -> list[dict]:

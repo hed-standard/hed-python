@@ -150,15 +150,31 @@ class Test(unittest.TestCase):
         )
 
     def test_blank_column(self):
+        # Blank names are not a mapping issue: validation reports them as TABULAR_INVALID before mapping.
         mapper = ColumnMapper()
         mapper.set_column_map(["", None])
-        self.assertTrue(len(mapper.check_for_mapping_issues()) == 2)
-        self.assertTrue(
-            mapper.check_for_mapping_issues(allow_blank_names=False)[1]["code"] == ValidationErrors.HED_BLANK_COLUMN
-        )
-        self.assertTrue(
-            mapper.check_for_mapping_issues(allow_blank_names=False)[1]["code"] == ValidationErrors.HED_BLANK_COLUMN
-        )
+        self.assertEqual(mapper.check_for_mapping_issues(), [])
+
+    def test_deprecated_allow_blank_names_is_ignored(self):
+        mapper = ColumnMapper()
+        mapper.set_column_map(["", None])
+        for value in (False, True):
+            with self.assertWarns(DeprecationWarning):
+                self.assertEqual(mapper.check_for_mapping_issues(allow_blank_names=value), [])
+
+    def test_deprecated_check_for_blank_names(self):
+        with self.assertWarns(DeprecationWarning):
+            issues = ColumnMapper.check_for_blank_names(["onset", "", None, "HED"], allow_blank_names=False)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.HED_BLANK_COLUMN] * 2)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(ColumnMapper.check_for_blank_names(["", None], allow_blank_names=True), [])
+
+    def test_unnamed_label_is_an_ordinary_column(self):
+        # pandas' label for an empty header cell is not treated specially: it is a column the sidecar lacks.
+        mapper = ColumnMapper(warn_on_missing_column=True)
+        mapper.set_column_map(["onset", "Unnamed: 1"])
+        issues = mapper.check_for_mapping_issues()
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.HED_UNKNOWN_COLUMN])
 
     def test_optional_column(self):
         mapper = ColumnMapper()

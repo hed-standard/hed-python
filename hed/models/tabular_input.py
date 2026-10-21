@@ -21,7 +21,10 @@ class TabularInput(BaseInput):
         """Constructor for the TabularInput class.
 
         Parameters:
-            file (str or FileLike or pd.Dataframe): A tsv file to open.
+            file (str or FileLike or pd.Dataframe): A tsv file to open. A DataFrame's column labels are taken
+                literally, converted to text (``1`` or ``1.0`` becomes ``"1"``): one already read with pandas has lost its original header (an empty name becomes
+                ``Unnamed: N``, a repeated one ``trial.1``), so its blank and repeated names cannot be found.
+                Pass the file path or a text stream to have them checked.
             sidecar (str or Sidecar or FileLike): A Sidecar or source file/filename.
             name (str): The name to display for this file for error purposes.
 
@@ -30,7 +33,6 @@ class TabularInput(BaseInput):
             - The file is blank.
             - An invalid dataframe was passed with size 0.
             - An invalid extension was provided.
-            - A duplicate or empty column name appears.
         OSError: If it cannot open the indicated file.
         ValueError: If this file has no column names.
         """
@@ -49,7 +51,6 @@ class TabularInput(BaseInput):
             has_column_names=True,
             mapper=new_mapper,
             name=name,
-            allow_blank_names=False,
         )
 
         if not self._has_column_names:

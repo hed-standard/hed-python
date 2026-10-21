@@ -1,4 +1,5 @@
 import io
+import json
 import os
 import unittest
 
@@ -49,6 +50,28 @@ class Test(unittest.TestCase):
         issues = sidecar.validate(self.hed_schema)
 
         self.assertEqual(len(issues), 4)
+
+    def test_padded_keys(self):
+        # A padded top-level key is SIDECAR_INVALID with or without a "HED" entry; an inner blank is fine.
+        sidecar = Sidecar(
+            io.StringIO(
+                json.dumps(
+                    {
+                        "trial ": {"HED": {"go": "Event"}},
+                        "\tresponse": {"Description": "No HED here."},
+                        "trial type": {"HED": {"go": "Event"}},
+                    }
+                )
+            )
+        )
+        issues = sidecar.validate(self.hed_schema)
+        self.assertEqual([issue["code"] for issue in issues], ["SIDECAR_INVALID"] * 2)
+        self.assertEqual([issue[ErrorContext.SIDECAR_COLUMN_NAME] for issue in issues], ["trial ", "\tresponse"])
+        self.assertIn("'trial '", issues[0]["message"])
+
+    def test_unpadded_keys_pass(self):
+        sidecar = Sidecar(io.StringIO(json.dumps({"trial type": {"HED": {"go": "Event"}}, "trial\u00a0": {}})))
+        self.assertEqual(sidecar.validate(self.hed_schema), [])
 
     def test_malformed_braces(self):
         hed_strings = [

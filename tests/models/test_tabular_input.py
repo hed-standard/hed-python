@@ -152,15 +152,19 @@ class Test(unittest.TestCase):
             os.path.dirname(os.path.realpath(__file__)), "../data/model_tests/blank_column_name.tsv"
         )
 
-        with self.assertRaises(HedFileError):
-            _ = TabularInput(filepath)
+        # A blank name no longer fails loading; validation reports it as TABULAR_INVALID (c) and stops.
+        tab_input = TabularInput(filepath)
+        self.assertEqual(tab_input.blank_columns, [1])
+        self.assertEqual(tab_input.columns, ["onset", "", "HED"])
+        issues = tab_input.validate(hed_schema=self.hed_schema)
+        self.assertEqual([issue["code"] for issue in issues], ["TABULAR_INVALID"])
+        self.assertIn("Column 2 ", issues[0]["message"])
 
-        # todo: add back in when we do this check
-        # filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-        # "../data/model_tests/duplicate_column_name.tsv")
-        #
-        # with self.assertRaises(HedFileError):
-        #     _ = TabularInput(filepath)
+        filepath = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "../data/model_tests/duplicate_column_name.tsv"
+        )
+        tab_input = TabularInput(filepath)
+        self.assertEqual(tab_input.duplicate_columns, ["onset"])
 
     def test_validate_file_warnings(self):
         issues1 = self.sidecar1.validate(hed_schema=self.hed_schema)

@@ -3,15 +3,16 @@ Mapping of a base input file columns into HED tags.
 """
 
 import copy
+import warnings
 from collections import Counter
 from functools import partial
 
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 from hed.models.column_metadata import ColumnMetadata, ColumnType
+from hed.models.column_source import is_blank_name
 from hed.models.definition_dict import DefinitionDict
 
-PANDAS_COLUMN_PREFIX_TO_IGNORE = "Unnamed: "
 NO_WARN_COLUMNS = ["onset", "duration"]
 
 
@@ -80,13 +81,13 @@ class ColumnMapper:
         self._warn_on_missing_column = warn_on_missing_column
         if tag_columns is None:
             tag_columns = []
-        self._tag_columns = self._trimmed_selectors(tag_columns)
+        self._tag_columns = tag_columns
         if optional_tag_columns is None:
             optional_tag_columns = []
-        self._optional_tag_columns = self._trimmed_selectors(optional_tag_columns)
+        self._optional_tag_columns = optional_tag_columns
         if column_prefix_dictionary is None:
             column_prefix_dictionary = {}
-        self._column_prefix_dictionary = self._trimmed_selectors(column_prefix_dictionary)
+        self._column_prefix_dictionary = column_prefix_dictionary
 
         self._na_patterns = ["n/a", "nan"]
         self._sidecar = None
@@ -145,27 +146,30 @@ class ColumnMapper:
 
     @staticmethod
     def check_for_blank_names(column_map, allow_blank_names) -> list[dict]:
-        """Validate there are no blank column names.
+        """Deprecated (removed in hedtools 2.0.0): return a HED_BLANK_COLUMN warning per blank column name.
+
+        Validation now reports a blank column name as TABULAR_INVALID; see
+        :func:`~hed.models.column_source.check_column_names`.
 
         Parameters:
             column_map (iterable): A list of column names.
-            allow_blank_names (bool): Only find issues if True.
+            allow_blank_names (bool): If True, return no issues.
 
         Returns:
-            list[dict]: A list of dicts, one per issue.
+            list[dict]: A list of dicts, one per blank name (empty, None or NaN).
         """
-        # Blank names are allowed unless the caller says otherwise; repeated names are not checked here
-        # (BaseInput.duplicate_columns records them and validation reports TABULAR_INVALID).
+        warnings.warn(
+            "ColumnMapper.check_for_blank_names is deprecated and will be removed in hedtools 2.0.0; validation "
+            "reports a blank column name as TABULAR_INVALID (see hed.models.column_source.check_column_names).",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         if allow_blank_names:
             return []
-
         issues = []
-
         for column_number, name in enumerate(column_map):
-            if name is None or not name or name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
+            if is_blank_name(name):
                 issues += ErrorHandler.format_error(ValidationErrors.HED_BLANK_COLUMN, column_number)
-                continue
-
         return issues
 
     def _set_sidecar(self, sidecar):
@@ -227,8 +231,8 @@ class ColumnMapper:
             tag_columns = []
         if optional_tag_columns is None:
             optional_tag_columns = []
-        self._tag_columns = self._trimmed_selectors(tag_columns)
-        self._optional_tag_columns = self._trimmed_selectors(optional_tag_columns)
+        self._tag_columns = tag_columns
+        self._optional_tag_columns = optional_tag_columns
         if finalize_mapping:
             self._finalize_mapping()
 
@@ -253,23 +257,9 @@ class ColumnMapper:
 
     def set_column_prefix_dictionary(self, column_prefix_dictionary, finalize_mapping=True):
         """Set the column prefix dictionary."""
-        self._column_prefix_dictionary = self._trimmed_selectors(column_prefix_dictionary)
+        self._column_prefix_dictionary = column_prefix_dictionary
         if finalize_mapping:
             self._finalize_mapping()
-
-    @staticmethod
-    def _trimmed_selectors(selectors):
-        """Return column selectors with each name trimmed, as BaseInput trims header names; numbers are unchanged.
-
-        Parameters:
-            selectors (list or dict): Column numbers or names, or a dict keyed by them.
-
-        Returns:
-            list or dict: A new list, or a new dict with the same values.
-        """
-        if isinstance(selectors, dict):
-            return {key.strip() if isinstance(key, str) else key: value for key, value in selectors.items()}
-        return [item.strip() if isinstance(item, str) else item for item in selectors]
 
     @staticmethod
     def _get_sidecar_basic_map(column_map, column_data):
@@ -283,8 +273,6 @@ class ColumnMapper:
                     column_entry = copy.deepcopy(column_data[column_name])
                     column_entry.column_name = column_name
                     basic_final_map[column_name] = column_entry
-                    continue
-                elif isinstance(column_name, str) and column_name.startswith(PANDAS_COLUMN_PREFIX_TO_IGNORE):
                     continue
                 unhandled_cols.append(column_name)
 
@@ -377,15 +365,25 @@ class ColumnMapper:
             issues += ErrorHandler.format_error(error_type, duplicate, self._column_map.get(duplicate), list_names)
         return issues
 
-    def check_for_mapping_issues(self, allow_blank_names=False) -> list[dict]:
+    def check_for_mapping_issues(self, allow_blank_names=None) -> list[dict]:
         """Find all issues given the current column_map, tag_columns, etc.
 
+        Blank, padded and repeated column names are not checked here; validation reports them as
+        TABULAR_INVALID before the mapping is looked at.
+
         Parameters:
-            allow_blank_names (bool): Only flag blank names if False.
+            allow_blank_names: Deprecated and ignored (removed in hedtools 2.0.0).
 
         Returns:
             list[dict]: All issues found as a list of dicts.
         """
+        if allow_blank_names is not None:
+            warnings.warn(
+                "The allow_blank_names= parameter of ColumnMapper.check_for_mapping_issues is deprecated, ignored, "
+                "and will be removed in hedtools 2.0.0; validation reports a blank column name as TABULAR_INVALID.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         # 1. Get the lists with entries
         column_lists, list_names = self._get_column_lists()
         # 2. Verify column_prefix columns and tag columns are present, and check for duplicates
@@ -408,7 +406,6 @@ class ColumnMapper:
                 if column not in fully_combined_list:
                     issues += ErrorHandler.format_error(ValidationErrors.HED_UNKNOWN_COLUMN, column)
 
-        issues += self.check_for_blank_names(self._column_map.values(), allow_blank_names=allow_blank_names)
         return issues
 
     def _finalize_mapping(self):
