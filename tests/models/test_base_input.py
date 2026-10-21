@@ -394,6 +394,28 @@ class TestPaddedAndBlankColumns(unittest.TestCase):
         suffixed = BaseInput(pd.DataFrame([["1", "a", "b"]], columns=["onset", "trial", "trial.1"]))
         self.assertEqual(suffixed.duplicate_columns, [])
 
+    def test_assembly_refused_for_bad_names(self):
+        cases = {
+            "padded": ("onset\tHED \n1\tRed\n", "padded ['HED ']"),
+            "blank": ("onset\t\tHED\n1\tx\tRed\n", "blank at columns [2]"),
+            "repeated": ("onset\tHED\tHED\n1\tRed\tBlue\n", "repeated ['HED']"),
+        }
+        for label, (text, expected) in cases.items():
+            input_file = TabularInput(io.StringIO(text), name="events.tsv")
+            for attribute in ("dataframe_a", "series_a", "series_filtered"):
+                with self.subTest(label=label, attribute=attribute), self.assertRaises(HedFileError) as context:
+                    getattr(input_file, attribute)
+                self.assertEqual(context.exception.code, "BAD_COLUMN_NAMES")
+            with self.subTest(label=label, attribute="assemble"), self.assertRaises(HedFileError) as context:
+                input_file.assemble()
+            self.assertEqual(context.exception.code, "BAD_COLUMN_NAMES")
+            self.assertIn(expected, context.exception.message)
+            self.assertEqual(context.exception.filename, "events.tsv")
+
+    def test_assembly_of_good_names(self):
+        input_file = TabularInput(io.StringIO("onset\ttrial type\tHED\n1\tgo\tRed\n"))
+        self.assertEqual(list(input_file.series_a), ["Red"])
+
     def test_deprecated_allow_blank_names_is_ignored(self):
         # The argument is accepted for compatibility, warns, and no longer makes a blank name raise.
         for value in (False, True):

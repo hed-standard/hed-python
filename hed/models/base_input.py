@@ -564,13 +564,23 @@ class BaseInput:
     def assemble(self, mapper=None, skip_curly_braces=False) -> pd.DataFrame:
         """Assembles the HED strings.
 
+        ``dataframe_a``, ``series_a`` and ``series_filtered`` assemble through this method, so the rule below
+        holds for them too.
+
         Parameters:
             mapper (ColumnMapper or None): Generally pass none here unless you want special behavior.
             skip_curly_braces (bool): If True, don't plug in curly brace values into columns.
 
         Returns:
             pd.Dataframe: The assembled dataframe.
+
+        Raises:
+            HedFileError: BAD_COLUMN_NAMES if a column name is padded, blank or repeated (``padded_columns``,
+                ``blank_columns``, ``duplicate_columns``). Such a table cannot be assembled correctly (a padded
+                ``HED`` column, for example, would be ignored), so it is refused rather than assembled wrongly.
+                ``validate`` reports these names as TABULAR_INVALID and never reaches assembly for them.
         """
+        self._check_names_for_assembly()
         if mapper is None:
             mapper = self._mapper
 
@@ -581,6 +591,24 @@ class BaseInput:
         refs = self.get_column_refs()
         column_names = list(transformers)
         return _handle_curly_braces_refs(all_columns, refs, column_names)
+
+    def _check_names_for_assembly(self):
+        """Raise BAD_COLUMN_NAMES if a column name is padded, blank or repeated; see ``assemble``."""
+        if not (self._padded_columns or self._blank_columns or self._duplicate_columns):
+            return
+        problems = []
+        if self._padded_columns:
+            problems.append(f"padded {self._padded_columns!r}")
+        if self._blank_columns:
+            problems.append(f"blank at columns {[position + 1 for position in self._blank_columns]!r}")
+        if self._duplicate_columns:
+            problems.append(f"repeated {self._duplicate_columns!r}")
+        raise HedFileError(
+            HedExceptions.BAD_COLUMN_NAMES,
+            f"Cannot assemble rows: column names are {'; '.join(problems)}. "
+            "Validate the file for the TABULAR_INVALID details.",
+            self.name,
+        )
 
     def _handle_transforms(self, mapper) -> pd.DataFrame:
         """Apply transformations to the dataframe using the provided mapper.
