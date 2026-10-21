@@ -22,7 +22,7 @@ class TabularInput(BaseInput):
 
         Parameters:
             file (str or FileLike or pd.Dataframe): A tsv file to open. A DataFrame's column labels are taken
-                literally: one already read with pandas has lost its original header (an empty name becomes
+                literally, converted to text (``1`` or ``1.0`` becomes ``"1"``): one already read with pandas has lost its original header (an empty name becomes
                 ``Unnamed: N``, a repeated one ``trial.1``), so its blank and repeated names cannot be found.
                 Pass the file path or a text stream to have them checked.
             sidecar (str or Sidecar or FileLike): A Sidecar or source file/filename.

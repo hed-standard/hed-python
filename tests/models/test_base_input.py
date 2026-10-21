@@ -394,6 +394,30 @@ class TestPaddedAndBlankColumns(unittest.TestCase):
         suffixed = BaseInput(pd.DataFrame([["1", "a", "b"]], columns=["onset", "trial", "trial.1"]))
         self.assertEqual(suffixed.duplicate_columns, [])
 
+    def test_names_converted_to_text(self):
+        # Excel: a whole number is written without a decimal point, so 1 and "1" are a repeated name.
+        excel = _excel_input([1, "1", 1.5, None, "HED"], ["a", "b", "c", "d", "Red"])
+        self.assertEqual(excel.columns, ["1", "1.1", "1.5", "", "HED"])
+        self.assertEqual(excel.duplicate_columns, ["1"])
+        self.assertEqual(excel.blank_columns, [3])
+        repeated = _excel_input([1, 1, "HED"], ["a", "b", "Red"])
+        self.assertEqual(repeated.duplicate_columns, ["1"])
+        # DataFrame: 1.0 and "1" are the same name; None and NaN are blank.
+        frame = pd.DataFrame([["a", "b", "c", "d", "Red"]], columns=[1.0, "1", None, np.nan, "HED"])
+        input_file = BaseInput(frame)
+        self.assertEqual(input_file.columns, ["1", "1.1", "", "", "HED"])
+        self.assertEqual(input_file.duplicate_columns, ["1"])
+        self.assertEqual(input_file.blank_columns, [2, 3])
+        # The caller's frame keeps its own labels.
+        self.assertEqual(list(frame.columns)[:2], [1.0, "1"])
+
+    def test_numeric_name_matches_sidecar_key(self):
+        sidecar = Sidecar(io.StringIO('{"1": {"HED": {"go": "Red"}}}'))
+        frame = pd.DataFrame([["1.0", "go", "Blue"]], columns=["onset", 1, "HED"])
+        tabular = TabularInput(frame, sidecar=sidecar)
+        self.assertEqual(tabular.columns, ["onset", "1", "HED"])
+        self.assertEqual(sorted(tabular.series_a[0].split(", ")), ["Blue", "Red"])
+
     def test_assembly_refused_for_bad_names(self):
         cases = {
             "padded": ("onset\tHED \n1\tRed\n", "padded ['HED ']"),

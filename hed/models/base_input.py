@@ -12,7 +12,7 @@ import pandas as pd
 from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.models.column_mapper import ColumnMapper
 from hed.models.column_metadata import ColumnMetadata
-from hed.models.column_source import check_column_names, distinct_values
+from hed.models.column_source import check_column_names, column_name_text, distinct_values
 from hed.models.definition_dict import DefinitionDict
 from hed.models.df_util import _handle_curly_braces_refs, filter_series_by_onset
 
@@ -37,9 +37,11 @@ class BaseInput:
 
         Parameters:
             file (str or file-like or pd.Dataframe): An xlsx/tsv file to open. A DataFrame's column labels are
-                taken literally: a DataFrame already read with pandas has lost its original header (pandas
-                renames an empty name to ``Unnamed: N`` and suffixes a repeated one, ``trial.1``), so its blank
-                and repeated names cannot be found. Pass the file path or a text stream to have them checked.
+                taken literally, except that each is converted to text as an Excel header cell is (``1`` or
+                ``1.0`` becomes ``"1"``; None or NaN becomes ``""``, a blank name). A DataFrame already read with
+                pandas has lost its original header (pandas renames an empty name to ``Unnamed: N`` and suffixes
+                a repeated one, ``trial.1``), so its blank and repeated names cannot be found. Pass the file path
+                or a text stream to have them checked.
             file_type (str or None): ".xlsx" (Excel), ".tsv" or ".txt" (tab-separated text).
                 Derived from file if file is a filename. Ignored if pandas dataframe.
             worksheet_name (str or None): Name of Excel workbook worksheet name to use.
@@ -195,7 +197,7 @@ class BaseInput:
 
     @property
     def blank_columns(self) -> list[int]:
-        """The 0-based positions of the blank column names (empty, None or NaN), in header order.
+        """The 0-based positions of the blank column names (empty; a None or NaN label counts as empty), in header order.
 
         A first line that ends with a tab has a blank last name. Empty when the file has no column names.
         """
@@ -315,7 +317,8 @@ class BaseInput:
     def columns(self) -> list[str]:
         """Returns a list of the column names.
 
-            Empty if no column names. The names are the header cells exactly as read (an empty cell is ``""``);
+            Empty if no column names. The names are the header cells exactly as read, as text (an empty cell is
+            ``""``; an Excel cell or DataFrame label ``1`` is ``"1"``);
             a name repeated in the header is suffixed in the second column it names (``trial.1``), as pandas does,
             and is listed in ``duplicate_columns``.
 
@@ -505,7 +508,10 @@ class BaseInput:
         return unique
 
     def _set_column_names(self, names, header_cells=None):
-        """Name the dataframe's columns exactly as read and record the padded, blank and repeated names.
+        """Name the dataframe's columns as read, as text, and record the padded, blank and repeated names.
+
+        Each name is converted to text with ``column_name_text`` (an Excel cell or DataFrame label ``1`` or
+        ``1.0`` becomes ``"1"``, None or NaN becomes ``""``) and is otherwise used exactly as read.
 
         Parameters:
             names (list): The dataframe's column labels as loaded.
@@ -516,6 +522,7 @@ class BaseInput:
         names = list(names)
         if header_cells is not None and len(header_cells) == len(names):
             names = list(header_cells)
+        names = [column_name_text(name) for name in names]
         self._padded_columns, self._blank_columns, self._duplicate_columns = check_column_names(names)
         self._dataframe.columns = self._unique_names(names)
 

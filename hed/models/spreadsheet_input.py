@@ -21,7 +21,8 @@ class SpreadsheetInput(BaseInput):
 
         Parameters:
             file (str or file like or pd.DataFrame): An xlsx/tsv file to open or a File object. A DataFrame's
-                column labels are taken literally: one already read with pandas has lost its original header
+                column labels, like Excel header cells, are taken literally, converted to text (``1`` or ``1.0``
+                becomes ``"1"``): one already read with pandas has lost its original header
                 (an empty name becomes ``Unnamed: N``, a repeated one ``trial.1``), so its blank and repeated
                 names cannot be found. Pass the file path or a text stream to have them checked.
             file_type (str or None): ".xlsx" for Excel, ".tsv" or ".txt" for tsv. data.

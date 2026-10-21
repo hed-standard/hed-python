@@ -11,6 +11,7 @@ a DataFrame unless it wants assembly.
 
 from __future__ import annotations
 
+import math
 import numbers
 from typing import Protocol, runtime_checkable
 
@@ -35,6 +36,28 @@ def is_blank_name(name) -> bool:
     if isinstance(name, str):
         return name == ""
     return isinstance(name, numbers.Real) and bool(name != name)
+
+
+def column_name_text(name) -> str:
+    """Return a column name as text, as a text header would hold it.
+
+    A blank label (None or NaN) becomes ``""``. A whole number is written without a decimal point (``1`` and
+    ``1.0`` both become ``"1"``), as JavaScript writes it; any other number keeps its usual form (``"1.5"``).
+    Anything else is converted with ``str``; a string is returned unchanged.
+
+    Parameters:
+        name: A column label (an Excel header cell or a DataFrame label, for example).
+
+    Returns:
+        str: The name as text.
+    """
+    if isinstance(name, str):
+        return name
+    if is_blank_name(name):
+        return ""
+    if isinstance(name, numbers.Real) and not isinstance(name, bool) and math.isfinite(name) and name == int(name):
+        return str(int(name))
+    return str(name)
 
 
 def check_column_names(names) -> tuple[list, list[int], list]:
