@@ -14,7 +14,7 @@ from hed.errors.error_types import ErrorContext, TemporalErrors, ValidationError
 from hed.models import df_util
 from hed.models.base_input import BaseInput
 from hed.models.column_mapper import ColumnMapper, ColumnType
-from hed.models.column_source import ColumnSource, check_column_names
+from hed.models.column_source import ColumnSource, check_column_names, is_padded
 from hed.models.definition_dict import DefinitionDict
 from hed.models.hed_string import HedString
 from hed.models.hed_tag import HedTag
@@ -43,8 +43,10 @@ class SpreadsheetValidator:
     1. **Sidecar**: every template and categorical string of the sidecar (``SidecarValidator``). A sidecar
        string is a fragment of a row, so the required-tag check waits for assembly.
     2. **Column values**: the column structure (mapper issues, sidecar references to columns the table
-       lacks), then each value column's distinct values against the units or value class of its ``#``
-       tag, and each categorical column's distinct values against its sidecar keys.
+       lacks), then, for each value and categorical column, its distinct values: one TABULAR_INVALID per
+       value that begins or ends with whitespace (``validate_padded_values``), then the other values, each
+       value column's against the units or value class of its ``#`` tag and each categorical column's
+       against its sidecar keys.
     3. **HED column**: each distinct string of every HED-tags column, the basic (single-string) checks.
        For a source that offers no assembly, the group-level checks follow on the same strings, since no
        stage 4 will run them on the whole row. The required-tag check belongs to the assembled row and
@@ -254,21 +256,28 @@ class SpreadsheetValidator:
         # is checked here only when no sidecar exists to have checked it (a column_prefix_dictionary).
         issues += self.validate_column_structure(column_names, mapper, sidecar, error_handler)
         for column in columns:
+            if column.column_type not in (ColumnType.Value, ColumnType.Categorical):
+                continue
+            # A padded value is reported as such and kept out of the value and categorical checks, so that
+            # "30 " is not also VALUE_INVALID and "go " not also SIDECAR_KEY_MISSING.
+            distinct = source.distinct_values(column.column_name)
+            issues += self.validate_padded_values(column.column_name, distinct, error_handler, row_offset=row_offset)
+            distinct = {value: rows for value, rows in distinct.items() if not is_padded(value)}
             if column.column_type == ColumnType.Value:
                 issues += self.validate_value_column(
                     column.column_name,
                     column.hed_dict,
-                    source.distinct_values(column.column_name),
+                    distinct,
                     error_handler,
                     row_offset=row_offset,
                     check_template=sidecar is None,
                     from_prefix=column.column_name in prefix_columns,
                 )
-            elif column.column_type == ColumnType.Categorical:
+            else:
                 issues += self.validate_categorical_column(
                     column.column_name,
                     list(column.hed_dict),
-                    source.distinct_values(column.column_name),
+                    distinct,
                     error_handler,
                 )
         if check_for_any_errors(issues):
@@ -330,6 +339,42 @@ class SpreadsheetValidator:
             issues += error_handler.format_error_with_context(
                 ValidationErrors.TSV_COLUMN_MISSING, invalid_keys=missing_refs
             )
+        return issues
+
+    @staticmethod
+    def validate_padded_values(column_name, distinct, error_handler, row_offset=0) -> list[dict]:
+        """Report each distinct value of a value or categorical column that begins or ends with whitespace.
+
+        Values are used exactly as written (specification 3.2.9.1), so a padded value would match no
+        annotation key or be substituted with its whitespace; it is TABULAR_INVALID (specification 3.2.10.2).
+        Whitespace is blank, tab, line feed and carriage return; a value made only of whitespace and ``n/a ``
+        count, while the missing values ``""`` and ``n/a`` are not in ``distinct`` at all.
+
+        Parameters:
+            column_name (str or int): The column, for the error context.
+            distinct (dict[str, list[int]]): Distinct cell text -> 0-based rows holding it.
+            error_handler (ErrorHandler): Holds context.
+            row_offset (int): Added to the first row of each reported value.
+
+        Returns:
+            list[dict]: One issue per distinct padded value, at its first row, each with ``row_count``.
+        """
+        issues = []
+        error_handler.push_error_context(ErrorContext.COLUMN, column_name)
+        try:
+            for value, rows in distinct.items():
+                if not is_padded(value):
+                    continue
+                error_handler.push_error_context(ErrorContext.ROW, rows[0] + row_offset)
+                value_issues = error_handler.format_error_with_context(
+                    ValidationErrors.TABULAR_VALUE_PADDED, value, column_name
+                )
+                error_handler.pop_error_context()  # Row
+                for issue in value_issues:
+                    issue[ROW_COUNT_KEY] = len(rows)
+                issues += value_issues
+        finally:
+            error_handler.pop_error_context()  # Column
         return issues
 
     def validate_value_column(

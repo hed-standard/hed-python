@@ -490,3 +490,61 @@ class TestPaddedAndBlankColumns(unittest.TestCase):
         frame = pd.DataFrame({"onset": ["1.0"], "Unnamed: 1": ["x"], "HED": ["Red"]})
         issues = self._validate(TabularInput(frame))
         self.assertNotIn(ValidationErrors.TABULAR_INVALID, [issue["code"] for issue in issues])
+
+
+class TestPaddedValues(unittest.TestCase):
+    """Stage 2: a padded value in a categorical or value column is TABULAR_INVALID (specification 3.2.10.2)."""
+
+    SIDECAR = {"trial": {"HED": {"go": "Experimental-trial", "stop": "Agent-action"}}, "age": {"HED": "Age/#"}}
+
+    @classmethod
+    def setUpClass(cls):
+        cls.schema = load_schema_version("8.4.0")
+
+    def _validate(self, rows, header="onset\tduration\ttrial\tage\tHED", warnings=False):
+        text = "\n".join([header, *rows]) + "\n"
+        tabular = TabularInput(io.StringIO(text), sidecar=Sidecar(io.StringIO(json.dumps(self.SIDECAR))))
+        error_handler = ErrorHandler(check_for_warnings=warnings)
+        issues = tabular.validate(self.schema, error_handler=error_handler)
+        self.assertEqual(error_handler.error_context, [])
+        return issues
+
+    def test_padded_categorical_values(self):
+        for cell in ("go ", " go", " ", "n/a "):
+            with self.subTest(cell=cell):
+                issues = self._validate([f"1.0\t0\t{cell}\t30\tRed"], warnings=True)
+                # The padded value alone: no SIDECAR_KEY_MISSING warning for it as well.
+                self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID])
+                self.assertEqual(issues[0][ErrorContext.COLUMN], "trial")
+                self.assertEqual(issues[0][ErrorContext.ROW], 2)
+                self.assertIn(repr(cell), issues[0]["message"])
+
+    def test_padded_value_column(self):
+        for cell in ("30 ", " 30"):
+            with self.subTest(cell=cell):
+                issues = self._validate([f"1.0\t0\tgo\t{cell}\tRed"])
+                # TABULAR_INVALID instead of VALUE_INVALID or UNITS_INVALID.
+                self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID])
+                self.assertEqual(issues[0][ErrorContext.COLUMN], "age")
+
+    def test_once_per_distinct_value_and_stops_before_the_hed_column(self):
+        rows = ["1.0\t0\tgo \t30\tInvalidTagXYZ", "2.0\t0\tgo \t30\tRed", "3.0\t0\tstop \t30\tRed"]
+        issues = self._validate(rows)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID] * 2)
+        by_row = {issue[ErrorContext.ROW]: issue["row_count"] for issue in issues}
+        self.assertEqual(by_row, {2: 2, 4: 1})
+
+    def test_values_that_pass(self):
+        rows = ["1.0\t0\tgo\t30\t Red ", "2.0\t0\tn/a\t\tBlue", "3.0\t0\tgo\u00a0\t30\tGreen"]
+        issues = self._validate(rows, warnings=True)
+        # The no-break space is not padding: that value only lacks an annotation (a warning).
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.SIDECAR_KEY_MISSING])
+        unannotated = self._validate(["1.0\t0\tgo\tx \tRed"], header="onset\tduration\ttrial\tnote\tHED")
+        self.assertEqual(unannotated, [])
+
+    def test_column_source(self):
+        source = ListColumnSource({"trial": ["go", "go "], "HED": ["Red", "Blue"]})
+        sidecar = Sidecar(io.StringIO(json.dumps({"trial": self.SIDECAR["trial"]})))
+        issues = SpreadsheetValidator(self.schema).validate(source, sidecar=sidecar, error_handler=ErrorHandler())
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID])
+        self.assertEqual(issues[0][ErrorContext.ROW], 1)

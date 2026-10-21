@@ -339,6 +339,12 @@ class SidecarValidator:
             val_issues += error_handler.format_error_with_context(SidecarErrors.BLANK_HED_STRING)
         for key_name, hed_string in raw_hed_dict.items():
             error_handler.push_error_context(ErrorContext.SIDECAR_KEY_NAME, key_name)
+            # A column value matches a key only when identical (specification 3.2.9.1), so a padded key could only
+            # match a padded value, which is itself an error: it can never annotate a row.
+            if is_padded(key_name):
+                val_issues += error_handler.format_error_with_context(
+                    SidecarErrors.SIDECAR_CATEGORY_KEY_PADDED, key_name, column_name
+                )
             if not hed_string:
                 val_issues += error_handler.format_error_with_context(SidecarErrors.BLANK_HED_STRING)
             elif not isinstance(hed_string, str):

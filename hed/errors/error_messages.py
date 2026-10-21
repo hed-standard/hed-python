@@ -255,6 +255,14 @@ def val_error_tabular_column_name_blank(column_number):
     return f"Column {column_number} of the first line (the column names) of the tabular file has a blank name."
 
 
+@hed_error(ValidationErrors.TABULAR_VALUE_PADDED, actual_code=ValidationErrors.TABULAR_INVALID)
+def val_error_tabular_value_padded(value, column_name):
+    return (
+        f"Value {value!r} in column '{column_name}', which has HED annotations, begins or ends with whitespace; "
+        "values are used exactly as written."
+    )
+
+
 @hed_error(ValidationErrors.SIDECAR_AND_OTHER_COLUMNS)
 def val_error_sidecar_with_column(column_names):
     return f"You cannot use a column name in curly braces and to designate a tag column. Found {column_names}."
@@ -421,6 +429,14 @@ def sidecar_na_used(column_name):
 @hed_error(SidecarErrors.SIDECAR_KEY_PADDED, actual_code=ValidationErrors.SIDECAR_INVALID)
 def sidecar_key_padded(key_name):
     return f"Top-level sidecar key {key_name!r} begins or ends with whitespace."
+
+
+@hed_error(SidecarErrors.SIDECAR_CATEGORY_KEY_PADDED, actual_code=ValidationErrors.SIDECAR_INVALID)
+def sidecar_category_key_padded(key_name, column_name):
+    return (
+        f"Key {key_name!r} under HED in the categorical entry '{column_name}' begins or ends with whitespace, "
+        "so it can match no column value."
+    )
 
 
 @hed_tag_error(DefinitionErrors.DEF_TAG_IN_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)

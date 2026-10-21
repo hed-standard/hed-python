@@ -73,6 +73,24 @@ class Test(unittest.TestCase):
         sidecar = Sidecar(io.StringIO(json.dumps({"trial type": {"HED": {"go": "Event"}}, "trial\u00a0": {}})))
         self.assertEqual(sidecar.validate(self.hed_schema), [])
 
+    def test_padded_categorical_keys(self):
+        # A key under HED in a categorical entry with leading or trailing whitespace is SIDECAR_INVALID.
+        for key in ("go ", " go", "go\t"):
+            with self.subTest(key=key):
+                sidecar = Sidecar(io.StringIO(json.dumps({"trial": {"HED": {key: "Event", "stop": "Event"}}})))
+                issues = sidecar.validate(self.hed_schema)
+                self.assertEqual([issue["code"] for issue in issues], ["SIDECAR_INVALID"])
+                self.assertEqual(issues[0][ErrorContext.SIDECAR_KEY_NAME], key)
+                self.assertIn(repr(key), issues[0]["message"])
+
+    def test_unpadded_categorical_keys_pass(self):
+        # An inner blank and a no-break space are not padding; Levels keys are not checked.
+        data = {
+            "trial": {"HED": {"go now": "Event", "stop\u00a0": "Event"}},
+            "response": {"Levels": {"left ": "Left hand"}, "HED": {"left": "Event"}},
+        }
+        self.assertEqual(Sidecar(io.StringIO(json.dumps(data))).validate(self.hed_schema), [])
+
     def test_malformed_braces(self):
         hed_strings = [
             "column2}, Event, Action",
