@@ -155,6 +155,20 @@ class Test(unittest.TestCase):
         mapper.set_column_map(["", None])
         self.assertEqual(mapper.check_for_mapping_issues(), [])
 
+    def test_deprecated_allow_blank_names_is_ignored(self):
+        mapper = ColumnMapper()
+        mapper.set_column_map(["", None])
+        for value in (False, True):
+            with self.assertWarns(DeprecationWarning):
+                self.assertEqual(mapper.check_for_mapping_issues(allow_blank_names=value), [])
+
+    def test_deprecated_check_for_blank_names(self):
+        with self.assertWarns(DeprecationWarning):
+            issues = ColumnMapper.check_for_blank_names(["onset", "", None, "HED"], allow_blank_names=False)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.HED_BLANK_COLUMN] * 2)
+        with self.assertWarns(DeprecationWarning):
+            self.assertEqual(ColumnMapper.check_for_blank_names(["", None], allow_blank_names=True), [])
+
     def test_unnamed_label_is_an_ordinary_column(self):
         # pandas' label for an empty header cell is not treated specially: it is a column the sidecar lacks.
         mapper = ColumnMapper(warn_on_missing_column=True)

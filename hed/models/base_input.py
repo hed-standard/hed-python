@@ -4,6 +4,7 @@ Superclass representing a basic columnar file.
 
 import io
 import os
+import warnings
 
 import openpyxl
 import pandas as pd
@@ -30,6 +31,7 @@ class BaseInput:
         has_column_names=True,
         mapper=None,
         name=None,
+        allow_blank_names=None,
     ):
         """Constructor for the BaseInput class.
 
@@ -47,6 +49,8 @@ class BaseInput:
             mapper (ColumnMapper or None): Indicates which columns have HED tags.
                 See SpreadsheetInput or TabularInput for examples of how to use built-in a ColumnMapper.
             name (str or None): Optional field for how this file will report errors.
+            allow_blank_names: Deprecated and ignored (removed in hedtools 2.0.0). A blank column name no
+                longer raises; ``validate`` reports it as TABULAR_INVALID.
 
         Raises:
              HedFileError: For various issues.
@@ -64,6 +68,13 @@ class BaseInput:
             reports it as TABULAR_INVALID.
 
         """
+        if allow_blank_names is not None:
+            warnings.warn(
+                "The allow_blank_names= parameter of BaseInput is deprecated, ignored, and will be removed in "
+                "hedtools 2.0.0; a blank column name is reported as TABULAR_INVALID by validate.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         if mapper is None:
             mapper = ColumnMapper()
         self._mapper = mapper

@@ -394,6 +394,15 @@ class TestPaddedAndBlankColumns(unittest.TestCase):
         suffixed = BaseInput(pd.DataFrame([["1", "a", "b"]], columns=["onset", "trial", "trial.1"]))
         self.assertEqual(suffixed.duplicate_columns, [])
 
+    def test_deprecated_allow_blank_names_is_ignored(self):
+        # The argument is accepted for compatibility, warns, and no longer makes a blank name raise.
+        for value in (False, True):
+            with self.assertWarns(DeprecationWarning):
+                input_file = BaseInput(
+                    io.StringIO("onset\t\tHED\n1\t2\t3\n"), file_type=".tsv", allow_blank_names=value
+                )
+            self.assertEqual(input_file.blank_columns, [1])
+
     def test_no_column_names(self):
         input_file = BaseInput(io.StringIO(" a\t\tb \n1\t2\t3\n"), file_type=".tsv", has_column_names=False)
         self.assertEqual(input_file.padded_columns, [])
