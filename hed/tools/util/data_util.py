@@ -1,5 +1,7 @@
 """Data handling utilities involving dataframes."""
 
+import warnings
+
 import numpy as np
 import pandas as pd
 
@@ -63,11 +65,14 @@ def delete_columns(df, column_list):
     """
 
     delete_cols = list(set(column_list).intersection(set(df)))
-    df.drop(columns=delete_cols, inplace=True)
+    for col in delete_cols:
+        del df[col]
 
 
 def delete_rows_by_column(df, value, column_list=None):
-    """Delete rows where columns have this value.
+    """Deprecated (removed in hedtools 2.0.0): delete rows where columns have this value, in place.
+
+    Use :func:`remove_rows_by_value`, which returns a new dataframe.
 
     Parameters:
         df (DataFrame):      Pandas dataframe from which to delete rows.
@@ -79,14 +84,48 @@ def delete_rows_by_column(df, value, column_list=None):
         - Deletion is done in place.
 
     """
+    warnings.warn(
+        "delete_rows_by_column is deprecated and will be removed in hedtools 2.0.0; use remove_rows_by_value, "
+        "which returns a new dataframe instead of deleting in place.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     if column_list:
         cols = list(set(column_list).intersection(set(df)))
     else:
         cols = list(df)
+    # pandas has no warning-free way to drop rows from the same object, and pandas 3.1 deprecates inplace=;
+    # silence pandas' warning so the caller sees only the one above. This shim goes in 2.0.0.
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        for col in cols:
+            map_col = df[col].map(str) == str(value)
+            df.drop(df[map_col].index, axis=0, inplace=True)  # noqa: PD002
 
+
+def remove_rows_by_value(df, value, column_list=None):
+    """Return a dataframe without the rows where any of the columns has this value.
+
+    Parameters:
+        df (DataFrame):      Pandas dataframe to filter; it is not changed.
+        value (str):         Specified value to indicate row should be removed.
+        column_list (list):  List of columns to search for value; all columns if None or empty.
+
+    Returns:
+        DataFrame: A new dataframe holding the remaining rows, with their original index.
+
+    Notes:
+        - All values are converted to string before testing.
+
+    """
+    if column_list:
+        cols = list(set(column_list).intersection(set(df)))
+    else:
+        cols = list(df)
+    mask = pd.Series(False, index=df.index)
     for col in cols:
-        map_col = df[col].map(str) == str(value)
-        df.drop(df[map_col].index, axis=0, inplace=True)
+        mask |= df[col].map(str) == str(value)
+    return df[~mask]
 
 
 def get_eligible_values(values, values_included):

@@ -12,19 +12,29 @@ Breakages addressed:
   6. get_attributes_from_row receiving NaN instead of a string
   7. _verify_hedid_matches receiving NaN hedId (broke .startswith())
   8. assign_hed_ids_section: float NaN is truthy, so bare `if hed_id:` skipped rows
+  9. sort_dataframe_by_onsets: the default quicksort did not keep tied onsets in file order
+ 10. pandas 3.1 deprecations (Pandas4Warning, a DeprecationWarning; pandas 4 raises): inplace=, filling a
+     string into a numeric column (KeyMap remap), adding a column through .at (merge_dfs)
 """
 
 import unittest
+import warnings
 
 import pandas as pd
 
 from hed import load_schema_version
-from hed.models.df_util import _filter_by_index_list, shrink_defs
+from hed.models.df_util import _filter_by_index_list, shrink_defs, sort_dataframe_by_onsets, split_delay_tags
 from hed.schema.hed_schema_io import from_dataframes
 from hed.schema.schema_io import df_constants as constants
 from hed.schema.schema_io.df_util import _merge_dataframes, get_attributes_from_row
-from hed.schema.schema_io.hed_id_util import _get_hedid_range, _verify_hedid_matches, assign_hed_ids_section
-from hed.tools.util.data_util import delete_columns
+from hed.schema.schema_io.hed_id_util import (
+    _get_hedid_range,
+    _verify_hedid_matches,
+    assign_hed_ids_section,
+    merge_dfs,
+)
+from hed.tools.analysis.key_map import KeyMap
+from hed.tools.util.data_util import delete_columns, get_row_hash, remove_rows_by_value
 
 hed_schema_global = load_schema_version("8.4.0")
 
@@ -445,6 +455,98 @@ class TestAssignHedIdsSectionNaN(unittest.TestCase):
         assign_hed_ids_section(df, {7, 8})
         new_id = df.loc[0, constants.hed_id]
         self.assertTrue(isinstance(new_id, str) and new_id.startswith("HED_"))
+
+
+# ---------------------------------------------------------------------------
+# 9. sort_dataframe_by_onsets - rows with equal onsets keep their file order
+# ---------------------------------------------------------------------------
+
+
+class TestOnsetSortStable(unittest.TestCase):
+    """Validate that sort_dataframe_by_onsets is a stable sort.
+
+    ``sort_values`` defaults to ``kind="quicksort"``, which is not stable, so rows sharing an onset could come
+    out in any order. Rows that share an onset are merged into one string at the first tied row, so the row an
+    issue is reported at depended on the sort. The fix sorts with ``kind="stable"``.
+    """
+
+    def test_tied_onsets_keep_file_order(self):
+        """Out-of-order onsets with ties of three: each tie keeps its rows in file order."""
+        onsets = [str(float(k // 3)) for k in range(12)][::-1]
+        df = pd.DataFrame({"onset": onsets, "HED": [f"Label/r{k}" for k in range(12)]})
+        result = sort_dataframe_by_onsets(df)
+        self.assertListEqual(list(result.index), [9, 10, 11, 6, 7, 8, 3, 4, 5, 0, 1, 2])
+        self.assertNotIn("_temp_onset_sort", result.columns)
+
+    def test_input_not_changed(self):
+        """The input frame keeps its rows and columns."""
+        df = pd.DataFrame({"onset": ["2.0", "1.0"], "HED": ["Red", "Blue"]})
+        sort_dataframe_by_onsets(df)
+        self.assertListEqual(list(df.index), [0, 1])
+        self.assertListEqual(list(df.columns), ["onset", "HED"])
+
+
+# ---------------------------------------------------------------------------
+# 10. inplace= - no pandas deprecation from the functions that used it
+# ---------------------------------------------------------------------------
+
+
+class TestNoPandasDeprecationWarnings(unittest.TestCase):
+    """Run each function that used ``inplace=`` with DeprecationWarning turned into an error.
+
+    pandas 3.1 deprecates ``inplace=`` with ``Pandas4Warning``, a ``DeprecationWarning``, and pandas 4 removes it.
+    Under pandas 3.1 these tests fail if a call warns again; under earlier pandas they pass either way.
+    """
+
+    def setUp(self):
+        catcher = warnings.catch_warnings()
+        catcher.__enter__()
+        self.addCleanup(catcher.__exit__, None, None, None)
+        warnings.simplefilter("error", DeprecationWarning)
+
+    def test_sort_dataframe_by_onsets(self):
+        df = pd.DataFrame({"onset": ["2.0", "1.0"], "HED": ["Red", "Blue"]})
+        self.assertListEqual(list(sort_dataframe_by_onsets(df).index), [1, 0])
+
+    def test_split_delay_tags(self):
+        series = pd.Series(["Red,(Delay/3.0 s,(Blue))", "Green"])
+        result = split_delay_tags(series, load_schema_version("8.5.0"), pd.Series([1.0, 2.0]))
+        self.assertListEqual(list(result.index), [0, 1, 2])
+        self.assertListEqual(list(result.onset), [1.0, 2.0, 4.0])
+
+    def test_key_map_make_template_and_resort(self):
+        key_map = KeyMap(["event_type"], ["code"])
+        key_map.update(pd.DataFrame({"event_type": ["b", "a", "b"], "code": ["2", "1", "2"]}))
+        template = key_map.make_template(show_counts=True)
+        self.assertListEqual(list(template["key_counts"]), [2, 1])
+        key_map.resort()
+        self.assertListEqual(list(key_map.col_map["event_type"]), ["a", "b"])
+        self.assertEqual(key_map.map_dict[get_row_hash(key_map.col_map.iloc[0], ["event_type"])], 0)
+
+    def test_delete_columns(self):
+        df = pd.DataFrame({"a": [1], "b": [2]})
+        delete_columns(df, ["a"])
+        self.assertListEqual(list(df.columns), ["b"])
+
+    def test_remove_rows_by_value(self):
+        df = pd.DataFrame({"a": ["x", "n/a"], "b": ["1", "2"]})
+        self.assertListEqual(list(remove_rows_by_value(df, "n/a").index), [0])
+
+    def test_key_map_remap_missing_key_numeric_columns(self):
+        """A missing key fills "n/a" into a numeric target column; numeric data columns are left alone."""
+        key_map = KeyMap(["k"], ["num"])
+        key_map.update(pd.DataFrame({"k": ["a", "b"], "num": [1.5, 2.0]}))
+        df_new, missing = key_map.remap(pd.DataFrame({"k": ["a", "z", "b"], "onset": [0.5, 1.0, 2.0]}))
+        self.assertListEqual(list(df_new["num"]), [1.5, "n/a", 2.0])
+        self.assertListEqual(list(df_new["onset"]), [0.5, 1.0, 2.0])
+        self.assertListEqual(missing, [1])
+
+    def test_merge_dfs_adds_column(self):
+        """merge_dfs copies a column dest_df lacks into the matching row."""
+        dest = pd.DataFrame({"rdfs:label": ["A", "B"]})
+        merge_dfs(dest, pd.DataFrame({"rdfs:label": ["B"], "extra": ["x"]}))
+        self.assertEqual(dest.loc[1, "extra"], "x")
+        self.assertTrue(pd.isna(dest.loc[0, "extra"]))
 
 
 if __name__ == "__main__":
