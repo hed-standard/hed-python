@@ -17,7 +17,7 @@ NUMERIC_RULE = _SETS.word_rule_description("numericClass")
 
 # todo: update these tests(TagValidator no longer exists)
 class TestHed(TestValidatorBase):
-    schema_file = "../data/schema_tests/HED8.2.0.mediawiki"
+    schema_version = "8.2.0"
 
 
 class IndividualHedTagsShort(TestHed):

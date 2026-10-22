@@ -9,14 +9,18 @@ from hed.validator.hed_validator import HedValidator
 
 # todo: update these tests(TagValidator no longer exists)
 class TestHedBase(unittest.TestCase):
-    schema_file = None
+    schema_file = None  # A schema file relative to this folder, for edited fixtures.
+    schema_version = None  # A released schema version, loaded from the bundled copy.
     hed_schema = None
 
     @classmethod
     def setUpClass(cls):
+        # A schema_file wins over an inherited schema_version: a subclass names a file to test a fixture.
         if cls.schema_file and not cls.hed_schema:
             hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.schema_file)
             cls.hed_schema = schema.load_schema(hed_xml)
+        elif cls.schema_version and not cls.hed_schema:
+            cls.hed_schema = schema.load_schema_version(cls.schema_version)
         elif not cls.hed_schema:
             raise ValueError("No schema set for test case")
         cls.error_handler = error_reporter.ErrorHandler()

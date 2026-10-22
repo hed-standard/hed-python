@@ -15,11 +15,7 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         cls.base_hed_input = "Event"
         cls.hed_base_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/")
-        schema_path = os.path.realpath(
-            os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.1.0.xml")
-        )
-        # hed_schema = schema.load_schema(schema_filename)
-        hed_schema = schema.load_schema(schema_path)
+        hed_schema = schema.load_schema_version("8.1.0")
         cls.hed_schema = hed_schema
         cls.hed_validator = HedValidator(hed_schema=hed_schema)
         cls.validation_issues = []
@@ -150,11 +146,10 @@ class Test(unittest.TestCase):
         self.assertTrue(all(ErrorContext.ROW not in issue for issue in validation_issues))
 
     def test_file_bad_defs_in_spreadsheet(self):
-        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.0.0t.xml")
         events_path = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../data/validator_tests/hed3_tags_single_sheet_bad_defs.xlsx"
         )
-        hed_schema = schema.load_schema(schema_path)
+        hed_schema = schema.load_schema_version("8.0.0")
 
         prefixed_needed_tag_columns = {
             1: "Property/Informational-property/Label/",
@@ -221,10 +216,7 @@ class Test(unittest.TestCase):
         self.assertEqual(source_span, (None, None))
 
     def test_duplicate_group_in_definition(self):
-        schema_path = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.2.0.mediawiki"
-        )
-        hed_schema = schema.load_schema(schema_path)
+        hed_schema = schema.load_schema_version("8.2.0")
         string_with_def = "(Definition/TestDef,(Item,Item))"
         test_string = HedString(string_with_def, hed_schema)
         issues = test_string.validate(hed_schema)

@@ -6,7 +6,7 @@ from tests.validator.test_tag_validator_base import TestHedBase
 
 
 class TestTagFormat(TestHedBase):
-    schema_file = "../data/schema_tests/HED8.0.0t.xml"
+    schema_version = "8.0.0"
 
 
 class TestConvertTag(TestTagFormat):

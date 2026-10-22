@@ -20,9 +20,8 @@ class Test(unittest.TestCase):
         cls.hed_schema = schema.load_schema_version("8.3.0")
 
     def test_validate_schema(self):
-        schema_path_with_issues = "../data/schema_tests/HED8.0.0t.xml"
-        schema_path_with_issues = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_path_with_issues)
-        hed_schema = schema.load_schema(schema_path_with_issues)
+        # Released 8.0.0 has known compliance issues.
+        hed_schema = schema.load_schema_version("8.0.0")
         issues = hed_schema.check_compliance()
         self.assertTrue(isinstance(issues, list))
         self.assertTrue(len(issues) > 1)
@@ -159,9 +158,8 @@ class TestComplianceSummary(unittest.TestCase):
         self.assertIn("HED Schema Compliance Report", report)
 
     def test_summary_with_issues(self):
-        """A schema with known issues should show FAIL in the summary."""
-        schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.0.0t.xml")
-        hed_schema = schema.load_schema(schema_path)
+        """A schema with known issues (released 8.0.0) should show FAIL in the summary."""
+        hed_schema = schema.load_schema_version("8.0.0")
         issues = hed_schema.check_compliance()
         summary = issues.compliance_summary
         self.assertGreater(summary.total_issues, 0)

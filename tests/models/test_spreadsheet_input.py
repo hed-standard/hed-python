@@ -17,8 +17,7 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         base = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/")
         cls.base_data_dir = base
-        hed_xml_file = os.path.join(base, "schema_tests/HED8.0.0t.xml")
-        cls.hed_schema = schema.load_schema(hed_xml_file)
+        cls.hed_schema = schema.load_schema_version("8.0.0")
         default = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../data/spreadsheet_validator_tests/ExcelMultipleSheets.xlsx"
         )

@@ -23,6 +23,7 @@ from hed.schema.schema_io.base2schema import SchemaLoader
 from hed.tools.util import data_util
 from hed.validator import SpreadsheetValidator
 from hed.validator.util import UnitValueValidator
+from tests.schema.schema_test_helpers import bundled_standard_path
 
 FIXTURE_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), "data/schema_tests/merge_group_tests"))
 
@@ -102,7 +103,7 @@ class TestSchemaParameterDeprecation(unittest.TestCase):
     def test_no_warning_without_schema_parameter(self):
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
-            load_schema(os.path.join(FIXTURE_DIR, "HED8.4.0.xml"))
+            load_schema(bundled_standard_path("8.4.0"))
         self.assertFalse(any(issubclass(w.category, DeprecationWarning) for w in caught))
 
 

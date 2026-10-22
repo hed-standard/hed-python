@@ -14,7 +14,7 @@ from hed.errors import HedExceptions, HedFileError
 from hed.errors.error_types import SchemaErrors
 from hed.schema import HedKey, HedSchema, HedSchemaGroup, hed_cache, load_schema, load_schema_version
 from hed.schema.hed_schema_io import _load_schema_version, from_string, parse_version_list
-from tests.schema.schema_test_helpers import get_temp_filename, with_temp_file
+from tests.schema.schema_test_helpers import get_temp_filename, make_xml_folder, with_temp_file
 from tests.schema.util_test_schemas import TEST_SCHEMAS_DIR, load_test_schema, test_schemas_available
 
 
@@ -50,9 +50,7 @@ class TestHedSchema(unittest.TestCase):
             load_schema(bad_filename)
 
     def test_load_schema_name(self):
-        schema_path = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.2.0.mediawiki"
-        )
+        schema_path = os.path.join(os.path.dirname(schema.__file__), "schema_data", "HED8.2.0.xml")
 
         hed_schema = load_schema(schema_path, schema_namespace="testspace", name="Test Name")
         self.assertEqual(hed_schema.schema_namespace, "testspace:")
@@ -1098,8 +1096,19 @@ class TestPrereleaseSchemaLoading(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Set up test fixtures."""
-        cls.schema_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/")
+        """Set up test fixtures: the bundled 8.2.0 at the root beside the fixture schemas."""
+        fixtures = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/")
+        cls.schema_dir = make_xml_folder(
+            ["8.2.0"],
+            [
+                (os.path.join(fixtures, "HED_testlocal_2.1.0.xml"), ""),
+                (os.path.join(fixtures, "prerelease"), "prerelease"),
+            ],
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls.schema_dir, ignore_errors=True)
 
     def test_load_regular_schema(self):
         """Test that a regular schema loads correctly."""

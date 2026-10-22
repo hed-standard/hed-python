@@ -1,21 +1,17 @@
 import os
 import unittest
 
+import hed
 from hed.errors import HedFileError
 from hed.models import HedTag
 from hed.schema import HedKey, HedSchemaGroup, get_hed_xml_version, load_schema, load_schema_version
 
 
 class TestHedSchema(unittest.TestCase):
-    schema_file_3g_xml = "../data/schema_tests/HED8.0.0t.xml"
-    schema_file_3g = "../data/schema_tests/HED8.2.0.mediawiki"
-
     @classmethod
     def setUpClass(cls):
-        cls.hed_xml_3g = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.schema_file_3g_xml)
-        cls.hed_wiki_3g = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.schema_file_3g)
-        cls.hed_schema_3g_wiki = load_schema(cls.hed_wiki_3g)
-        cls.hed_schema_3g = load_schema(cls.hed_xml_3g)
+        cls.hed_xml_3g = os.path.join(os.path.dirname(hed.schema.__file__), "schema_data", "HED8.0.0.xml")
+        cls.hed_schema_3g = load_schema_version("8.0.0")
 
         schema_file = "../data/validator_tests/HED8.0.0_added_tests.mediawiki"
         hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)

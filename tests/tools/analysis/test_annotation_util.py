@@ -24,9 +24,6 @@ class Test(unittest.TestCase):
         bids_root_path = os.path.realpath(
             os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/bids_tests/eeg_ds003645s_hed")
         )
-        schema_path = os.path.realpath(
-            os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../data/schema_tests/HED8.2.0.xml")
-        )
         cls.bids_root_path = bids_root_path
         json_path = os.path.realpath(os.path.join(bids_root_path, "task-FacePerception_events.json"))
         cls.events_path = os.path.realpath(
@@ -70,7 +67,7 @@ class Test(unittest.TestCase):
             "c": {"HED": {"b6": "Purple", "b7": "Red"}, "Levels": {"b6": "Its purple.", "b7": "Its red."}},
         }
 
-        cls.hed_schema = hedschema.load_schema(schema_path)
+        cls.hed_schema = hedschema.load_schema_version("8.2.0")
         with open(json_path) as fp:
             cls.sidecar_face = json.load(fp)
         with open(json_sm_path) as fp:

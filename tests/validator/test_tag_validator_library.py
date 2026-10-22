@@ -32,18 +32,14 @@ class TestHed3(TestValidatorBase):
         super().setUpClass()
 
     def test_invalid_load(self):
-        schema_file = "../data/schema_tests/HED8.0.0t.xml"
-        hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
-        hed_schema1 = schema.load_schema(hed_xml, schema_namespace="tl:")
-        hed_schema2 = schema.load_schema(hed_xml, schema_namespace="tl:")
+        hed_schema1 = schema.load_schema_version("tl:8.0.0")
+        hed_schema2 = schema.load_schema_version("tl:8.0.0")
 
         self.assertRaises(HedFileError, HedSchemaGroup, [hed_schema1, hed_schema2])
 
     def test_invalid_load_prefix(self):
-        schema_file = "../data/schema_tests/HED8.0.0t.xml"
-        hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), schema_file)
-        hed_schema1 = schema.load_schema(hed_xml)
-        hed_schema2 = schema.load_schema(hed_xml)
+        hed_schema1 = schema.load_schema_version("8.0.0")
+        hed_schema2 = schema.load_schema_version("8.0.0")
 
         self.assertRaises(HedFileError, HedSchemaGroup, [hed_schema1, hed_schema2])
 

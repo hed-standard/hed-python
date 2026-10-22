@@ -6,7 +6,7 @@ import unittest
 
 import pandas as pd
 
-from hed import Sidecar, SpreadsheetInput, TabularInput, load_schema, load_schema_version
+from hed import Sidecar, SpreadsheetInput, TabularInput, load_schema_version
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ErrorContext, ValidationErrors
 from hed.models.column_source import ListColumnSource
@@ -20,8 +20,7 @@ class TestSpreadsheetValidation(unittest.TestCase):
         cls.validator = SpreadsheetValidator(cls.schema)
         base = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/")
         cls.base_data_dir = base
-        hed_xml_file = os.path.join(base, "schema_tests/HED8.0.0t.xml")
-        cls.hed_schema = load_schema(hed_xml_file)
+        cls.hed_schema = load_schema_version("8.0.0")
         default = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), "../data/spreadsheet_validator_tests/ExcelMultipleSheets.xlsx"
         )

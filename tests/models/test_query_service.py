@@ -1,6 +1,5 @@
 """Tests for query_service module: get_query_handlers and search_hed_objs."""
 
-import os
 import unittest
 
 from hed import schema
@@ -79,9 +78,7 @@ class TestSearchHedObjs(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        base_data_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/"))
-        hed_xml_file = os.path.join(base_data_dir, "schema_tests/HED8.0.0t.xml")
-        cls.hed_schema = schema.load_schema(hed_xml_file)
+        cls.hed_schema = schema.load_schema_version("8.0.0")
 
     def test_basic_search(self):
         hed_objs = [

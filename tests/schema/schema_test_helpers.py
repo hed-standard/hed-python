@@ -1,12 +1,15 @@
 """
 Shared utility functions for schema tests.
 
-Provides helper decorators and functions for creating temporary files in tests.
+Provides helper decorators and functions for creating temporary files and schema folders in tests.
 """
 
 import functools
 import os
+import shutil
 import tempfile
+
+from hed import schema
 
 
 def get_temp_filename(extension):
@@ -57,3 +60,44 @@ def with_temp_file(extension):
         return wrapper
 
     return decorator
+
+
+def bundled_standard_path(version):
+    """
+    Return the path of a released standard schema bundled with hedtools.
+
+    Parameters:
+        version (str): A released standard version (e.g., "8.4.0").
+
+    Returns:
+        str: Path to the bundled XML file in hed/schema/schema_data.
+    """
+    return os.path.join(os.path.dirname(schema.__file__), "schema_data", f"HED{version}.xml")
+
+
+def make_xml_folder(versions, copies=()):
+    """
+    Build a temporary folder to pass as xml_folder: fixture files plus bundled standard schemas.
+
+    A version string loaded with xml_folder is looked up only in that folder, so a test that names a
+    released standard there needs the file on disk; it comes from the bundle instead of a copy in tests/data.
+
+    Parameters:
+        versions (list[str]): Released standard versions copied from the bundle into the folder root.
+        copies (list[tuple[str, str]]): (source, target) pairs; a source file or folder is copied into the
+            target subfolder ("" for the root).
+
+    Returns:
+        str: Path to the new folder; the caller removes it with shutil.rmtree.
+    """
+    folder = tempfile.mkdtemp()
+    for source, target in copies:
+        destination = os.path.join(folder, target)
+        if os.path.isdir(source):
+            shutil.copytree(source, destination, dirs_exist_ok=True)
+        else:
+            os.makedirs(destination, exist_ok=True)
+            shutil.copy(source, destination)
+    for version in versions:
+        shutil.copy(bundled_standard_path(version), folder)
+    return folder

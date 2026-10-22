@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from hed import load_schema
+from hed import load_schema_version
 from hed.errors import ValidationErrors
 from hed.models import ColumnType, HedString
 from hed.models.column_mapper import ColumnMapper
@@ -11,10 +11,7 @@ from hed.models.sidecar import DefinitionDict, Sidecar
 class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/")
-        schema_file = "schema_tests/HED8.0.0t.xml"
-
-        cls.hed_schema = load_schema(os.path.join(base_data_dir, schema_file))
+        cls.hed_schema = load_schema_version("8.0.0")
         cls.integer_key_dictionary = {0: "one", 1: "two", 2: "three"}
         cls.zero_based_row_column_count = 3
         cls.column_prefix_dictionary = {2: "Event/Description/", 3: "Event/Label/", 4: "Event/Category/"}

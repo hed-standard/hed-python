@@ -15,8 +15,7 @@ class Test(unittest.TestCase):
     def setUpClass(cls):
         base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/")
         cls.base_data_dir = base_data_dir
-        hed_xml_file = os.path.join(base_data_dir, "schema_tests/HED8.0.0t.xml")
-        cls.hed_schema = schema.load_schema(hed_xml_file)
+        cls.hed_schema = schema.load_schema_version("8.0.0")
         cls._refs_json_filename = os.path.join(base_data_dir, "sidecar_tests/basic_refs_test.json")
         cls._bad_refs_json_filename = os.path.join(base_data_dir, "sidecar_tests/bad_refs_test2.json")
         cls._malformed_refs_json_filename = os.path.join(base_data_dir, "sidecar_tests/malformed_refs_test.json")
