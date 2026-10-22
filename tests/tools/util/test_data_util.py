@@ -15,6 +15,7 @@ from hed.tools.util.data_util import (
     get_row_hash,
     get_value_dict,
     make_info_dataframe,
+    remove_rows_by_value,
     reorder_columns,
     replace_na,
     replace_values,
@@ -65,8 +66,23 @@ class Test(unittest.TestCase):
         data = {"Name": ["n/a", "", "tom", "alice", 0, 1], "Age": [np.nan, 10, "", "n/a", "0", "10"]}
         df1 = DataFrame(data)
         self.assertEqual(len(df1.index), 6, "The data frame should have 6 rows to start")
-        delete_rows_by_column(df1, "")
+        with self.assertWarns(DeprecationWarning):
+            delete_rows_by_column(df1, "")
         self.assertEqual(len(df1.index), 4, "The data frame should have 4 rows after deletion")
+
+    def test_remove_rows_by_value(self):
+        data = {"Name": ["n/a", "", "tom", "alice", 0, 1], "Age": [np.nan, 10, "", "n/a", "0", "10"]}
+        df1 = DataFrame(data)
+        df2 = remove_rows_by_value(df1, "")
+        self.assertEqual(len(df2.index), 4, "The returned data frame should have 4 rows")
+        self.assertListEqual(list(df2.index), [0, 3, 4, 5], "The remaining rows keep their original index")
+        self.assertEqual(len(df1.index), 6, "The original data frame should still have 6 rows")
+
+    def test_remove_rows_by_value_column_list(self):
+        data = {"Name": ["n/a", "", "tom", "alice", 0, 1], "Age": [np.nan, 10, "", "n/a", "0", "10"]}
+        df1 = DataFrame(data)
+        self.assertListEqual(list(remove_rows_by_value(df1, "n/a", ["Age", "Missing"]).index), [0, 1, 2, 4, 5])
+        self.assertListEqual(list(remove_rows_by_value(df1, "0").index), [0, 1, 2, 3, 5])
 
     def test_get_new_dataframe(self):
         df_new = get_new_dataframe(self.stern_map_path)

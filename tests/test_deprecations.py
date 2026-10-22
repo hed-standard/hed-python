@@ -20,6 +20,7 @@ from hed.errors.error_types import SchemaAttributeErrors
 from hed.schema import load_schema
 from hed.schema.hed_schema_io import from_string
 from hed.schema.schema_io.base2schema import SchemaLoader
+from hed.tools.util import data_util
 from hed.validator import SpreadsheetValidator
 from hed.validator.util import UnitValueValidator
 
@@ -52,6 +53,11 @@ SCHEDULED_REMOVALS = [
     (
         "value_validators= parameter of UnitValueValidator.__init__ (no-op since the date-time cleanup)",
         lambda: _has_parameter(UnitValueValidator.__init__, "value_validators"),
+        2,
+    ),
+    (
+        "hed.tools.util.data_util.delete_rows_by_column (replaced by remove_rows_by_value)",
+        lambda: hasattr(data_util, "delete_rows_by_column"),
         2,
     ),
 ]
@@ -148,6 +154,24 @@ class TestValueValidatorsParameterDeprecation(unittest.TestCase):
             warnings.simplefilter("always")
             UnitValueValidator(modern_allowed_char_rules=True)
         self.assertFalse(any(issubclass(w.category, DeprecationWarning) for w in caught))
+
+
+class TestDeleteRowsByColumnDeprecation(unittest.TestCase):
+    """delete_rows_by_column deleted rows in place, which pandas 3.1 deprecates; remove_rows_by_value returns a copy."""
+
+    def test_warns_names_replacement_and_still_deletes_in_place(self):
+        import pandas as pd
+
+        df = pd.DataFrame({"a": ["x", "n/a", "y"], "b": ["1", "2", "n/a"]})
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            result = data_util.delete_rows_by_column(df, "n/a")
+        deprecations = [w for w in caught if issubclass(w.category, DeprecationWarning)]
+        self.assertEqual(len(deprecations), 1, [str(w.message) for w in deprecations])
+        self.assertIn("remove_rows_by_value", str(deprecations[0].message))
+        self.assertIn("2.0.0", str(deprecations[0].message))
+        self.assertIsNone(result)
+        self.assertListEqual(list(df.index), [0])
 
 
 if __name__ == "__main__":
