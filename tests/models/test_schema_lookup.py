@@ -19,12 +19,10 @@ class TestSchemaLookupBase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        base_data_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/"))
-        hed_xml_file = os.path.join(base_data_dir, "schema_tests/HED8.0.0t.xml")
         try:
             from hed import schema as hed_schema
 
-            cls.hed_schema = hed_schema.load_schema(hed_xml_file)
+            cls.hed_schema = hed_schema.load_schema_version("8.0.0")
             cls.lookup = generate_schema_lookup(cls.hed_schema)
         except Exception as exc:
             cls.hed_schema = None
@@ -194,13 +192,11 @@ class TestGenerateSchemaLookupGroup(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        base_data_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/"))
-        hed_xml_file = os.path.join(base_data_dir, "schema_tests/HED8.0.0t.xml")
         try:
             from hed import schema as hed_schema
             from hed.schema.hed_schema_group import HedSchemaGroup
 
-            single = hed_schema.load_schema(hed_xml_file)
+            single = hed_schema.load_schema_version("8.0.0")
             cls.group = HedSchemaGroup([single])
             cls.single_lookup = generate_schema_lookup(single)
             cls.group_lookup = generate_schema_lookup(cls.group)

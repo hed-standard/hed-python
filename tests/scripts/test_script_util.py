@@ -5,6 +5,7 @@ import os
 import shutil
 import unittest
 
+import hed
 from hed import load_schema_version
 from hed.scripts.schema_script_util import (
     add_extension,
@@ -326,12 +327,7 @@ class TestCheckWarnings(unittest.TestCase):
 
     def test_validate_schema_default_is_warnings_false(self):
         """validate_schema default check_for_warnings=False matches explicit False."""
-        schema_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "data",
-            "schema_tests",
-            "HED8.2.0.mediawiki",
-        )
+        schema_path = os.path.join(os.path.dirname(hed.schema.__file__), "schema_data", "HED8.2.0.xml")
         with contextlib.redirect_stdout(io.StringIO()):
             default_issues = validate_schema(schema_path)
             explicit_issues = validate_schema(schema_path, check_for_warnings=False)

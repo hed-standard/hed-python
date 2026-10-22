@@ -11,8 +11,19 @@ from hed.schema import HedKey, from_string, hed_cache, load_schema, load_schema_
 from hed.schema.hed_schema_io import _load_schema_version
 from hed.schema.schema_io.schema_merge import resolve_group
 from hed.schema.schema_io.xml2schema import SchemaLoaderXML
+from tests.schema.schema_test_helpers import bundled_standard_path, make_xml_folder
 
 FIXTURE_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/schema_tests/merge_group_tests"))
+XML_FOLDER = None  # The fixture libraries plus their bundled partners 8.4.0 and 8.5.0, built in setUpModule.
+
+
+def setUpModule():
+    global XML_FOLDER
+    XML_FOLDER = make_xml_folder(["8.4.0", "8.5.0"], [(FIXTURE_DIR, "")])
+
+
+def tearDownModule():
+    shutil.rmtree(XML_FOLDER, ignore_errors=True)
 
 
 class TestSingleLibraryMerge(unittest.TestCase):
@@ -47,7 +58,7 @@ class TestSingleLibraryMerge(unittest.TestCase):
         self.assertIsNone(library_only.tags.get("Red"))
 
     def test_load_schema_combines_with_partner(self):
-        loaded = load_schema(self.unmerged_path, xml_folder=FIXTURE_DIR)
+        loaded = load_schema(self.unmerged_path, xml_folder=XML_FOLDER)
         self.assertNotIn("unmerged", loaded.header_attributes)
         self.assertEqual(
             loaded.header_attributes, {"version": "2.0.0", "library": "testconflict", "withStandard": "8.5.0"}
@@ -70,7 +81,7 @@ class TestSingleLibraryMerge(unittest.TestCase):
         self.assertIn("testconflict 2.0.0 partners with", loaded.prologue)
 
     def test_unmerged_load_equals_merged_file_load(self):
-        loaded = load_schema(self.unmerged_path, xml_folder=FIXTURE_DIR)
+        loaded = load_schema(self.unmerged_path, xml_folder=XML_FOLDER)
         merged_path = os.path.join(self.empty_cache, "HED_testconflict_2.0.0_merged.xml")
         loaded.save_as_xml(merged_path, save_merged=True)
         reloaded = load_schema(merged_path)
@@ -82,10 +93,10 @@ class TestSingleLibraryMerge(unittest.TestCase):
         )
 
     def test_load_schema_version_from_unmerged_folder(self):
-        by_version = load_schema_version("testconflict_2.0.0", xml_folder=FIXTURE_DIR)
-        by_path = load_schema(self.unmerged_path, xml_folder=FIXTURE_DIR)
+        by_version = load_schema_version("testconflict_2.0.0", xml_folder=XML_FOLDER)
+        by_path = load_schema(self.unmerged_path, xml_folder=XML_FOLDER)
         self.assertEqual(by_version, by_path)
-        prefixed = load_schema_version("sc:testconflict_2.0.0", xml_folder=FIXTURE_DIR)
+        prefixed = load_schema_version("sc:testconflict_2.0.0", xml_folder=XML_FOLDER)
         self.assertEqual(prefixed.schema_namespace, "sc:")
         self.assertIsNotNone(prefixed.get_tag_entry("sc:Event/Rooted-tag", schema_namespace="sc:"))
 
@@ -94,7 +105,7 @@ class TestSingleLibraryMerge(unittest.TestCase):
         library_only_dir = tempfile.mkdtemp()
         try:
             shutil.copy(self.unmerged_path, library_only_dir)
-            shutil.copy(os.path.join(FIXTURE_DIR, "HED8.5.0.xml"), self.empty_cache)
+            shutil.copy(bundled_standard_path("8.5.0"), self.empty_cache)
             _load_schema_version.cache_clear()
             loaded = load_schema_version("testconflict_2.0.0", xml_folder=library_only_dir)
             self.assertIsNotNone(loaded.get_tag_entry("Event/Rooted-tag"))
@@ -131,7 +142,7 @@ class TestUnpartneredAndStandardUnchanged(unittest.TestCase):
         self.assertIsNone(loaded.get_tag_entry("Red"))
 
     def test_standard_schema(self):
-        loaded = load_schema(os.path.join(FIXTURE_DIR, "HED8.4.0.xml"))
+        loaded = load_schema(bundled_standard_path("8.4.0"))
         self.assertEqual(loaded.version, "8.4.0")
         self.assertIsNotNone(loaded.get_tag_entry("Red"))
 
@@ -153,7 +164,7 @@ class TestMergeGroups(unittest.TestCase):
         shutil.rmtree(cls.empty_cache, ignore_errors=True)
 
     def _load(self, versions):
-        return load_schema_version(versions, xml_folder=FIXTURE_DIR)
+        return load_schema_version(versions, xml_folder=XML_FOLDER)
 
     def _assert_fails(self, versions, code=HedExceptions.SCHEMA_LOAD_FAILED, mentions=()):
         with self.assertRaises(HedFileError) as context:

@@ -434,14 +434,10 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
         errors = [i for i in issues if i.get("severity", ErrorSeverity.ERROR) == ErrorSeverity.ERROR]
         self.assertEqual(len(errors), 0, "Current schemas should have no compliance errors")
 
-        # Load an older schema with known issues (HED8.0.0t has compliance problems)
-        old_schema_path = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.0.0t.xml"
-        )
-        if os.path.exists(old_schema_path):
-            old_schema = load_schema(old_schema_path)
-            old_issues = old_schema.check_compliance()
-            self.assertGreater(len(old_issues), 0, "Old schema should have compliance issues")
+        # Released 8.0.0 has known compliance issues.
+        old_schema = load_schema_version("8.0.0")
+        old_issues = old_schema.check_compliance()
+        self.assertGreater(len(old_issues), 0, "Old schema should have compliance issues")
 
     def test_duplicate_detection(self):
         """Test that duplicate units/unit classes are detected during compliance checking."""
@@ -467,17 +463,11 @@ class TestSchemaFormatRoundtrip(unittest.TestCase):
 
     def test_saving_with_namespace_prefix(self):
         """Test that schemas loaded with a namespace prefix can be saved correctly."""
-        old_schema_path = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.0.0t.xml"
-        )
-        if not os.path.exists(old_schema_path):
-            self.skipTest("Test schema file not available")
-
         # Load schema without prefix
-        schema_no_prefix = load_schema(old_schema_path)
+        schema_no_prefix = load_schema_version("8.0.0")
 
         # Load same schema with prefix
-        schema_with_prefix = load_schema(old_schema_path, schema_namespace="tl:")
+        schema_with_prefix = load_schema_version("tl:8.0.0")
 
         # Save the prefixed schema
         xml_path = os.path.join(self.temp_dir, "with_prefix.xml")

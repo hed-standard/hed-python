@@ -1,18 +1,16 @@
-import os
 import unittest
 
 from hed.errors import ErrorHandler
 from hed.models import HedString
-from hed.schema import load_schema
+from hed.schema import load_schema_version
 
 
 class TestBaseTagBase(unittest.TestCase):
-    schema_file = "../data/schema_tests/HED8.0.0t.xml"
+    schema_version = "8.0.0"
 
     @classmethod
     def setUpClass(cls):
-        hed_xml = os.path.join(os.path.dirname(os.path.realpath(__file__)), cls.schema_file)
-        cls.hed_schema = load_schema(hed_xml)
+        cls.hed_schema = load_schema_version(cls.schema_version)
         cls.error_handler = ErrorHandler()
 
     def tag_form_base(self, test_strings, expected_results, expected_errors):

@@ -38,16 +38,13 @@ class Test(unittest.TestCase):
         bids_root_path = os.path.realpath(
             os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/bids_tests/eeg_ds003645s_hed")
         )
-        schema_path = os.path.realpath(
-            os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/schema_tests/HED8.2.0.xml")
-        )
         cls.bids_root_path = bids_root_path
         json_path = os.path.realpath(os.path.join(bids_root_path, "task-FacePerception_events.json"))
         events_path = os.path.realpath(
             os.path.join(bids_root_path, "sub-002/eeg/sub-002_task-FacePerception_run-1_events.tsv")
         )
 
-        cls.hed_schema = schema.load_schema(schema_path)
+        cls.hed_schema = schema.load_schema_version("8.2.0")
         sidecar1 = Sidecar(json_path, name="face_sub1_json")
         mapper1 = ColumnMapper(sidecar=sidecar1, optional_tag_columns=["HED"], warn_on_missing_column=False)
         cls.input_data1 = BaseInput(

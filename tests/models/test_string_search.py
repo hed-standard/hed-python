@@ -12,7 +12,6 @@ a descendant of "Action") are placed in a separate test class that generates a
 schema lookup table from a real schema file.
 """
 
-import os
 import unittest
 
 import pandas as pd
@@ -982,12 +981,10 @@ class TestSchemaLookupAncestorSearch(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        base_data_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/"))
-        hed_xml_file = os.path.join(base_data_dir, "schema_tests/HED8.0.0t.xml")
         try:
             from hed import schema as hed_schema
 
-            cls.hed_schema = hed_schema.load_schema(hed_xml_file)
+            cls.hed_schema = hed_schema.load_schema_version("8.0.0")
             cls.lookup = generate_schema_lookup(cls.hed_schema)
         except Exception:
             cls.hed_schema = None

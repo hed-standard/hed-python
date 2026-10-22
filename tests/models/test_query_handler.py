@@ -23,8 +23,7 @@ class TestParser(unittest.TestCase):
     def setUpClass(cls):
         base_data_dir = os.path.realpath(os.path.join(os.path.dirname(__file__), "../data/"))
         cls.base_data_dir = base_data_dir
-        hed_xml_file = os.path.join(base_data_dir, "schema_tests/HED8.0.0t.xml")
-        cls.hed_schema = schema.load_schema(hed_xml_file)
+        cls.hed_schema = schema.load_schema_version("8.0.0")
 
     def base_test(self, parse_expr, search_strings):
         expression = QueryHandler(parse_expr)

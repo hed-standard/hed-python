@@ -1,5 +1,4 @@
 import copy
-import os
 import unittest
 
 from hed import schema
@@ -13,9 +12,7 @@ from tests.validator.test_tag_validator_base import TestHedBase
 class Test(TestHedBase):
     @classmethod
     def setUpClass(cls):
-        cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/")
-        hed_xml_file = os.path.join(cls.base_data_dir, "schema_tests/HED8.2.0.mediawiki")
-        cls.hed_schema = schema.load_schema(hed_xml_file)
+        cls.hed_schema = schema.load_schema_version("8.2.0")
         cls.placeholder_label_def_string = "Def/TestDefPlaceholder/2471"
         cls.placeholder_def_contents = "(Acceleration/#,Action/TestDef2)"
         cls.placeholder_definition_string = f"(Definition/TestDefPlaceholder/#,{cls.placeholder_def_contents})"

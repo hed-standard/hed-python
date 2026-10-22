@@ -15,7 +15,6 @@ class Test(unittest.TestCase):
         cls.saved_cache_folder = hed_cache.HED_CACHE_DIRECTORY
         schema.set_cache_directory(cls.hed_cache_dir)
 
-        cls.default_xml_base_filename = "HED8.0.0t.xml"
         cls.hed_test_version = "7.1.1"
         cls.hed_invalid_version = "4.6.7"
 

@@ -13,8 +13,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/")
-        hed_xml_file = os.path.realpath(os.path.join(cls.base_data_dir, "schema_tests/HED8.0.0t.xml"))
-        cls.hed_schema = schema.load_schema(hed_xml_file)
+        cls.hed_schema = schema.load_schema_version("8.0.0")
         cls.def_contents_string = "(Item/TestDef1,Item/TestDef2)"
         cls.basic_definition_string = f"(Definition/TestDef,{cls.def_contents_string})"
         cls.basic_definition_string_no_paren = f"Definition/TestDef,{cls.def_contents_string}"
@@ -165,8 +164,7 @@ class TestDefErrors(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_data_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../data/")
-        hed_xml_file = os.path.realpath(os.path.join(cls.base_data_dir, "schema_tests/HED8.0.0t.xml"))
-        cls.hed_schema = schema.load_schema(hed_xml_file)
+        cls.hed_schema = schema.load_schema_version("8.0.0")
         cls.def_contents_string = "(Item/TestDef1,Item/TestDef2)"
         cls.basic_definition_string = f"(Definition/TestDef,{cls.def_contents_string})"
         cls.basic_definition_string_no_paren = f"Definition/TestDef,{cls.def_contents_string}"
