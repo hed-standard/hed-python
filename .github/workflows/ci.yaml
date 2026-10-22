@@ -30,10 +30,18 @@ jobs:
 
   build:
     needs: determine_version
+    # Keeps the check names "build (<platform>, <python>)"; only the minimum-pandas job adds a suffix.
+    name: build (${{ matrix.platform }}, ${{ matrix.python-version }}${{ matrix.pandas != 'latest' && format(', pandas {0}', matrix.pandas) || '' }})
     strategy:
       matrix:
         platform: [ubuntu-latest]
         python-version: ${{fromJson(needs.determine_version.outputs.matrix)}}
+        # "latest": the newest pandas the Python version allows. The extra job tests the floor in pyproject.toml.
+        pandas: [latest]
+        include:
+          - platform: ubuntu-latest
+            python-version: "3.10"
+            pandas: "2.2.3"
 
     runs-on: ${{ matrix.platform }}
 
@@ -57,6 +65,10 @@ jobs:
       # Install dependencies
       - name: Install dependencies
         run: uv pip install -e ".[docs,test]"
+
+      - name: Install the minimum supported pandas
+        if: matrix.pandas != 'latest'
+        run: uv pip install "pandas==${{ matrix.pandas }}"
 
       # Run spec tests without coverage for non Python 3.10
       - name: Run spec_test
