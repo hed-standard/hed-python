@@ -364,4 +364,4 @@ def merge_dfs(dest_df, source_df):
         if not match_index.empty:
             for col in source_df.columns:
                 if col not in save_df1_columns:
-                    dest_df.at[match_index[0], col] = row[col]
+                    dest_df.loc[match_index[0], col] = row[col]  # .at cannot add a column (pandas 3.1)

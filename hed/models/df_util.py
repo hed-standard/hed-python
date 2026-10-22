@@ -118,6 +118,8 @@ def process_def_expands(
 def sort_dataframe_by_onsets(df):
     """Sort a dataframe by the onset column.
 
+    The sort is stable: rows with equal onsets keep their order in the file.
+
     Parameters:
         df(pd.Dataframe): Dataframe to sort.
 
@@ -128,8 +130,7 @@ def sort_dataframe_by_onsets(df):
         # Create a copy and sort by onsets as floats(if needed), but continue to keep the string version.
         df_copy = df.copy()
         df_copy["_temp_onset_sort"] = pd.to_numeric(df_copy["onset"], errors="coerce")
-        df_copy.sort_values(by="_temp_onset_sort", inplace=True)
-        df_copy.drop(columns=["_temp_onset_sort"], inplace=True)
+        df_copy = df_copy.sort_values(by="_temp_onset_sort", kind="stable").drop(columns=["_temp_onset_sort"])
 
         return df_copy
     return df
@@ -276,7 +277,7 @@ def split_delay_tags(series, hed_schema, onsets):
         insert_index = split_df["original_index"].index.max() + 1
         split_df.loc[insert_index] = {"HED": str(group), "onset": onset_mod, "original_index": i}
     split_df = sort_dataframe_by_onsets(split_df)
-    split_df.reset_index(drop=True, inplace=True)
+    split_df = split_df.reset_index(drop=True)
 
     split_df = filter_series_by_onset(split_df, split_df.onset)
     return split_df

@@ -93,7 +93,7 @@ class KeyMap:
             df[additional_cols] = "n/a"
         if show_counts:
             df.insert(0, "key_counts", self._get_counts())
-            df.sort_values(by=["key_counts"], inplace=True, ignore_index=True, ascending=False)
+            df = df.sort_values(by=["key_counts"], ignore_index=True, ascending=False)
         return df
 
     def _get_counts(self):
@@ -172,11 +172,16 @@ class KeyMap:
         # Copy all the map_dict data into merged_df as new columns, merging on the map_dict_index number of both
         remapped_df = pd.merge(
             merged_df, self.col_map, left_on="key_value", right_index=True, suffixes=("", "_new"), how="left"
-        ).fillna("n/a")
+        )
 
-        # Override the original columns with our newly calculated ones
+        # Override the original columns with our newly calculated ones; a row without a mapping gets "n/a".
+        # pandas 3.1 deprecates filling a string into a numeric column, so such a column becomes object first
+        # (the dtype the fill used to produce).
         for col in self.target_cols:
-            df[col] = remapped_df[col + "_new"]
+            new_col = remapped_df[col + "_new"]
+            if pd.api.types.is_numeric_dtype(new_col) and new_col.isna().any():
+                new_col = new_col.astype(object)
+            df[col] = new_col.fillna("n/a")
 
         # Finally calculate missing indices
         missing_indices = key_series.index[key_values.isna()].tolist()
@@ -185,7 +190,7 @@ class KeyMap:
 
     def resort(self):
         """Sort the col_map in place by the key columns."""
-        self.col_map.sort_values(by=self.key_cols, inplace=True, ignore_index=True)
+        self.col_map = self.col_map.sort_values(by=self.key_cols, ignore_index=True)
         for index, row in self.col_map.iterrows():
             key_hash = data_util.get_row_hash(row, self.key_cols)
             self.map_dict[key_hash] = index
