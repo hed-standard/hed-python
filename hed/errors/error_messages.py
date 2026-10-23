@@ -212,6 +212,16 @@ def val_error_invalid_parent(tag, problem_tag, expected_parent_tag):
     return f"In '{tag}', '{problem_tag}' appears as '{str(expected_parent_tag)}' and cannot be used as an extension."
 
 
+@hed_tag_error(
+    ValidationErrors.EXTENSION_TERM_NO_LETTER, has_sub_tag=True, actual_code=ValidationErrors.TAG_EXTENSION_INVALID
+)
+def val_error_extension_term_no_letter(tag, problem_tag):
+    return (
+        f"In '{tag}', the extension term '{problem_tag}' contains no letter; "
+        "an extension term must contain at least one letter."
+    )
+
+
 @hed_tag_error(ValidationErrors.NO_VALID_TAG_FOUND, has_sub_tag=True, actual_code=ValidationErrors.TAG_INVALID)
 def val_error_no_valid_tag(tag, problem_tag):
     return f"'{problem_tag}' in {tag} is not a valid base HED tag."

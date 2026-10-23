@@ -55,6 +55,10 @@ class TagValidator:
               inherits extensionAllowed (specification 3.2.5): TAG_EXTENSION_INVALID, also for ``Onset/#``.
             - ``#`` used as an extension of any other tag is PLACEHOLDER_INVALID, whether or not the parent
               allows extension (specification 3.2.5 rule 5).
+            - An extension term must contain at least one letter (specification 3.2.5 rule 6), for every schema
+              version: ``Item/Blech/3`` and ``Item/1-2`` are TAG_EXTENSION_INVALID. A letter is any character for
+              which ``str.isalpha`` is true. The specification limits letters to A-Z and a-z before 8.3.0, and that
+              needs no separate test: before 8.3.0 every non-ASCII character is already CHARACTER_INVALID.
         """
         validation_issues = []
         if original_tag.is_basic_tag() or original_tag.is_takes_value_tag():
@@ -72,6 +76,14 @@ class TagValidator:
             )
         elif not original_tag.has_attribute(HedKey.ExtensionAllowed):
             validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_EXTENSION_INVALID, tag=original_tag)
+        elif no_letter := TagValidator._extension_terms_without_letter(original_tag):
+            for start, end in no_letter:
+                validation_issues += ErrorHandler.format_error(
+                    ValidationErrors.EXTENSION_TERM_NO_LETTER,
+                    tag=original_tag,
+                    index_in_tag=start,
+                    index_in_tag_end=end,
+                )
         else:
             validation_issues += ErrorHandler.format_error(
                 ValidationErrors.TAG_EXTENDED,
@@ -80,6 +92,24 @@ class TagValidator:
                 index_in_tag_end=None,
             )
         return validation_issues
+
+    @staticmethod
+    def _extension_terms_without_letter(original_tag) -> list[tuple[int, int]]:
+        """Return the (start, end) positions in the tag of the extension terms that contain no letter.
+
+        Parameters:
+            original_tag (HedTag): A tag whose extension is to be checked.
+
+        Returns:
+            list[tuple[int, int]]: One pair per term with no letter; empty terms are left to other checks.
+        """
+        spans = []
+        start = len(original_tag.org_base_tag) + 1
+        for term in original_tag.extension.split("/"):
+            if term and not any(character.isalpha() for character in term):
+                spans.append((start, start + len(term)))
+            start += len(term) + 1
+        return spans
 
     @staticmethod
     def check_tag_requires_child(original_tag) -> list[dict]:

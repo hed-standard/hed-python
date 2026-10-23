@@ -146,8 +146,9 @@ class IndividualHedTagsShort(TestHed3):
             "notRequiredNoNumber": "Age",
             "notRequiredNumber": "Age/0.5",
             "notRequiredScientific": "Age/5.2e-1",
+            # Clock-face takes no value before 8.3.0 (these schemas are 8.0.0-based), so 08:30 is an extension
+            # term, and one with no letter (specification 3.2.5 rule 6).
             "timeValue": "Clock-face/08:30",
-            # Update test - This one is currently marked as valid because clock face isn't in hed3
             "invalidTimeValue": "Clock-face/8:30",
         }
         expected_results = {
@@ -167,10 +168,10 @@ class IndividualHedTagsShort(TestHed3):
             "notRequiredNumber": [],
             "notRequiredScientific": [],
             "timeValue": self.format_error(
-                ValidationErrors.TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None
+                ValidationErrors.EXTENSION_TERM_NO_LETTER, tag=0, index_in_tag=11, index_in_tag_end=16
             ),
             "invalidTimeValue": self.format_error(
-                ValidationErrors.TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None
+                ValidationErrors.EXTENSION_TERM_NO_LETTER, tag=0, index_in_tag=11, index_in_tag_end=15
             ),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
