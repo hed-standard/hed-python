@@ -77,6 +77,8 @@ class ValidationErrors:
     HED_TAG_REPEATED_GROUP = "HED_TAG_REPEATED_GROUP"
 
     INVALID_PARENT_NODE = "invalidParent"
+    # An extension term with no letter (spec 3.2.5 rule 6); reported as TAG_EXTENSION_INVALID.
+    EXTENSION_TERM_NO_LETTER = "EXTENSION_TERM_NO_LETTER"
     NO_VALID_TAG_FOUND = "invalidTag"
     NODE_NAME_EMPTY = "NODE_NAME_EMPTY"
 

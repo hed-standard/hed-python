@@ -119,8 +119,9 @@ class IndividualHedTagsShort(TestHed):
             "notRequiredNoNumber": "Age",
             "notRequiredNumber": "Age/0.5",
             "notRequiredScientific": "Age/5.2e-1",
+            # Clock-face takes no value before 8.3.0 (this score library is partnered with 8.2.0), so 08:30 is an
+            # extension term, and one with no letter (specification 3.2.5 rule 6).
             "timeValue": "Clock-face/08:30",
-            # Update test - This one is currently marked as valid because clock face isn't in hed3
             "invalidTimeValue": "Clock-face/8:30",
         }
         expected_results = {
@@ -140,10 +141,10 @@ class IndividualHedTagsShort(TestHed):
             "notRequiredNumber": [],
             "notRequiredScientific": [],
             "timeValue": self.format_error(
-                ValidationErrors.TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None
+                ValidationErrors.EXTENSION_TERM_NO_LETTER, tag=0, index_in_tag=11, index_in_tag_end=16
             ),
             "invalidTimeValue": self.format_error(
-                ValidationErrors.TAG_EXTENDED, tag=0, index_in_tag=10, index_in_tag_end=None
+                ValidationErrors.EXTENSION_TERM_NO_LETTER, tag=0, index_in_tag=11, index_in_tag_end=15
             ),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
@@ -323,6 +324,38 @@ class IndividualHedTagsShort(TestHed):
                 index_in_tag_end=31,
                 expected_parent_tag="Agent/Animal-agent",
             ),
+        }
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
+
+    def test_extension_term_without_letter(self):
+        # Specification 3.2.5 rule 6: an extension term must contain at least one letter.
+        test_strings = {
+            "digitsOnly": "Item/Blech/3",
+            "digitsAndHyphen": "Item/1-2",
+            "twoTermsWithoutLetter": "Item/3/Blech/4",
+            "startsWithDigit": "Item/Blech/1red",
+            "multiLevel": "Item/Blech/Blech1/Blech2",
+        }
+        expected_results = {
+            "digitsOnly": False,
+            "digitsAndHyphen": False,
+            "twoTermsWithoutLetter": False,
+            "startsWithDigit": True,
+            "multiLevel": True,
+        }
+        expected_issues = {
+            "digitsOnly": self.format_error(
+                ValidationErrors.EXTENSION_TERM_NO_LETTER, tag=0, index_in_tag=11, index_in_tag_end=12
+            ),
+            "digitsAndHyphen": self.format_error(
+                ValidationErrors.EXTENSION_TERM_NO_LETTER, tag=0, index_in_tag=5, index_in_tag_end=8
+            ),
+            "twoTermsWithoutLetter": self.format_error(
+                ValidationErrors.EXTENSION_TERM_NO_LETTER, tag=0, index_in_tag=5, index_in_tag_end=6
+            )
+            + self.format_error(ValidationErrors.EXTENSION_TERM_NO_LETTER, tag=0, index_in_tag=13, index_in_tag_end=14),
+            "startsWithDigit": [],
+            "multiLevel": [],
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
