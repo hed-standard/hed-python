@@ -70,7 +70,7 @@ These changes can alter validation results or break code written against 1.2.0.
 
 ### Tabular files and sidecars
 
-- `TABULAR_INVALID` is reported for a column name that is repeated, padded (begins or ends with whitespace) or blank, and for a padded value in a column the sidecar annotates with HED. Column-name errors stop validation before the sidecar is checked; a padded value is reported once per column at its first row. The `HED` and `onset` columns are not checked for padded values.
+- `TABULAR_INVALID` is reported for a column name that is repeated, padded (begins or ends with whitespace) or blank, and for a padded value in a column the sidecar annotates with HED. Column-name errors stop validation before the sidecar is checked; each distinct padded value is reported once per column, at the first row that holds it, with its `row_count`. The `HED` and `onset` columns are not checked for padded values.
 - `SIDECAR_INVALID` is reported for a padded top-level sidecar key and for a padded key under `"HED"` in a categorical entry.
 - Excel header cells and DataFrame column labels are converted to text at load: a whole number becomes `"1"`, and None or NaN becomes `""` (a blank name).
 - `BaseInput.assemble` (and `dataframe_a`, `series_a`, `series_filtered`, `EventManager`) raises `HedFileError` (`BAD_COLUMN_NAMES`) for a table with a padded, blank or repeated column name instead of assembling it wrongly.
@@ -116,10 +116,10 @@ These changes can alter validation results or break code written against 1.2.0.
 
 ## Deprecations
 
-All are scheduled for removal in hedtools 2.0.0 and raise `DeprecationWarning`.
+All are scheduled for removal in hedtools 2.0.0. All except the `SCHEMA_MISSING_EXTRA_VALUE` alias raise `DeprecationWarning` when used.
 
 - The `schema=` parameter of `load_schema` and `from_string` (parsing a file into an existing schema): use a version list in `load_schema_version`.
-- `SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE`: use `SCHEMA_MISSING_EXTRA` (the value is already `"SCHEMA_MISSING_EXTRA"`).
+- `SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE`: use `SCHEMA_MISSING_EXTRA` (the value is already `"SCHEMA_MISSING_EXTRA"`). It is a plain alias and gives no warning, so search your code for it.
 - The `def_dicts=` parameter of `SpreadsheetValidator.validate`: use `extra_def_dicts=`.
 - The `value_validators=` parameter of `UnitValueValidator`: it has no effect.
 - The `allow_blank_names=` parameter of `BaseInput` and of `ColumnMapper.check_for_mapping_issues`: it is ignored.
