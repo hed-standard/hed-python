@@ -17,6 +17,8 @@ import warnings
 
 import hed
 from hed.errors.error_types import SchemaAttributeErrors
+from hed.models.base_input import BaseInput
+from hed.models.column_mapper import ColumnMapper
 from hed.schema import load_schema
 from hed.schema.hed_schema_io import from_string
 from hed.schema.schema_io.base2schema import SchemaLoader
@@ -59,6 +61,21 @@ SCHEDULED_REMOVALS = [
     (
         "hed.tools.util.data_util.delete_rows_by_column (replaced by remove_rows_by_value)",
         lambda: hasattr(data_util, "delete_rows_by_column"),
+        2,
+    ),
+    (
+        "allow_blank_names= parameter of BaseInput.__init__ (ignored; blank names are TABULAR_INVALID)",
+        lambda: _has_parameter(BaseInput.__init__, "allow_blank_names"),
+        2,
+    ),
+    (
+        "allow_blank_names= parameter of ColumnMapper.check_for_mapping_issues (ignored)",
+        lambda: _has_parameter(ColumnMapper.check_for_mapping_issues, "allow_blank_names"),
+        2,
+    ),
+    (
+        "ColumnMapper.check_for_blank_names (validation reports blank names as TABULAR_INVALID)",
+        lambda: hasattr(ColumnMapper, "check_for_blank_names"),
         2,
     ),
 ]

@@ -198,7 +198,8 @@ class SchemaAttributeErrors:
 
     # Extras section errors
     SCHEMA_MISSING_EXTRA = "SCHEMA_MISSING_EXTRA"
-    # Deprecated alias for the pre-1.3.0 name; same code string. Remove in 2.0.0.
+    # Deprecated alias for the pre-1.3.0 name. Its value is now "SCHEMA_MISSING_EXTRA", so code that compared issue
+    # codes to the old string "SCHEMA_MISSING_EXTRA_VALUE" must change. Remove in 2.0.0.
     SCHEMA_MISSING_EXTRA_VALUE = SCHEMA_MISSING_EXTRA
 
     # Annotation attribute errors
