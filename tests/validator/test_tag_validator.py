@@ -5,6 +5,7 @@ from hed.errors import ErrorContext, ErrorHandler
 from hed.errors.error_types import DefinitionErrors, ValidationErrors
 from hed.models.hed_string import HedString
 from hed.schema.hed_schema_io import load_schema_version
+from hed.validator import HedValidator
 from hed.validator.util.char_util import COLUMN_BRACES_RULE
 from hed.validator.util.character_sets import CharacterSets
 from tests.validator.test_tag_validator_base import TestValidatorBase
@@ -1243,6 +1244,38 @@ class TestHedAllowedCharacters(TestHed):
             "allowTab": [],
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
+
+
+class TestReleased850Units(unittest.TestCase):
+    """Unit rules against the released, bundled HED 8.5.0 (Quantity/# takes every unit class through anyUnits)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.hed_schema = load_schema_version("8.5.0")
+        cls.validator = HedValidator(cls.hed_schema)
+
+    def codes(self, text):
+        issues = self.validator.validate(HedString(text, self.hed_schema), allow_placeholders=False)
+        return sorted({issue["code"] for issue in issues})
+
+    def test_derived_si_unit_symbol_is_valid(self):
+        self.assertEqual(self.codes("Quantity/3 uV"), [])
+
+    def test_unit_symbols_are_case_sensitive(self):
+        self.assertEqual(self.codes("Quantity/3 UV"), [ValidationErrors.UNITS_INVALID])
+
+    def test_derived_default_unit_resolves(self):
+        # currentUnits has defaultUnits=mA, a form derived from A by an SI modifier.
+        self.assertEqual(self.codes("Quantity/3 mA"), [])
+
+    def test_unit_without_symbol_takes_no_modifier_symbol(self):
+        # calorie has no unit symbol, so kcal is not a unit (kilocalorie is).
+        self.assertEqual(self.codes("Quantity/3 kcal"), [ValidationErrors.UNITS_INVALID])
+        self.assertEqual(self.codes("Quantity/3 kilocalorie"), [])
+
+    def test_deprecated_unit_prefix_is_not_accepted(self):
+        self.assertEqual(self.codes("Quantity/$5"), [ValidationErrors.VALUE_INVALID])
+        self.assertEqual(self.codes("Quantity/5 dollars"), [])
 
 
 if __name__ == "__main__":

@@ -143,7 +143,7 @@ schema = load_schema_version(["score_2.1.0", "lang_1.1.0"])
 ```
 
 - All libraries in a merge group must be partnered with the **same** standard schema version. Listing that standard version as well is allowed and adds nothing; listing a different one fails.
-- Duplicate versions in the list are ignored, but two *different* versions of the same schema cannot be combined.
+- A schema may appear only once in a merge group: listing the same version twice, or two *different* versions of the same schema, makes the load raise a `HedFileError` with code `SCHEMA_LOAD_FAILED`.
 - An element (tag, unit class, unit, value class, or schema attribute) declared by more than one library must be declared identically - same attributes, description, position in the hierarchy, and placeholder (`#`) child. Any conflict makes the load raise a `HedFileError` with code `SCHEMA_LOAD_FAILED` whose `issues` list names each conflicting element.
 
 Schemas that cannot be merged can still be used side by side by giving them *namespace prefixes*. Each prefix forms its own merge group, resolved independently, and tags from a prefixed schema are written with the prefix in annotations:

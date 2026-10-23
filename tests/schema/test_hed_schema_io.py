@@ -616,6 +616,65 @@ class TestHedSchema(unittest.TestCase):
             load_schema_version("sc1:")
 
 
+class TestBundledSchemasInCache(unittest.TestCase):
+    """A schema bundled with hedtools wins over any copy in the default cache, and reaches an older cache."""
+
+    STALE_MARKER = "STALE-COPY-MARKER"
+
+    def setUp(self):
+        self.saved_cache_folder = hed_cache.HED_CACHE_DIRECTORY
+        self.cache = tempfile.mkdtemp()
+        schema.set_cache_directory(self.cache)
+        _load_schema_version.cache_clear()
+
+    def tearDown(self):
+        schema.set_cache_directory(self.saved_cache_folder)
+        _load_schema_version.cache_clear()
+        shutil.rmtree(self.cache, ignore_errors=True)
+
+    def _bundled(self, name):
+        return os.path.join(hed_cache.INSTALLED_CACHE_LOCATION, name)
+
+    def _write_stale_850(self, folder):
+        os.makedirs(folder, exist_ok=True)
+        with open(self._bundled("HED8.5.0.xml"), encoding="utf-8") as f:
+            text = f.read().replace("</prologue>", self.STALE_MARKER + "</prologue>", 1)
+        with open(os.path.join(folder, "HED8.5.0.xml"), "w", encoding="utf-8") as f:
+            f.write(text)
+
+    def _fill_as_older_release(self):
+        # A cache an older hedtools populated: the released standard schemas up to 8.4.0, nothing newer.
+        for version in ("8.0.0", "8.1.0", "8.2.0", "8.3.0", "8.4.0"):
+            shutil.copy(self._bundled(f"HED{version}.xml"), self.cache)
+
+    def test_stale_prerelease_copy_does_not_shadow_the_release(self):
+        self._fill_as_older_release()
+        self._write_stale_850(os.path.join(self.cache, "prerelease"))
+        loaded = load_schema_version("8.5.0")
+        self.assertNotIn(self.STALE_MARKER, loaded.prologue)
+
+    def test_stale_copy_in_cache_root_does_not_shadow_the_release(self):
+        self._fill_as_older_release()
+        self._write_stale_850(self.cache)
+        self.assertEqual(hed_cache.get_hed_version_path("8.5.0"), self._bundled("HED8.5.0.xml"))
+        self.assertNotIn(self.STALE_MARKER, load_schema_version("8.5.0").prologue)
+
+    def test_newly_bundled_schemas_reach_an_older_cache(self):
+        self._fill_as_older_release()
+        self.assertIn("8.5.0", hed_cache.get_hed_versions())
+        self.assertIn("2.2.0", hed_cache.get_hed_versions(library_name="score"))
+        self.assertEqual(load_schema_version().version_number, hed_cache.get_hed_versions()[0])
+
+    def test_custom_folder_keeps_its_own_file(self):
+        folder = tempfile.mkdtemp()
+        try:
+            self._write_stale_850(folder)
+            path = hed_cache.get_hed_version_path("8.5.0", local_hed_directory=folder)
+            self.assertEqual(path, os.path.join(folder, "HED8.5.0.xml"))
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+
+
 class TestHedSchemaUnmerged(unittest.TestCase):
     # Verify the HED cache can handle loading unmerged with_standard schemas in case they are ever used
     @classmethod

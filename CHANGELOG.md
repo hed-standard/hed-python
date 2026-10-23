@@ -1,3 +1,154 @@
+# Release 1.3.0 October 23, 2026
+
+This release implements HED specification 4.0.0 (reserved tags, column names and padded values, tag-extension rules, value-text and character sets, BIDS date-times, compound units) and bundles HED 8.5.0. Many annotations that passed under 1.2.0 now give errors, and tabular validation reports issues differently: read the upgrade notes first. Runtime dependencies and supported Python versions (3.10 and later) are unchanged.
+
+## Upgrade notes
+
+These changes can alter validation results or break code written against 1.2.0.
+
+- **Tabular validation runs in stages and stops at the first stage with an error.** A file's column names are checked first, then its sidecar, then each column's distinct values, then each distinct `HED`-column string, and only then the assembled rows (group-level, onset and temporal checks). Warnings never stop the run. A file whose sidecar has errors now reports only the sidecar's issues, once each, rather than once per row; fix them and run again to see later checks.
+- **A bad value is reported once, not once per row.** An issue found in a column value or a `HED`-column string is reported at the first row that holds it, with a new `row_count` key giving the number of rows. Code that counts issues will see much smaller numbers.
+- **`SpreadsheetValidator.validate` has a new signature:** `validate(source, sidecar=None, extra_def_dicts=None, name=None, error_handler=None, row_offset=None, validate_sidecar=True)`. The second positional argument is now the sidecar; passing a definition dictionary there raises `TypeError`.
+- **New errors for annotations that used to pass.** In particular: a repeated, padded or blank column name and a padded value in an annotated column (`TABULAR_INVALID`); a padded sidecar key (`SIDECAR_INVALID`); an extension term with no letter such as `Item/Blech/3` (`TAG_EXTENSION_INVALID`); `#` after an extension in a sidecar (`PLACEHOLDER_INVALID`); `(Delay/3 s)` without an inner group (`TEMPORAL_TAG_ERROR`); a double quote anywhere in a HED string (`CHARACTER_INVALID`); a date-time that is not a BIDS Datetime or not a real date (`VALUE_INVALID`); unit names in the wrong case such as `Milliseconds` (`UNITS_INVALID`). Details below.
+- **`NaN` in a TSV file is a value, not a missing cell.** Only an empty cell and `n/a` are missing. `NaN`, `NA`, `NULL`, `None` and the other pandas default NA strings are now validated like any other value.
+- **Column names are used exactly as written.** They are never trimmed, and a sidecar key or column selector must match a column name exactly. A blank column name no longer raises `HedFileError` when the file is loaded; validation reports it as `TABULAR_INVALID`. Text files are read without CSV quoting, so a double quote is an ordinary character.
+- **Changed error codes.** `SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE` is now an alias whose value is the string `"SCHEMA_MISSING_EXTRA"`, so code comparing issue codes to the literal `"SCHEMA_MISSING_EXTRA_VALUE"` must change. The warnings `SCHEMA_ANNOTATION_PREFIX_MISSING`, `SCHEMA_ANNOTATION_EXTERNAL_MISSING` and `SCHEMA_ANNOTATION_SOURCE_MISSING` are replaced by `SCHEMA_ANNOTATION_INVALID`. A tilde is `CHARACTER_INVALID` instead of `TILDES_UNSUPPORTED`. Extending a reserved tag (`Onset/Blah`) is `TAG_EXTENSION_INVALID` instead of `TEMPORAL_TAG_ERROR`. A schema listed twice in one merge group fails with `SCHEMA_LOAD_FAILED` instead of `SCHEMA_LIBRARY_INVALID`.
+- **`Sidecar.validate` no longer reports `REQUIRED_TAG_MISSING`**, because a sidecar string is only part of a row. The check runs on the assembled row.
+- **Removed functions and data files** are listed under "Removed" below.
+
+## New features
+
+### Schemas
+
+- HED 8.5.0 is bundled, with the libraries score 1.2.0, score 2.2.0 and lang 1.2.0, so they load offline. `load_schema_version()` with no version now loads 8.5.0. The bundled partnered libraries (lang 1.0.0 to 1.2.0, score 1.1.0 to 2.2.0) are stored unmerged, which shrinks the package; they load the same as the merged releases.
+- Schema merge groups follow HED specification 3.1.2.4. `load_schema_version` resolves each namespace of a version list as a merge group: all libraries must share one standard partner, an unpartnered library must be alone in its namespace, and the partner standard version may be listed beside its libraries. The rules are checked from the schema headers before any file is parsed, and the standard schema is loaded at most once per group. Libraries in one group may declare the same element if the declarations agree; it carries a comma-separated `inLibrary` value. The merged schema's Sources, Prefixes and External annotations combine every library's rows with the partner's.
+- `load_schema` and `from_string` take a new `xml_folder` argument, searched first for the standard partner of an unmerged partnered library.
+- `HedSchema.unmerged_libraries`: the libraries in a schema that were loaded from an unmerged file.
+- `anyUnits` (HED 8.5.0, `Quantity/#`): the placeholder accepts a unit from any unit class, listed or derived; a listed unit wins over a derived form (`dB` is the decibel). `value_as_default_unit` converts to the default unit of the class that matched.
+- `HedTag.default_unit` resolves a `defaultUnits` value that is a derived form of a listed unit (such as `mA` in HED 8.5.0) to the unit it derives from.
+
+### Validation
+
+- Public staged-validation methods on `SpreadsheetValidator`: `validate_column_names`, `validate_column_structure`, `validate_value_column`, `validate_categorical_column`, `validate_padded_values`, `validate_hed_column` (with `full_string=` for callers that never assemble rows) and `validate_assembled`. `SpreadsheetValidator(hed_schema, def_dicts=None)` takes definitions for these calls.
+- The `ColumnSource` protocol (`hed.models.column_source`): validation reads a table through `column_names()`, `distinct_values()`, `column_mapper()` and `as_base_input()`, so tables other than files (for example NWB tables through ndx-hed) get the same checks. `BaseInput` implements it; `ListColumnSource` wraps plain lists; `hed.models.distinct_values` builds the value-to-rows map; `check_column_names` applies the column-name rules.
+- `BaseInput.validate`, `TabularInput.validate` and `SpreadsheetValidator.validate` take `validate_sidecar=` (skip a sidecar you already validated) and `row_offset=` (`0` reports 0-based data rows; the default is still 1-based file lines counting the header).
+- `row_count` on issues; `get_printable_issue_string` and `get_printable_issue_string_html` add `[first of N rows with this value]` when N > 1.
+- `HedValidator.run_full_string_checks(hed_string, *, required_tags=True, unique_tags=True)` can skip the row-wide checks when validating part of a row.
+- New read-only properties `BaseInput.duplicate_columns`, `BaseInput.padded_columns` and `BaseInput.blank_columns`. Repeated names are read from the raw header, before pandas renames the second copy.
+- One character table shared with the specification: `hed/validator/data/character_sets.json`, read by `hed.validator.util.character_sets` (`CharacterSets.load()`, `code_point()`). From standard schema 8.5.0, and in libraries partnered with 8.5.0 or later, a value class's `allowedCharacter` declaration defines its characters; earlier schemas use the file's per-class defaults.
+- The `value-text` character set: from standard schema 8.5.0, a textClass value (`Description/#`, `Label/#`, `Parameter-value/#`, ...) may not contain `(`, `)`, `#` or `~` (`CHARACTER_INVALID`).
+- `CHARACTER_INVALID` and `VALUE_INVALID` messages name the character, its code point, its index and the allowed set, and the issues carry new `char_set` and `code_point` keys.
+
+### Schema tools
+
+- Schema compliance (`check_compliance`, `hedpy schema validate`):
+  - New error `SCHEMA_RESERVED_INVALID`: a standard schema must define the reserved tags with their required attributes, and a reserved tag may have no child other than `#`.
+  - New `SCHEMA_LIBRARY_INVALID` reasons: an unmerged partnered library may not declare a Properties section (j); a merged one's must equal its partner's (k); no library element may carry `reserved` (l), define a tag with a reserved name (m), or root a node under a reserved tag (n).
+  - A unit already accepted as an SI-modified or plural form of another unit of its class (`uV` beside `V`) is `SCHEMA_DUPLICATE_NODE`, for standard schemas 8.5.0 and later and the libraries partnered with them.
+  - Unit class rules: a `#` with more than one `unitClass`, or with a `unitClass` but not `valueClass=numericClass` (8.5.0 and later), is `SCHEMA_ATTRIBUTE_VALUE_INVALID`; `anyUnits` may list no units or `defaultUnits`; one unit string derived by two classes is `SCHEMA_DUPLICATE_NODE`.
+- `hed_validate_schemas --require-ids` and `hedpy schema validate --require-ids` list every element without a hedId and fail; `hed_validate_schemas` accepts `.json` schema files; `hedpy schema add-ids` works (it crashed with an argument error in 1.2.0).
+- `hedpy schema convert` (`hed_update_schemas`) drops a spreadsheet row whose element is gone from the schema when its hedId is listed under `retired_ids` in hed-schemas `library_data.json`, and never reassigns a retired hedId. New helper `hed.schema.schema_io.hed_id_util.remove_retired_rows`.
+- `SchemaComparer`: a removed unit the newer schema still derives is reported as Patch with the derivation (`Unit uV removed from electricPotentialUnits; still derivable as u + V`); for a partnered library, changes are marked with `origin` and the partner's changes are printed in a separate `From the partner standard schema` block; a prologue or epilogue change lists the removed and added lines; `compare_differences` takes `use_markdown=` (default True) and its markdown follows the hed-schemas `PRERELEASE_CHANGES.md` layout.
+
+### Other tools
+
+- `hed.tools.util.data_util.remove_rows_by_value(df, value, column_list=None)` returns a new dataframe without the rows where any of the columns holds `value`, keeping the original index.
+
+## Changed
+
+### Validation rules (HED specification 4.0.0)
+
+- Reserved tags are validated from the `reserved_tags.json` file the specification publishes, for every standard schema from 8.0.0. A reserved tag may not be extended (`Onset/Blah`, `Onset/#`: `TAG_EXTENSION_INVALID`); a `Delay` group needs its inner group (`(Delay/3 s)`: `TEMPORAL_TAG_ERROR`); `Delay` and `Duration` need a value in every schema version (`TAG_REQUIRES_CHILD`); only `#` may follow a definition name (`DEFINITION_INVALID`); a `Def` may not sit at the top level of a `Duration` or `Delay` group (`TEMPORAL_TAG_ERROR`); a `{column}` reference may not appear in a `Definition` or `Event-context` group. A content error in a reserved group carries the reserved tag's own code.
+- An extension term must contain at least one letter (3.2.5 rule 6): `Item/Blech/3`, `Item/1-2`, `Item/_` and, from 8.3.0, a non-ASCII term with no letter are `TAG_EXTENSION_INVALID`, reported at the term; `Item/Blech/1red` and `Item/3D-printout` stay valid. The rule applies to every schema version, so `Clock-face/08:30` under a schema before 8.3.0 (where `Clock-face` takes no value) is now an error.
+- `#` after an extension (`Item/#`, `Item/Blech/#`) is `PLACEHOLDER_INVALID` in a sidecar too; 1.2.0 accepted it there.
+- Tag extensions may contain non-ASCII characters from the `nonascii` set (code 160 and above).
+- Date-time values follow the BIDS Datetime format, `YYYY-MM-DDThh:mm:ss[.ffffff][Z|+hh:mm|-hh:mm]`, and the date must exist (`2026-02-31` is `VALUE_INVALID`). 1.2.0 accepted `2026-13-45T99:99:99`.
+- A double quote is `CHARACTER_INVALID` anywhere in a HED string. Control characters (codes 0-31 and 127-159) are forbidden in every schema version; other non-ASCII characters such as a no-break space are accepted in text values from 8.3.0.
+- A placeholder with no value class (`URL/#`, `DOI/#`, `UUID/#`, ...) is checked against `value-text`, so `DOI/10.1000/abc?x=1` is now valid.
+- A definition repeated with identical contents is accepted; different contents are still `DEFINITION_INVALID`.
+- `Def-expand` contents are compared without regard to the order of tags and groups.
+
+### Tabular files and sidecars
+
+- `TABULAR_INVALID` is reported for a column name that is repeated, padded (begins or ends with whitespace) or blank, and for a padded value in a column the sidecar annotates with HED. Column-name errors stop validation before the sidecar is checked; a padded value is reported once per column at its first row. The `HED` and `onset` columns are not checked for padded values.
+- `SIDECAR_INVALID` is reported for a padded top-level sidecar key and for a padded key under `"HED"` in a categorical entry.
+- Excel header cells and DataFrame column labels are converted to text at load: a whole number becomes `"1"`, and None or NaN becomes `""` (a blank name).
+- `BaseInput.assemble` (and `dataframe_a`, `series_a`, `series_filtered`, `EventManager`) raises `HedFileError` (`BAD_COLUMN_NAMES`) for a table with a padded, blank or repeated column name instead of assembling it wrongly.
+- A value column referenced by `{column}` is checked in every row, and a value that would break the HED string it is substituted into (`a(b`, `a~b`, `a#b`) is rejected at the value stage.
+- In a file with an `onset` column, a `Delay` or `Duration` value that cannot be converted to its default unit is `TEMPORAL_TAG_ERROR`; an invalid `Delay` unit used to raise `TypeError`. Under 8.0.0, whose time units have no conversion factors, a value in seconds is taken as it is. `split_delay_tags` and `TemporalEvent` raise `HedFileError` naming the tag instead of computing a wrong onset.
+- Rows with equal onsets keep their file order when a table is sorted by onset, so an issue in rows sharing an onset is reported at the first of them.
+- `Sidecar.validate`, `TabularInput.validate` and `SpreadsheetValidator.validate` add a file-name context only when a name is given (`name=""` suppresses it), so callers validating non-file tables can supply their own context.
+- `BidsFileGroup` validates each merged sidecar once and skips a data file whose merged sidecar has errors, unless its header has a bad column name; `hedpy validate tabular` no longer validates the sidecar twice. Directories are walked in sorted order on every OS.
+
+### Units
+
+- Unit names are case-sensitive, like symbols and modifiers: `Time-value/5 milliseconds` is valid, while `Milliseconds`, `MS` and `UV` are `UNITS_INVALID`. Unit names may be pluralized; symbols may not.
+- Compound SI units (`m-per-s`, `m-per-s^2`, `m^3`, `mol-per-L`) take one SI modifier on each component: `Speed/3 cm-per-us` is now valid, and conversions are computed per component (`mm^3` converts to 1e-9 m^3; 1.2.0 gave 1e-3).
+- `HedTag.value_as_default_unit` returns None when the value is not numeric, the unit is not valid, or the unit has no `conversionFactor` (it used to return the bare number).
+
+### Schemas
+
+- Schema writers (MediaWiki, XML, JSON) always write the Sources, Prefixes and External annotations sections, empty when the schema has none.
+- The annotation-attribute check uses one warning, `SCHEMA_ANNOTATION_INVALID`, with four reasons, and runs only on standard schemas 8.5.0 and later and the libraries partnered with them. A `dc:source` value may cite a Sources row by a URL under the row's link.
+- Two different versions of one schema in a merge group, or a library that is incompatible with another in the group, fail with `SCHEMA_LOAD_FAILED`, one issue per problem; this replaces `SCHEMA_DUPLICATE_NAMES`.
+- A library that redeclares a unit class of its partner may only add units to it; a redeclaration with a description is `SCHEMA_LIBRARY_INVALID`.
+- An unpartnered library's entries no longer get the `inLibrary` attribute when loaded.
+- The library hedId registry (`library_data.json`) is fetched from hed-schemas first, falling back to the cached and packaged copies only when GitHub is unreachable.
+- Schema tools write a partnered library's prerelease JSON unmerged; `hed_add_ids` fails with a message when there is no prerelease TSV set; a missing or exhausted hedId range raises `HedFileError` instead of `IndexError`.
+
+### API
+
+- `CharRexValidator` and `UnitValueValidator` take a `hed_schema=` argument; `UnitValueValidator.report_value_errors` is an instance method with `allowed_names=` and `rule_failures=`.
+
+## Bug fixes
+
+- A schema version bundled with hedtools now always loads from the bundled file, and a cache populated by an older hedtools receives the newly bundled schemas (HED 8.5.0, lang 1.2.0, score 1.2.0 and 2.2.0). Before, a stale or prerelease copy left in the cache, such as an 8.5.0 prerelease downloaded with 1.2.0, was loaded instead of the release, and `load_schema_version()` with no version could resolve to an older version. A folder passed as `xml_folder` is still used as it is.
+- `conversionFactor` values written with a caret (`10^-15` in HED 8.0.0 to 8.2.0 and score 1.2.0) are read as powers; they were read as `10e-15`, ten times too large (`Duration/1 fs` on 8.2.0 converted to 1e-14 s).
+- `TabularSummary` no longer doubles the categorical row and file counts on each update (present since 0.9.0).
+- hedtools no longer triggers the pandas 3.1 `Pandas4Warning` deprecations (`inplace=`, filling text into numeric columns in `KeyMap.remap`, adding a column with `.at`) that were printed when validating a table with an `onset` column.
+- Loading a JSON file that is not a HED schema raises `HedFileError` (`INVALID_HED_FORMAT`) naming the file, instead of a misleading header error or an `AttributeError`.
+- Validators no longer leave a file-name context on a caller's `ErrorHandler` after an early return.
+- `get_printable_issue_string(..., add_link=True)` prints the documentation link.
+- `SchemaComparer` output is in a stable, sorted order.
+- A `CHARACTER_INVALID` in a `Def/` or `Def-expand/` value reports the index within the tag as written.
+- A text stream that cannot report its position can be loaded as a tabular input.
+- The `INVALID_COLUMN_REF` message no longer ends with a stray quote.
+
+## Deprecations
+
+All are scheduled for removal in hedtools 2.0.0 and raise `DeprecationWarning`.
+
+- The `schema=` parameter of `load_schema` and `from_string` (parsing a file into an existing schema): use a version list in `load_schema_version`.
+- `SchemaAttributeErrors.SCHEMA_MISSING_EXTRA_VALUE`: use `SCHEMA_MISSING_EXTRA` (the value is already `"SCHEMA_MISSING_EXTRA"`).
+- The `def_dicts=` parameter of `SpreadsheetValidator.validate`: use `extra_def_dicts=`.
+- The `value_validators=` parameter of `UnitValueValidator`: it has no effect.
+- The `allow_blank_names=` parameter of `BaseInput` and of `ColumnMapper.check_for_mapping_issues`: it is ignored.
+- `ColumnMapper.check_for_blank_names`: validation reports blank names as `TABULAR_INVALID`.
+- `hed.tools.util.data_util.delete_rows_by_column`: use `remove_rows_by_value`, which returns a new dataframe.
+
+## Removed
+
+- Error codes `SCHEMA_ANNOTATION_PREFIX_MISSING`, `SCHEMA_ANNOTATION_EXTERNAL_MISSING` and `SCHEMA_ANNOTATION_SOURCE_MISSING` (now `SCHEMA_ANNOTATION_INVALID`) and `HedExceptions.SCHEMA_DUPLICATE_NAMES` (now `SCHEMA_LOAD_FAILED`).
+- Validation no longer issues `HED_BLANK_COLUMN` (the constant remains defined).
+- From `hed.validator.util.class_util`: `is_date_time_value_class`, `is_name_value_class`, `is_numeric_value_class`, `is_text_value_class`, `is_clock_face_time`, `find_invalid_positions`, `UnitValueValidator.validate_value_class_type` and the constants `DATE_TIME_VALUE_CLASS`, `NUMERIC_VALUE_CLASS`, `TEXT_VALUE_CLASS`, `NAME_VALUE_CLASS`, `DIGIT_OR_POUND_EXPRESSION`.
+- The `CharValidator` attributes `DEFAULT_ALLOWED_PLACEHOLDER_CHARS`, `TAG_ALLOWED_CHARS`, `INVALID_STRING_CHARS`, `INVALID_STRING_CHARS_PLACEHOLDERS` and `CLASS_REX_FILENAME`; `PANDAS_COLUMN_PREFIX_TO_IGNORE` from `hed.models.column_mapper` and `hed.validator.spreadsheet_validator`.
+- Package data files `hed/validator/data/class_regex.json` (replaced by `character_sets.json`) and `reservedTags.json` (replaced by `reserved_tags.json`).
+- The `benchmarks/` directory; the benchmark harness lives in [hed-benchmarks](https://github.com/hed-standard/hed-benchmarks).
+
+## Testing
+
+- The specification tests run against hed-tests 54f137e (reserved tags, column names, padded values, extension rules), with no skipped cases.
+- The unit tests no longer use the testlib library or vendored copies of released schemas: they load the bundled schemas and the hed-tests test schemas.
+- New tests for staged validation, column sources, value-text and character sets, merge groups, reserved tags, the hedId tools, and HED 8.5.0 units; a deprecation registry (`tests/test_deprecations.py`) fails when a scheduled removal is overdue.
+- CI adds a job with the minimum supported pandas (2.2.3, Python 3.10).
+
+## Internal and documentation
+
+- Ruff uses the standard rule set plus isort, pyupgrade and pandas-vet PD002 (no `inplace=True`); code reformatted, no behavior change.
+- `reserved_tags.json` and `character_sets.json` are verbatim copies of the specification's files; CI workflows fail when they drift.
+- The user guide covers staged tabular validation and `row_count`, schema merge groups, and the schema release steps (`--set-ids`, `--require-ids`, `add-ids`).
+- Repository layout, contributor and assistant instructions standardized; the documentation chat widget renamed and moved.
+
 # Release 1.2.0 July 18, 2026
 
 ## New features

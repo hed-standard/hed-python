@@ -115,7 +115,11 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
             hed_files += os.listdir(hed_dir)
         except FileNotFoundError:
             pass
-    if not any(version_pattern.match(f) for f in hed_files):
+    # The default cache always holds every bundled schema, so schemas bundled by a newer hedtools reach a cache
+    # populated by an older one; any other folder is seeded only when it holds no schema at all.
+    if (local_hed_directory == HED_CACHE_DIRECTORY and _bundled_schemas_missing(local_hed_directory)) or not any(
+        version_pattern.match(f) for f in hed_files
+    ):
         cache_local_versions(local_hed_directory)
         hed_files = []
         for hed_dir in local_directories:
@@ -145,10 +149,11 @@ def get_hed_versions(local_hed_directory=None, library_name=None, check_prerelea
 def get_hed_version_path(xml_version, library_name=None, local_hed_directory=None) -> str | None:
     """Get the HED XML file path for a given version.
 
-    Searches the local cache first (including the bundled schemas that are always present).
-    If the version is not found and local_hed_directory is the default HED cache, downloads
-    only the single requested file from GitHub — never the entire catalog.
-    No network call is made for custom directories.
+    In the default HED cache, a version bundled with hedtools always resolves to the bundled file: a released
+    schema never changes, so a stale or prerelease copy left in the cache cannot shadow it. Otherwise the
+    local cache is searched. If the version is not found and local_hed_directory is the default HED cache,
+    only the single requested file is downloaded from GitHub, never the entire catalog.
+    No network call is made for custom directories, and their files are used as they are.
 
     Parameters:
         xml_version (str): The version string to look up.
@@ -162,6 +167,11 @@ def get_hed_version_path(xml_version, library_name=None, local_hed_directory=Non
     """
     if not local_hed_directory:
         local_hed_directory = HED_CACHE_DIRECTORY
+
+    if xml_version and local_hed_directory == HED_CACHE_DIRECTORY:
+        bundled_path = _create_xml_filename(xml_version, library_name, INSTALLED_CACHE_LOCATION, False)
+        if os.path.isfile(bundled_path):
+            return bundled_path
 
     result = _find_hed_version_path(xml_version, library_name, local_hed_directory)
     if result:
@@ -791,6 +801,22 @@ def _write_library_data_file(filename, library_data):
         os.replace(tmp_filename, filename)
     except OSError:
         pass
+
+
+def _bundled_schemas_missing(cache_folder) -> bool:
+    """Return True if a schema file bundled with hedtools is not in the root of the cache folder.
+
+    Parameters:
+        cache_folder (str): The folder holding the cache.
+
+    Returns:
+        bool: True if at least one bundled schema file is absent from the cache folder.
+    """
+    try:
+        cached = set(os.listdir(cache_folder))
+    except FileNotFoundError:
+        return True
+    return any(version_pattern.match(name) and name not in cached for name in os.listdir(INSTALLED_CACHE_LOCATION))
 
 
 def _copy_installed_folder_to_cache(cache_folder, sub_folder=""):

@@ -826,7 +826,8 @@ class BaseInput:
             - Converts all data to string type for consistency
             - Replaces NaN values with "n/a" for consistent handling
             - Skips blank lines during parsing
-            - Uses specific na_values configuration ("", "null")
+            - Treats only an empty cell and "n/a" as missing (na_values ("", "n/a"), keep_default_na=False), so
+              "NaN", "NULL" and the other pandas default NA strings are values
             - Handles pandas.errors.EmptyDataError for files with no data
             - With a header, the header record is read first so that blank and repeated names are known before
               pandas renames them (``blank_columns``, ``duplicate_columns``); the column names are the header
