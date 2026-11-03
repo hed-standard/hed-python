@@ -14,7 +14,11 @@
       "Bash(git status *)",
       "Bash(git log *)",
       "Bash(git diff *)",
-      "Bash(git branch *)",
+      "Bash(git branch)",
+      "Bash(git branch --show-current)",
+      "Bash(git branch -a)",
+      "Bash(git branch -r)",
+      "Bash(git branch -vv)",
       "Bash(git ls-files *)",
       "Bash(git submodule status)"
     ],
