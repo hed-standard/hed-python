@@ -7,7 +7,9 @@
 # two-space form to the backslash form anyway).
 #
 # This is the floor. Add sections for particular file types (indent rules,
-# for example), but do not override the [*] keys.
+# for example), but do not override the [*] keys. The one exception is
+# data formats where trailing whitespace is data: a TSV row whose last
+# cell is empty ends in a tab, and trimming it drops the column.
 root = true
 
 [*]
@@ -15,3 +17,6 @@ end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 charset = utf-8
+
+[*.tsv]
+trim_trailing_whitespace = false
