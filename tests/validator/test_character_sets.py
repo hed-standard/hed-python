@@ -5,6 +5,7 @@ import os
 import re
 import unittest
 
+from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.validator.util.character_sets import CHARACTER_SETS_FILENAME, CharacterSets, code_point
 
 
@@ -22,6 +23,8 @@ class TestCharacterSetsFile(unittest.TestCase):
 
     def test_the_file_has_every_section_the_validators_read(self):
         for key in (
+            "specification_version",
+            "file_version",
             "sets",
             "aliases",
             "literal_names",
@@ -33,6 +36,17 @@ class TestCharacterSetsFile(unittest.TestCase):
             self.assertIn(key, self.raw)
         self.assertEqual(self.raw["declaration_wins_from"]["standard_version"], "8.5.0")
         self.assertEqual(self.sets.declaration_wins_from, "8.5.0")
+
+    def test_a_copy_with_an_unsupported_file_version_is_refused(self):
+        for version, accepted in (("1.2.3", True), ("1.0.0", True), ("2.0.0", False), ("0.9.9", False)):
+            with self.subTest(version=version):
+                data = {**self.raw, "file_version": version}
+                if accepted:
+                    self.assertEqual(CharacterSets(data).sets, self.sets.sets)
+                else:
+                    with self.assertRaises(HedFileError) as context:
+                        CharacterSets(data)
+                    self.assertEqual(context.exception.code, HedExceptions.INVALID_FILE_FORMAT)
 
     def test_every_set_regex_compiles_and_single_character_sets_match_their_code(self):
         for name, entry in self.sets.sets.items():

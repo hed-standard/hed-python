@@ -4,6 +4,10 @@
 
 - **A tag extension may contain only `name` characters** (letters, digits, hyphen, underscore, and from 8.3.0 non-ASCII), as specification 3.2.5 rule 2 requires. Period, plus, caret, blank, and colon were accepted before (`Item/my.ext`, `Item/a b`) and are now errors. Any character outside `name` in an extension, including ones that were already errors such as `$`, is now reported as `TAG_EXTENSION_INVALID` (Appendix B, reason b) instead of `CHARACTER_INVALID`, naming the character and its position. `#` stays `PLACEHOLDER_INVALID`. ([#1471](https://github.com/hed-standard/hed-python/issues/1471))
 
+## Specification files
+
+- **The packaged `reserved_tags.json` carries `specificationVersion` and `fileVersion`** (hed-specification #731), refreshed verbatim from hed-specification. Both specification files, `reserved_tags.json` and `character_sets.json`, are now refused with `HedFileError` `INVALID_FILE_FORMAT` when their file version is missing or its major number is not 1; any minor and patch number is accepted (specification Appendix A.6.1). The check lives in the new internal module `hed/validator/util/spec_files.py`. ([#1489](https://github.com/hed-standard/hed-python/issues/1489))
+
 # Release 1.3.0 October 23, 2026
 
 This release implements HED specification 4.0.0 (reserved tags, column names and padded values, tag-extension rules, value-text and character sets, BIDS date-times, compound units) and bundles HED 8.5.0. Many annotations that passed under 1.2.0 now give errors, and tabular validation reports issues differently: read the upgrade notes first. Runtime dependencies and supported Python versions (3.10 and later) are unchanged.

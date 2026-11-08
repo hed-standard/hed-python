@@ -3,13 +3,16 @@
 import io
 import json
 import os
+import re
+import tempfile
 import unittest
 
 from hed import HedString, Sidecar, TabularInput, load_schema_version, schema
 from hed.errors import ErrorSeverity, ValidationErrors
+from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.models import DefinitionDict
 from hed.validator import HedValidator
-from hed.validator.reserved_checker import ReservedChecker
+from hed.validator.reserved_checker import ReservedChecker, load_reserved_file
 from hed.validator.spreadsheet_validator import SpreadsheetValidator
 
 DEFINITIONS = ["(Definition/MyDef, (Red))", "(Definition/Other, (Blue))"]
@@ -54,7 +57,7 @@ class ReservedTestBase(unittest.TestCase):
 
 
 class TestReservedCheckerData(unittest.TestCase):
-    """The loader reads the published file's two top-level keys."""
+    """The loader reads the published file's tags and valueForms, after checking its fileVersion."""
 
     def test_file_is_the_published_reserved_tags_json(self):
         checker = ReservedChecker.get_instance()
@@ -63,6 +66,27 @@ class TestReservedCheckerData(unittest.TestCase):
             data = json.load(file)
         self.assertEqual(checker.reserved_map, data["tags"])
         self.assertEqual(checker.value_forms, data["valueForms"])
+
+    def test_the_file_carries_its_version_fields(self):
+        data = load_reserved_file(ReservedChecker.reserved_reqs_path)
+        for key in ("specificationVersion", "fileVersion"):
+            self.assertRegex(data[key], re.compile(r"^\d+\.\d+\.\d+$"), key)
+
+    def test_load_reserved_file_checks_the_file_version(self):
+        with open(ReservedChecker.reserved_reqs_path, encoding="utf-8") as file:
+            packaged = json.load(file)
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "reserved_tags.json")
+            for version, accepted in (("1.1.0", True), ("1.0.3", True), ("2.0.0", False), ("0.1.0", False)):
+                with self.subTest(version=version):
+                    with open(path, "w", encoding="utf-8") as file:
+                        json.dump({**packaged, "fileVersion": version}, file)
+                    if accepted:
+                        self.assertEqual(load_reserved_file(path)["tags"], packaged["tags"])
+                    else:
+                        with self.assertRaises(HedFileError) as context:
+                            load_reserved_file(path)
+                        self.assertEqual(context.exception.code, HedExceptions.INVALID_FILE_FORMAT)
 
     def test_derived_sets(self):
         checker = ReservedChecker.get_instance()

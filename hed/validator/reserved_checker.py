@@ -5,6 +5,7 @@ specification (section 3.2.8, defined in Appendix A.6). The ``reserved_tags.yaml
 drifts from hed-specification main. Every row of the file applies in every standard schema version >= 8.0.0
 (hed-specification decision 2026-10-15): its ``requireValue``, ``tagGroup`` and ``topLevelTagGroup`` fields
 supply what the 8.0.0 to 8.2.0 schemas lack on ``Delay`` and ``Duration``, so no check here takes a version.
+The loader refuses a file whose file version major number it does not support (specification Appendix A.6.1).
 """
 
 import json
@@ -14,6 +15,25 @@ from threading import Lock
 
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import TemporalErrors, ValidationErrors
+from hed.validator.util.spec_files import check_file_version
+
+
+def load_reserved_file(path) -> dict:
+    """Read a reserved_tags.json file, refusing a file version this hedtools does not support.
+
+    Parameters:
+        path (str): The path of a ``reserved_tags.json`` file.
+
+    Returns:
+        dict: The parsed content of the file.
+
+    Raises:
+        HedFileError: INVALID_FILE_FORMAT if the file's ``fileVersion`` is missing or has an unsupported major number.
+    """
+    with open(path, encoding="utf-8") as file:
+        data = json.load(file)
+    check_file_version(data, "reserved_tags.json")
+    return data
 
 
 class ReservedChecker:
@@ -52,8 +72,7 @@ class ReservedChecker:
     def _initialize(self):
         # Load the JSON file during the first instantiation
         if not hasattr(self, "reserved_map"):
-            with open(self.reserved_reqs_path, encoding="utf-8") as file:
-                data = json.load(file)
+            data = load_reserved_file(self.reserved_reqs_path)
             self.reserved_map = data["tags"]
             self.value_forms = data["valueForms"]
         self._initialize_special_tags()

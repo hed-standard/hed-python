@@ -1,6 +1,8 @@
 {
   "title": "HED reserved tags",
   "description": "Machine-readable form of the validation rules of the structural reserved tags, HED specification section 3.2.8 (Reserved tags). The tables in docs/source/03_HED_formats.md are generated from this file by scripts/generate_reserved_table.py, and Appendix A.6 of the specification defines every field. Validators load this file unchanged. Each row of tags gives the group rules of one tag; a Def tag or the Def-expand group that is its expanded form is the anchor these rows refer to and is never counted as a companion tag or an inner group. Every row applies in every standard schema version >= 8.0.0; requireValue, tagGroup and topLevelTagGroup supply what the 8.0.0 to 8.2.0 schemas lack on Delay and Duration. A row with secondaryWith is secondary in a group that also holds one of the listed tags: that tag's row gives the group rules (requiresDef, otherAllowedNonDefTags, minNonDefSubgroups, maxNonDefSubgroups, allowSpliceInGroup), the secondary row's group rules apply only when its tag is the only one of the table in its group, and its other fields apply wherever its tag appears. valueForms lists the tags whose value has two parts, name or name/value.",
+  "specificationVersion": "4.0.0",
+  "fileVersion": "1.0.0",
   "tags": {
     "Definition": {
       "name": "Definition",
