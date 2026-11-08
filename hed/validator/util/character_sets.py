@@ -4,6 +4,7 @@
 hed-specification (``docs/source/_static/character_sets.json``). Both validators load the same file, so the
 named sets, the per-class defaults, the whole-value rules and the string-level exclusions cannot drift between
 them or from the specification text, which is generated from the file. Update the copy; never edit it.
+The loader refuses a file whose file version major number it does not support (specification Appendix A.6.1).
 """
 
 import json
@@ -11,6 +12,8 @@ import os
 import re
 
 from semantic_version import Version
+
+from hed.validator.util.spec_files import check_file_version
 
 CHARACTER_SETS_FILENAME = "../data/character_sets.json"
 
@@ -33,7 +36,12 @@ class CharacterSets:
 
         Parameters:
             data (dict): The parsed content of a ``character_sets.json`` file.
+
+        Raises:
+            HedFileError: INVALID_FILE_FORMAT if the file's ``file_version`` is missing or has an unsupported major
+                number.
         """
+        check_file_version(data, "character_sets.json")
         self._data = data
         self.sets = data["sets"]
         self.aliases = data.get("aliases", {})
