@@ -147,7 +147,7 @@ class IndividualHedTagsShort(TestHed3):
             "notRequiredNumber": "Age/0.5",
             "notRequiredScientific": "Age/5.2e-1",
             # Clock-face takes no value before 8.3.0 (these schemas are 8.0.0-based), so 08:30 is an extension
-            # term, and one with no letter (specification 3.2.5 rule 6).
+            # term with no letter (specification 3.2.5 rule 6) and a colon, which is not a name character (rule 2).
             "timeValue": "Clock-face/08:30",
             "invalidTimeValue": "Clock-face/8:30",
         }
@@ -169,9 +169,31 @@ class IndividualHedTagsShort(TestHed3):
             "notRequiredScientific": [],
             "timeValue": self.format_error(
                 ValidationErrors.EXTENSION_TERM_NO_LETTER, tag=0, index_in_tag=11, index_in_tag_end=16
+            )
+            + self.format_error(
+                ValidationErrors.INVALID_TAG_CHARACTER,
+                tag=0,
+                index_in_tag=13,
+                index_in_tag_end=14,
+                actual_error=ValidationErrors.TAG_EXTENSION_INVALID,
+                char_index=13,
+                char_set="name, forward-slash",
+                code_point="U+003A",
+                allows="a tag extension allows name, forward-slash",
             ),
             "invalidTimeValue": self.format_error(
                 ValidationErrors.EXTENSION_TERM_NO_LETTER, tag=0, index_in_tag=11, index_in_tag_end=15
+            )
+            + self.format_error(
+                ValidationErrors.INVALID_TAG_CHARACTER,
+                tag=0,
+                index_in_tag=12,
+                index_in_tag_end=13,
+                actual_error=ValidationErrors.TAG_EXTENSION_INVALID,
+                char_index=12,
+                char_set="name, forward-slash",
+                code_point="U+003A",
+                allows="a tag extension allows name, forward-slash",
             ),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)

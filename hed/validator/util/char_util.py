@@ -9,21 +9,10 @@ from hed.errors.error_types import ValidationErrors
 from hed.schema.schema_io.schema_util import schema_version_greater_equal
 from hed.validator.util.character_sets import CharacterSets, code_point
 
-# The character sets a tag extension may use (specification 3.2.5 says ``name`` characters; hedtools has always
-# also admitted the characters below, which appear in extensions of existing datasets).
-EXTENSION_SETS = (
-    "alphanumeric",
-    "hyphen",
-    "underscore",
-    "forward-slash",
-    "period",
-    "plus",
-    "caret",
-    "blank",
-    "number-sign",
-    "colon",
-    "nonascii",
-)
+# The character sets a tag extension may use: ``name`` characters (specification 3.2.5 rule 2) and the forward
+# slash that separates extension terms. Any other character is TAG_EXTENSION_INVALID (Appendix B, reason b),
+# except ``#``, which TagValidator.check_for_placeholder reports as PLACEHOLDER_INVALID.
+EXTENSION_SETS = ("name", "forward-slash")
 # The character sets of the schema path of a tag (the part matched to schema nodes).
 TAG_PATH_SETS = ("alphanumeric", "hyphen", "underscore", "forward-slash", "colon", "nonascii")
 # The value class used for a value whose placeholder declares no valueClass (decision 2026-09-30, D3).
@@ -131,7 +120,7 @@ class CharValidator:
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
             validate_text (str): the text we want to validate, if not the full extension.
-            error_code (str): The code to override the error as. Again mostly for def/def-expand tags.
+            error_code (str): The code to report instead of TAG_EXTENSION_INVALID (Appendix B, reason b).
             index_offset (int): Offset into the extension validate_text starts at.
 
         Returns:
@@ -142,12 +131,13 @@ class CharValidator:
             list(EXTENSION_SETS),
             original_tag,
             starting_index=len(original_tag.org_base_tag) + 1 + index_offset,
-            error_code=error_code,
+            error_code=error_code or ValidationErrors.TAG_EXTENSION_INVALID,
             subject="a tag extension",
+            skip_chars="#",
         )
 
     def _check_invalid_chars(
-        self, check_string, allowed_names, source_tag, starting_index=0, error_code=None, subject="a tag"
+        self, check_string, allowed_names, source_tag, starting_index=0, error_code=None, subject="a tag", skip_chars=""
     ):
         """Helper for checking for invalid characters.
 
@@ -158,6 +148,7 @@ class CharValidator:
             starting_index (int): Starting index of check_string within the tag.
             error_code (str): The code to override the error as. Again mostly for def/def-expand tags.
             subject (str): What is being checked, for the message ("a tag extension").
+            skip_chars (str): Characters outside allowed_names that another check reports, so not reported here.
 
         Returns:
             list:  List of dictionaries with validation issues.
@@ -165,6 +156,8 @@ class CharValidator:
         validation_issues = []
         allows = f"{subject} allows {self._sets.describe(allowed_names)}"
         for i, character in self._sets.problem_characters(check_string, allowed_names):
+            if character in skip_chars:
+                continue
             validation_issues += ErrorHandler.format_error(
                 ValidationErrors.INVALID_TAG_CHARACTER,
                 tag=source_tag,

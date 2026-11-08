@@ -577,7 +577,8 @@ class TestStagedValidation(unittest.TestCase):
         template_issues = [issue["code"] for issue in issues if ErrorContext.ROW not in issue]
         self.assertEqual(template_issues, [ValidationErrors.TAG_EXTENDED])
         self.assertIn(
-            (ValidationErrors.CHARACTER_INVALID, 2), [(issue["code"], issue.get(ErrorContext.ROW)) for issue in issues]
+            (ValidationErrors.TAG_EXTENSION_INVALID, 2),
+            [(issue["code"], issue.get(ErrorContext.ROW)) for issue in issues],
         )
 
 
