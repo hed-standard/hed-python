@@ -15,7 +15,8 @@ SUPPORTED_FILE_MAJOR = {
     "character_sets.json": ("file_version", 1),
 }
 
-_VERSION_PATTERN = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
+# ASCII digits only, matched against the whole string (fullmatch, so a trailing newline does not pass).
+_VERSION_PATTERN = re.compile(r"([0-9]+)\.([0-9]+)\.([0-9]+)")
 
 
 def check_file_version(data, filename) -> None:
@@ -31,7 +32,7 @@ def check_file_version(data, filename) -> None:
     """
     key, supported_major = SUPPORTED_FILE_MAJOR[filename]
     version = data.get(key) if isinstance(data, dict) else None
-    match = _VERSION_PATTERN.match(version) if isinstance(version, str) else None
+    match = _VERSION_PATTERN.fullmatch(version) if isinstance(version, str) else None
     if match is None:
         raise HedFileError(
             HedExceptions.INVALID_FILE_FORMAT,

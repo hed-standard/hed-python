@@ -56,7 +56,7 @@ class TestCheckFileVersion(unittest.TestCase):
 
     def test_a_missing_or_malformed_version_is_refused(self):
         for filename in SUPPORTED_FILE_MAJOR:
-            for version in (None, "1.0", "v1.0.0", "1.0.0-beta", " 1.0.0", "", 1, 1.0):
+            for version in (None, "1.0", "v1.0.0", "1.0.0-beta", " 1.0.0", "1.0.0\n", "١.0.0", "", 1, 1.0):
                 with self.subTest(filename=filename, version=version):
                     self.assert_refused(self.with_version(filename, version), filename)
 
