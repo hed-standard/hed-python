@@ -121,7 +121,8 @@ class IndividualHedTagsShort(TestHed):
             "notRequiredNumber": "Age/0.5",
             "notRequiredScientific": "Age/5.2e-1",
             # Clock-face takes no value before 8.3.0 (this score library is partnered with 8.2.0), so 08:30 is an
-            # extension term, and one with no letter (specification 3.2.5 rule 6).
+            # extension term with no letter (specification 3.2.5 rule 6) and a colon, which is not a name character
+            # (rule 2).
             "timeValue": "Clock-face/08:30",
             "invalidTimeValue": "Clock-face/8:30",
         }
@@ -143,9 +144,31 @@ class IndividualHedTagsShort(TestHed):
             "notRequiredScientific": [],
             "timeValue": self.format_error(
                 ValidationErrors.EXTENSION_TERM_NO_LETTER, tag=0, index_in_tag=11, index_in_tag_end=16
+            )
+            + self.format_error(
+                ValidationErrors.INVALID_TAG_CHARACTER,
+                tag=0,
+                index_in_tag=13,
+                index_in_tag_end=14,
+                actual_error=ValidationErrors.TAG_EXTENSION_INVALID,
+                char_index=13,
+                char_set="name, forward-slash",
+                code_point="U+003A",
+                allows="a tag extension allows name, forward-slash",
             ),
             "invalidTimeValue": self.format_error(
                 ValidationErrors.EXTENSION_TERM_NO_LETTER, tag=0, index_in_tag=11, index_in_tag_end=15
+            )
+            + self.format_error(
+                ValidationErrors.INVALID_TAG_CHARACTER,
+                tag=0,
+                index_in_tag=12,
+                index_in_tag_end=13,
+                actual_error=ValidationErrors.TAG_EXTENSION_INVALID,
+                char_index=12,
+                char_set="name, forward-slash",
+                code_point="U+003A",
+                allows="a tag extension allows name, forward-slash",
             ),
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
@@ -358,6 +381,50 @@ class IndividualHedTagsShort(TestHed):
             "startsWithDigit": [],
             "multiLevel": [],
         }
+        self.validator_semantic(test_strings, expected_results, expected_issues, False)
+
+    def test_extension_characters_outside_name(self):
+        # Specification 3.2.5 rule 2: an extension term contains only name characters; any other character is
+        # TAG_EXTENSION_INVALID (Appendix B, reason b), reported at the character (hed-python issue #1471).
+        test_strings = {
+            "period": "Item/my.ext",
+            "plus": "Item/a+b",
+            "caret": "Item/a^b",
+            "blank": "Item/a b",
+            "colon": "Item/a:b",
+            "dollar": "Item/a$b",
+            "secondTerm": "Item/Blech/a.b",
+            "twoBad": "Item/a.b+c",
+            "nameCharacters": "Item/My-thing_2/Blech",
+        }
+        bad = {
+            "period": [(7, ".", "U+002E")],
+            "plus": [(6, "+", "U+002B")],
+            "caret": [(6, "^", "U+005E")],
+            "blank": [(6, " ", "U+0020")],
+            "colon": [(6, ":", "U+003A")],
+            "dollar": [(6, "$", "U+0024")],
+            "secondTerm": [(12, ".", "U+002E")],
+            "twoBad": [(6, ".", "U+002E"), (8, "+", "U+002B")],
+            "nameCharacters": [],
+        }
+        expected_results = {key: not positions for key, positions in bad.items()}
+        expected_issues = {}
+        for key, positions in bad.items():
+            expected_issues[key] = []
+            for index, character, point in positions:
+                self.assertEqual(test_strings[key][index], character)
+                expected_issues[key] += self.format_error(
+                    ValidationErrors.INVALID_TAG_CHARACTER,
+                    tag=0,
+                    index_in_tag=index,
+                    index_in_tag_end=index + 1,
+                    actual_error=ValidationErrors.TAG_EXTENSION_INVALID,
+                    char_index=index,
+                    char_set="name, forward-slash",
+                    code_point=point,
+                    allows="a tag extension allows name, forward-slash",
+                )
         self.validator_semantic(test_strings, expected_results, expected_issues, False)
 
     def test_extension_warning(self):
