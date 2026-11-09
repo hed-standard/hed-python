@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import copy
-import math
 import re
 import warnings
 
@@ -66,7 +65,6 @@ class SpreadsheetValidator:
     SIDECAR_KEY_MISSING warning per column naming every unknown value, with no row, as before.
     """
 
-    ONSET_TOLERANCE = 1e-7
     # The rows of reserved_tags.json with requiresTimeline (specification 3.2.8 rule 4): they need a row time.
     TIMELINE_TAGS = frozenset(ReservedChecker.get_instance().timeline_tags)
     TEMPORAL_ANCHORS = re.compile(r"|".join(map(re.escape, sorted(tag.casefold() for tag in TIMELINE_TAGS))))
@@ -579,49 +577,54 @@ class SpreadsheetValidator:
             issues += error_handler.format_error_with_context(ValidationErrors.ONSETS_UNORDERED)
             data = data_new
 
-        # If there are n/a errors in the onset column, further validation cannot proceed
+        # One assembly. A row with a numeric onset is checked after the onset merge (_run_onset_checks); every
+        # other row, which is every row of a file without an onset column, is checked on its own here.
+        assembled = data.series_a
         onsets = data.onsets
+        split = None
+        has_onset = None
         if onsets is not None:
-            onsets = onsets.astype(str).str.strip()
-            onsets = pd.to_numeric(onsets, errors="coerce")
-            assembled = data.series_a
+            onsets = pd.to_numeric(onsets.astype(str).str.strip(), errors="coerce")
+            # If there are n/a errors in the onset column, further validation cannot proceed
             na_issues = self._check_onset_nans(onsets, assembled, self._schema, error_handler, row_offset)
             issues += na_issues
             if len(na_issues) > 0:
                 return issues
             assembled, time_issues = self._check_time_conversions(assembled, error_handler, row_offset)
             issues += time_issues
-            onsets = df_util.split_delay_tags(assembled, self._schema, onsets)
-        else:
-            onsets = None
-
-        df = data.dataframe_a
-
-        if onsets is not None:
+            split = df_util.split_delay_tags(assembled, self._schema, onsets)
+            # Keyed by row label: the split frame is sorted and renumbered, so it cannot say which row is which.
+            has_onset = onsets.notna().to_dict()
             self._onset_validator = OnsetValidator()
-            onset_mask = ~pd.isna(pd.to_numeric(onsets["onset"], errors="coerce"))
         else:
             self._onset_validator = None
-            onset_mask = None
 
-        issues += self._run_row_checks(df, error_handler=error_handler, row_offset=row_offset, onset_mask=onset_mask)
-        if self._onset_validator:
-            issues += self._run_onset_checks(onsets, error_handler=error_handler, row_offset=row_offset)
-            issues += self._recheck_duplicates(onsets, error_handler=error_handler, row_offset=row_offset)
+        issues += self._run_row_checks(assembled, error_handler, row_offset, has_onset)
+        if split is not None:
+            issues += self._run_onset_checks(split, error_handler=error_handler, row_offset=row_offset)
         return issues
 
-    def _run_row_checks(self, hed_df, error_handler, row_offset, onset_mask=None):
-        """Full-string checks on each assembled row of a non-timeline file (timeline rows are checked after
-        the onset merge in _run_onset_checks)."""
+    def _run_row_checks(self, assembled, error_handler, row_offset, has_onset=None):
+        """Full-string checks on each assembled row that has no numeric onset.
+
+        Parameters:
+            assembled (pd.Series): The assembled HED strings, indexed by row label.
+            error_handler (ErrorHandler): Holds context.
+            row_offset (int): Added to the row label for reporting.
+            has_onset (dict or None): For a timeline file, row label -> True if the row has a numeric onset; such
+                rows are skipped here before they are parsed. None for a file without an onset column.
+
+        Returns:
+            list[dict]: The issues found.
+        """
         issues = []
-        for row_number, text_file_row in hed_df.iterrows():
-            row_strings = [HedString(cell, self._schema) for cell in text_file_row if cell and cell != "n/a"]
-            if not row_strings or (onset_mask is not None and onset_mask.iloc[row_number]):
+        for label, text in zip(assembled.index, assembled.tolist(), strict=True):
+            if not text or (has_onset is not None and has_onset[label]):
                 continue
-            row_string = HedString.from_hed_strings(row_strings)
+            row_string = HedString(text, self._schema)
             if not row_string:
                 continue
-            error_handler.push_error_context(ErrorContext.ROW, row_number + row_offset)
+            error_handler.push_error_context(ErrorContext.ROW, label + row_offset)
             error_handler.push_error_context(ErrorContext.HED_STRING, row_string)
             row_issues = self._hed_validator.run_full_string_checks(row_string)
             row_issues += OnsetValidator.check_for_banned_tags(row_string)
@@ -646,54 +649,6 @@ class SpreadsheetValidator:
                 issues += new_column_issues
             error_handler.pop_error_context()  # Row
         return issues
-
-    def _recheck_duplicates(self, onset_filtered, error_handler, row_offset):
-        issues = []
-        for i in range(len(onset_filtered) - 1):
-            current_row = onset_filtered.iloc[i]
-            next_row = onset_filtered.iloc[i + 1]
-
-            # Skip if the HED column is empty or the onsets differ
-            if not current_row["HED"] or not self._is_within_tolerance(next_row["onset"], current_row["onset"]):
-                continue
-
-            # At least two rows have been merged with their onsets recognized as the same.
-            error_handler.push_error_context(ErrorContext.ROW, current_row.original_index + row_offset)
-            row_string = HedString(current_row.HED, self._schema, self._hed_validator._def_validator)
-            error_handler.push_error_context(ErrorContext.HED_STRING, row_string)
-            new_column_issues = self._hed_validator.run_full_string_checks(row_string)
-            error_handler.add_context_and_filter(new_column_issues)
-            error_handler.pop_error_context()  # HedString
-            issues += new_column_issues
-            error_handler.pop_error_context()  # Row
-
-        return issues
-
-    def _is_within_tolerance(self, onset1, onset2):
-        """
-        Checks if two onset strings are within the specified tolerance.
-
-        Parameters:
-            onset1 (str): The first onset value as a string.
-            onset2 (str): The second onset value as a string.
-
-        Returns:
-            bool: True if the values are within tolerance and valid, False otherwise.
-        """
-        try:
-            # Convert to floats
-            onset1 = float(onset1)
-            onset2 = float(onset2)
-
-            # Check if both values are finite
-            if not (math.isfinite(onset1) and math.isfinite(onset2)):
-                return False
-
-            # Check if the difference is within tolerance
-            return abs(onset1 - onset2) <= self.ONSET_TOLERANCE
-        except ValueError:
-            # Return False if either value is not convertible to a float
-            return False
 
     def _check_time_conversions(self, assembled, error_handler, row_offset):
         """Report Delay and Duration tags whose value cannot be converted to default units.
@@ -745,8 +700,13 @@ class SpreadsheetValidator:
                 if not copied:
                     assembled = assembled.copy()
                     copied = True
-                hed_obj.remove(bad_groups)
-                assembled.at[index] = str(hed_obj)
+                # The issues above hold hed_obj as their HED string context, so it must keep the bad groups.
+                # Remove them from a fresh parse instead, matching the groups by position.
+                positions = [i for i, group in enumerate(hed_obj.groups()) if any(group is b for b in bad_groups)]
+                trimmed = HedString(value, self._schema)
+                trimmed_groups = trimmed.groups()
+                trimmed.remove([trimmed_groups[i] for i in positions])
+                assembled.at[index] = str(trimmed)
         return assembled, issues
 
     def _check_onset_nans(self, onsets, assembled, hed_schema, error_handler, row_offset):

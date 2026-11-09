@@ -324,11 +324,15 @@ def _filter_by_index_list(original_data, indexed_dict):
     else:
         raise TypeError("Input must be a pandas Series or DataFrame")
 
-    new_series = pd.Series([""] * len(data_series), dtype=data_series.dtype)
-    for _onset, indices in indexed_dict.items():
-        if indices:
-            first_index = indices[0]
-            new_series.iloc[first_index] = ",".join([str(data_series.iloc[i]) for i in indices])
+    # Work on a list: only groups of two or more rows need a join, and positional pandas writes are slow.
+    values = [str(value) for value in data_series.tolist()]
+    joined = [""] * len(values)
+    for indices in indexed_dict.values():
+        if len(indices) == 1:
+            joined[indices[0]] = values[indices[0]]
+        elif indices:
+            joined[indices[0]] = ",".join(values[i] for i in indices)
+    new_series = pd.Series(joined, dtype=data_series.dtype)
 
     if isinstance(original_data, pd.Series):
         return new_series

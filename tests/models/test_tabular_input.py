@@ -4,7 +4,7 @@ import shutil
 import unittest
 
 from hed import schema
-from hed.errors import ErrorContext, ErrorHandler, HedFileError
+from hed.errors import ErrorContext, ErrorHandler, HedFileError, ValidationErrors
 from hed.models import Sidecar, TabularInput
 
 
@@ -116,10 +116,12 @@ class Test(unittest.TestCase):
         validation_issues = tab_input3.validate(hed_schema=self.hed_schema, error_handler=error_handler1)
         self.assertEqual(len(validation_issues), 2)
 
+        # With warnings on: no ONSETS_UNORDERED, since the n/a onsets are not part of the order.
         error_handler2 = ErrorHandler(check_for_warnings=True)
         tab_input3 = self.get_tabular(events3, sidecar)
         validation_issues = tab_input3.validate(hed_schema=self.hed_schema, error_handler=error_handler2)
-        self.assertEqual(len(validation_issues), 3)
+        self.assertEqual(len(validation_issues), 2)
+        self.assertNotIn(ValidationErrors.ONSETS_UNORDERED, [issue["code"] for issue in validation_issues])
 
     def test_only_empty_and_na_cells_are_missing_in_a_text_file(self):
         """A TSV cell is missing only when it is empty or n/a; nan, NaN, None and NULL are values, as for a

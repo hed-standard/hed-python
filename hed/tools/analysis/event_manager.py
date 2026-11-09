@@ -31,8 +31,12 @@ class EventManager:
         are separated from the rest of the annotations, which are contained in self.hed_strings.
 
         """
-        if input_data.onsets is not None and input_data.needs_sorting:
-            raise HedFileError("OnsetsNotOrdered", "Events must have numeric non-decreasing onset values", "")
+        if input_data.onsets is not None:
+            # Every onset must be numeric here, n/a included: event times are computed from them. (needs_sorting
+            # ignores n/a rows, which validation allows, so it is not the test for this.)
+            onsets = pd.to_numeric(input_data.onsets, errors="coerce")
+            if onsets.isna().any() or not onsets.is_monotonic_increasing:
+                raise HedFileError("OnsetsNotOrdered", "Events must have numeric non-decreasing onset values", "")
         self.hed_schema = hed_schema
         self.input_data = input_data
         self.def_dict = input_data.get_def_dict(hed_schema, extra_def_dicts=extra_defs)

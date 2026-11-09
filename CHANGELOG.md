@@ -3,6 +3,12 @@
 ## Validation
 
 - **A tag extension may contain only `name` characters** (letters, digits, hyphen, underscore, and from 8.3.0 non-ASCII), as specification 3.2.5 rule 2 requires. Period, plus, caret, blank, and colon were accepted before (`Item/my.ext`, `Item/a b`) and are now errors. Any character outside `name` in an extension, including ones that were already errors such as `$`, is now reported as `TAG_EXTENSION_INVALID` (Appendix B, reason b) instead of `CHARACTER_INVALID`, naming the character and its position. `#` stays `PLACEHOLDER_INVALID`. ([#1471](https://github.com/hed-standard/hed-python/issues/1471))
+- **Assembled validation is about 2 to 4 times faster** on large tables: about 4.3 s -> 1.0 s for 20,000 rows with an `onset` column, and 2.3 s -> 1.0 s without one. Rows are assembled once, a row with a numeric onset is no longer parsed and discarded before the onset checks, and merged rows are no longer checked a second time. ([#1481](https://github.com/hed-standard/hed-python/issues/1481))
+- **A repeated tag in rows merged at one onset is reported once**, not twice. ([#1481](https://github.com/hed-standard/hed-python/issues/1481))
+- **A row whose onset is `n/a` is validated wherever it is.** Such a row was skipped unless it was the last row of the file, so its assembled-row errors (for example a tag repeated across the `HED` column and the sidecar) went unreported. ([#1481](https://github.com/hed-standard/hed-python/issues/1481))
+- **`n/a` onsets no longer cause `ONSETS_UNORDERED`**: only the numeric onsets must be in order. `EventManager` still requires every onset to be numeric.
+- **The HED string context of a `TEMPORAL_TAG_ERROR` for an unconvertible `Delay`** (`(Delay/3 month, (Red))`) keeps the `Delay` group; it was removed after the issue was made.
+- In a file without an `onset` column, the `char_index` of an assembled-row issue now counts in the assembled string with `", "` between cells, as for files with onsets (one more per earlier cell than before).
 
 ## Specification files
 
