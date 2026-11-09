@@ -189,8 +189,9 @@ class TestSpreadsheetValidation(unittest.TestCase):
         }
         df_with_nans = pd.DataFrame(tsv)
         issues = self.validator.validate(TabularInput(df_with_nans), extra_def_dicts=def_dict)
-        self.assertEqual(len(issues), 3)
-        self.assertEqual(issues[2]["code"], ValidationErrors.TEMPORAL_TAG_ERROR)
+        # The n/a onsets are not out of order (ONSETS_UNORDERED ignores rows without a numeric onset).
+        self.assertEqual(len(issues), 2)
+        self.assertEqual(issues[1]["code"], ValidationErrors.TEMPORAL_TAG_ERROR)
 
         # Test with sidecar
         sidecar_dict = {
@@ -206,15 +207,14 @@ class TestSpreadsheetValidation(unittest.TestCase):
 
         sidecar1 = Sidecar(io.StringIO(json.dumps(sidecar_dict)))
         issues1 = self.validator.validate(TabularInput(df_with_nans, sidecar=sidecar1), extra_def_dicts=def_dict)
-        self.assertEqual(len(issues1), 2)
-        self.assertEqual(issues1[1]["code"], ValidationErrors.TEMPORAL_TAG_ERROR)
+        self.assertEqual(len(issues1), 1)
+        self.assertEqual(issues1[0]["code"], ValidationErrors.TEMPORAL_TAG_ERROR)
 
         # The whatelse does not use the bad HED columns and HED column appears in {} so only when assembled is used.
         sidecar_dict["event_code"]["HED"]["whatever"] = "Black, {HED}"
         sidecar2 = Sidecar(io.StringIO(json.dumps(sidecar_dict)))
         issues2 = self.validator.validate(TabularInput(df_with_nans, sidecar=sidecar2), extra_def_dicts=def_dict)
-        self.assertEqual(len(issues2), 1)
-        self.assertEqual(issues1[0]["code"], ValidationErrors.ONSETS_UNORDERED)
+        self.assertEqual(issues2, [])
 
     def test_delay_without_conversion_factor(self):
         # 'Delay/3 month' is valid HED but month has no conversionFactor, so the delayed onset cannot be
@@ -345,8 +345,8 @@ class TestSpreadsheetValidation(unittest.TestCase):
         )
 
         codes = {issue["code"] for issue in issues}
-        # The n/a onset also makes the onsets non-monotonic, which is reported alongside.
-        self.assertEqual(codes, {ValidationErrors.TEMPORAL_TAG_ERROR, ValidationErrors.ONSETS_UNORDERED})
+        # The n/a onset is not out of order: ONSETS_UNORDERED ignores rows without a numeric onset.
+        self.assertEqual(codes, {ValidationErrors.TEMPORAL_TAG_ERROR})
         self.assertTrue(all(issue.get("ec_filename") == "events.tsv" for issue in issues))
         self.assertEqual(error_handler.error_context, [])
 
@@ -547,3 +547,75 @@ class TestPaddedValues(unittest.TestCase):
         issues = SpreadsheetValidator(self.schema).validate(source, sidecar=sidecar, error_handler=ErrorHandler())
         self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID])
         self.assertEqual(issues[0][ErrorContext.ROW], 1)
+
+
+class TestAssembledRows(unittest.TestCase):
+    """Assembled-row checks of a timeline file (issue #1481): merged onsets, n/a onsets, Delay context."""
+
+    SIDECAR = {"event_code": {"HED": {"show": "Sensory-event, Visual-presentation", "press": "Agent-action"}}}
+
+    @classmethod
+    def setUpClass(cls):
+        cls.schema = load_schema_version("8.4.0")
+
+    def validate(self, table, warnings=False, sidecar=True):
+        sidecar_obj = Sidecar(io.StringIO(json.dumps(self.SIDECAR))) if sidecar else None
+        return SpreadsheetValidator(self.schema).validate(
+            TabularInput(pd.DataFrame(table), sidecar=sidecar_obj),
+            error_handler=ErrorHandler(check_for_warnings=warnings),
+            extra_def_dicts="(Definition/MyDef, (Label/x))",
+        )
+
+    def test_repeat_across_merged_rows_is_reported_once(self):
+        table = {
+            "onset": [1.0, 1.0, 2.0],
+            "event_code": ["show", "press", "press"],
+            "HED": ["Red", "Sensory-event", "Blue"],
+        }
+        issues = self.validate(table)
+        self.assertEqual(
+            [(issue["code"], issue[ErrorContext.ROW]) for issue in issues],
+            [(ValidationErrors.TAG_EXPRESSION_REPEATED, 2)],
+        )
+
+    def test_na_onset_row_is_checked_wherever_it_sits(self):
+        rows = [[1.5, "show", "Red"], [2.5, "press", "Blue"], [3.5, "show", "Green"]]
+        for position in (0, 1, 3):
+            with self.subTest(position=position):
+                table_rows = [list(row) for row in rows]
+                table_rows.insert(position, ["n/a", "show", "Sensory-event, Yellow"])
+                table = {
+                    "onset": [row[0] for row in table_rows],
+                    "event_code": [row[1] for row in table_rows],
+                    "HED": [row[2] for row in table_rows],
+                }
+                issues = self.validate(table)
+                # Row label plus 2 (the header line and 1-based lines).
+                self.assertEqual(
+                    [(issue["code"], issue[ErrorContext.ROW]) for issue in issues],
+                    [(ValidationErrors.TAG_EXPRESSION_REPEATED, position + 2)],
+                )
+
+    def test_onsets_closer_than_the_merge_tolerance_only_are_merged(self):
+        # 5e-8 apart is above the 1e-9 merge tolerance of df_util, so the rows are separate events.
+        table = {"onset": [1.0, 1.00000005], "HED": ["Sensory-event", "Sensory-event"]}
+        self.assertEqual(self.validate(table, sidecar=False), [])
+        table = {"onset": [1.0, 1.0000000001], "HED": ["Sensory-event", "Sensory-event"]}
+        self.assertEqual(
+            [issue["code"] for issue in self.validate(table, sidecar=False)],
+            [ValidationErrors.TAG_EXPRESSION_REPEATED],
+        )
+
+    def test_na_onsets_do_not_make_the_file_unordered(self):
+        table = {"onset": [1.0, "n/a", 2.0, "n/a", 3.0], "HED": ["Red", "Blue", "Green", "Yellow", "Black"]}
+        codes = [issue["code"] for issue in self.validate(table, warnings=True, sidecar=False)]
+        self.assertNotIn(ValidationErrors.ONSETS_UNORDERED, codes)
+        table = {"onset": [2.0, "n/a", 1.0], "HED": ["Red", "Blue", "Green"]}
+        codes = [issue["code"] for issue in self.validate(table, warnings=True, sidecar=False)]
+        self.assertIn(ValidationErrors.ONSETS_UNORDERED, codes)
+
+    def test_delay_error_keeps_the_delay_in_its_context(self):
+        table = {"onset": [1.0, 2.0], "HED": ["(Delay/3 month, (Red))", "Blue"]}
+        issues = self.validate(table, sidecar=False)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TEMPORAL_TAG_ERROR])
+        self.assertIn("Delay/3 month", str(issues[0][ErrorContext.HED_STRING]))

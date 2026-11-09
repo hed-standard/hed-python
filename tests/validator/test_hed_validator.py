@@ -198,8 +198,9 @@ class Test(unittest.TestCase):
 
         input_file = SpreadsheetInput(events_path, tag_columns=[0, 1, "error"])
         validation_issues = input_file.validate(hed_schema=self.hed_schema)
-        self.assertEqual(validation_issues[1]["char_index"], 6)
-        self.assertEqual(validation_issues[2]["char_index"], 6)
+        # Indexes into the assembled row string, whose cells are joined with ", " ("Event, Event", "Event, ()").
+        self.assertEqual(validation_issues[1]["char_index"], 7)
+        self.assertEqual(validation_issues[2]["char_index"], 7)
         self.assertEqual(len(validation_issues), 3)
 
     # todo: move this test somewhere more appropriate

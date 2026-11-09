@@ -163,8 +163,9 @@ class BaseInput:
         """Return True if this both has an onset column, and it needs sorting."""
         onsets = self.onsets
         if onsets is not None:
+            # A row without a numeric onset (n/a) is not part of the order (it is never merged or sorted).
             onsets = pd.to_numeric(self.dataframe["onset"], errors="coerce")
-            return not onsets.is_monotonic_increasing
+            return not onsets.dropna().is_monotonic_increasing
         else:
             return False
 
@@ -676,8 +677,12 @@ class BaseInput:
         Returns:
             pd.Series: The assembled series.
         """
-        dataframe = dataframe.apply(lambda x: ", ".join(filter(lambda e: bool(e) and e != "n/a", map(str, x))), axis=1)
-        return dataframe
+        if len(dataframe.columns) == 0:
+            return pd.Series([""] * len(dataframe), index=dataframe.index)
+        # Column lists joined row by row: the same text as str() of each cell, without a per-row pandas Series.
+        columns = [[str(value) for value in dataframe[column].tolist()] for column in dataframe.columns]
+        joined = [", ".join(e for e in row if e and e != "n/a") for row in zip(*columns, strict=True)]
+        return pd.Series(joined, index=dataframe.index)
 
     def get_def_dict(self, hed_schema, extra_def_dicts=None) -> "DefinitionDict":
         """Return the definition dict for this file.
