@@ -8,6 +8,15 @@
 - **A row whose onset is `n/a` is validated wherever it is.** Such a row was skipped unless it was the last row of the file, so its assembled-row errors (for example a tag repeated across the `HED` column and the sidecar) went unreported. ([#1481](https://github.com/hed-standard/hed-python/issues/1481))
 - **`n/a` onsets no longer cause `ONSETS_UNORDERED`**: only the numeric onsets must be in order. `EventManager` still requires every onset to be numeric.
 - **The HED string context of a `TEMPORAL_TAG_ERROR` for an unconvertible `Delay`** (`(Delay/3 month, (Red))`) keeps the `Delay` group; it was removed after the issue was made.
+- **Errors that were missed are now reported** (hed-tests cases added in hed-tests #99):
+  - Misnested parentheses with equal counts, such as `(Red)), ((Blue)` and `)(Red)(` (`PARENTHESES_MISMATCH`).
+  - A `#` that is not the whole value of its tag, such as `Label/x#`, `Label/#x` or `Age/##`, in a sidecar or a definition (`PLACEHOLDER_INVALID`, specification Appendix B reason f). Units after one blank (`Frequency/# Hz`) are not part of the value. A definition containing `Age/##` now gets this code instead of `DEFINITION_INVALID`.
+  - A curly-brace reference whose name has characters other than letters, digits, hyphen and underscore, such as `{my.col}`: it was ignored, so an unknown column went unreported and a known one was never substituted (`SIDECAR_BRACES_INVALID` when unknown). A name with a comma or parenthesis is still not a reference, since a reference must parse as one tag. A `#` in a referenced name (`{col#1}`) is no longer filled with the row value when the HED is assembled.
+  - A definition beside other tags in a sidecar entry, categorical or value, such as `(Definition/MyDef, (Red)), Label/#` (`DEFINITION_INVALID`). An entry that holds only definitions is still valid.
+  - A `HED` key below the second level of an entry that also has a valid one, such as in `Levels` (`SIDECAR_INVALID`).
+  - Units in a `Def` value checked against the definition's placeholder tag with its units: `Def/Freq/3 kHz` with `(Definition/Freq/#, (Frequency/# Hz))` gives `Frequency/3 kHz Hz` (`UNITS_INVALID`).
+- **A sidecar string that references `{HED}` is no longer checked for repeated tags and group rules in the sidecar**, since what the `HED` column contributes is known only per row (specification 3.2.9.3 rule 10). `(Red, {HED}), (Red)` was reported as `TAG_EXPRESSION_REPEATED` although a row with `HED=Blue` is valid; such errors are now found when each row is assembled.
+- **`annotation_util.df_to_hed` with `description_tag=True` no longer adds a `Description` tag beside definitions**, which made the sidecar invalid; the description stays in the `Levels` or `Description` text.
 - In a file without an `onset` column, the `char_index` of an assembled-row issue now counts in the assembled string with `", "` between cells, as for files with onsets (one more per earlier cell than before).
 
 ## Specification files

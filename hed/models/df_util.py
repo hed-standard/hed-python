@@ -173,7 +173,8 @@ def replace_ref(text, old_value, new_value="n/a"):
     # c1/c2 contain the comma(and possibly spaces) separating this ref from other tags
     # p1/p2 contain the parentheses directly surrounding the tag
     # All four groups can have spaces.
-    pattern = r"(?P<c1>[\s,]*)(?P<p1>[(\s]*)" + old_value + r"(?P<p2>[\s)]*)(?P<c2>[\s,]*)"
+    # The reference is escaped: a column name may hold regex characters ({my.col}, {col+1}).
+    pattern = r"(?P<c1>[\s,]*)(?P<p1>[(\s]*)" + re.escape(old_value) + r"(?P<p2>[\s)]*)(?P<c2>[\s,]*)"
     return re.sub(pattern, _remover, text)
 
 

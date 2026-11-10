@@ -177,7 +177,9 @@ def val_error_reserved_tag_splice(tag, group):
 
 
 @hed_error(ValidationErrors.PARENTHESES_MISMATCH)
-def val_error_parentheses(opening_parentheses_count, closing_parentheses_count):
+def val_error_parentheses(opening_parentheses_count, closing_parentheses_count, unmatched_index=None):
+    if unmatched_index is not None:
+        return f"Closing parenthesis at index {unmatched_index} has no opening parenthesis before it."
     return (
         f"Number of opening and closing parentheses are unequal. "
         f"{opening_parentheses_count} opening parentheses. {closing_parentheses_count} "

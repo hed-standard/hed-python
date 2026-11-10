@@ -281,6 +281,8 @@ class HedValidator:
                     )
                 elif hed_tag.short_base_tag == DefTagNames.DEFINITION_KEY:
                     validation_issues += self._validate_definition_value(hed_tag, allow_placeholders)
+                elif allow_placeholders and self._placeholder_not_whole_value(hed_tag):
+                    validation_issues += self._report_placeholder_not_whole_value(hed_tag)
                 elif allow_placeholders and hed_tag.is_unit_class_tag() and hed_tag.extension.startswith("# "):
                     # If placeholder is followed by units (e.g., "# m-per-s^2"), validate the units
                     validation_issues += self.validate_units(hed_tag, allow_placeholders=allow_placeholders)
@@ -288,6 +290,46 @@ class HedValidator:
                     validation_issues += self.validate_units(hed_tag, allow_placeholders=allow_placeholders)
 
         return validation_issues
+
+    @staticmethod
+    def _placeholder_not_whole_value(hed_tag) -> bool:
+        """Return True if a takes-value tag has a ``#`` that is not the whole of its value.
+
+        Parameters:
+            hed_tag (HedTag): A tag that is not Definition, Def or Def-expand.
+
+        Returns:
+            bool: True for ``Label/x#`` or ``Label/#x``; False for ``Label/#``, ``Frequency/# Hz`` and for a
+                value without ``#``.
+
+        Notes:
+            - PLACEHOLDER_INVALID reason f of the specification (Appendix B). Units after one blank are not part
+              of the value.
+        """
+        extension = hed_tag.extension
+        if "#" not in extension or extension == "#" or not hed_tag.is_takes_value_tag():
+            return False
+        return not (hed_tag.is_unit_class_tag() and extension.startswith("# "))
+
+    @staticmethod
+    def _report_placeholder_not_whole_value(hed_tag) -> list[dict]:
+        """Report PLACEHOLDER_INVALID for a tag whose value has a ``#`` that is not the whole value.
+
+        Parameters:
+            hed_tag (HedTag): A tag for which ``_placeholder_not_whole_value`` is True.
+
+        Returns:
+            list[dict]: One PLACEHOLDER_INVALID issue, at the first ``#``. The value-class check is skipped, so
+                the code is PLACEHOLDER_INVALID rather than CHARACTER_INVALID.
+        """
+        index = len(hed_tag.org_base_tag) + 1 + hed_tag.extension.index("#")
+        return error_reporter.ErrorHandler.format_error(
+            ValidationErrors.INVALID_TAG_CHARACTER,
+            tag=hed_tag,
+            index_in_tag=index,
+            index_in_tag_end=index + 1,
+            actual_error=ValidationErrors.PLACEHOLDER_INVALID,
+        )
 
     def _validate_definition_value(self, definition_tag, allow_placeholders) -> list[dict]:
         """Validate the two-part value of a Definition tag: a name, then optionally ``/#``.

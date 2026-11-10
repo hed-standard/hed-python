@@ -470,6 +470,25 @@ class Test(unittest.TestCase):
         self.assertNotIn("HED", dict8, "_get_value_entry should not have a HED entry when Description not used")
         self.assertIn("Description", dict8, "_get_value_entry should have Description entry when Description not used")
 
+    def test_get_value_entry_definitions(self):
+        # An entry holding definitions may hold nothing else, so no Description tag is added beside them.
+        for tags in [
+            "(Definition/MyDef, (Red))",
+            "(tl:Definition/MyDef, (tl:Red))",
+            "(Organizational-property/Definition/MyDef, (Red))",
+            "(Property/Organizational-property/Definition/MyDef, (Red))",
+        ]:
+            with self.subTest(tags=tags):
+                self.assertEqual(annotation_util._get_value_entry(tags, "A test")["HED"], tags)
+        # "definition/" inside a label or value is not a Definition tag.
+        for tags in [
+            "Def/MyDefinition/3",
+            "Description/See definition/example",
+            "Description/See organizational-property/definition/example",
+        ]:
+            with self.subTest(tags=tags):
+                self.assertEqual(annotation_util._get_value_entry(tags, "A test")["HED"], tags + ", Description/A test")
+
     def test_tag_list_to_str(self):
         ext1 = ["apple", "banana"]
         str1 = annotation_util._tag_list_to_str(ext1)
