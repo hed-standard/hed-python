@@ -3,6 +3,7 @@ Mapping of a base input file columns into HED tags.
 """
 
 import copy
+import re
 import warnings
 from collections import Counter
 from functools import partial
@@ -12,6 +13,10 @@ from hed.errors.error_types import ValidationErrors
 from hed.models.column_metadata import ColumnMetadata, ColumnType
 from hed.models.column_source import is_blank_name
 from hed.models.definition_dict import DefinitionDict
+from hed.models.model_constants import COLUMN_REF_PATTERN
+
+# A curly-brace reference, matched so it is kept whole, or a placeholder outside one.
+_PLACEHOLDER_OUTSIDE_REFS = re.compile(COLUMN_REF_PATTERN.pattern + "|#")
 
 NO_WARN_COLUMNS = ["onset", "duration"]
 
@@ -459,4 +464,8 @@ class ColumnMapper:
         if x == "n/a":
             return "n/a"
 
-        return value_str.replace("#", str(x))
+        # A column name may hold "#" ({col#1}), so placeholders inside curly-brace references are left alone.
+        value = str(x)
+        return _PLACEHOLDER_OUTSIDE_REFS.sub(
+            lambda match: value if match.group(0) == "#" else match.group(0), value_str
+        )

@@ -12,8 +12,11 @@ from hed.models.hed_string import HedString
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 
-# A Definition tag, short or long form, at the start of a tag. Not "Def/MyDefinition/3" or "Description/a definition/b".
-_DEFINITION_TAG_PATTERN = re.compile(r"(?:^|[,(]|organizational-property/)\s*definition/", re.IGNORECASE)
+# A Definition tag at the start of a tag: short, long or intermediate form, with an optional library prefix
+# ("tl:Definition/MyDef"). Not "Def/MyDefinition/3" or "Description/See organizational-property/definition/x".
+_DEFINITION_TAG_PATTERN = re.compile(
+    r"(?:^|[,(])\s*(?:[a-z]+:)?(?:(?:property/)?organizational-property/)?definition/", re.IGNORECASE
+)
 
 
 def check_df_columns(df, required_cols=("column_name", "column_value", "description", "HED")) -> list[str]:

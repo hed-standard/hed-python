@@ -6,7 +6,7 @@ import unittest
 from hed import schema
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ErrorContext, SidecarErrors
-from hed.models import Sidecar
+from hed.models import Sidecar, TabularInput
 from hed.validator.sidecar_validator import SidecarValidator
 
 
@@ -281,6 +281,16 @@ class TestSidecarFalseNegatives(unittest.TestCase):
         sidecar = {"cond": {"HED": {"a": "Red, {my.col}"}}, "my.col": {"HED": {"b": "Blue"}}}
         self.assertEqual(self.codes(sidecar), [])
         self.assertEqual(Sidecar(io.StringIO(json.dumps(sidecar))).get_column_refs(), ["my.col"])
+
+    def test_brace_name_with_hash_assembled(self):
+        # The value fills the template's placeholder only, not a "#" in a referenced column name.
+        sidecar = Sidecar(
+            io.StringIO(json.dumps({"val": {"HED": "Label/#, {col#1}"}, "col#1": {"HED": {"x": "Blue"}}}))
+        )
+        tsv = io.StringIO("onset\tval\tcol#1\n1.0\t3\tx\n")
+        tabular = TabularInput(tsv, sidecar=sidecar)
+        self.assertEqual(tabular.validate(self.hed_schema), [])
+        self.assertEqual([str(hed) for hed in tabular.series_a], ["Label/3, Blue"])
 
     def test_brace_name_with_delimiter_not_a_reference(self):
         # A reference must parse as one tag (specification 3.2.9.3 rule 8), so a name holding a comma or a
