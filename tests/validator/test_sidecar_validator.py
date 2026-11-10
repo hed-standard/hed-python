@@ -282,6 +282,15 @@ class TestSidecarFalseNegatives(unittest.TestCase):
         self.assertEqual(self.codes(sidecar), [])
         self.assertEqual(Sidecar(io.StringIO(json.dumps(sidecar))).get_column_refs(), ["my.col"])
 
+    def test_brace_name_with_delimiter_not_a_reference(self):
+        # A reference must parse as one tag (specification 3.2.9.3 rule 8), so a name holding a comma or a
+        # parenthesis is never a reference, even when such a column is annotated.
+        for name in ["a,b", "a(b)"]:
+            with self.subTest(name=name):
+                sidecar = {"cond": {"HED": {"a": "Red, {" + name + "}"}}, name: {"HED": {"b": "Blue"}}}
+                self.assertTrue(self.codes(sidecar))
+                self.assertEqual(Sidecar(io.StringIO(json.dumps(sidecar))).get_column_refs(), [])
+
     def test_every_categorical_substitution_checked(self):
         sidecar = {"event_code": {"HED": {"face": "(Red, {color})"}}, "color": {"HED": {"warm": "Red", "cool": "Blue"}}}
         self.assertEqual(self.codes(sidecar), ["TAG_EXPRESSION_REPEATED"])

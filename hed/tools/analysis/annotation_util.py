@@ -12,6 +12,9 @@ from hed.models.hed_string import HedString
 from hed.models.sidecar import Sidecar
 from hed.models.tabular_input import TabularInput
 
+# A Definition tag, short or long form, at the start of a tag. Not "Def/MyDefinition/3" or "Description/a definition/b".
+_DEFINITION_TAG_PATTERN = re.compile(r"(?:^|[,(]|organizational-property/)\s*definition/", re.IGNORECASE)
+
 
 def check_df_columns(df, required_cols=("column_name", "column_value", "description", "HED")) -> list[str]:
     """Return a list of the specified columns that are missing from a dataframe.
@@ -388,7 +391,7 @@ def _get_value_entry(hed_entry, description_entry, description_tag=True):
         tags = hed_entry
     if description_entry and description_entry != "n/a":
         value_dict["Description"] = description_entry
-        if "definition/" in tags.casefold():
+        if _DEFINITION_TAG_PATTERN.search(tags):
             # An entry that holds definitions may hold nothing else (specification 3.2.9.1), so the description
             # is kept only in the Description or Levels text, not as a Description tag beside the definitions.
             pass

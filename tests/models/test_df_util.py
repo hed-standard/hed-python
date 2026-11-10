@@ -10,11 +10,23 @@ from hed.models.df_util import (
     convert_to_form,
     expand_defs,
     process_def_expands,
+    replace_ref,
     shrink_defs,
     split_delay_tags,
 )
 
 hed_schema_global = load_schema_version("8.4.0")
+
+
+class TestReplaceRef(unittest.TestCase):
+    def test_remove_ref_with_regex_characters(self):
+        # A column name may hold regex characters; only the named reference is removed.
+        self.assertEqual(replace_ref("{my.col}, {myXcol}", "{my.col}"), "{myXcol}")
+        self.assertEqual(replace_ref("Red, {col+1}", "{col+1}"), "Red")
+        self.assertEqual(replace_ref("(Red, {col+1}), Blue", "{col+1}"), "(Red), Blue")
+
+    def test_replace_ref_with_value(self):
+        self.assertEqual(replace_ref("Red, {col+1}", "{col+1}", "Blue"), "Red, Blue")
 
 
 class TestShrinkDefs(unittest.TestCase):
