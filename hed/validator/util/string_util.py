@@ -30,22 +30,38 @@ class StringValidator:
     def check_count_tag_group_parentheses(hed_string) -> list[dict]:
         """Report unmatched parentheses.
 
+        The counts of opening and closing parentheses must be equal, and no closing parenthesis may come
+        before its opening one (`(Red)), ((Blue)` has equal counts but is misnested). One issue is
+        reported per string.
+
         Parameters:
             hed_string (str): A HED string.
 
         Returns:
             list: A list of validation list. Each issue is a dictionary.
         """
-        validation_issues = []
         number_open_parentheses = hed_string.count("(")
         number_closed_parentheses = hed_string.count(")")
         if number_open_parentheses != number_closed_parentheses:
-            validation_issues += ErrorHandler.format_error(
+            return ErrorHandler.format_error(
                 ValidationErrors.PARENTHESES_MISMATCH,
                 opening_parentheses_count=number_open_parentheses,
                 closing_parentheses_count=number_closed_parentheses,
             )
-        return validation_issues
+        depth = 0
+        for index, character in enumerate(hed_string):
+            if character == "(":
+                depth += 1
+            elif character == ")":
+                depth -= 1
+                if depth < 0:
+                    return ErrorHandler.format_error(
+                        ValidationErrors.PARENTHESES_MISMATCH,
+                        opening_parentheses_count=number_open_parentheses,
+                        closing_parentheses_count=number_closed_parentheses,
+                        unmatched_index=index,
+                    )
+        return []
 
     def check_delimiter_issues_in_hed_string(self, hed_string) -> list[dict]:
         """Report missing commas or commas in value tags.

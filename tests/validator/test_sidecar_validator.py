@@ -48,7 +48,9 @@ class Test(unittest.TestCase):
         sidecar = Sidecar(self._malformed_refs_json_filename)
         issues = sidecar.validate(self.hed_schema)
 
-        self.assertEqual(len(issues), 4)
+        # The {Property/...} reference is an unknown column (any character but a brace may name one), which
+        # also makes column1 a reference column that column2 and column4 reference: 3 more issues.
+        self.assertEqual(len(issues), 7)
 
     def test_padded_keys(self):
         # A padded top-level key is SIDECAR_INVALID with or without a "HED" entry; an inner blank is fine.
@@ -259,3 +261,60 @@ class Test(unittest.TestCase):
 
         self.assertIn(SidecarErrors.SIDECAR_BRACES_INVALID, {issue["code"] for issue in issues})
         self.assertEqual(error_handler.error_context, [])
+
+
+class TestSidecarFalseNegatives(unittest.TestCase):
+    """Sidecar errors that hedtools 1.3.0 did not report (HED 8.4.0)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.hed_schema = schema.load_schema_version("8.4.0")
+
+    def codes(self, sidecar_dict):
+        sidecar = Sidecar(io.StringIO(json.dumps(sidecar_dict)))
+        return [issue["code"] for issue in sidecar.validate(self.hed_schema)]
+
+    def test_brace_name_with_period_unknown(self):
+        self.assertIn("SIDECAR_BRACES_INVALID", self.codes({"cond": {"HED": {"a": "Red, {my.col}"}}}))
+
+    def test_brace_name_with_period_known(self):
+        sidecar = {"cond": {"HED": {"a": "Red, {my.col}"}}, "my.col": {"HED": {"b": "Blue"}}}
+        self.assertEqual(self.codes(sidecar), [])
+        self.assertEqual(Sidecar(io.StringIO(json.dumps(sidecar))).get_column_refs(), ["my.col"])
+
+    def test_every_categorical_substitution_checked(self):
+        sidecar = {"event_code": {"HED": {"face": "(Red, {color})"}}, "color": {"HED": {"warm": "Red", "cool": "Blue"}}}
+        self.assertEqual(self.codes(sidecar), ["TAG_EXPRESSION_REPEATED"])
+
+    def test_hed_reference_not_checked_in_sidecar(self):
+        # What {HED} contributes is known only per row (specification 3.2.9.3 rule 10).
+        self.assertEqual(self.codes({"c": {"HED": {"a": "(Red, {HED}), (Red)"}}}), [])
+
+    def test_definition_beside_tags(self):
+        cases = [
+            {"cond": {"HED": {"a": "(Definition/MyDef, (Red)), Blue"}}},
+            {"val": {"HED": "(Definition/MyDef, (Red)), Label/#"}},
+            {"val": {"HED": "(Definition/MyDef, (Red)), Label/#, Age/#"}},
+        ]
+        for sidecar in cases:
+            with self.subTest(sidecar=sidecar):
+                self.assertEqual(self.codes(sidecar), ["DEFINITION_INVALID"])
+
+    def test_definitions_alone_valid(self):
+        cases = [
+            {"defs": {"HED": {"a": "(Definition/MyDef, (Red))", "b": "(Definition/Other, (Blue))"}}},
+            {"defs": {"HED": "(Definition/MyDef, (Red)), (Definition/Other/#, (Label/#))"}},
+        ]
+        for sidecar in cases:
+            with self.subTest(sidecar=sidecar):
+                self.assertEqual(self.codes(sidecar), [])
+
+    def test_nested_hed_key(self):
+        cases = [
+            {"cond": {"HED": {"a": "Red"}, "Levels": {"a": "x", "HED": "Blue"}}},
+            {"cond": {"HED": {"a": "Red"}, "extra": {"inner": {"HED": "Blue"}}}},
+            {"val": {"HED": "Label/#", "extra": {"HED": "Blue"}}},
+        ]
+        for sidecar in cases:
+            with self.subTest(sidecar=sidecar):
+                self.assertEqual(self.codes(sidecar), ["SIDECAR_INVALID"])

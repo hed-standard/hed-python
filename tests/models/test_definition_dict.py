@@ -153,8 +153,14 @@ class TestDefinitionDict(TestDefBase):
             "doublePoundSignPlaceholder": self.format_error(
                 DefinitionErrors.INVALID_DEFINITION_EXTENSION, tag=0, def_name="InvalidDef"
             ),
+            # A '#' that is not the whole value is PLACEHOLDER_INVALID (reason f), found before the count of
+            # placeholder tags is checked.
             "doublePoundSignDiffPlaceholder": self.format_error(
-                DefinitionErrors.WRONG_NUMBER_PLACEHOLDER_TAGS, "InvalidDef", expected_count=1, tag_list=["Age/##"]
+                ValidationErrors.INVALID_TAG_CHARACTER,
+                tag=1,
+                index_in_tag=4,
+                index_in_tag_end=5,
+                actual_error=ValidationErrors.PLACEHOLDER_INVALID,
             ),
             "placeholdersWrongSpot": [],
         }

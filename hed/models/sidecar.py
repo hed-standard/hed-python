@@ -1,7 +1,6 @@
 """Contents of a JSON file or merged JSON files."""
 
 import json
-import re
 
 from hed.errors import ErrorHandler
 from hed.errors.error_types import ErrorContext
@@ -9,6 +8,7 @@ from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.models.column_metadata import ColumnMetadata, ColumnType
 from hed.models.definition_dict import DefinitionDict
 from hed.models.hed_string import HedString
+from hed.models.model_constants import COLUMN_REF_PATTERN
 
 
 class Sidecar:
@@ -240,7 +240,7 @@ class Sidecar:
             if column_data.column_type == ColumnType.Ignore:
                 continue
             hed_strings = column_data.get_hed_strings()
-            matches = hed_strings.str.findall(r"\{([a-z_\-0-9]+)\}", re.IGNORECASE)
+            matches = hed_strings.str.findall(COLUMN_REF_PATTERN)
             u_vals = [match for sublist in matches for match in sublist]
 
             found_vals.update(u_vals)

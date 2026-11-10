@@ -317,3 +317,37 @@ class Test(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestStringAndPlaceholderChecks(unittest.TestCase):
+    """Misnested parentheses and a placeholder that is not the whole value (HED 8.4.0)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.hed_schema = schema.load_schema_version("8.4.0")
+
+    def codes(self, hed_string, allow_placeholders=False):
+        validator = HedValidator(self.hed_schema)
+        issues = validator.validate(HedString(hed_string, self.hed_schema), allow_placeholders=allow_placeholders)
+        return [issue["code"] for issue in issues]
+
+    def test_misnested_parentheses_equal_counts(self):
+        for hed_string in ["(Red)), ((Blue)", ")(Red)("]:
+            with self.subTest(hed_string=hed_string):
+                self.assertIn("PARENTHESES_MISMATCH", self.codes(hed_string))
+
+    def test_nested_parentheses_valid(self):
+        self.assertEqual(self.codes("(Red, (Blue)), (Green)"), [])
+
+    def test_unequal_counts_one_issue(self):
+        self.assertEqual(self.codes("(Red))").count("PARENTHESES_MISMATCH"), 1)
+
+    def test_placeholder_not_whole_value(self):
+        for hed_string in ["Label/x#", "Label/#x", "Frequency/3# Hz", "Age/##"]:
+            with self.subTest(hed_string=hed_string):
+                self.assertEqual(self.codes(hed_string, allow_placeholders=True), ["PLACEHOLDER_INVALID"])
+
+    def test_placeholder_whole_value_valid(self):
+        for hed_string in ["Label/#", "Frequency/# Hz", "Age/#"]:
+            with self.subTest(hed_string=hed_string):
+                self.assertEqual(self.codes(hed_string, allow_placeholders=True), [])

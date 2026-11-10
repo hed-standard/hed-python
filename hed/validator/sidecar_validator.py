@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import copy
 import itertools
-import re
 
 from hed.errors import ColumnErrors, DefinitionErrors, ErrorContext, ErrorHandler, SidecarErrors, ValidationErrors
 from hed.errors.error_reporter import check_for_any_errors, sort_issues
@@ -13,10 +12,8 @@ from hed.models.column_mapper import ColumnType
 from hed.models.column_metadata import ColumnMetadata
 from hed.models.column_source import is_padded
 from hed.models.hed_string import HedString
-from hed.models.model_constants import DefTagNames
+from hed.models.model_constants import COLUMN_REF_PATTERN, DefTagNames, TopTagReturnType
 from hed.validator.reserved_checker import ReservedChecker
-
-COLUMN_REF_PATTERN = re.compile(r"\{([a-z_\-0-9]+)\}", re.IGNORECASE)
 
 
 # todo: Add/improve validation for definitions being in known columns(right now it just assumes they aren't)
@@ -82,6 +79,7 @@ class SidecarValidator:
         # todo: Break this function up
         all_ref_columns = sidecar.get_column_refs()
         definition_checks = {}
+        reported_definitions = set()
         for column_data in sidecar:
             column_name = column_data.column_name
             column_data = column_data._get_unvalidated_data()
@@ -101,6 +99,10 @@ class SidecarValidator:
                 def_check_list.append(
                     hed_string_obj.find_tags({DefTagNames.DEFINITION_KEY}, recursive=True, include_groups=0)
                 )
+                misplaced = self._misplaced_definitions(hed_string_obj, def_check_list[-1])
+                for def_tag in misplaced:
+                    new_issues += ErrorHandler.format_error(DefinitionErrors.BAD_DEFINITION_LOCATION, def_tag)
+                reported_definitions.update(id(def_tag) for def_tag in misplaced)
 
                 # Might refine this later - for now just skip checking placeholder counts in definition columns.
                 if not def_check_list[-1]:
@@ -110,13 +112,13 @@ class SidecarValidator:
                 issues += new_issues
                 error_handler.pop_error_context()  # Hed String
 
-                # Only do full string checks on full columns, not partial ref columns.
-                if not is_ref_column:
-                    # TODO: Figure out why this pattern is giving lint errors.
-                    refs = COLUMN_REF_PATTERN.findall(hed_string)
+                # Only do full string checks on full columns, not partial ref columns. Every combination of the
+                # referenced columns' annotations is checked, whether or not a file uses it (specification
+                # 3.2.9.3 rule 10). What {HED} contributes is known only per row, so a string that references it
+                # gets its full-string checks when each row is assembled.
+                refs = COLUMN_REF_PATTERN.findall(hed_string)
+                if not is_ref_column and "HED" not in refs:
                     refs_strings = {data.column_name: data.get_hed_strings() for data in sidecar}
-                    if "HED" not in refs_strings:
-                        refs_strings["HED"] = ["n/a"]
                     for combination in itertools.product(*[refs_strings[key] for key in refs]):
                         new_issues = []
                         ref_dict = dict(zip(refs, combination, strict=False))
@@ -137,7 +139,7 @@ class SidecarValidator:
                     error_handler.pop_error_context()  # Category key
 
             error_handler.pop_error_context()  # Column Name
-        issues += self._check_definitions_bad_spot(definition_checks, error_handler)
+        issues += self._check_definitions_bad_spot(definition_checks, error_handler, reported_definitions)
         issues = sort_issues(issues)
 
         return issues
@@ -326,8 +328,14 @@ class SidecarValidator:
             found_hed = self._check_for_key("HED", dict_for_entry)
             if found_hed:
                 val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_HED_USED)
-        elif column_type == ColumnType.Categorical:
-            val_issues += self._validate_categorical_column(column_name, dict_for_entry, error_handler)
+        else:
+            # A HED key is allowed only directly under the entry (specification 3.2.9.1): one in "Levels" or
+            # deeper is SIDECAR_INVALID even when the entry has a valid HED key of its own.
+            nested_keys = {key: value for key, value in dict_for_entry.items() if key != "HED"}
+            if self._check_for_key("HED", nested_keys):
+                val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_HED_USED)
+            if column_type == ColumnType.Categorical:
+                val_issues += self._validate_categorical_column(column_name, dict_for_entry, error_handler)
 
         return val_issues
 
@@ -381,14 +389,50 @@ class SidecarValidator:
 
         return []
 
-    def _check_definitions_bad_spot(self, definition_checks, error_handler):
+    @staticmethod
+    def _misplaced_definitions(hed_string_obj, definition_tags) -> list:
+        """Return the Definition tags of one sidecar string that has tags other than definitions.
+
+        Parameters:
+            hed_string_obj (HedString): The string of one sidecar entry, with its column references removed.
+            definition_tags (list[HedTag]): The Definition tags found anywhere in the string.
+
+        Returns:
+            list[HedTag]: Every Definition tag of the string if anything other than definition groups is at its
+                top level; else empty.
+
+        Notes:
+            - Definitions go in dummy entries that hold only definitions, categorical or not (specification
+              3.2.9.1); a definition beside other tags, as in a value template, is DEFINITION_INVALID.
+        """
+        if not definition_tags:
+            return []
+        top_level_definition_groups = hed_string_obj.find_top_level_tags(
+            anchor_tags={DefTagNames.DEFINITION_KEY}, include_groups=TopTagReturnType.GROUPS
+        )
+        if len(top_level_definition_groups) != len(hed_string_obj.children):
+            return list(definition_tags)
+        return []
+
+    def _check_definitions_bad_spot(self, definition_checks, error_handler, reported_definitions=None):
+        """Report the definitions of a column in which some entries have definitions and some do not.
+
+        Parameters:
+            definition_checks (dict): Column name -> list, per entry, of the Definition tags it holds.
+            error_handler (ErrorHandler): Sets the context for the error reporting.
+            reported_definitions (set or None): ids of Definition tags already reported for their own entry,
+                which are not reported again.
+
+        Returns:
+            list[dict]: BAD_DEFINITION_LOCATION issues.
+        """
         issues = []
-        # This could be simplified now
+        reported_definitions = reported_definitions or set()
         for col_name, has_def in definition_checks.items():
             error_handler.push_error_context(ErrorContext.SIDECAR_COLUMN_NAME, col_name)
             def_check = {bool(d) for d in has_def}
             if len(def_check) != 1:
-                flat_def_list = [d for defs in has_def for d in defs]
+                flat_def_list = [d for defs in has_def for d in defs if id(d) not in reported_definitions]
                 for d in flat_def_list:
                     issues += error_handler.format_error_with_context(DefinitionErrors.BAD_DEFINITION_LOCATION, d)
             error_handler.pop_error_context()

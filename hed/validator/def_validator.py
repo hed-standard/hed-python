@@ -144,8 +144,19 @@ class DefValidator(DefinitionDict):
         def_contents = def_entry.get_definition(def_tag, placeholder_value=placeholder, return_copy_of_tag=True)
         if def_contents and def_entry.takes_value and hed_validator:
             placeholder_tag = def_contents.get_first_group().find_placeholder_tag()
+            # When the definition writes units after its placeholder (Frequency/# Hz), the substituted tag is
+            # what must be valid: Def/Freq/3 kHz gives Frequency/3 kHz Hz, which is UNITS_INVALID. The value
+            # starts the extension in both, so the index offset is the same.
+            validate_text = placeholder
+            template_tag = def_entry.contents.find_placeholder_tag() if def_entry.contents else None
+            if template_tag is not None and template_tag.extension != "#":
+                validate_text = placeholder_tag.extension
             def_issues += hed_validator.validate_units(
-                placeholder_tag, placeholder, report_as=def_tag, error_code=error_code, index_offset=len(tag_label) + 1
+                placeholder_tag,
+                validate_text,
+                report_as=def_tag,
+                error_code=error_code,
+                index_offset=len(tag_label) + 1,
             )
 
         return def_issues

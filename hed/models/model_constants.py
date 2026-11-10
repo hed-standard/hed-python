@@ -1,6 +1,11 @@
 """Defined constants for definitions, def labels, and expanded labels."""
 
+import re
 from enum import IntEnum
+
+# A curly-brace column reference in a sidecar annotation, ``{column_name}`` or ``{HED}``. A column name may hold
+# any character but a brace (``{my.col}``); nested and unmatched braces are reported before this is applied.
+COLUMN_REF_PATTERN = re.compile(r"\{([^{}]+)\}")
 
 # The whitespace that may not begin or end a column name or a top-level sidecar key (specification 3.2.10):
 # blank, tab, line feed and carriage return only. A non-breaking space is not padding.

@@ -388,7 +388,11 @@ def _get_value_entry(hed_entry, description_entry, description_tag=True):
         tags = hed_entry
     if description_entry and description_entry != "n/a":
         value_dict["Description"] = description_entry
-        if description_tag and tags:
+        if "definition/" in tags.casefold():
+            # An entry that holds definitions may hold nothing else (specification 3.2.9.1), so the description
+            # is kept only in the Description or Levels text, not as a Description tag beside the definitions.
+            pass
+        elif description_tag and tags:
             tags = tags + ", Description/" + description_entry
         elif description_tag and not tags:
             tags = "Description/" + description_entry

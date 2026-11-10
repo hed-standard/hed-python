@@ -389,3 +389,27 @@ class TestDefValueCharacterIndex(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestDefValueUnits(unittest.TestCase):
+    """A Def value is checked as substituted into its definition's placeholder tag (HED 8.4.0)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.hed_schema = schema.load_schema_version("8.4.0")
+        cls.def_dict = DefinitionDict(
+            "(Definition/Freq/#, (Frequency/# Hz)), (Definition/Acc/#, (Acceleration/#))", cls.hed_schema
+        )
+
+    def codes(self, hed_string):
+        validator = HedValidator(self.hed_schema, def_dicts=self.def_dict)
+        issues = validator.validate(HedString(hed_string, self.hed_schema), allow_placeholders=False)
+        return [issue["code"] for issue in issues]
+
+    def test_units_after_definition_placeholder(self):
+        self.assertIn("UNITS_INVALID", self.codes("Def/Freq/3 kHz"))
+        self.assertEqual(self.codes("Def/Freq/3"), [])
+
+    def test_units_in_def_value(self):
+        self.assertIn("UNITS_INVALID", self.codes("Def/Acc/3 m"))
+        self.assertEqual(self.codes("Def/Acc/3 m-per-s^2"), [])
