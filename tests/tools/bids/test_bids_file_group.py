@@ -277,6 +277,29 @@ class Test(unittest.TestCase):
         self.assertEqual(len({i["ec_filename"] for i in bad_values}), 3, "all three sub-002 files still ran")
         self.assertTrue(all("sub-002" in i["ec_filename"] and i["ec_column"] == "stim_file" for i in bad_values))
 
+    def test_sidecar_without_hed_does_not_make_file_hed(self):
+        # Specification 3.2.10: only a file with a HED column or a sidecar with HED annotations is checked.
+        tsv_text = "onset\tduration\tresponse\n1.0\t0\ta\n\n"  # An empty last line, which is TABULAR_INVALID.
+        for sidecar_text, expected_codes in (
+            ('{"response": {"Description": "A response."}}', []),
+            ('{"response": {"HED": {"a": "Red"}}}', ["TABULAR_INVALID"]),
+        ):
+            with self.subTest(sidecar=sidecar_text), tempfile.TemporaryDirectory() as temp_dir:
+                root_path = os.path.join(temp_dir, "dataset")
+                os.makedirs(os.path.join(root_path, "sub-01"))
+                tsv_path = os.path.join(root_path, "sub-01", "sub-01_task-x_events.tsv")
+                json_path = os.path.join(root_path, "task-x_events.json")
+                with open(tsv_path, "w", encoding="utf-8", newline="") as fp:
+                    fp.write(tsv_text)
+                with open(json_path, "w", encoding="utf-8", newline="") as fp:
+                    fp.write(sidecar_text)
+                events = BidsFileGroup(root_path, [tsv_path, json_path], "events")
+                has_hed = [data_obj for data_obj in events.datafile_dict.values() if data_obj.has_hed]
+                issues = events.validate_datafiles(load_schema_version("8.4.0"))
+                self.assertEqual(len(events.datafile_dict), 1)
+                self.assertEqual(len(has_hed), len(expected_codes))
+                self.assertEqual([issue["code"] for issue in issues], expected_codes)
+
 
 if __name__ == "__main__":
     unittest.main()
