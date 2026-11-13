@@ -11,7 +11,7 @@ import pandas as pd
 from hed import schema
 from hed.errors.error_types import ErrorContext, ValidationErrors
 from hed.errors.exceptions import HedFileError
-from hed.models.base_input import BaseInput
+from hed.models.base_input import BaseInput, find_line_problems
 from hed.models.column_mapper import ColumnMapper
 from hed.models.definition_dict import DefinitionDict
 from hed.models.sidecar import Sidecar
@@ -264,11 +264,19 @@ class TestDuplicateColumns(unittest.TestCase):
         self.assertEqual(input_file.columns, ["trial", "trial.1", "HED"])
         self.assertEqual(len(input_file.dataframe), 1)
 
-    def test_bom_blank_line_and_crlf(self):
-        text = "\ufeff\r\nonset\tduration\ttrial\ttrial\r\n1\t2\t3\t4\r\n"
+    def test_bom_and_crlf(self):
+        text = "\ufeffonset\tduration\ttrial\ttrial\r\n1\t2\t3\t4\r\n"
         input_file = BaseInput(io.BytesIO(text.encode("utf-8")), file_type=".tsv")
         self.assertEqual(input_file.duplicate_columns, ["trial"])
         self.assertEqual(input_file.columns, ["onset", "duration", "trial", "trial.1"])
+        self.assertEqual(input_file.line_problems, [])
+
+    def test_bom_and_empty_first_line(self):
+        # An empty first line is one blank column name (TABULAR_INVALID c); it is no longer skipped.
+        text = "\ufeff\r\nonset\tduration\r\n1\t2\r\n"
+        input_file = BaseInput(io.BytesIO(text.encode("utf-8")), file_type=".tsv")
+        self.assertEqual(input_file.blank_columns, [0])
+        self.assertEqual(input_file.line_problems, [(2, 2, 1), (3, 2, 1)])
 
     def test_names_are_kept_as_read(self):
         # Names are compared exactly: "trial " beside "trial" is one padded name, not a repeat.
@@ -291,10 +299,11 @@ class TestDuplicateColumns(unittest.TestCase):
     def test_quotes_do_not_join_lines(self):
         # A quote does not open a cell that spans lines: the header is the first line, split on tabs.
         text = self._text('"trial\nnote"\ttrial\ttrial', ("a\tb\tc",))
-        with self.assertWarns(pd.errors.ParserWarning):  # the later lines have more cells than the header
-            input_file = BaseInput(io.BytesIO(text.encode("utf-8")), file_type=".tsv")
+        input_file = BaseInput(io.BytesIO(text.encode("utf-8")), file_type=".tsv")
         self.assertEqual(input_file.columns, ['"trial'])
         self.assertEqual(input_file.duplicate_columns, [])
+        # The later lines have more cells than the first line (TABULAR_INVALID f).
+        self.assertEqual(input_file.line_problems, [(2, 3, 1), (3, 3, 1)])
 
     def test_quoted_data_cells(self):
         text = 'onset\tnote\tHED\n1\t"a, b"\t"Red"\n2\t"open\tBlue\n'
@@ -322,10 +331,10 @@ class TestDuplicateColumns(unittest.TestCase):
             input_file.to_csv()
 
     def test_quoted_tab_splits_the_cell(self):
-        # The extra cell of the row is dropped, as hed-javascript drops it; the BIDS validator reports the row.
+        # The row has one cell more than the first line (TABULAR_INVALID f), as the BIDS validator reports it.
         text = 'onset\tnote\tHED\n1\t"a\tb"\tRed\n'
-        with self.assertWarns(pd.errors.ParserWarning):
-            input_file = BaseInput(io.StringIO(text), file_type=".tsv")
+        input_file = BaseInput(io.StringIO(text), file_type=".tsv")
+        self.assertEqual(input_file.line_problems, [(2, 4, 3)])
         self.assertEqual(input_file.dataframe.iloc[0].tolist(), ["1", '"a', 'b"'])
 
     def test_order_and_count(self):
@@ -485,3 +494,91 @@ class TestPaddedAndBlankColumns(unittest.TestCase):
         input_file = BaseInput(io.StringIO(" a\t\tb \n1\t2\t3\n"), file_type=".tsv", has_column_names=False)
         self.assertEqual(input_file.padded_columns, [])
         self.assertEqual(input_file.blank_columns, [])
+
+
+class TestLineProblems(unittest.TestCase):
+    """line_problems: TABULAR_INVALID (e) empty line and (f) wrong cell count of a text tabular file."""
+
+    # (text, header cells, problems as (file line, cells found or None for an empty line, cells expected))
+    SPLIT_CASES = [
+        ("a\tb\n1\t2", ["a", "b"], []),  # no final terminator
+        ("a\tb\n1\t2\n", ["a", "b"], []),  # one final terminator
+        ("a\tb\n1\t2\n\n", ["a", "b"], [(3, None, 2)]),  # two final terminators: an empty last line
+        ("a\tb\n1\t2\n\n\n", ["a", "b"], [(3, None, 2), (4, None, 2)]),
+        ("a\tb\n1\t2\n\n3\t4\n", ["a", "b"], [(3, None, 2)]),  # empty line between rows
+        ("a\tb\r\n1\t2\r\n", ["a", "b"], []),  # CRLF
+        ("a\tb\r\n\r\n1\t2\r\n", ["a", "b"], [(2, None, 2)]),
+        ("a\tb\n1\t2\r\n3\t4\n", ["a", "b"], []),  # mixed CRLF and LF
+        ("a\tb\n1\t2\r3\t4\n", ["a", "b"], [(2, 3, 2)]),  # a lone CR is not a line end
+        ("\na\tb\n", [""], [(2, 2, 1)]),  # an empty first line is one blank name (c), not (e)
+        ("a\n \n", ["a"], []),  # blanks-only line in a one-column table: a value, not (f)
+        ("a\tb\n \n", ["a", "b"], [(2, 1, 2)]),  # blanks-only line in a two-column table
+        ("a\tb\n1\n", ["a", "b"], [(2, 1, 2)]),  # short row
+        ("a\tb\n1\t2\t3\n4\t5\n", ["a", "b"], [(2, 3, 2)]),  # long first data row
+        ("a\tb\n1\t2\n3\t4\t5\n", ["a", "b"], [(3, 3, 2)]),  # long later row
+        ("a\tb\n\t\n", ["a", "b"], []),  # tabs only, right length: a row of missing values
+        ("﻿a\tb\n1\t2\n", ["a", "b"], []),  # a byte order mark is not part of the first name
+    ]
+
+    def test_split_table(self):
+        for text, header, problems in self.SPLIT_CASES:
+            with self.subTest(text=text):
+                self.assertEqual(find_line_problems(text), (header, problems))
+
+    def test_text_input_records_problems(self):
+        text = "onset\tHED\n1\tRed\n\n2\n"
+        for file in (io.StringIO(text), io.BytesIO(text.encode("utf-8"))):
+            with self.subTest(file=type(file).__name__):
+                input_file = BaseInput(file, file_type=".tsv")
+                self.assertEqual(input_file.line_problems, [(3, None, 2), (4, 1, 2)])
+
+    def test_path_input_records_problems(self):
+        folder = os.path.join(os.path.dirname(__file__), "../data/temp_line_problems")
+        os.makedirs(folder, exist_ok=True)
+        try:
+            path = os.path.join(folder, "events.tsv")
+            with open(path, "wb") as fp:
+                fp.write(b"onset\tHED\r\n1\tRed\r\n\r\n")
+            self.assertEqual(BaseInput(path).line_problems, [(3, None, 2)])
+        finally:
+            shutil.rmtree(folder)
+
+    def test_long_later_row_does_not_raise(self):
+        # pandas cannot read this file; the frame is empty and keeps the header.
+        input_file = BaseInput(io.StringIO("onset\tHED\n1\tRed\n2\tBlue\tx\n"), file_type=".tsv")
+        self.assertEqual(input_file.line_problems, [(3, 3, 2)])
+        self.assertEqual(input_file.columns, ["onset", "HED"])
+        self.assertEqual(len(input_file.dataframe), 0)
+
+    def test_empty_first_line(self):
+        input_file = BaseInput(io.StringIO("\nonset\tHED\n1\tRed\n"), file_type=".tsv")
+        self.assertEqual(input_file.blank_columns, [0])
+        self.assertEqual(input_file.columns, [""])
+        self.assertEqual(input_file.line_problems, [(2, 2, 1), (3, 2, 1)])
+
+    def test_blanks_only_line_kept_as_value(self):
+        input_file = BaseInput(io.StringIO("trial\ngo\n \n"), file_type=".tsv")
+        self.assertEqual(input_file.line_problems, [])
+        self.assertEqual(input_file.dataframe["trial"].tolist(), ["go", " "])
+
+    def test_clean_file_unchanged(self):
+        input_file = BaseInput(io.StringIO("onset\tHED\n1\tRed\n2\t\n"), file_type=".tsv")
+        self.assertEqual(input_file.line_problems, [])
+        self.assertEqual(input_file.dataframe.values.tolist(), [["1", "Red"], ["2", "n/a"]])
+
+    def test_dataframe_and_excel_have_no_line_problems(self):
+        self.assertEqual(BaseInput(pd.DataFrame([["1", "Red"]], columns=["onset", "HED"])).line_problems, [])
+        self.assertEqual(_excel_input(["onset", "HED"], ["1", "Red"]).line_problems, [])
+
+    def test_file_without_column_names_not_checked(self):
+        # The line rules are rules of a tabular file, whose first line holds the column names.
+        input_file = BaseInput(io.StringIO("Red\tBlue\nSquare\n\n"), file_type=".tsv", has_column_names=False)
+        self.assertEqual(input_file.line_problems, [])
+        self.assertEqual(input_file.dataframe.values.tolist(), [["Red", "Blue"], ["Square", "n/a"]])
+
+    def test_assembly_refused_for_line_problems(self):
+        input_file = BaseInput(io.StringIO("onset\tHED\n1\tRed\n\n"), file_type=".tsv")
+        with self.assertRaises(HedFileError) as context:
+            input_file.assemble()
+        self.assertEqual(context.exception.code, "INVALID_FILE_FORMAT")
+        self.assertIn("line 3", context.exception.message)

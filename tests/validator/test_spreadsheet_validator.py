@@ -619,3 +619,70 @@ class TestAssembledRows(unittest.TestCase):
         issues = self.validate(table, sidecar=False)
         self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TEMPORAL_TAG_ERROR])
         self.assertIn("Delay/3 month", str(issues[0][ErrorContext.HED_STRING]))
+
+
+class TestTabularLines(unittest.TestCase):
+    """Stage 0: TABULAR_INVALID (e) empty line and (f) wrong cell count stop the run (specification 3.2.10)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.schema = load_schema_version("8.4.0")
+
+    def _validate(self, text, sidecar=None):
+        error_handler = ErrorHandler(check_for_warnings=True)
+        tabular = TabularInput(io.StringIO(text), sidecar=sidecar, name="events.tsv")
+        issues = tabular.validate(self.schema, error_handler=error_handler)
+        self.assertEqual(error_handler.error_context, [])
+        return issues
+
+    def test_empty_line_reported_and_rows_not_validated(self):
+        # The row with an invalid tag is not checked once the file has an empty line.
+        issues = self._validate("onset\tHED\n1.0\tInvalidTagXYZ\n\n2.0\tBlue\n")
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID])
+        self.assertEqual(issues[0][ErrorContext.ROW], 3)
+        self.assertEqual(issues[0][ErrorContext.FILE_NAME], "events.tsv")
+        self.assertIn("Line 3 ", issues[0]["message"])
+        self.assertIn("empty", issues[0]["message"])
+
+    def test_empty_last_line(self):
+        issues = self._validate("onset\tHED\n1.0\tRed\n\n")
+        self.assertEqual([issue[ErrorContext.ROW] for issue in issues], [3])
+
+    def test_every_wrong_cell_count_reported(self):
+        issues = self._validate("onset\tHED\n1.0\n2.0\tRed\tx\n3.0\tBlue\n")
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID] * 2)
+        self.assertEqual([issue[ErrorContext.ROW] for issue in issues], [2, 3])
+        self.assertIn("has 1 tab-separated cells", issues[0]["message"])
+        self.assertIn("first line has 2", issues[0]["message"])
+        self.assertIn("has 3 tab-separated cells", issues[1]["message"])
+
+    def test_empty_line_and_wrong_count_together(self):
+        issues = self._validate("onset\tHED\n1.0\n\n2.0\tRed\n")
+        self.assertEqual([issue[ErrorContext.ROW] for issue in issues], [2, 3])
+
+    def test_empty_first_line_is_blank_name(self):
+        issues = self._validate("\nonset\tHED\n1.0\tRed\n")
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID] * 3)
+        self.assertIn("Column 1 ", issues[0]["message"])
+        self.assertEqual([issue.get(ErrorContext.ROW) for issue in issues[1:]], [2, 3])
+
+    def test_blanks_only_line_in_one_column_table_is_padded_value(self):
+        sidecar = Sidecar(io.StringIO(json.dumps({"trial": {"HED": {"go": "Experimental-trial"}}})))
+        issues = self._validate("trial\ngo\n \n", sidecar=sidecar)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID])
+        self.assertIn("begins or ends with whitespace", issues[0]["message"])
+        self.assertEqual(issues[0][ErrorContext.ROW], 3)
+
+    def test_clean_files_valid(self):
+        for text in [
+            "onset\tHED\n1.0\tRed\n",
+            "onset\tHED\r\n1.0\tRed\r\n",
+            "onset\tHED\n1.0\tRed",
+            "onset\tHED\n1.0\t\n",
+        ]:
+            with self.subTest(text=text):
+                self.assertEqual(self._validate(text), [])
+
+    def test_row_numbers_are_file_lines(self):
+        issues = self._validate("onset\tHED\n1.0\tRed\n2.0\tInvalidTagXYZ\n")
+        self.assertEqual([issue[ErrorContext.ROW] for issue in issues], [3])
