@@ -900,8 +900,12 @@ class BaseInput:
                     index_col=False,
                 )
         except pd.errors.EmptyDataError:
-            self._dataframe = pd.DataFrame()  # Handle case where file has no data
-            return
+            if not self._line_problems:
+                self._dataframe = pd.DataFrame()  # Handle case where file has no data
+                return
+            # Empty lines at the start, then other lines: pandas finds no columns, but the first line is the
+            # column names (one blank name), so the names are still set and reported below.
+            self._dataframe = None
         except Exception as e:
             if not self._line_problems:
                 raise HedFileError(

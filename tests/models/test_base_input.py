@@ -556,6 +556,16 @@ class TestLineProblems(unittest.TestCase):
         self.assertEqual(input_file.columns, [""])
         self.assertEqual(input_file.line_problems, [(2, 2, 1), (3, 2, 1)])
 
+    def test_two_empty_first_lines(self):
+        # pandas finds no columns here; the first line is still one blank column name.
+        input_file = BaseInput(io.StringIO("\n\nonset\tHED\n1\tRed\n"), file_type=".tsv")
+        self.assertEqual(input_file.blank_columns, [0])
+        self.assertEqual(input_file.columns, [""])
+        self.assertEqual(input_file.line_problems, [(2, None, 1), (3, 2, 1), (4, 2, 1)])
+
+    def test_only_line_endings_is_an_empty_table(self):
+        self.assertEqual(BaseInput(io.StringIO("\n"), file_type=".tsv").blank_columns, [])
+
     def test_blanks_only_line_kept_as_value(self):
         input_file = BaseInput(io.StringIO("trial\ngo\n \n"), file_type=".tsv")
         self.assertEqual(input_file.line_problems, [])
