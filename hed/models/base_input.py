@@ -18,6 +18,39 @@ from hed.models.definition_dict import DefinitionDict
 from hed.models.df_util import _handle_curly_braces_refs, filter_series_by_onset
 
 
+def find_line_problems(text) -> tuple[list[str], list[tuple[int, int | None, int]]]:
+    """Return the cells of a text table's first line and the lines that break the line rules.
+
+    The rules are TABULAR_INVALID (e), a line other than the first that is empty, and (f), a line other than the
+    first whose number of tab-separated cells differs from the first line's (specification 3.2.10). Lines end at
+    LF or CRLF; a lone CR is part of its line. A single line ending at the end of the text is not an empty line,
+    but two are. An empty first line is one blank cell, so it is a blank column name, not (e). A line of only
+    blanks has one cell. A byte order mark at the start is not part of the first line.
+
+    Parameters:
+        text (str): The whole text of the file.
+
+    Returns:
+        tuple: The first line's cells (list[str]) and the problems, each (file line counting the first line as 1,
+        cells found or None for an empty line, cells expected), in line order.
+    """
+    text = text.removeprefix("\ufeff")
+    lines = text.split("\n")
+    if lines and lines[-1] == "":
+        lines.pop()  # The terminator of the last line, not an empty line.
+    lines = [line.removesuffix("\r") for line in lines]
+    if not lines:
+        return [], []
+    header = lines[0].split("\t")
+    problems = []
+    for number, line in enumerate(lines[1:], 2):
+        if line == "":
+            problems.append((number, None, len(header)))
+        elif (cells := line.count("\t") + 1) != len(header):
+            problems.append((number, cells, len(header)))
+    return header, problems
+
+
 class BaseInput:
     """Superclass representing a basic columnar file."""
 
@@ -90,6 +123,7 @@ class BaseInput:
         self._padded_columns = []
         self._blank_columns = []
         self._duplicate_columns = []
+        self._line_problems = []
 
         input_type = file_type
         if isinstance(file, str):
@@ -204,6 +238,18 @@ class BaseInput:
         A first line that ends with a tab has a blank last name. Empty when the file has no column names.
         """
         return self._blank_columns
+
+    @property
+    def line_problems(self) -> list[tuple[int, int | None, int]]:
+        """The lines of a text file that are empty or have the wrong number of cells (TABULAR_INVALID e and f).
+
+        Each is (file line counting the first line as 1, cells found or None for an empty line, cells expected),
+        in line order; see :func:`find_line_problems`. ``validate`` reports them and checks no row. When pandas
+        cannot read such a file, or reads a header other than its first line, the dataframe has the first line's
+        columns and no rows. Always empty for Excel and DataFrame input and for a text file read without column
+        names, to which these rules do not apply.
+        """
+        return self._line_problems
 
     @property
     def loaded_workbook(self):
@@ -539,53 +585,18 @@ class BaseInput:
         self._dataframe.columns = self._unique_names(names)
 
     @staticmethod
-    def _read_header_cells(file):
-        """Return the cells of a text file's header record and the file to hand to pandas.
+    def _read_text(file) -> str:
+        """Return the whole text of a text file given as a path or a binary or text file-like object.
 
-        The header is read by pandas as a data row (``header=None``), so its cells are parsed exactly as the
-        dataframe's header is (blank lines skipped, BOM removed, a double quote kept as an ordinary character)
-        but are not yet suffixed. A file-like object is returned to where it was; one that cannot seek or
-        report its position is read into memory first.
-
-        Parameters:
-            file (str, os.PathLike or file-like): Path to the text file or a binary or text file-like object.
-
-        Returns:
-            tuple: The header cells (list[str]) and the file or in-memory copy for pandas.
+        Bytes are decoded as UTF-8, as pandas reads them; a byte order mark is kept for ``find_line_problems``
+        and pandas to remove.
         """
         if isinstance(file, (str, os.PathLike)):
-            return BaseInput._first_record_cells(file), file
-        position = None
-        if hasattr(file, "seekable") and file.seekable():
-            try:
-                position = file.tell()
-            except OSError:
-                pass  # A text file advanced with next() cannot tell its position, but can still be read.
-        if position is None:
+            with open(file, "rb") as fp:
+                contents = fp.read()
+        else:
             contents = file.read()
-            file = io.BytesIO(contents) if isinstance(contents, bytes) else io.StringIO(contents)
-            position = 0
-        cells = BaseInput._first_record_cells(file)
-        file.seek(position)
-        return cells, file
-
-    @staticmethod
-    def _first_record_cells(file) -> list[str]:
-        """Return the cells of the first record pandas reads from file, or [] if there is none."""
-        try:
-            first = pd.read_csv(
-                file,
-                delimiter="\t",
-                header=None,
-                nrows=1,
-                dtype=str,
-                keep_default_na=False,
-                skip_blank_lines=True,
-                quoting=csv.QUOTE_NONE,
-            )
-        except pd.errors.EmptyDataError:
-            return []
-        return list(first.iloc[0]) if len(first) else []
+        return contents.decode("utf-8") if isinstance(contents, bytes) else contents
 
     def assemble(self, mapper=None, skip_curly_braces=False) -> pd.DataFrame:
         """Assembles the HED strings.
@@ -605,6 +616,8 @@ class BaseInput:
                 ``blank_columns``, ``duplicate_columns``). Such a table cannot be assembled correctly (a padded
                 ``HED`` column, for example, would be ignored), so it is refused rather than assembled wrongly.
                 ``validate`` reports these names as TABULAR_INVALID and never reaches assembly for them.
+            HedFileError: INVALID_FILE_FORMAT if a line of a text file is empty or has the wrong number of cells
+                (``line_problems``): the dataframe does not hold the file's rows as written.
         """
         self._check_names_for_assembly()
         if mapper is None:
@@ -619,7 +632,15 @@ class BaseInput:
         return _handle_curly_braces_refs(all_columns, refs, column_names)
 
     def _check_names_for_assembly(self):
-        """Raise BAD_COLUMN_NAMES if a column name is padded, blank or repeated; see ``assemble``."""
+        """Raise if a column name is padded, blank or repeated or a line is empty or ragged; see ``assemble``."""
+        if self._line_problems:
+            lines = [line for line, _, _ in self._line_problems]
+            raise HedFileError(
+                HedExceptions.INVALID_FILE_FORMAT,
+                f"Cannot assemble rows: the file has an empty line or a wrong number of cells at line "
+                f"{', '.join(str(line) for line in lines)}. Validate the file for the TABULAR_INVALID details.",
+                self.name,
+            )
         if not (self._padded_columns or self._blank_columns or self._duplicate_columns):
             return
         problems = []
@@ -830,46 +851,73 @@ class BaseInput:
             - Handles empty files by creating an empty DataFrame
             - Converts all data to string type for consistency
             - Replaces NaN values with "n/a" for consistent handling
-            - Skips blank lines during parsing
+            - With column names, keeps every line: an empty line or a line of only blanks is a row, so a row's
+              index plus 2 is its file line. Without column names, blank lines are skipped and short rows are
+              padded, as before; the line rules below apply only to a file with column names
             - Treats only an empty cell and "n/a" as missing (na_values ("", "n/a"), keep_default_na=False), so
               "NaN", "NULL" and the other pandas default NA strings are values
             - Handles pandas.errors.EmptyDataError for files with no data
-            - With a header, the header record is read first so that blank and repeated names are known before
-              pandas renames them (``blank_columns``, ``duplicate_columns``); the column names are the header
-              cells exactly as read
+            - The text is read once and split into lines first (``find_line_problems``): the column names are the
+              cells of the first line exactly as written, so blank and repeated names are known before pandas
+              renames them (``blank_columns``, ``duplicate_columns``), and an empty line or a line with the wrong
+              number of cells is recorded in ``line_problems`` (TABULAR_INVALID e and f) instead of being
+              skipped, padded or truncated. The file is still loaded: if pandas cannot read it, or reads a
+              different number of columns than the first line has, the dataframe has the first line's columns
+              and no rows
             - Double quotes are ordinary characters, as in hed-javascript and the BIDS validator: a line is split
               on every tab, a quoted cell keeps its quotes (a quote in a HED string is CHARACTER_INVALID), and a
-              quoted cell holding a tab is two cells. A row with more cells than the header loses the extra
-              cells (pandas warns); the BIDS validator reports such a row
+              quoted cell holding a tab is two cells
         """
-        if isinstance(file, str) and os.path.exists(file) and os.path.getsize(file) == 0:
-            self._dataframe = pd.DataFrame()  # Handle empty file
-            return
-
         try:
-            header_cells = None
-            if pandas_header is not None:
-                header_cells, file = self._read_header_cells(file)
-            self._dataframe = pd.read_csv(
-                file,
-                delimiter="\t",
-                header=pandas_header,
-                skip_blank_lines=True,
-                dtype=str,
-                keep_default_na=False,
-                na_values=("", "n/a"),
-                quoting=csv.QUOTE_NONE,
-                index_col=False,
-            )
-            # Only an empty cell and n/a are missing (BIDS). Every other cell text, including nan, NaN, NA,
-            # None and NULL, which pandas would otherwise read as missing, is a value and is validated as one,
-            # as it is when a DataFrame is passed in.
-            self._dataframe = self._dataframe.fillna("n/a")
-            if header_cells is not None:
-                self._set_column_names(self._dataframe.columns, header_cells)
-        except pd.errors.EmptyDataError:
-            self._dataframe = pd.DataFrame()  # Handle case where file has no data
+            text = self._read_text(file)
         except Exception as e:
             raise HedFileError(
                 HedExceptions.INVALID_FILE_FORMAT, f"Failed to load text file: {str(e)}", self.name
             ) from e
+        if not text.removeprefix("\ufeff"):
+            self._dataframe = pd.DataFrame()  # Handle empty file
+            return
+
+        # The line rules are rules of a tabular file, whose first line holds the column names (specification
+        # 3.2.10); a text file read without column names is loaded as before, blank lines skipped.
+        has_names = pandas_header is not None
+        header_cells = None
+        if has_names:
+            header_cells, self._line_problems = find_line_problems(text)
+        try:
+            with warnings.catch_warnings():
+                # pandas warns when it drops the extra cells of a long row; that row is in line_problems.
+                warnings.simplefilter("ignore", pd.errors.ParserWarning)
+                self._dataframe = pd.read_csv(
+                    io.StringIO(text),
+                    delimiter="\t",
+                    header=pandas_header,
+                    skip_blank_lines=not has_names,
+                    dtype=str,
+                    keep_default_na=False,
+                    na_values=("", "n/a"),
+                    quoting=csv.QUOTE_NONE,
+                    index_col=False,
+                )
+        except pd.errors.EmptyDataError:
+            if not self._line_problems:
+                self._dataframe = pd.DataFrame()  # Handle case where file has no data
+                return
+            # Empty lines at the start, then other lines: pandas finds no columns, but the first line is the
+            # column names (one blank name), so the names are still set and reported below.
+            self._dataframe = None
+        except Exception as e:
+            if not self._line_problems:
+                raise HedFileError(
+                    HedExceptions.INVALID_FILE_FORMAT, f"Failed to load text file: {str(e)}", self.name
+                ) from e
+            self._dataframe = None
+        if has_names and (self._dataframe is None or len(self._dataframe.columns) != len(header_cells)):
+            # The rows are not the file's rows as written; validate reports line_problems and checks no row.
+            self._dataframe = pd.DataFrame(columns=range(len(header_cells)), dtype=str)
+        # Only an empty cell and n/a are missing (BIDS). Every other cell text, including nan, NaN, NA,
+        # None and NULL, which pandas would otherwise read as missing, is a value and is validated as one,
+        # as it is when a DataFrame is passed in.
+        self._dataframe = self._dataframe.fillna("n/a")
+        if has_names:
+            self._set_column_names(self._dataframe.columns, header_cells)

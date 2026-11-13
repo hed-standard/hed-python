@@ -157,6 +157,35 @@ class Test(unittest.TestCase):
                 self.assertEqual(bad_name.get("ec_column"), column)
                 self.assertTrue(bad_name["ec_filename"].endswith("sub-002_task-FacePerception_run-1_events.tsv"))
 
+    def test_empty_line_reported_despite_bad_merged_sidecar(self):
+        """An empty line (TABULAR_INVALID e) is reported by its file line, like a bad column name."""
+        source = os.path.realpath(
+            os.path.join(os.path.dirname(__file__), "../../data/bids_tests/eeg_ds003645s_hed_inheritance")
+        )
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root_path = os.path.join(temp_dir, "dataset")
+            shutil.copytree(source, root_path)
+            events_path = os.path.join(root_path, "sub-002", "sub-002_task-FacePerception_run-1_events.tsv")
+            with open(events_path, encoding="utf-8", newline="") as fp:
+                header, second, rest = fp.read().split("\n", 2)
+            with open(events_path, "w", encoding="utf-8", newline="") as fp:
+                fp.write(header + "\n" + second + "\n\n" + rest)
+
+            file_paths = io_util.get_file_list(
+                root_path, extensions=[".tsv", ".json"], exclude_dirs=self.exclude_dirs, name_suffix=["_events"]
+            )
+            events = BidsFileGroup(root_path, file_paths, "events")
+            group_sidecars = {id(sidecar.contents) for sidecar in events.sidecar_dict.values()}
+            for data_obj in events.datafile_dict.values():
+                if "sub-002" in data_obj.file_path and id(data_obj.sidecar) not in group_sidecars:
+                    data_obj.sidecar.loaded_dict["bad_column"] = {"HED": {"x": "InvalidTagXYZ"}}
+            issues = events.validate_datafiles(load_schema_version("8.4.0"))
+
+            self.assertEqual(sorted(issue["code"] for issue in issues), ["TABULAR_INVALID", "TAG_INVALID"])
+            empty_line = next(issue for issue in issues if issue["code"] == "TABULAR_INVALID")
+            self.assertEqual(empty_line["ec_row"], 3)
+            self.assertTrue(empty_line["ec_filename"].endswith("sub-002_task-FacePerception_run-1_events.tsv"))
+
     def test_padded_hed_header_found_without_sidecar(self):
         """Discovery trims header cells only to find HED: a sidecar-free file headed `HED \\t HED` has HED
         columns, so it is validated, and each padded name is TABULAR_INVALID."""
@@ -247,6 +276,29 @@ class Test(unittest.TestCase):
         bad_values = [i for i in issues if i["code"] == "VALUE_INVALID"]
         self.assertEqual(len({i["ec_filename"] for i in bad_values}), 3, "all three sub-002 files still ran")
         self.assertTrue(all("sub-002" in i["ec_filename"] and i["ec_column"] == "stim_file" for i in bad_values))
+
+    def test_sidecar_without_hed_does_not_make_file_hed(self):
+        # Specification 3.2.10: only a file with a HED column or a sidecar with HED annotations is checked.
+        tsv_text = "onset\tduration\tresponse\n1.0\t0\ta\n\n"  # An empty last line, which is TABULAR_INVALID.
+        for sidecar_text, expected_codes in (
+            ('{"response": {"Description": "A response."}}', []),
+            ('{"response": {"HED": {"a": "Red"}}}', ["TABULAR_INVALID"]),
+        ):
+            with self.subTest(sidecar=sidecar_text), tempfile.TemporaryDirectory() as temp_dir:
+                root_path = os.path.join(temp_dir, "dataset")
+                os.makedirs(os.path.join(root_path, "sub-01"))
+                tsv_path = os.path.join(root_path, "sub-01", "sub-01_task-x_events.tsv")
+                json_path = os.path.join(root_path, "task-x_events.json")
+                with open(tsv_path, "w", encoding="utf-8", newline="") as fp:
+                    fp.write(tsv_text)
+                with open(json_path, "w", encoding="utf-8", newline="") as fp:
+                    fp.write(sidecar_text)
+                events = BidsFileGroup(root_path, [tsv_path, json_path], "events")
+                has_hed = [data_obj for data_obj in events.datafile_dict.values() if data_obj.has_hed]
+                issues = events.validate_datafiles(load_schema_version("8.4.0"))
+                self.assertEqual(len(events.datafile_dict), 1)
+                self.assertEqual(len(has_hed), len(expected_codes))
+                self.assertEqual([issue["code"] for issue in issues], expected_codes)
 
 
 if __name__ == "__main__":

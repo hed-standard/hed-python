@@ -211,8 +211,8 @@ class BidsFileGroup:
 
             had_contents = data_obj.contents
             # A file whose merged sidecar has errors is skipped, unless its header has a padded, blank or
-            # repeated column name: validate then reports only TABULAR_INVALID (stage 0) and checks no row
-            # against the sidecar. A file that cannot even be loaded is skipped as it was before loading.
+            # repeated column name or it has an empty or ragged line: validate then reports only
+            # TABULAR_INVALID (stage 0) and checks no row against the sidecar. A file that cannot even be loaded is skipped as it was before loading.
             try:
                 data_obj.set_contents(overwrite=False)
             except HedFileError:
@@ -221,8 +221,13 @@ class BidsFileGroup:
                 logger.debug(f"Skipping {os.path.basename(data_obj.file_path)}: its merged sidecar has errors")
                 continue
             contents = data_obj.contents
-            bad_names = contents.padded_columns or contents.blank_columns or contents.duplicate_columns
-            if sidecar_has_errors and not bad_names:
+            stage_zero = (
+                contents.padded_columns
+                or contents.blank_columns
+                or contents.duplicate_columns
+                or contents.line_problems
+            )
+            if sidecar_has_errors and not stage_zero:
                 logger.debug(f"Skipping {os.path.basename(data_obj.file_path)}: its merged sidecar has errors")
                 if not had_contents:
                     data_obj.clear_contents()
