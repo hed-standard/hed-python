@@ -2,11 +2,12 @@ import io
 import json
 import os
 import unittest
+from unittest import mock
 
 from hed import schema
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ErrorContext, SidecarErrors
-from hed.models import Sidecar, TabularInput
+from hed.models import HedString, Sidecar, TabularInput
 from hed.validator.sidecar_validator import SidecarValidator
 
 
@@ -33,10 +34,17 @@ class Test(unittest.TestCase):
         sidecar = Sidecar(self._multiple_category_refs)
         issues = sidecar.validate(self.hed_schema)
 
-        # Two combinations (go with go2, stop with go2) repeat Azure; the repeat is reported once.
-        self.assertEqual(len(issues), 1)
+        # Azure repeats only when cat1 and cat2 are both filled (go with go2, stop with go2). The sidecar
+        # check fills one referenced column at a time (specification 3.2.9.3 rule 10), so it reports nothing;
+        # the repeat is found when a row with those values is assembled.
+        self.assertEqual(len(issues), 0)
         refs = sidecar.get_column_refs()
         self.assertEqual(len(refs), 2)
+
+        events = TabularInput(io.StringIO("cat1\tcat2\tcombo\ngo\tgo2\t3\nstop\tstop2\t3\n"), sidecar=sidecar)
+        row_issues = events.validate(self.hed_schema)
+        self.assertEqual([issue["code"] for issue in row_issues], ["TAG_EXPRESSION_REPEATED"])
+        self.assertEqual([issue["ec_row"] for issue in row_issues], [2])
 
     def test_bad_refs(self):
         sidecar = Sidecar(self._bad_refs_json_filename)
@@ -405,7 +413,7 @@ class TestRemovalSubstitution(unittest.TestCase):
                 self.assertEqual(self.codes(sidecar), ["TAG_EXPRESSION_REPEATED"])
 
     def test_repeat_reported_once(self):
-        # Every combination finds these repeats; each is reported once.
+        # Several substitutions find these repeats; each is reported once.
         cases = [
             ({"event_code": {"HED": {"face": "Red, Red, {color}"}}, "color": self.COLOR}, 1),
             ({"event_code": {"HED": {"face": "(Red, {color}), (Red, {HED})"}}, "color": self.COLOR}, 1),
@@ -422,8 +430,33 @@ class TestRemovalSubstitution(unittest.TestCase):
             with self.subTest(sidecar=sidecar):
                 self.assertEqual(self.codes(sidecar), ["TAG_EXPRESSION_REPEATED"] * count)
 
+    def test_several_references_cost_is_linear(self):
+        # 8 referenced columns of 10 annotations: 81 substitutions, not 11**8 combinations.
+        sidecar = {"event_code": {"HED": {"face": ", ".join(f"(Label/G{n}, {{c{n}}})" for n in range(8))}}}
+        for n in range(8):
+            sidecar[f"c{n}"] = {"HED": {f"k{level}": f"Label/V{n}-{level}" for level in range(10)}}
+        strings = []
+        original = HedString.__init__
+
+        def counting(hed_string_obj, *args, **kwargs):
+            strings.append(1)
+            original(hed_string_obj, *args, **kwargs)
+
+        with mock.patch.object(HedString, "__init__", counting):
+            self.assertEqual(self.codes(sidecar), [])
+        self.assertLess(len(strings), 500)
+
+    def test_two_filled_columns_not_checked_in_sidecar(self):
+        # The repeat needs color and shade both filled; it is left to row assembly.
+        sidecar = {
+            "event_code": {"HED": {"face": "({color}, {shade})"}},
+            "color": {"HED": {"warm": "Red"}},
+            "shade": {"HED": {"dark": "Red"}},
+        }
+        self.assertEqual(self.codes(sidecar), [])
+
     def test_repeated_reference_is_one_substitution(self):
-        # Every occurrence of a reference gets the same value, so 20 occurrences are 3 combinations, not 3**20.
+        # Every occurrence of a reference gets the same value, so 20 occurrences are 3 substitutions, not 3**20.
         groups = ", ".join(f"(Label/L{number}, {{color}})" for number in range(20))
         sidecar = {"event_code": {"HED": {"face": groups}}, "color": self.COLOR}
         self.assertEqual(self.codes(sidecar), [])

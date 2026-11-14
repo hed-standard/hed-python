@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import copy
-import itertools
 
 from hed.errors import ColumnErrors, DefinitionErrors, ErrorContext, ErrorHandler, SidecarErrors, ValidationErrors
 from hed.errors.error_reporter import check_for_any_errors, sort_issues
@@ -129,7 +128,7 @@ class SidecarValidator:
         return issues
 
     def _validate_ref_combinations(self, hed_string, sidecar, def_dict, hed_validator, error_handler) -> list[dict]:
-        """Check every substitution of the curly-brace references in one sidecar string.
+        """Check the required substitutions of the curly-brace references in one sidecar string.
 
         Parameters:
             hed_string (str): The sidecar string, with its curly-brace references.
@@ -142,28 +141,32 @@ class SidecarValidator:
             list[dict]: The issues found in the substituted strings.
 
         Notes:
-            - Every combination of the referenced columns' annotations is checked, whether or not a file uses
-              it (specification 3.2.9.3 rule 10). A value column's template is substituted with its # unfilled.
-            - Any referenced column can be n/a or blank in a row, which removes the reference (rule 3). So
-              for every reference the removal is one more substitution, and for {HED}, whose content is
-              known only per row, it is the only one. A combination with a removal is checked for
-              TAG_EXPRESSION_REPEATED only; other checks may rely on a column being filled and wait for the
-              assembled row.
+            - The annotations of each referenced column are substituted one column at a time, whether or not
+              a file uses them, with every other reference removed; the string is also checked with all of its
+              references removed (specification 3.2.9.3 rule 10). A value column's template is substituted
+              with its # unfilled. Combinations that fill several columns are not checked here: the number of
+              substitutions is one more than the number of annotations, not their product, and an error that
+              needs two columns filled is found when a row is assembled.
+            - Any referenced column can be n/a or blank in a row, which removes the reference (rule 3); for
+              {HED}, whose content is known only per row, the removal is the only substitution. A
+              substitution with a removal is checked for TAG_EXPRESSION_REPEATED only; other checks may rely
+              on a column being filled and wait for the assembled row. So the full string checks run only
+              for a string with one referenced column.
             - The removal is made by df_util.replace_ref with n/a, as in assembly.
-            - A repeat found by several combinations is reported once.
+            - A repeat found by several substitutions is reported once.
         """
         # replace_ref replaces every occurrence of a reference at once, so each name is one substitution.
         refs = list(dict.fromkeys(COLUMN_REF_PATTERN.findall(hed_string)))
         refs_strings = {data.column_name: list(data.get_hed_strings()) for data in sidecar}
         filled = [refs_strings.get(ref, []) if ref != "HED" else [] for ref in refs]
-        # None stands for the removal of the reference.
-        options = [[*values, None] for values in filled]
-        # The combinations without a removal go first, so a repeat they find is reported with their string.
-        # Both parts are generated lazily rather than sorted, so the product is never held in memory.
-        combinations = itertools.chain(
-            itertools.product(*filled),
-            (combination for combination in itertools.product(*options) if None in combination),
-        )
+        # One column filled at a time; None stands for the removal of a reference. The substitutions without
+        # a removal (one referenced column) go first, so a repeat they find is reported with their string.
+        combinations = [
+            tuple(value if position == filled_position else None for position in range(len(refs)))
+            for filled_position, values in enumerate(filled)
+            for value in values
+        ]
+        combinations.append((None,) * len(refs))
 
         issues = []
         reported_repeats = set()
