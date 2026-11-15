@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import copy
-import itertools
 
 from hed.errors import ColumnErrors, DefinitionErrors, ErrorContext, ErrorHandler, SidecarErrors, ValidationErrors
 from hed.errors.error_reporter import check_for_any_errors, sort_issues
@@ -14,6 +13,7 @@ from hed.models.column_source import is_padded
 from hed.models.hed_string import HedString
 from hed.models.model_constants import COLUMN_REF_PATTERN, DefTagNames, TopTagReturnType
 from hed.validator.reserved_checker import ReservedChecker
+from hed.validator.util.dup_util import DuplicateChecker
 
 
 # todo: Add/improve validation for definitions being in known columns(right now it just assumes they aren't)
@@ -31,6 +31,7 @@ class SidecarValidator:
             hed_schema (HedSchema): HED schema object to use for validation.
         """
         self._schema = hed_schema
+        self._duplicate_checker = DuplicateChecker()
 
     def validate(self, sidecar, extra_def_dicts=None, name=None, error_handler=None) -> list[dict]:
         """Validate the input data using the schema
@@ -112,29 +113,11 @@ class SidecarValidator:
                 issues += new_issues
                 error_handler.pop_error_context()  # Hed String
 
-                # Only do full string checks on full columns, not partial ref columns. Every combination of the
-                # referenced columns' annotations is checked, whether or not a file uses it (specification
-                # 3.2.9.3 rule 10). What {HED} contributes is known only per row, so a string that references it
-                # gets its full-string checks when each row is assembled.
-                refs = COLUMN_REF_PATTERN.findall(hed_string)
-                if not is_ref_column and "HED" not in refs:
-                    refs_strings = {data.column_name: data.get_hed_strings() for data in sidecar}
-                    for combination in itertools.product(*[refs_strings[key] for key in refs]):
-                        new_issues = []
-                        ref_dict = dict(zip(refs, combination, strict=False))
-                        modified_string = hed_string
-                        for ref in refs:
-                            modified_string = df_util.replace_ref(modified_string, f"{{{ref}}}", ref_dict[ref])
-                        hed_string_obj = HedString(modified_string, hed_schema=self._schema, def_dict=sidecar_def_dict)
-
-                        # A sidecar string is a fragment of a row: a tag it lacks may come from another
-                        # column, so the required-tag check waits for assembly. A unique tag repeated in
-                        # the fragment is repeated in the row, so that check runs here.
-                        error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
-                        new_issues += hed_validator.run_full_string_checks(hed_string_obj, required_tags=False)
-                        error_handler.add_context_and_filter(new_issues)
-                        issues += new_issues
-                        error_handler.pop_error_context()  # Hed string
+                # Only do full string checks on full columns, not partial ref columns.
+                if not is_ref_column:
+                    issues += self._validate_ref_combinations(
+                        hed_string, sidecar, sidecar_def_dict, hed_validator, error_handler
+                    )
                 if len(hed_strings) > 1:
                     error_handler.pop_error_context()  # Category key
 
@@ -142,6 +125,78 @@ class SidecarValidator:
         issues += self._check_definitions_bad_spot(definition_checks, error_handler, reported_definitions)
         issues = sort_issues(issues)
 
+        return issues
+
+    def _validate_ref_combinations(self, hed_string, sidecar, def_dict, hed_validator, error_handler) -> list[dict]:
+        """Check the required substitutions of the curly-brace references in one sidecar string.
+
+        Parameters:
+            hed_string (str): The sidecar string, with its curly-brace references.
+            sidecar (Sidecar): The sidecar the string belongs to.
+            def_dict (DefinitionDict): The definitions of the sidecar.
+            hed_validator (HedValidator): The validator for the full-string checks.
+            error_handler (ErrorHandler): The error handler, with the sidecar column and key context pushed.
+
+        Returns:
+            list[dict]: The issues found in the substituted strings.
+
+        Notes:
+            - The annotations of each referenced column are substituted one column at a time, whether or not
+              a file uses them, with every other reference removed; the string is also checked with all of its
+              references removed (specification 3.2.9.3 rule 10). A value column's template is substituted
+              with its # unfilled. Combinations that fill several columns are not checked here: the number of
+              substitutions is one more than the number of annotations, not their product, and an error that
+              needs two columns filled is found when a row is assembled.
+            - Any referenced column can be n/a or blank in a row, which removes the reference (rule 3); for
+              {HED}, whose content is known only per row, the removal is the only substitution. A
+              substitution with a removal is checked for TAG_EXPRESSION_REPEATED only; other checks may rely
+              on a column being filled and wait for the assembled row. So the full string checks run only
+              for a string with one referenced column.
+            - The removal is made by df_util.replace_ref with n/a, as in assembly.
+            - A repeat found by several substitutions is reported once.
+        """
+        # replace_ref replaces every occurrence of a reference at once, so each name is one substitution.
+        refs = list(dict.fromkeys(COLUMN_REF_PATTERN.findall(hed_string)))
+        refs_strings = {data.column_name: list(data.get_hed_strings()) for data in sidecar}
+        filled = [refs_strings.get(ref, []) if ref != "HED" else [] for ref in refs]
+        # One column filled at a time; None stands for the removal of a reference. The substitutions without
+        # a removal (one referenced column) go first, so a repeat they find is reported with their string.
+        combinations = [
+            tuple(value if position == filled_position else None for position in range(len(refs)))
+            for filled_position, values in enumerate(filled)
+            for value in values
+        ]
+        combinations.append((None,) * len(refs))
+
+        issues = []
+        reported_repeats = set()
+        for combination in combinations:
+            modified_string = hed_string
+            for ref, value in zip(refs, combination, strict=True):
+                modified_string = df_util.replace_ref(modified_string, f"{{{ref}}}", "n/a" if value is None else value)
+            hed_string_obj = HedString(modified_string, hed_schema=self._schema, def_dict=def_dict)
+
+            if None in combination:
+                new_issues = self._duplicate_checker.check_for_duplicates(hed_string_obj)
+            else:
+                # A sidecar string is a fragment of a row: a tag it lacks may come from another
+                # column, so the required-tag check waits for assembly. A unique tag repeated in
+                # the fragment is repeated in the row, so that check runs here.
+                new_issues = hed_validator.run_full_string_checks(hed_string_obj, required_tags=False)
+
+            kept_issues = []
+            for issue in new_issues:
+                if issue["code"] == ValidationErrors.TAG_EXPRESSION_REPEATED:
+                    repeat_key = issue["message"]
+                    if repeat_key in reported_repeats:
+                        continue
+                    reported_repeats.add(repeat_key)
+                kept_issues.append(issue)
+
+            error_handler.push_error_context(ErrorContext.HED_STRING, hed_string_obj)
+            error_handler.add_context_and_filter(kept_issues)
+            issues += kept_issues
+            error_handler.pop_error_context()  # Hed string
         return issues
 
     def validate_structure(self, sidecar, error_handler) -> list[dict]:

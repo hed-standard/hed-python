@@ -2,11 +2,12 @@ import io
 import json
 import os
 import unittest
+from unittest import mock
 
 from hed import schema
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ErrorContext, SidecarErrors
-from hed.models import Sidecar, TabularInput
+from hed.models import HedString, Sidecar, TabularInput
 from hed.validator.sidecar_validator import SidecarValidator
 
 
@@ -33,10 +34,17 @@ class Test(unittest.TestCase):
         sidecar = Sidecar(self._multiple_category_refs)
         issues = sidecar.validate(self.hed_schema)
 
-        # 3 issues are expected for repeated tags from stacking lines
-        self.assertEqual(len(issues), 2)
+        # Azure repeats only when cat1 and cat2 are both filled (go with go2, stop with go2). The sidecar
+        # check fills one referenced column at a time (specification 3.2.9.3 rule 10), so it reports nothing;
+        # the repeat is found when a row with those values is assembled.
+        self.assertEqual(len(issues), 0)
         refs = sidecar.get_column_refs()
         self.assertEqual(len(refs), 2)
+
+        events = TabularInput(io.StringIO("cat1\tcat2\tcombo\ngo\tgo2\t3\nstop\tstop2\t3\n"), sidecar=sidecar)
+        row_issues = events.validate(self.hed_schema)
+        self.assertEqual([issue["code"] for issue in row_issues], ["TAG_EXPRESSION_REPEATED"])
+        self.assertEqual([issue["ec_row"] for issue in row_issues], [2])
 
     def test_bad_refs(self):
         sidecar = Sidecar(self._bad_refs_json_filename)
@@ -305,10 +313,6 @@ class TestSidecarFalseNegatives(unittest.TestCase):
         sidecar = {"event_code": {"HED": {"face": "(Red, {color})"}}, "color": {"HED": {"warm": "Red", "cool": "Blue"}}}
         self.assertEqual(self.codes(sidecar), ["TAG_EXPRESSION_REPEATED"])
 
-    def test_hed_reference_not_checked_in_sidecar(self):
-        # What {HED} contributes is known only per row (specification 3.2.9.3 rule 10).
-        self.assertEqual(self.codes({"c": {"HED": {"a": "(Red, {HED}), (Red)"}}}), [])
-
     def test_definition_beside_tags(self):
         cases = [
             {"cond": {"HED": {"a": "(Definition/MyDef, (Red)), Blue"}}},
@@ -337,3 +341,122 @@ class TestSidecarFalseNegatives(unittest.TestCase):
         for sidecar in cases:
             with self.subTest(sidecar=sidecar):
                 self.assertEqual(self.codes(sidecar), ["SIDECAR_INVALID"])
+
+
+class TestRemovalSubstitution(unittest.TestCase):
+    """A removed reference (its column n/a or blank) is a substitution for the repeat check only (HED 8.4.0).
+
+    Specification 3.2.9.3 rule 10 and its explanation: for TAG_EXPRESSION_REPEATED the annotation with a
+    reference removed (rule 3) is one of the substitutions, for every reference; for {HED} it is the only one.
+    """
+
+    COLOR = {"HED": {"warm": "Blue", "cool": "Green"}}
+
+    @classmethod
+    def setUpClass(cls):
+        cls.hed_schema = schema.load_schema_version("8.4.0")
+
+    def issues(self, sidecar_dict):
+        return Sidecar(io.StringIO(json.dumps(sidecar_dict))).validate(self.hed_schema)
+
+    def codes(self, sidecar_dict):
+        return [issue["code"] for issue in self.issues(sidecar_dict)]
+
+    def test_hed_reference_removed_repeats(self):
+        sidecar = {"event_code": {"HED": {"face": "(Red, {HED}), (Red)"}}}
+        self.assertEqual(self.codes(sidecar), ["TAG_EXPRESSION_REPEATED"])
+
+    def test_categorical_reference_removed_repeats(self):
+        sidecar = {"event_code": {"HED": {"face": "(Red, {color}), (Red)"}}, "color": self.COLOR}
+        self.assertEqual(self.codes(sidecar), ["TAG_EXPRESSION_REPEATED"])
+
+    def test_value_reference_removed_repeats(self):
+        sidecar = {"event_code": {"HED": {"face": "(Red, {rt}), (Red)"}}, "rt": {"HED": "Label/#"}}
+        self.assertEqual(self.codes(sidecar), ["TAG_EXPRESSION_REPEATED"])
+
+    def test_hed_reference_alone_in_group(self):
+        self.assertEqual(self.codes({"event_code": {"HED": {"face": "Red, ({HED})"}}}), [])
+
+    def test_hed_reference_removed_no_repeat(self):
+        self.assertEqual(self.codes({"event_code": {"HED": {"face": "(Red, {HED}), (Blue)"}}}), [])
+
+    def test_categorical_reference_removed_no_repeat(self):
+        sidecar = {"event_code": {"HED": {"face": "(Red, {color}), (Yellow)"}}, "color": self.COLOR}
+        self.assertEqual(self.codes(sidecar), [])
+
+    def test_duration_group_rule_not_checked_with_removal(self):
+        # Removing {stim_desc} leaves (Duration/# s) without its inner group; the row with n/a fails when
+        # assembled, not the sidecar.
+        sidecar = {"dur": {"HED": "(Duration/# s, {stim_desc})"}, "stim_desc": {"HED": {"a": "(Red)", "b": "(Blue)"}}}
+        self.assertEqual(self.codes(sidecar), [])
+
+    def test_duration_group_rule_not_checked_for_hed_reference(self):
+        self.assertEqual(self.codes({"dur": {"HED": "(Duration/# s, {HED})"}}), [])
+
+    def test_categorical_substitution_repeat_kept(self):
+        sidecar = {"event_code": {"HED": {"face": "(Red, {color})"}}, "color": {"HED": {"warm": "Red", "cool": "Blue"}}}
+        self.assertEqual(self.codes(sidecar), ["TAG_EXPRESSION_REPEATED"])
+
+    def test_removal_reports_only_repeats(self):
+        # Each removal leaves a group that breaks another rule ((Duration/# s) with no inner group, a lone
+        # (Onset)); only the repeat is reported.
+        cases = [
+            {"dur": {"HED": "(Duration/# s, {HED}), (Red, {HED}), (Red)"}},
+            {"event_code": {"HED": {"face": "(Onset, {HED}), (Red, {HED}), (Red)"}}},
+            {
+                "dur": {"HED": "(Duration/# s, {stim_desc}), (Red, {stim_desc}), (Red)"},
+                "stim_desc": {"HED": {"a": "(Blue)", "b": "(Green)"}},
+            },
+        ]
+        for sidecar in cases:
+            with self.subTest(sidecar=sidecar):
+                self.assertEqual(self.codes(sidecar), ["TAG_EXPRESSION_REPEATED"])
+
+    def test_repeat_reported_once(self):
+        # Several substitutions find these repeats; each is reported once.
+        cases = [
+            ({"event_code": {"HED": {"face": "Red, Red, {color}"}}, "color": self.COLOR}, 1),
+            ({"event_code": {"HED": {"face": "(Red, {color}), (Red, {HED})"}}, "color": self.COLOR}, 1),
+            (
+                {
+                    "event_code": {"HED": {"face": "(Red, {color}, {rt}), (Red)"}},
+                    "color": self.COLOR,
+                    "rt": {"HED": "Label/#"},
+                },
+                1,
+            ),
+        ]
+        for sidecar, count in cases:
+            with self.subTest(sidecar=sidecar):
+                self.assertEqual(self.codes(sidecar), ["TAG_EXPRESSION_REPEATED"] * count)
+
+    def test_several_references_cost_is_linear(self):
+        # 8 referenced columns of 10 annotations: 81 substitutions, not 11**8 combinations.
+        sidecar = {"event_code": {"HED": {"face": ", ".join(f"(Label/G{n}, {{c{n}}})" for n in range(8))}}}
+        for n in range(8):
+            sidecar[f"c{n}"] = {"HED": {f"k{level}": f"Label/V{n}-{level}" for level in range(10)}}
+        strings = []
+        original = HedString.__init__
+
+        def counting(hed_string_obj, *args, **kwargs):
+            strings.append(1)
+            original(hed_string_obj, *args, **kwargs)
+
+        with mock.patch.object(HedString, "__init__", counting):
+            self.assertEqual(self.codes(sidecar), [])
+        self.assertLess(len(strings), 500)
+
+    def test_two_filled_columns_not_checked_in_sidecar(self):
+        # The repeat needs color and shade both filled; it is left to row assembly.
+        sidecar = {
+            "event_code": {"HED": {"face": "({color}, {shade})"}},
+            "color": {"HED": {"warm": "Red"}},
+            "shade": {"HED": {"dark": "Red"}},
+        }
+        self.assertEqual(self.codes(sidecar), [])
+
+    def test_repeated_reference_is_one_substitution(self):
+        # Every occurrence of a reference gets the same value, so 20 occurrences are 3 substitutions, not 3**20.
+        groups = ", ".join(f"(Label/L{number}, {{color}})" for number in range(20))
+        sidecar = {"event_code": {"HED": {"face": groups}}, "color": self.COLOR}
+        self.assertEqual(self.codes(sidecar), [])

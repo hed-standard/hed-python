@@ -95,6 +95,9 @@ class ValidationErrors:
     TABULAR_COLUMN_NAME_BLANK = "TABULAR_COLUMN_NAME_BLANK"
     # Reported as TABULAR_INVALID (reason d): a value with leading or trailing whitespace in an annotated column.
     TABULAR_VALUE_PADDED = "TABULAR_VALUE_PADDED"
+    # Reported as TABULAR_INVALID (reasons e and f): a text file's empty line, or a line with the wrong cell count.
+    TABULAR_LINE_EMPTY = "TABULAR_LINE_EMPTY"
+    TABULAR_LINE_CELL_COUNT = "TABULAR_LINE_CELL_COUNT"
     # end internal codes
 
     # Still being worked on below this line

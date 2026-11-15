@@ -34,11 +34,13 @@ class SpreadsheetValidator:
 
     The stages run in order and each stops the run when it finds an error (never on a warning alone):
 
-    0. **Column names**: a table with a padded, blank or repeated column name gets one TABULAR_INVALID per
-       such name and nothing else: neither the sidecar nor any row is checked or assembled (specification
+    0. **Column names and lines**: a table with a padded, blank or repeated column name gets one TABULAR_INVALID
+       per such name, and a text file with an empty line or a line with the wrong number of cells one per such
+       line, and nothing else: neither the sidecar nor any row is checked or assembled (specification
        3.2.10). Names are compared exactly. A :class:`~hed.models.base_input.BaseInput` supplies the names it
-       recorded from its header (``padded_columns``, ``blank_columns``, ``duplicate_columns``); for any other
-       column source they are found in ``column_names()``.
+       recorded from its header (``padded_columns``, ``blank_columns``, ``duplicate_columns``) and the lines
+       (``line_problems``); for any other column source the names are found in ``column_names()`` and there
+       are no lines to check.
     1. **Sidecar**: every template and categorical string of the sidecar (``SidecarValidator``). A sidecar
        string is a fragment of a row, so the required-tag check waits for assembly.
     2. **Column values**: the column structure (mapper issues, sidecar references to columns the table
@@ -102,9 +104,10 @@ class SpreadsheetValidator:
     ) -> list[dict]:
         """Run the stages on a column source, stopping at the first stage that finds an error.
 
-        A table with a padded, blank or repeated column name is reported by stage 0 alone: one TABULAR_INVALID
-        per padded name, then per blank name, then per repeated name, with the FILE_NAME context when ``name``
-        is given (see ``validate_column_names``).
+        A table with a padded, blank or repeated column name, or a text file with an empty line or a line with
+        the wrong number of cells, is reported by stage 0 alone: one TABULAR_INVALID per padded name, then per
+        blank name, then per repeated name, then per such line, with the FILE_NAME context when ``name`` is given
+        (see ``validate_column_names`` and ``validate_lines``).
 
         Parameters:
             source (ColumnSource): The table to validate. A BaseInput (TabularInput, SpreadsheetInput) or any
@@ -166,16 +169,20 @@ class SpreadsheetValidator:
             # Strings and lists of strings need the schema to become definitions.
             extra_def_dicts = DefinitionDict(extra_def_dicts, hed_schema=self._schema)
 
-        # Stage 0: a padded, blank or repeated column name stops the run before the sidecar.
+        # Stage 0: a padded, blank or repeated column name, or an empty or ragged line, stops the run before the
+        # sidecar.
         if isinstance(source, BaseInput):
             padded, blank, repeated = source.padded_columns, source.blank_columns, source.duplicate_columns
+            line_problems = source.line_problems
         else:
             padded, blank, repeated = check_column_names(source.column_names())
-        if padded or blank or repeated:
+            line_problems = []
+        if padded or blank or repeated or line_problems:
             if name:
                 error_handler.push_error_context(ErrorContext.FILE_NAME, name)
             try:
-                return self.validate_column_names(padded, blank, repeated, error_handler)
+                issues = self.validate_column_names(padded, blank, repeated, error_handler)
+                return issues + self.validate_lines(line_problems, error_handler)
             finally:
                 if name:
                     error_handler.pop_error_context()
@@ -230,6 +237,33 @@ class SpreadsheetValidator:
         for column_name in repeated:
             error_handler.push_error_context(ErrorContext.COLUMN, column_name)
             issues += error_handler.format_error_with_context(ValidationErrors.TABULAR_INVALID, column_name)
+            error_handler.pop_error_context()
+        return issues
+
+    @staticmethod
+    def validate_lines(line_problems, error_handler) -> list[dict]:
+        """Stage 0: report the empty lines (e) and the lines with the wrong number of cells (f) as TABULAR_INVALID.
+
+        Each issue carries the ROW context set to the file line, counting the first line as 1, and is kept in
+        line order (not sorted).
+
+        Parameters:
+            line_problems (list): (file line, cells found or None for an empty line, cells expected) for each
+                line, as :attr:`~hed.models.base_input.BaseInput.line_problems` holds them.
+            error_handler (ErrorHandler): Holds context.
+
+        Returns:
+            list[dict]: The issues found.
+        """
+        issues = []
+        for line_number, cells, expected in line_problems:
+            error_handler.push_error_context(ErrorContext.ROW, line_number)
+            if cells is None:
+                issues += error_handler.format_error_with_context(ValidationErrors.TABULAR_LINE_EMPTY, line_number)
+            else:
+                issues += error_handler.format_error_with_context(
+                    ValidationErrors.TABULAR_LINE_CELL_COUNT, line_number, cells, expected
+                )
             error_handler.pop_error_context()
         return issues
 

@@ -267,6 +267,16 @@ def val_error_tabular_column_name_blank(column_number):
     return f"Column {column_number} of the first line (the column names) of the tabular file has a blank name."
 
 
+@hed_error(ValidationErrors.TABULAR_LINE_EMPTY, actual_code=ValidationErrors.TABULAR_INVALID)
+def val_error_tabular_line_empty(line_number):
+    return f"Line {line_number} of the tabular file is empty (no characters before its line terminator)."
+
+
+@hed_error(ValidationErrors.TABULAR_LINE_CELL_COUNT, actual_code=ValidationErrors.TABULAR_INVALID)
+def val_error_tabular_line_cell_count(line_number, cells, expected):
+    return f"Line {line_number} of the tabular file has {cells} tab-separated cells, but the first line has {expected}."
+
+
 @hed_error(ValidationErrors.TABULAR_VALUE_PADDED, actual_code=ValidationErrors.TABULAR_INVALID)
 def val_error_tabular_value_padded(value, column_name):
     return (
