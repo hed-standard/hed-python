@@ -904,11 +904,12 @@ class BaseInput:
                     index_col=False,
                 )
         except pd.errors.EmptyDataError:
-            if not self._line_problems:
+            if not has_names:
                 self._dataframe = pd.DataFrame()  # Handle case where file has no data
                 return
-            # Empty lines at the start, then other lines: pandas finds no columns, but the first line is the
-            # column names (one blank name), so the names are still set and reported below.
+            # pandas finds no columns when the first line is empty (the text is not, see above). That line is
+            # the column names, one blank name, so the names are still set and reported below, whether or not
+            # other lines follow.
             self._dataframe = None
         except Exception as e:
             if not self._line_problems:

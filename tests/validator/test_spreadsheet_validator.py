@@ -687,6 +687,12 @@ class TestTabularLines(unittest.TestCase):
         issues = self._validate("onset\tHED\n1.0\tRed\n2.0\tInvalidTagXYZ\n")
         self.assertEqual([issue[ErrorContext.ROW] for issue in issues], [3])
 
+    def test_only_a_line_ending_with_annotating_sidecar(self):
+        sidecar = Sidecar(io.StringIO(json.dumps({"trial": {"HED": {"go": "Experimental-trial"}}})))
+        issues = self._validate("\n", sidecar=sidecar)
+        self.assertEqual([issue["code"] for issue in issues], [ValidationErrors.TABULAR_INVALID])
+        self.assertIn("Column 1 ", issues[0]["message"])
+
     def test_lone_cr_does_not_end_a_row(self):
         # The lone CR is inside the value of line 2, so pandas also puts the invalid tag on line 3.
         issues = self._validate("HED\nRed\rBlue\nInvalidTagXYZ\n")

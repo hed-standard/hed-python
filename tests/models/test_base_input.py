@@ -565,8 +565,15 @@ class TestLineProblems(unittest.TestCase):
         self.assertEqual(input_file.columns, [""])
         self.assertEqual(input_file.line_problems, [(2, None, 1), (3, 2, 1), (4, 2, 1)])
 
-    def test_only_line_endings_is_an_empty_table(self):
-        self.assertEqual(BaseInput(io.StringIO("\n"), file_type=".tsv").blank_columns, [])
+    def test_only_a_line_ending_is_a_blank_column_name(self):
+        # An empty first line is one blank column name (specification 3.2.10); only an empty file has no columns.
+        for text in ("\n", "\r\n", "﻿\n"):
+            with self.subTest(text=text):
+                input_file = BaseInput(io.StringIO(text), file_type=".tsv")
+                self.assertEqual(input_file.blank_columns, [0])
+                self.assertEqual(input_file.columns, [""])
+                self.assertEqual(input_file.line_problems, [])
+        self.assertEqual(BaseInput(io.StringIO(""), file_type=".tsv").blank_columns, [])
 
     def test_blanks_only_line_kept_as_value(self):
         input_file = BaseInput(io.StringIO("trial\ngo\n \n"), file_type=".tsv")
