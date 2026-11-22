@@ -1,7 +1,7 @@
 """Value characters follow the schema and the specification's character_sets.json.
 
-The value-text set (from HED 8.5.0 a textClass value may not contain (, ), # or ~), the declaration-wins gate
-(decisions D2 and D5, 2026-09-30), the value-text rule for a placeholder without a value class (D3), the
+The value-text set (from HED 8.5.0 a textClass value may not contain (, ), # or ~), the declaration-wins gate,
+the value-text rule for a placeholder without a value class, the
 double-quote rule, and the messages that name the character, its code point, its index and the set.
 """
 

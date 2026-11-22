@@ -35,6 +35,7 @@ CI runs ruff check, ruff format --check, typos, the unittest suite, and the spec
 - Google-style docstrings for public APIs, with `Parameters:` not `Args:`.
 - Markdown headers in sentence case: first word, proper nouns, and acronyms.
 - No mocks in tests: real schemas, real HED strings, real files (`.rules/testing.md`).
+- Code comments and docstrings state the rule and cite its public source (a specification section, an issue); never a working ruling, a person, or a `.status/` decision or plan.
 - Commits: atomic, subject under 50 chars, no emoji, no AI attribution. PRs target `main` (`.rules/git.md`).
 
 ## Rules that are easy to get wrong
@@ -74,7 +75,7 @@ Hosted at https://github.com/hed-standard/hed-python. Keep local `main` a clean 
 ## Working agreements
 
 - IMPORTANT: every file written to `.status/` opens with a `For humans:` summary - three or four sentences, at the very top: what the file is and what a person needs to take from it. The same applies to a long answer in a session: lead with the conclusion.
-- IMPORTANT: temporary scripts, experiments, and one-off test files go in `.status/scratch/` - **never the repository root**. `scratch/` is cleaned only when Kay asks: list each file you would remove and why, wait for her approval, then delete exactly those files yourself.
+- IMPORTANT: temporary scripts, experiments, and one-off test files go in `.status/scratch/` - **never the repository root**. `scratch/` is cleaned only when the developer asks for a cleanup: list the files that will be deleted and ask whether it is okay to delete them, then delete exactly those files yourself.
 - IMPORTANT: ask before deleting, moving, or renaming anything under `.status/`. `README.md`, `plans/`, and `prompts/` are living documents: edit them freely, including whole-file rewrites, without asking (copy `README.md` to `scratch/` before rewriting it wholesale). Notes are write-once; `decisions.md` and `development_history.md` are append-only.
 - For a change spanning more than three files, write a plan to `.status/plans/` and stop for review before editing.
 - When you are guessing about an external API or data format, say so explicitly rather than assuming.
