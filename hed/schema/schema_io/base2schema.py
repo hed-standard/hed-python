@@ -142,7 +142,8 @@ class SchemaLoader(ABC):
 
         # inLibrary tells a library's elements from its standard partner's in a merged view. The elements of
         # an unmerged partnered file are all the library's, so they are stamped here; a merged file carries the
-        # attribute itself, and an unpartnered library has no partner to be told apart from.
+        # attribute itself, and an unpartnered library has no partner to be told apart from (specification
+        # Appendix A.1.4.8).
         if self.library and self._schema.with_standard and not self._schema.merged:
             # only add it if not already present - This is a rare case
             if not entry.has_attribute(HedKey.InLibrary):

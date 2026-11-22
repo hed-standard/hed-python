@@ -74,7 +74,10 @@ class TestGetProblemChars(unittest.TestCase):
 
 
 class TestAllowedNamesGate(unittest.TestCase):
-    """The schema's allowedCharacter declaration wins from standard schema 8.5.0; the defaults apply before."""
+    """The schema's allowedCharacter declaration wins from standard schema 8.5.0; the defaults apply before.
+
+    Specification Appendix A.7.3 (``declaration_wins_from``).
+    """
 
     @classmethod
     def setUpClass(cls):
