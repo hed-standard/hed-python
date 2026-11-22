@@ -35,7 +35,7 @@ CI runs ruff check, ruff format --check, typos, the unittest suite, and the spec
 - Google-style docstrings for public APIs, with `Parameters:` not `Args:`.
 - Markdown headers in sentence case: first word, proper nouns, and acronyms.
 - No mocks in tests: real schemas, real HED strings, real files (`.rules/testing.md`).
-- Code comments and docstrings state the rule and cite its public source (a specification section, an issue); never a working ruling, a person, or a `.status/` decision or plan.
+- A code comment or docstring that explains a rule cites its public source (a specification section, an issue). No comment or docstring cites a working ruling, a person, or a `.status/` decision or plan.
 - Commits: atomic, subject under 50 chars, no emoji, no AI attribution. PRs target `main` (`.rules/git.md`).
 
 ## Rules that are easy to get wrong
