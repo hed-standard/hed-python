@@ -35,6 +35,7 @@ CI runs ruff check, ruff format --check, typos, the unittest suite, and the spec
 - Google-style docstrings for public APIs, with `Parameters:` not `Args:`.
 - Markdown headers in sentence case: first word, proper nouns, and acronyms.
 - No mocks in tests: real schemas, real HED strings, real files (`.rules/testing.md`).
+- A code comment or docstring that explains a rule cites its public source (a specification section, an issue). No comment or docstring cites a working ruling, a person, or a `.status/` decision or plan.
 - Commits: atomic, subject under 50 chars, no emoji, no AI attribution. PRs target `main` (`.rules/git.md`).
 
 ## Rules that are easy to get wrong
@@ -66,15 +67,16 @@ Hosted at https://github.com/hed-standard/hed-python. Keep local `main` a clean 
 - `.status/README.md` - current state, unfinished work, and an ordered `Next` list. Read this first.
 - `.status/development_history.md` - what has shipped, newest first, with pointers to the records. History only; append at the top when a PR merges.
 - `.status/decisions.md` - why things are the way they are. Read before proposing structural changes. Append entries; never rewrite one.
-- `.status/plans/*.md` - unfinished plans only. Check the `Status:` header and the `[ ]` / `[x]` markers before starting work. A finished plan moves to `.status/archive/completed_plans/`; split any still-open boxes into a new plan first.
+- `.status/plans/*.md` - unfinished plans only, named `YYYY-MM-DD_<slug>.md` with the day each was opened. Check the `Status:` header and the `[ ]` / `[x]` markers before starting work. A finished plan moves to `.status/archive/completed_plans/`, name unchanged; split any still-open boxes into a new plan first.
+- `.status/notes/` - dated records, always named `YYYY-MM-DD_<slug>.md`. Write-once.
 - `.status/local-environment.md` - this machine's paths, interpreter, and quirks. Tool-agnostic. Never copy its contents into a committed file.
 - IMPORTANT: do not read `.status/archive/` unless a file is named for you. The `.status/` root holds only `README.md`, `decisions.md`, `development_history.md`, and `local-environment.md`; nothing else is created there.
 
 ## Working agreements
 
 - IMPORTANT: every file written to `.status/` opens with a `For humans:` summary - three or four sentences, at the very top: what the file is and what a person needs to take from it. The same applies to a long answer in a session: lead with the conclusion.
-- IMPORTANT: temporary scripts, experiments, and one-off test files go in `.status/scratch/` - **never the repository root**. Anything in `scratch/` may be deleted unread.
-- IMPORTANT: never delete or rewrite a file under `.status/` without asking first. Appending is fine.
+- IMPORTANT: temporary scripts, experiments, and one-off test files go in `.status/scratch/` - **never the repository root**. `scratch/` is cleaned only when the developer asks for a cleanup: list the files that will be deleted and ask whether it is okay to delete them, then delete exactly those files yourself.
+- IMPORTANT: ask before deleting, moving, or renaming anything under `.status/`. `README.md`, `plans/`, and `prompts/` are living documents: edit them freely, including whole-file rewrites, without asking (copy `README.md` to `scratch/` before rewriting it wholesale). Notes are write-once; `decisions.md` and `development_history.md` are append-only.
 - For a change spanning more than three files, write a plan to `.status/plans/` and stop for review before editing.
 - When you are guessing about an external API or data format, say so explicitly rather than assuming.
 - Show evidence, not assertions: the command you ran and its actual output.

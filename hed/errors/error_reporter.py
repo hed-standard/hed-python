@@ -63,7 +63,7 @@ ROW_COUNT_KEY = "row_count"
 
 # Keyword arguments of an error message function that are also copied onto the issue dictionary, so that a
 # consumer (hed-server, the CLI) can render them without parsing the message. ``char_set`` names the character
-# set or rule an invalid character failed; ``code_point`` is its ``U+XXXX`` form (decision 2026-09-30).
+# set or rule an invalid character failed; ``code_point`` is its ``U+XXXX`` form.
 ISSUE_DETAIL_KEYS = ("char_set", "code_point")
 
 

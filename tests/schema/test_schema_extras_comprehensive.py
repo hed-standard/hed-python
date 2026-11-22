@@ -79,7 +79,7 @@ class TestSchemaExtrasAllFormats(unittest.TestCase):
 
         The number of partner rows is not pinned. The fixture partners with the 8.5.0 prerelease, which a
         save or a reload of an unmerged file fetches as it is today, and hed-schemas edits that prerelease
-        (2026-09-17 added a Sources row and two ExternalAnnotations rows, which broke the pinned counts).
+        (rows added to it have broken pinned counts before).
         Until 8.5.0 is released, these tests check the shape of the partner's rows, not their number.
         """
         partner_rows = (df[df_constants.in_library] == "").sum()

@@ -1,8 +1,8 @@
 """Whole-value rules of the value classes, as the character table defines them.
 
 The dateTimeClass rule is the BIDS Datetime format (RFC 3339 with an optional offset), shared with
-hed-specification's character_sets.json, followed by a Gregorian calendar check of the date (Kay,
-2026-10-02); the numericClass rule uses ASCII digits only.
+hed-specification's character_sets.json, followed by a Gregorian calendar check of the date; the numericClass
+rule uses ASCII digits only.
 """
 
 import unittest

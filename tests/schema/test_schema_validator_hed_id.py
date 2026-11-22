@@ -15,7 +15,7 @@ class Test(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.hed_schema = load_schema_version("8.3.0")
-        # score is the released library with a version history and a registry entry (plan Q1, 2026-10-07).
+        # score is the released library with a version history and a registry entry.
         cls.test_schema = load_schema_version("score_2.1.0")
         cls.hed_schema84 = copy.deepcopy(cls.hed_schema)
         cls.hed_schema84.header_attributes[hed_schema_constants.VERSION_ATTRIBUTE] = "8.4.0"

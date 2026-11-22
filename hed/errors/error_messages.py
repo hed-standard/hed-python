@@ -63,7 +63,7 @@ def val_error_tag_extended(tag, problem_tag):
 
 
 def _invalid_character_message(character, char_index, source_string, code_point=None, allows=None):
-    """One message pattern for every invalid-character report (decision 2026-09-30).
+    """One message pattern for every invalid-character report.
 
     ``Invalid character "?" (U+003F) at index 8 of "Label/reaching?": nameClass allows ...``. The code point
     is computed when the caller does not pass it; the ``allows`` clause names the set the character failed.

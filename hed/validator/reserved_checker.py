@@ -2,8 +2,8 @@
 
 ``hed/validator/data/reserved_tags.json`` is a verbatim copy of ``reserved_tags.json`` as published by the HED
 specification (section 3.2.8, defined in Appendix A.6). The ``reserved_tags.yaml`` workflow fails when the copy
-drifts from hed-specification main. Every row of the file applies in every standard schema version >= 8.0.0
-(hed-specification decision 2026-10-15): its ``requireValue``, ``tagGroup`` and ``topLevelTagGroup`` fields
+drifts from hed-specification main. Every row of the file applies in every standard schema version >= 8.0.0:
+its ``requireValue``, ``tagGroup`` and ``topLevelTagGroup`` fields
 supply what the 8.0.0 to 8.2.0 schemas lack on ``Delay`` and ``Duration``, so no check here takes a version.
 The loader refuses a file whose file version major number it does not support (specification Appendix A.6.1).
 """

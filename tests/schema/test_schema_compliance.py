@@ -407,7 +407,7 @@ class TestLibrarySchemaCompliance(unittest.TestCase):
 
 class TestLibraryPartnerRules(unittest.TestCase):
     """check_library_partner_rules: specification Appendix B SCHEMA_LIBRARY_INVALID reasons j, k and l, and the
-    inLibrary stamp that only unmerged partnered libraries receive (plan library_compliance_rules.md, 2026-10-06).
+    inLibrary stamp that only unmerged partnered libraries receive.
 
     The fixtures are the hed-tests SCHEMA_LIBRARY_INVALID cases, trimmed; the partner is HED 8.4.0.
     """
@@ -508,7 +508,7 @@ class TestLibraryPartnerRules(unittest.TestCase):
         self.assertFalse(hed_schema.properties["boolProperty"].has_attribute("inLibrary"))
 
     def test_l_reserved_in_an_unpartnered_library(self):
-        # hed-specification decision 2026-10-14: no library schema, partnered or not, may carry reserved.
+        # SCHEMA_LIBRARY_INVALID (l): no library schema, partnered or not, may carry reserved.
         hed_schema = self.schema_from(
             self.HEADER_UNPARTNERED,
             [self.tag("NewTag") + " <nowiki>{reserved}</nowiki>"],
