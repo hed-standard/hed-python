@@ -1004,7 +1004,7 @@ class TestHedSchemaMerging(unittest.TestCase):
         old_score_schema = load_schema_version("score_1.0.0")
 
         # score 1.0.0 is unpartnered: it has no standard partner to be told apart from, so the loader
-        # does not stamp inLibrary on its entries.
+        # does not stamp inLibrary on its entries (specification Appendix A.1.4.8).
         tag_entry = old_score_schema.get_tag_entry("Modulator")
         self.assertFalse(tag_entry.has_attribute(HedKey.InLibrary))
 

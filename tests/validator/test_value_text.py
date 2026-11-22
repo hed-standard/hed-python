@@ -100,7 +100,10 @@ class TestValueText(unittest.TestCase):
 
 
 class TestDeclarationWinsGate(unittest.TestCase):
-    """D2 and D5: from 8.5.0 the schema's allowedCharacter declaration defines the class; before, the defaults."""
+    """From 8.5.0 the schema's allowedCharacter declaration defines the class; before, the defaults.
+
+    Specification Appendix A.7.3 (``declaration_wins_from``).
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -146,7 +149,7 @@ class TestDeclarationWinsGate(unittest.TestCase):
 
 
 class TestValueWithoutValueClass(unittest.TestCase):
-    """D3: a placeholder that declares no valueClass takes value-text."""
+    """A placeholder that declares no valueClass takes value-text (specification 3.1.4.6 and 2.2)."""
 
     @classmethod
     def setUpClass(cls):

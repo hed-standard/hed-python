@@ -156,7 +156,7 @@ class UnitValueValidator:
 
         if not value_classes:
             # A placeholder with no valueClass takes value-text: the characters a value may contain without
-            # changing the structure of the HED string it is substituted into.
+            # changing the structure of the HED string it is substituted into (specification 3.1.4.6 and 2.2).
             names = list(UNCLASSED_VALUE_SETS)
             errors = self._get_problem_indices(stripped_value, names, start_index=start_index)
             return self.report_value_char_errors(

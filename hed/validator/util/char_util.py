@@ -15,14 +15,16 @@ from hed.validator.util.character_sets import CharacterSets, code_point
 EXTENSION_SETS = ("name", "forward-slash")
 # The character sets of the schema path of a tag (the part matched to schema nodes).
 TAG_PATH_SETS = ("alphanumeric", "hyphen", "underscore", "forward-slash", "colon", "nonascii")
-# The value class used for a value whose placeholder declares no valueClass.
+# The value class used for a value whose placeholder declares no valueClass: such a placeholder takes textClass
+# values (specification 3.1.4.6), and value-text is the textClass character set (specification 2.2).
 UNCLASSED_VALUE_SETS = ("value-text",)
 # The version from which pre-8.3.0 schemas' ASCII-only rule no longer applies, for the message.
 ASCII_ONLY_BEFORE = "8.3.0"
 # Message clauses for the string-level checks (specification Appendix B CHARACTER_INVALID b).
 COLUMN_BRACES_RULE = "curly braces may appear only in a sidecar column reference"
 # The value class whose whole-value rule is a date-time. After the shape regex the date must exist in the
-# Gregorian calendar, as the BIDS text requires (the BIDS validator itself checks only the regex). The leap second ``:60`` the regex admits is not a calendar question and stays allowed.
+# Gregorian calendar, as the BIDS text requires (the BIDS validator itself checks only the regex). The leap
+# second ``:60`` the regex admits is not a calendar question and stays allowed.
 DATE_TIME_CLASS = "dateTimeClass"
 
 
@@ -279,7 +281,7 @@ class CharRexValidator(CharValidator):
         """Return the character-set names that define the characters of value class *cname*.
 
         From standard schema 8.5.0, and in libraries partnered with 8.5.0 or later, the schema's own
-        ``allowedCharacter`` declaration defines the class, provided every name is a
+        ``allowedCharacter`` declaration defines the class (specification Appendix A.7.3), provided every name is a
         known set, an alias, or a single literal character; an unknown name is a schema compliance error and
         the defaults apply instead. On earlier standard versions the specification's ``value_class_defaults``
         define the five standard classes, because their released declarations are incomplete (nameClass
