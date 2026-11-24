@@ -24,6 +24,8 @@
 ## Specification files
 
 - **The packaged `reserved_tags.json` carries `specificationVersion` and `fileVersion`** (hed-specification #731), refreshed verbatim from hed-specification. Both specification files, `reserved_tags.json` and `character_sets.json`, are now refused with `HedFileError` `INVALID_FILE_FORMAT` when their file version is missing or its major number is not 1; any minor and patch number is accepted (specification Appendix A.6.1). The check lives in the new internal module `hed/validator/util/spec_files.py`. ([#1489](https://github.com/hed-standard/hed-python/issues/1489))
+- **Unit plurals come from the specification's `unit_plurals.json`** (specification 3.1.4.4 and A.8), packaged verbatim as `hed/validator/data/unit_plurals.json` and refused like the other two files when its file version major number is not 1. A unit name that the file does not list has no plural, and nothing is derived by a rule. Visible changes: `Quantity/3 degrees-Celsius` is now valid; `degree-Celsiuses`, `degrees Celsius` and, in score `2.0.0` and `2.1.0` and standard `8.3.0` and `8.4.0`, `uVs` are now `UNITS_INVALID`. A new workflow compares the copy with hed-specification `main`. ([#1517](https://github.com/hed-standard/hed-python/issues/1517))
+- **The runtime dependency `inflect` is removed**; it formed unit plurals. ([#1517](https://github.com/hed-standard/hed-python/issues/1517))
 
 # Release 1.3.0 October 23, 2026
 
