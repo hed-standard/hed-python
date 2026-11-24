@@ -14,13 +14,30 @@ skip_tests = {
     # "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
     # "curly-braces-has-no-hed": "Need to fix issue #1006",
     # "character-invalid-non-printing appears": "Need to recheck how this is verified for textClass",
+    "attribute-invalid-on-property": "A schema property carries only hedId; issue #1511",
+    "definition-invalid-identical-in-one-string": "Identical definitions in one HED string; issue #1520",
+    "definition-invalid-value-case": "Definitions compare values with case; issues #1520 and #1514",
+    "element-deprecated-unit": "ELEMENT_DEPRECATED for a deprecated unit; issue #1506",
+    "sidecar-invalid-annotation-empty": "SIDECAR_INVALID for an empty annotation; issue #1508",
+    "tag-expression-repeated-value-case": "Values compare with case; issue #1507",
 }
 
 
-# Test-only libraries resolved against hed-tests json_test_data/test_schemas/hedxml
-# (the loading convention documented in that folder's README).
-TEST_SCHEMA_LIBRARIES = ("testconflict", "testclash", "testminimal")
+# Standard versions that resolve against hed-tests json_test_data/test_schemas/hedxml (the loading convention
+# documented in that folder's README). The test-only libraries are the HED_<library>_<version>.xml files there.
 TEST_SCHEMA_STANDARD_VERSIONS = ("8.5.0",)
+
+
+def vendored_test_libraries(hedxml_dir) -> tuple[str, ...]:
+    """Return the names of the test-only libraries vendored in hedxml_dir (``testaux`` for HED_testaux_1.0.0.xml)."""
+    if not os.path.isdir(hedxml_dir):
+        return ()
+    names = {
+        filename[len("HED_") :].rsplit("_", 1)[0]
+        for filename in os.listdir(hedxml_dir)
+        if filename.startswith("HED_") and filename.endswith(".xml")
+    }
+    return tuple(sorted(names))
 
 
 class MyTestCase(unittest.TestCase):
@@ -35,6 +52,7 @@ class MyTestCase(unittest.TestCase):
 
         cls.test_base_dir = test_base_dir
         cls.test_schemas_dir = os.path.join(test_base_dir, "test_schemas", "hedxml")
+        cls.test_schema_libraries = vendored_test_libraries(cls.test_schemas_dir)
         cls.fail_count = []
         cls.current_test_file = None
         cls.test_counter = {"total": 0, "passed": 0, "failed": 0, "skipped": 0}
@@ -219,7 +237,7 @@ class MyTestCase(unittest.TestCase):
             versions = versions.split(",")
         for version in versions:
             name = version.strip().split(":", 1)[-1]  # drop any namespace prefix
-            if name.startswith(TEST_SCHEMA_LIBRARIES) or name in TEST_SCHEMA_STANDARD_VERSIONS:
+            if name.startswith(self.test_schema_libraries) or name in TEST_SCHEMA_STANDARD_VERSIONS:
                 return self.test_schemas_dir
         return None
 
