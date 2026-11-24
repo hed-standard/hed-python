@@ -25,6 +25,7 @@
 
 - **A schema property carries no attribute other than `hedId`** (specification 3.1.4.8): any other attribute on a property, `deprecatedFrom` included, is now `SCHEMA_ATTRIBUTE_INVALID`. Before, `deprecatedFrom` on a property was accepted, and a deprecated property used by a non-deprecated schema attribute gave `SCHEMA_DEPRECATION_ERROR`; that check (Appendix B reason e) is retired. Such a schema still loads and is written back unchanged. ([#1511](https://github.com/hed-standard/hed-python/issues/1511))
 - **The comma is allowed in the prologue and epilogue** (specification 4.0.0, Appendix B `SCHEMA_CHARACTER_INVALID` d), in schemas of every version. ([#1505](https://github.com/hed-standard/hed-python/issues/1505))
+- **`SCHEMA_CHARACTER_INVALID` and `SCHEMA_ATTRIBUTE_VALUE_INVALID` for a unit class on a non-placeholder are errors**, not warnings, as Appendix B gives them. `check_compliance(check_for_warnings=False)` now reports them, so the schema scripts (`validate_schemas`, `hed_convert_schema`) stop at compliance for a schema that has them. Of the bundled schemas, `8.0.0`, `8.1.0`, `8.2.0` and score `1.0.0` to `1.2.0` now have compliance errors (they had only warnings, or fewer errors). ([#1515](https://github.com/hed-standard/hed-python/issues/1515))
 
 ## Specification files
 
