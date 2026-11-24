@@ -107,7 +107,9 @@ class TestHedSchema(unittest.TestCase):
 
     def test_schema_compliance(self):
         warnings = self.hed_schema_group.check_compliance(True)
-        self.assertEqual(len(warnings), 24)
+        # The comma is allowed in the prologue and epilogue from specification 4.0.0 (issue #1505), which removes
+        # four issues per schema from this fixture.
+        self.assertEqual(len(warnings), 16)
 
     def test_bad_prefixes(self):
         schema = load_schema_version(xml_version="8.3.0")

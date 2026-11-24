@@ -236,7 +236,7 @@ class SchemaValidator:
         self.summary.add_sub_check("prologue character validation")
         self.summary.add_sub_check("epilogue character validation")
         issues = []
-        char_set = get_allowed_characters_by_name(["text", "newline"])
+        char_set = get_allowed_characters_by_name(["text", "comma", "newline"])
         for label, text in [("Prologue", self.hed_schema.prologue), ("Epilogue", self.hed_schema.epilogue)]:
             for _, index in get_problem_indexes(text, char_set):
                 issues += ErrorHandler.format_error(
