@@ -21,6 +21,10 @@
 - **`annotation_util.df_to_hed` with `description_tag=True` no longer adds a `Description` tag beside definitions**, which made the sidecar invalid; the description stays in the `Levels` or `Description` text.
 - In a file without an `onset` column, the `char_index` of an assembled-row issue now counts in the assembled string with `", "` between cells, as for files with onsets (one more per earlier cell than before).
 
+## Schema compliance
+
+- **A schema property carries no attribute other than `hedId`** (specification 3.1.4.8): any other attribute on a property, `deprecatedFrom` included, is now `SCHEMA_ATTRIBUTE_INVALID`. Before, `deprecatedFrom` on a property was accepted, and a deprecated property used by a non-deprecated schema attribute gave `SCHEMA_DEPRECATION_ERROR`; that check (Appendix B reason e) is retired. Such a schema still loads and is written back unchanged. ([#1511](https://github.com/hed-standard/hed-python/issues/1511))
+
 ## Specification files
 
 - **The packaged `reserved_tags.json` carries `specificationVersion` and `fileVersion`** (hed-specification #731), refreshed verbatim from hed-specification. Both specification files, `reserved_tags.json` and `character_sets.json`, are now refused with `HedFileError` `INVALID_FILE_FORMAT` when their file version is missing or its major number is not 1; any minor and patch number is accepted (specification Appendix A.6.1). The check lives in the new internal module `hed/validator/util/spec_files.py`. ([#1489](https://github.com/hed-standard/hed-python/issues/1489))

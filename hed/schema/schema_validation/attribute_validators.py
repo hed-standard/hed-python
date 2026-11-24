@@ -65,12 +65,12 @@ def attribute_is_deprecated(hed_schema, tag_entry, attribute_name) -> list:
         list[dict]: A list of issues from validating this attribute.
     """
     issues = []
-    # Attributes has to check properties
-    section_key = HedSectionKey.Attributes
+    # A schema property cannot be deprecated (specification 3.1.4.8), so the properties of a schema attribute are
+    # not checked here; a property that carries deprecatedFrom is SCHEMA_ATTRIBUTE_INVALID instead.
     if tag_entry.section_key == HedSectionKey.Attributes:
-        section_key = HedSectionKey.Properties
+        return issues
 
-    attribute_entry = hed_schema.get_tag_entry(attribute_name, section_key)
+    attribute_entry = hed_schema.get_tag_entry(attribute_name, HedSectionKey.Attributes)
     if (
         attribute_entry
         and attribute_entry.has_attribute(HedKey.DeprecatedFrom)

@@ -791,11 +791,17 @@ class HedSchema(HedSchemaBase):
         """
         element_prop_key = HedKey.ElementDomain if self.schema_83_props else HedKeyOld.ElementProperty
 
-        # Common logic for Attributes and Properties
-        if key_class in [HedSectionKey.Attributes, HedSectionKey.Properties]:
-            prop_added_dict = {}
-            if key_class == HedSectionKey.Attributes:
-                prop_added_dict = dict(self._sections[HedSectionKey.Properties].items())
+        # A schema property carries no schema attribute other than hedId (specification 3.1.4.8), so any other
+        # attribute on a property is unknown and reported as SCHEMA_ATTRIBUTE_INVALID. inLibrary is the mark a
+        # merged file, or the loader of an unmerged one, puts on a library's own rows; a library property is
+        # reported by the library rules (SCHEMA_LIBRARY_INVALID j and k), not a second time here.
+        if key_class == HedSectionKey.Properties:
+            attributes = self._sections[HedSectionKey.Attributes]
+            allowed = {name: attributes.get(name) for name in (HedKey.HedID, HedKey.InLibrary)}
+            return {name: entry for name, entry in allowed.items() if entry is not None}
+
+        if key_class == HedSectionKey.Attributes:
+            prop_added_dict = dict(self._sections[HedSectionKey.Properties].items())
             self._add_element_property_attributes(prop_added_dict, element_prop_key)
             return prop_added_dict
 

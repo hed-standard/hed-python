@@ -120,7 +120,7 @@ def schema_error_SCHEMA_INVALID_CHILD(tag, child_tag_list):
 def schema_error_unknown_attribute(attribute_name, source_tag):
     return (
         f"Attribute '{attribute_name}' used by '{source_tag}' "
-        + "was not defined in the schema, or was used outside of it's defined class."
+        + "is not defined in the schema or is not allowed on this kind of entry."
     )
 
 
