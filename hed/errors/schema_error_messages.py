@@ -49,6 +49,15 @@ def schema_error_library_properties_mismatch(tag, library, with_standard, differ
     )
 
 
+@hed_error(SchemaErrors.SCHEMA_LIBRARY_EXTRAS_DUPLICATE, actual_code=SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY)
+def schema_error_library_extras_duplicate(tag, library, with_standard, section):
+    return (
+        f"The {section} row '{tag}' of library '{library}', which is partnered with HED {with_standard} and "
+        f"unmerged, has the same key as a row of its partner; an unmerged library lists only rows of its own "
+        f"(specification 3.1.2.2, Appendix B SCHEMA_LIBRARY_INVALID h)."
+    )
+
+
 @hed_error(SchemaErrors.SCHEMA_LIBRARY_RESERVED, actual_code=SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY)
 def schema_error_library_reserved(tag, library, section):
     return (
