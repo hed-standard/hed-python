@@ -162,10 +162,17 @@ class TestUnmergedLibraryExtrasKeys(unittest.TestCase):
 
     def test_the_released_libraries_that_repeat_partner_rows_load_but_are_not_compliant(self):
         data = os.path.join(os.path.dirname(hed.__file__), "schema", "schema_data")
-        for name in ("HED_lang_1.1.0.xml", "HED_lang_1.2.0.xml", "HED_score_2.1.0.xml", "HED_score_2.2.0.xml"):
+        for name in ("HED_lang_1.1.0.xml", "HED_score_2.1.0.xml"):
             with self.subTest(name=name):
                 codes = [issue["code"] for issue in load_schema(os.path.join(data, name)).check_compliance()]
                 self.assertIn("SCHEMA_LIBRARY_INVALID", codes)
+
+    def test_the_other_bundled_libraries_are_compliant(self):
+        data = os.path.join(os.path.dirname(hed.__file__), "schema", "schema_data")
+        for name in ("HED_lang_1.2.0.xml", "HED_score_2.2.0.xml"):
+            with self.subTest(name=name):
+                codes = [issue["code"] for issue in load_schema(os.path.join(data, name)).check_compliance()]
+                self.assertNotIn("SCHEMA_LIBRARY_INVALID", codes)
 
 
 class TestUnmergedSaveDropsPartnerRows(unittest.TestCase):
@@ -188,7 +195,7 @@ class TestUnmergedSaveDropsPartnerRows(unittest.TestCase):
 
     def test_a_released_library_saved_unmerged_is_compliant(self):
         data = os.path.join(os.path.dirname(hed.__file__), "schema", "schema_data")
-        released = load_schema(os.path.join(data, "HED_score_2.2.0.xml"))
+        released = load_schema(os.path.join(data, "HED_score_2.1.0.xml"))  # repeats 30 partner rows
         resaved = from_string(released.get_as_mediawiki_string(save_merged=False), schema_format=".mediawiki")
         codes = [issue["code"] for issue in resaved.check_compliance()]
         self.assertNotIn("SCHEMA_LIBRARY_INVALID", codes)
