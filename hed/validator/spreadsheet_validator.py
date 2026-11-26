@@ -467,10 +467,19 @@ class SpreadsheetValidator:
                 # The template's tag has a schema entry (placeholder_tag found it), so those checks can
                 # only fail because of the value; the sidecar's own validity is not re-judged here.
                 tag = HedTag(substituted, self._schema)
-                tag_issues = self._hed_validator.validate_units(tag, allow_placeholders=False)
+                tag_issues = self._hed_validator.validate_units(tag, allow_placeholders=False, check_deprecated=False)
                 substituted_string = HedString(substituted, self._schema, def_dict=self._def_dict)
                 if not tag_issues:
-                    tag_issues = self._hed_validator.run_basic_checks(substituted_string, allow_placeholders=False)
+                    # A deprecated element written in the template or the definition is reported there, once
+                    # (Appendix B ELEMENT_DEPRECATED), not again for each value.
+                    tag_issues = [
+                        issue
+                        for issue in self._hed_validator.run_basic_checks(substituted_string, allow_placeholders=False)
+                        if issue["code"] != ValidationErrors.ELEMENT_DEPRECATED
+                    ]
+                if not tag_issues and placeholder.extension == "#":
+                    # The units, if any, come from the value: report a deprecated unit or unit modifier.
+                    tag_issues = self._hed_validator.validate_units(tag, allow_placeholders=False)
                 if not tag_issues:
                     continue
                 error_handler.push_error_context(ErrorContext.ROW, rows[0] + row_offset)

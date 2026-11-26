@@ -4,9 +4,11 @@ testaux 1.1.0 from hed-tests deprecates the unit bigauxunit and the unit modifie
 auxsiunit are not deprecated.
 """
 
+import io
+import json
 import unittest
 
-from hed.models import DefinitionDict, HedString
+from hed.models import DefinitionDict, HedString, Sidecar, TabularInput
 from hed.validator import HedValidator
 from tests.schema.util_test_schemas import load_test_schema
 
@@ -53,6 +55,26 @@ class TestDeprecatedUnits(unittest.TestCase):
         self.assertEqual(self.codes("Def/Open/3 bigauxunit", open_definition), ["ELEMENT_DEPRECATED"])
         expanded = "(Def-expand/Open/3 bigauxunit, (Aux-measure/3 bigauxunit))"
         self.assertEqual(self.codes(expanded, open_definition), ["ELEMENT_DEPRECATED"])
+
+    def table_warnings(self, template, cells, definitions=None):
+        """Count ELEMENT_DEPRECATED for a value column with this template and these cells."""
+        sidecar = Sidecar(io.StringIO(json.dumps({"val": {"HED": template}})))
+        lines = ["onset\tduration\tval"] + [f"{row}\t0\t{cell}" for row, cell in enumerate(cells, 1)]
+        table = TabularInput(io.StringIO("\n".join(lines) + "\n"), sidecar=sidecar)
+        issues = table.validate(self.schema, extra_def_dicts=definitions)
+        return sum(issue["code"] == "ELEMENT_DEPRECATED" for issue in issues)
+
+    def test_a_value_column_reports_a_template_unit_once(self):
+        # Written in the template: reported with the template, not for each value.
+        self.assertEqual(self.table_warnings("Aux-measure/# bigauxunit", ["3", "4", "5"]), 1)
+
+    def test_a_value_column_does_not_report_a_definition_unit(self):
+        big = DefinitionDict("(Definition/Big/#, (Aux-measure/# bigauxunit))", self.schema)
+        self.assertEqual(self.table_warnings("Def/Big/#", ["3", "4", "5"], definitions=big), 0)
+
+    def test_a_value_column_reports_each_distinct_value_with_a_deprecated_unit(self):
+        cells = ["3 bigauxunit", "4 bigauxunit", "5 auxModauxsiunit", "6 auxunit"]
+        self.assertEqual(self.table_warnings("Aux-measure/#", cells), 3)
 
 
 if __name__ == "__main__":
