@@ -408,7 +408,11 @@ class SidecarValidator:
                 val_issues += error_handler.format_error_with_context(
                     SidecarErrors.SIDECAR_CATEGORY_KEY_PADDED, key_name, column_name
                 )
-            if not hed_string:
+            # An annotation that is empty or only blanks is SIDECAR_INVALID f (specification 3.2.9.2); a column
+            # value with no annotation is given "n/a". A tab or other whitespace is already CHARACTER_INVALID.
+            if isinstance(hed_string, str) and not hed_string.strip(" "):
+                val_issues += error_handler.format_error_with_context(SidecarErrors.SIDECAR_ANNOTATION_EMPTY, key_name)
+            elif not hed_string:
                 val_issues += error_handler.format_error_with_context(SidecarErrors.BLANK_HED_STRING)
             elif not isinstance(hed_string, str):
                 val_issues += error_handler.format_error_with_context(

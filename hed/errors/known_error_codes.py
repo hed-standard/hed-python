@@ -14,7 +14,6 @@ known_error_codes = {
         "SIDECAR_BRACES_INVALID",
         "SIDECAR_INVALID",
         "SIDECAR_KEY_MISSING",
-        "STYLE_WARNING",
         "TAG_EMPTY",
         "TAG_EXPRESSION_REPEATED",
         "TAG_EXTENDED",

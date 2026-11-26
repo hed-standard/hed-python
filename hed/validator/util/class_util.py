@@ -4,6 +4,7 @@ import warnings
 
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
+from hed.schema.hed_schema_constants import HedKey
 from hed.validator.util.char_util import UNCLASSED_VALUE_SETS, CharRexValidator
 from hed.validator.util.character_sets import code_point
 
@@ -40,9 +41,16 @@ class UnitValueValidator:
         self._char_validator = CharRexValidator(modern_allowed_char_rules, hed_schema=hed_schema)
 
     def check_tag_unit_class_units_are_valid(
-        self, original_tag, validate_text, report_as=None, error_code=None, allow_placeholders=True, index_offset=0
+        self,
+        original_tag,
+        validate_text,
+        report_as=None,
+        error_code=None,
+        allow_placeholders=True,
+        index_offset=0,
+        check_deprecated=True,
     ) -> list[dict]:
-        """Report incorrect unit class or units.
+        """Report incorrect unit class or units, and a deprecated unit or unit modifier.
 
         Parameters:
             original_tag (HedTag): The original tag that is used to report the error.
@@ -52,6 +60,9 @@ class UnitValueValidator:
             allow_placeholders (bool): Whether placeholders are allowed (affects value class validation for "#")
             index_offset (int): Where validate_text starts within the extension of report_as, for the
                 character index of an issue (a Def tag's placeholder value follows its label).
+            check_deprecated (bool): Report ELEMENT_DEPRECATED for a deprecated unit or unit modifier. False
+                when the units were written elsewhere and are reported there (a definition's units, met
+                again in a Def expansion).
 
         Returns:
             list: Validation issues. Each issue is a dictionary.
@@ -67,10 +78,13 @@ class UnitValueValidator:
             validation_issues += self._report_bad_units(original_tag, report_as)
             return validation_issues
 
+        # A warning, so it is kept out of the error code override below.
+        deprecated_issues = self._check_units_deprecated(original_tag, units, report_as) if check_deprecated else []
+
         # If value is a placeholder (#) and placeholders are allowed, it's valid
         # Invalid units would have been caught above (stripped_value would be None)
         if stripped_value == "#" and allow_placeholders:
-            return validation_issues
+            return deprecated_issues
 
         # Check the value classes
         # If placeholders are NOT allowed, "#" will fail value class validation (e.g., not a valid number)
@@ -84,7 +98,34 @@ class UnitValueValidator:
             new_issue["code"] = error_code
             validation_issues += [new_issue]
 
-        return validation_issues
+        return validation_issues + deprecated_issues
+
+    @staticmethod
+    def _check_units_deprecated(original_tag, units, report_as):
+        """Report ELEMENT_DEPRECATED once when the unit or one of its modifiers has been deprecated.
+
+        Specification Appendix B, ELEMENT_DEPRECATED b: a unit or unit modifier has been deprecated.
+
+        Parameters:
+            original_tag (HedTag): The tag whose units were accepted.
+            units (str or None): The units string, as written.
+            report_as (HedTag or None): Report as this tag.
+
+        Returns:
+            list: A single warning, or an empty list.
+        """
+        if not units:
+            return []
+        _, _, unit_entry = original_tag._get_tag_units_portion(f"0 {units}", original_tag.unit_classes)
+        if unit_entry is None:
+            return []
+        elements = [unit_entry, *unit_entry.derivative_modifiers.get(units, ())]
+        deprecated = [element.name for element in elements if element.has_attribute(HedKey.DeprecatedFrom)]
+        if not deprecated:
+            return []
+        return ErrorHandler.format_error(
+            ValidationErrors.ELEMENT_DEPRECATED, tag=report_as if report_as else original_tag, element=deprecated[0]
+        )
 
     def check_tag_value_class_valid(self, original_tag, validate_text, report_as=None, index_offset=0) -> list[dict]:
         """Report an invalid value portion.

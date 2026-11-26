@@ -1,7 +1,5 @@
 """Utilities supporting validation of HED tags as strings."""
 
-import re
-
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 from hed.schema.hed_schema_constants import HedKey
@@ -10,8 +8,6 @@ from hed.validator.reserved_checker import ReservedChecker
 
 class TagValidator:
     """Validation for individual HED tags."""
-
-    CAMEL_CASE_EXPRESSION = r"([A-Z]+\s*[a-z-]*)+"
 
     def run_individual_tag_validators(self, original_tag, allow_placeholders=False, is_definition=False) -> list[dict]:
         """Runs the validators on the individual tags.
@@ -33,7 +29,6 @@ class TagValidator:
             validation_issues += self.check_for_placeholder(original_tag, is_definition)
         validation_issues += self.check_tag_requires_child(original_tag)
         validation_issues += self.check_tag_is_deprecated(original_tag)
-        validation_issues += self.check_capitalization(original_tag)
         return validation_issues
 
     # ==========================================================================
@@ -131,24 +126,6 @@ class TagValidator:
             and original_tag.short_base_tag in ReservedChecker.get_instance().require_value_tags
         ):
             validation_issues += ErrorHandler.format_error(ValidationErrors.TAG_REQUIRES_CHILD, tag=original_tag)
-        return validation_issues
-
-    def check_capitalization(self, original_tag) -> list[dict]:
-        """Report warning if incorrect tag capitalization.
-
-        Parameters:
-            original_tag (HedTag): The original tag used to report the warning.
-
-        Returns:
-            list: Validation issues. Each issue is a dictionary.
-        """
-        validation_issues = []
-        tag_names = original_tag.org_base_tag.split("/")
-        for tag_name in tag_names:
-            correct_tag_name = tag_name.capitalize()
-            if tag_name != correct_tag_name and not re.search(self.CAMEL_CASE_EXPRESSION, tag_name):
-                validation_issues += ErrorHandler.format_error(ValidationErrors.STYLE_WARNING, tag=original_tag)
-                break
         return validation_issues
 
     def check_tag_is_deprecated(self, original_tag) -> list[dict]:

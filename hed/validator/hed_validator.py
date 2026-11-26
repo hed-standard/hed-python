@@ -202,7 +202,14 @@ class HedValidator:
         return validation_issues
 
     def validate_units(
-        self, original_tag, validate_text=None, report_as=None, error_code=None, index_offset=0, allow_placeholders=True
+        self,
+        original_tag,
+        validate_text=None,
+        report_as=None,
+        error_code=None,
+        index_offset=0,
+        allow_placeholders=True,
+        check_deprecated=True,
     ) -> list[dict]:
         """Validate units and value classes
 
@@ -214,6 +221,8 @@ class HedValidator:
             error_code (str): The code to override the error as. Again mostly for def/def-expand tags.
             index_offset (int): Offset into the extension validate_text starts at
             allow_placeholders (bool): Whether placeholders are allowed (affects value class validation for "#")
+            check_deprecated (bool): Report a deprecated unit or unit modifier (False for units written in a
+                definition, which are reported there).
 
         Returns:
             list[dict]: Issues found from units
@@ -231,6 +240,7 @@ class HedValidator:
                 error_code=error_code,
                 allow_placeholders=allow_placeholders,
                 index_offset=index_offset,
+                check_deprecated=check_deprecated,
             )
         elif original_tag.is_value_class_tag() or original_tag.is_takes_value_tag():
             # A placeholder without a valueClass takes textClass values, whose character set is value-text

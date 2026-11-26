@@ -100,6 +100,28 @@ class Test(unittest.TestCase):
         }
         self.assertEqual(Sidecar(io.StringIO(json.dumps(data))).validate(self.hed_schema), [])
 
+    def codes_for_annotation(self, annotation):
+        sidecar = Sidecar(io.StringIO(json.dumps({"code": {"HED": {"go": annotation, "stop": "Event"}}})))
+        return [issue["code"] for issue in sidecar.validate(self.hed_schema)]
+
+    def test_empty_or_blank_categorical_annotation(self):
+        # SIDECAR_INVALID f (specification 3.2.9.2, issue #1508): an annotation that is empty or only blanks.
+        for annotation in ("", " ", "   "):
+            with self.subTest(annotation=annotation):
+                self.assertEqual(self.codes_for_annotation(annotation), ["SIDECAR_INVALID"])
+
+    def test_na_categorical_annotation_passes(self):
+        self.assertEqual(self.codes_for_annotation("n/a"), [])
+
+    def test_tab_only_categorical_annotation_is_a_character_error(self):
+        # A tab is not a blank: it is a character a HED string may not contain.
+        self.assertEqual(self.codes_for_annotation("\t"), ["CHARACTER_INVALID"])
+
+    def test_empty_value_annotation_is_unchanged(self):
+        # Reason f is for categorical entries; a value entry without a # is a placeholder error.
+        sidecar = Sidecar(io.StringIO(json.dumps({"code": {"HED": ""}})))
+        self.assertEqual([issue["code"] for issue in sidecar.validate(self.hed_schema)], ["PLACEHOLDER_INVALID"])
+
     def test_malformed_braces(self):
         hed_strings = [
             "column2}, Event, Action",
