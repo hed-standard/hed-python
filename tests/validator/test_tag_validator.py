@@ -94,13 +94,13 @@ class IndividualHedTagsShort(TestHed):
             "numeric": "Statistical-uncertainty/20",
             "lowercase": "Event/sensory-event",
         }
-        expected_results = {"proper": True, "camelCase": True, "takesValue": True, "numeric": True, "lowercase": False}
+        expected_results = {"proper": True, "camelCase": True, "takesValue": True, "numeric": True, "lowercase": True}
         expected_issues = {
             "proper": [],
             "camelCase": [],
             "takesValue": [],
             "numeric": [],
-            "lowercase": self.format_error(ValidationErrors.STYLE_WARNING, tag=0),
+            "lowercase": [],
         }
         self.validator_semantic(test_strings, expected_results, expected_issues, True)
 

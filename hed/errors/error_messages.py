@@ -83,7 +83,9 @@ def val_error_invalid_char(source_string, char_index, char_set=None, code_point=
 
 
 @hed_tag_error(ValidationErrors.ELEMENT_DEPRECATED, default_severity=ErrorSeverity.WARNING)
-def val_error_element_deprecated(tag):
+def val_error_element_deprecated(tag, element=None):
+    if element:
+        return f"Unit or unit modifier '{element}' in '{tag}' has been deprecated and an alternative should be used"
     return f"Element '{tag}' has been deprecated and an alternative method of tagging should be used"
 
 
@@ -405,11 +407,6 @@ def val_warning_required_prefix_missing(tag_namespace):
     return f"Tag with namespace '{tag_namespace}' is required"
 
 
-@hed_tag_error(ValidationErrors.STYLE_WARNING, default_severity=ErrorSeverity.WARNING)
-def val_warning_capitalization(tag):
-    return f"First word not capitalized or camel case - '{tag}'"
-
-
 @hed_error(SidecarErrors.BLANK_HED_STRING)
 def sidecar_error_blank_hed_string():
     return "No HED string found for Value or Category column."
@@ -459,6 +456,11 @@ def sidecar_category_key_padded(key_name, column_name):
         f"Key {key_name!r} under HED in the categorical entry '{column_name}' begins or ends with whitespace, "
         "so it can match no column value."
     )
+
+
+@hed_error(SidecarErrors.SIDECAR_ANNOTATION_EMPTY, actual_code=ValidationErrors.SIDECAR_INVALID)
+def sidecar_annotation_empty(key_name):
+    return f"The annotation of {key_name!r} is empty or only blanks; a column value with no annotation is given 'n/a'."
 
 
 @hed_tag_error(DefinitionErrors.DEF_TAG_IN_DEFINITION, actual_code=ValidationErrors.DEFINITION_INVALID)

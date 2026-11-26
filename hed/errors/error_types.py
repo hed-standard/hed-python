@@ -43,7 +43,6 @@ class ValidationErrors:
     SIDECAR_INVALID = "SIDECAR_INVALID"
     SIDECAR_KEY_MISSING = "SIDECAR_KEY_MISSING"
     HED_COLUMN_MISSING = "HED_COLUMN_MISSING"
-    STYLE_WARNING = "STYLE_WARNING"
     TABULAR_INVALID = "TABULAR_INVALID"
     TAG_EMPTY = "TAG_EMPTY"
     TAG_EXPRESSION_REPEATED = "TAG_EXPRESSION_REPEATED"
@@ -135,6 +134,8 @@ class SidecarErrors:
     # Reported as SIDECAR_INVALID (reason e): a key under "HED" in a categorical entry with leading or trailing
     # whitespace.
     SIDECAR_CATEGORY_KEY_PADDED = "SIDECAR_CATEGORY_KEY_PADDED"
+    # Reported as SIDECAR_INVALID (reason f): an annotation in a categorical entry that is empty or only blanks.
+    SIDECAR_ANNOTATION_EMPTY = "SIDECAR_ANNOTATION_EMPTY"
 
 
 class SchemaErrors:

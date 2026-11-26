@@ -16,9 +16,6 @@ skip_tests = {
     # "character-invalid-non-printing appears": "Need to recheck how this is verified for textClass",
     "definition-invalid-identical-in-one-string": "Identical definitions in one HED string; issue #1520",
     "definition-invalid-value-case": "Definitions compare values with case; issues #1520 and #1514",
-    "schema-annotation-invalid": "Passes items repeat rows of the 8.5.0 partner (SCHEMA_LIBRARY_INVALID h); issue #1504",
-    "element-deprecated-unit": "ELEMENT_DEPRECATED for a deprecated unit; issue #1506",
-    "sidecar-invalid-annotation-empty": "SIDECAR_INVALID for an empty annotation; issue #1508",
     "tag-expression-repeated-value-case": "Values compare with case; issue #1507",
 }
 

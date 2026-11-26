@@ -149,14 +149,18 @@ class DefValidator(DefinitionDict):
             # starts the extension in both, so the index offset is the same.
             validate_text = placeholder
             template_tag = def_entry.contents.find_placeholder_tag() if def_entry.contents else None
-            if template_tag is not None and template_tag.extension != "#":
+            units_in_definition = template_tag is not None and template_tag.extension != "#"
+            if units_in_definition:
                 validate_text = placeholder_tag.extension
+            # A deprecated unit is reported where it is written: with the definition when the definition writes
+            # it, and by the expanded group's own tag for a Def-expand, not again at the Def-expand.
             def_issues += hed_validator.validate_units(
                 placeholder_tag,
                 validate_text,
                 report_as=def_tag,
                 error_code=error_code,
                 index_offset=len(tag_label) + 1,
+                check_deprecated=not (units_in_definition or is_def_expand_tag),
             )
 
         return def_issues

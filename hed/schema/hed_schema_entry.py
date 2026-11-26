@@ -290,6 +290,8 @@ class UnitEntry(HedSchemaEntry):
         unit_modifiers (list[HedSchemaEntry]): SI modifier entries (e.g. *milli*, *kilo*).
         derivative_units (dict[str, float]): Map from every accepted surface
             form to its numeric conversion factor relative to the SI base unit.
+        derivative_modifiers (dict[str, tuple[HedSchemaEntry, ...]]): Map from every accepted surface form
+            to the unit modifier entries it uses (empty for an unmodified form), for ELEMENT_DEPRECATED b.
         unit_class_entry (UnitClassEntry): The parent unit class.
     """
 
@@ -297,6 +299,7 @@ class UnitEntry(HedSchemaEntry):
         super().__init__(*args, **kwargs)
         self.unit_modifiers = []
         self.derivative_units = {}
+        self.derivative_modifiers = {}
         self.unit_class_entry = None
 
     def finalize_entry(self, schema):
@@ -317,10 +320,11 @@ class UnitEntry(HedSchemaEntry):
         self.unit_modifiers = schema._get_modifiers_for_unit(self.name)
         components = self._compound_components()
         if components is not None:
-            self.derivative_units = self._compound_derivative_units(components)
+            self.derivative_units, self.derivative_modifiers = self._compound_derivative_units(components)
             return
 
         derivative_units = {}
+        derivative_modifiers = {}
         if self.has_attribute(HedKey.UnitSymbol):
             base_plural_units = {self.name}
         else:
@@ -329,9 +333,12 @@ class UnitEntry(HedSchemaEntry):
         base_factor = self._parse_factor(self.attributes)
         for derived_unit in base_plural_units:
             derivative_units[derived_unit] = base_factor
+            derivative_modifiers[derived_unit] = ()
             for modifier in self.unit_modifiers:
                 derivative_units[modifier.name + derived_unit] = base_factor * self._parse_factor(modifier.attributes)
+                derivative_modifiers[modifier.name + derived_unit] = (modifier,)
         self.derivative_units = derivative_units
+        self.derivative_modifiers = derivative_modifiers
 
     def _compound_components(self):
         """Split a compound SI unit name into its components.
@@ -370,23 +377,28 @@ class UnitEntry(HedSchemaEntry):
                 the listed factor times the product of each component's modifier factor raised to the
                 component's exponent, negative for denominator components: ``cm-per-us`` in speed is
                 ``1.0 * 0.01 * (1e-6) ** -1 = 10000`` m-per-s and ``mm^3`` is ``1e-9`` m^3.
+            dict[str, tuple[HedSchemaEntry, ...]]: Every accepted surface form mapped to the modifier
+                entries it uses, one per modified component.
         """
         base_factor = self._parse_factor(self.attributes)
-        modifier_choices = [("", 1.0)] + [
-            (modifier.name, self._parse_factor(modifier.attributes)) for modifier in self.unit_modifiers
+        modifier_choices = [("", 1.0, None)] + [
+            (modifier.name, self._parse_factor(modifier.attributes), modifier) for modifier in self.unit_modifiers
         ]
         derivative_units = {}
+        derivative_modifiers = {}
         for choice in itertools.product(modifier_choices, repeat=len(components)):
             parts = []
             factor = base_factor
-            for index, ((base, exponent), (prefix, modifier_factor)) in enumerate(
+            for index, ((base, exponent), (prefix, modifier_factor, _)) in enumerate(
                 zip(components, choice, strict=False)
             ):
                 parts.append(prefix + base + (f"^{exponent}" if exponent != 1 else ""))
                 signed_exponent = exponent if index == 0 else -exponent
                 factor *= math.pow(modifier_factor, signed_exponent)
-            derivative_units["-per-".join(parts)] = factor
-        return derivative_units
+            surface = "-per-".join(parts)
+            derivative_units[surface] = factor
+            derivative_modifiers[surface] = tuple(modifier for _, _, modifier in choice if modifier is not None)
+        return derivative_units, derivative_modifiers
 
     @staticmethod
     def _parse_factor(attributes):
