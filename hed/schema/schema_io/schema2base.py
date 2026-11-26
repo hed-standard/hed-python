@@ -315,7 +315,8 @@ class Schema2Base:
         SCHEMA_LIBRARY_INVALID h, issue #1504). A merged load cannot always tell the library's rows from the
         partner's: a section with no row of the library's own carries no ``in_library`` marker, and a library
         file may repeat partner rows. A row is identified by its key (``source``; ``prefix``; ``prefix`` and
-        ``id``). If the partner cannot be loaded the rows are kept as they are.
+        ``id``). The partner is the one the schema was loaded with (``HedSchema._get_partner_extras_keys``);
+        if it cannot be loaded the rows are kept as they are.
 
         Parameters:
             extras_key (str): The key for the extras type (e.g., df_constants.SOURCES_KEY).
@@ -327,16 +328,9 @@ class Schema2Base:
         key_columns = df_constants.UNIQUE_EXTRAS_KEYS.get(extras_key)
         if not key_columns or not set(key_columns) <= set(extras.columns):
             return extras
-        from hed.schema.hed_schema_io import load_schema_version  # noqa: PLC0415 (avoids an import cycle)
-
-        try:
-            partner = load_schema_version(self._schema.with_standard)
-        except HedFileError:
+        partner_keys = (self._schema._get_partner_extras_keys() or {}).get(extras_key)
+        if not partner_keys:
             return extras
-        partner_extras = partner.get_extras(extras_key)
-        if partner_extras is None or partner_extras.empty or not set(key_columns) <= set(partner_extras.columns):
-            return extras
-        partner_keys = {tuple(row) for row in partner_extras[key_columns].itertuples(index=False)}
         own = [tuple(row) not in partner_keys for row in extras[key_columns].itertuples(index=False)]
         return extras[own].reset_index(drop=True)
 

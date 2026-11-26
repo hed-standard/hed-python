@@ -6,11 +6,13 @@ SCHEMA_LIBRARY_INVALID h).
 """
 
 import os
+import shutil
+import tempfile
 import unittest
 
 import hed
 from hed.errors import ErrorSeverity
-from hed.schema import from_string, load_schema
+from hed.schema import from_string, load_schema, load_schema_version
 
 PROPERTY_SCHEMA = """HED version="1.1.0" library="score"
 '''Prologue'''
@@ -200,6 +202,51 @@ class TestUnmergedSaveDropsPartnerRows(unittest.TestCase):
         codes = [issue["code"] for issue in resaved.check_compliance()]
         self.assertNotIn("SCHEMA_LIBRARY_INVALID", codes)
         self.assertIn("Beniczky ea 2013", resaved.get_as_mediawiki_string(save_merged=False))
+
+
+class TestPartnerRowsFromTheLoad(unittest.TestCase):
+    """The duplicate-row rule and the unmerged save use the partner and the library rows the load used."""
+
+    DATA = os.path.join(os.path.dirname(hed.__file__), "schema", "schema_data")
+    LIBRARIES = os.path.join(os.path.dirname(__file__), "..", "..", "spec_tests", "hed-schemas", "library_schemas")
+    MERGED = ("lang/hedxml/HED_lang_1.1.0.xml", "testlib/hedxml/HED_testlib_2.0.0.xml")  # partnered with 8.4.0
+
+    def setUp(self):
+        self.folder = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.folder)
+
+    @staticmethod
+    def duplicate_rows(schema):
+        return sum("partner" in issue["message"] for issue in schema.check_compliance())
+
+    def test_a_later_merged_library_does_not_hide_the_unmerged_rows(self):
+        merged = [os.path.join(self.LIBRARIES, path) for path in self.MERGED]
+        if not all(os.path.exists(path) for path in merged):
+            self.skipTest("hed-schemas submodule not checked out")
+        for path in [*merged, os.path.join(self.DATA, "HED8.4.0.xml"), os.path.join(self.DATA, "HED_score_2.1.0.xml")]:
+            shutil.copy(path, self.folder)
+        # The unmerged score 2.1.0 repeats 30 rows of 8.4.0, whatever the order of the merged libraries.
+        for versions in (
+            ["score_2.1.0", "lang_1.1.0", "testlib_2.0.0"],
+            ["lang_1.1.0", "testlib_2.0.0", "score_2.1.0"],
+        ):
+            with self.subTest(versions=versions):
+                self.assertEqual(self.duplicate_rows(load_schema_version(versions, xml_folder=self.folder)), 30)
+
+    def test_a_partner_found_only_in_xml_folder_is_used(self):
+        # 8.4.0 renamed 8.9.0, a version no cache holds, and score 2.1.0 partnered with it.
+        for name, old, new in (
+            ("HED8.4.0.xml", 'version="8.4.0"', 'version="8.9.0"'),
+            ("HED_score_2.1.0.xml", 'withStandard="8.4.0"', 'withStandard="8.9.0"'),
+        ):
+            with open(os.path.join(self.DATA, name), encoding="utf-8") as source:
+                text = source.read().replace(old, new, 1)
+            with open(os.path.join(self.folder, name.replace("8.4.0", "8.9.0")), "w", encoding="utf-8") as target:
+                target.write(text)
+        library = load_schema_version("score_2.1.0", xml_folder=self.folder)
+        self.assertEqual(self.duplicate_rows(library), 30)
+        self.assertNotIn("prefix=dc:", library.get_as_mediawiki_string(save_merged=False))
+        self.assertIn("Beniczky ea 2013", library.get_as_mediawiki_string(save_merged=False))
 
 
 if __name__ == "__main__":

@@ -112,6 +112,27 @@ def merge_extras_dataframes(library_df, standard_df):
     return merged
 
 
+def extras_row_keys(extras):
+    """Return the key of every Sources, Prefixes and External annotations row, in row order.
+
+    A row is identified by its key (specification 3.1.2.2): ``source`` in Sources, ``prefix`` in Prefixes,
+    and ``prefix`` with ``id`` in External annotations.
+
+    Parameters:
+        extras (dict): Section key -> DataFrame, as ``HedSchema.extras`` holds them.
+
+    Returns:
+        dict: Section key -> list of key tuples, for each of the three sections that has rows.
+    """
+    keys = {}
+    for section_key, key_columns in constants.UNIQUE_EXTRAS_KEYS.items():
+        df = extras.get(section_key)
+        if df is None or df.empty or not set(key_columns) <= set(df.columns):
+            continue
+        keys[section_key] = [tuple(row) for row in df[key_columns].itertuples(index=False)]
+    return keys
+
+
 def merge_dataframe_dicts(df_dict1, df_dict2, key_column=constants.KEY_COLUMN_NAME):
     """Create a new dictionary of DataFrames where dict2 is merged into dict1.
 

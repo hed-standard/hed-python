@@ -418,7 +418,7 @@ class SchemaValidator:
             unmerged = self.hed_schema.unmerged_libraries
             if unmerged:
                 issues += self._check_unmerged_library_rules(unmerged)
-                issues += self._check_unmerged_extras_keys(unmerged, with_standard)
+                issues += self._check_unmerged_extras_keys(with_standard)
             else:
                 issues += self._compare_properties_with_partner(library, with_standard)
                 issues += self._check_library_reserved_attribute(library)
@@ -597,41 +597,30 @@ class SchemaValidator:
         df_constants.EXTERNAL_ANNOTATION_KEY: "External annotations",
     }
 
-    def _check_unmerged_extras_keys(self, unmerged, with_standard):
+    def _check_unmerged_extras_keys(self, with_standard):
         """Return the reason-h issues: an unmerged library's extras row with the key of a row of its partner.
 
         A row is identified by its key (specification 3.1.2.2): ``source`` in Sources, ``prefix`` in Prefixes,
-        and ``prefix`` with ``id`` in External annotations; the other columns do not matter. The rows of the
-        unmerged file are the ones stamped with ``in_library`` on loading. They are compared with the partner's
-        own rows, loaded through the schema cache, because loading keeps one copy of a row that is identical in
-        both. When the partner cannot be loaded the check is skipped, since compliance never raises.
+        and ``prefix`` with ``id`` in External annotations; the other columns do not matter. Both sides were
+        recorded on loading: the rows of each unmerged file before they were combined with any other rows, and
+        the rows of the partner that load used. When the partner cannot be loaded the check is skipped, since
+        compliance never raises.
         """
-        from hed.schema.hed_schema_io import _load_schema_version  # noqa: PLC0415 (avoids an import cycle)
-
-        try:
-            partner = _load_schema_version(xml_version=with_standard)
-        except HedFileError:
+        partner_keys = self.hed_schema._get_partner_extras_keys()
+        if not partner_keys:
             return []
         issues = []
-        for section_key, key_columns in df_constants.UNIQUE_EXTRAS_KEYS.items():
-            own_df = self.hed_schema.extras.get(section_key)
-            partner_df = partner.extras.get(section_key)
-            if own_df is None or own_df.empty or partner_df is None or partner_df.empty:
-                continue
-            if df_constants.in_library not in own_df.columns or not set(key_columns) <= set(own_df.columns):
-                continue
-            partner_keys = {tuple(row) for row in partner_df[key_columns].itertuples(index=False)}
-            own_rows = own_df[own_df[df_constants.in_library].isin(unmerged)]
-            for row in own_rows.itertuples(index=False):
-                key = tuple(getattr(row, column) for column in key_columns)
-                if key in partner_keys:
-                    issues += self.error_handler.format_error_with_context(
-                        SchemaErrors.SCHEMA_LIBRARY_EXTRAS_DUPLICATE,
-                        ", ".join(key),
-                        library=getattr(row, df_constants.in_library),
-                        with_standard=with_standard,
-                        section=self._EXTRAS_SECTION_NAMES[section_key],
-                    )
+        for library, sections in self.hed_schema._unmerged_extras_keys.items():
+            for section_key, keys in sections.items():
+                for key in keys:
+                    if key in partner_keys.get(section_key, ()):
+                        issues += self.error_handler.format_error_with_context(
+                            SchemaErrors.SCHEMA_LIBRARY_EXTRAS_DUPLICATE,
+                            ", ".join(key),
+                            library=library,
+                            with_standard=with_standard,
+                            section=self._EXTRAS_SECTION_NAMES[section_key],
+                        )
         return issues
 
     def _compare_properties_with_partner(self, library, with_standard):
