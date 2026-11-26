@@ -6,12 +6,8 @@ import itertools
 import math
 from typing import Any
 
-import inflect
-
 from hed.schema.hed_schema_constants import ANY_UNITS_CLASS, HedKey, HedSectionKey
-
-pluralize = inflect.engine()
-pluralize.defnoun("hertz", "hertz")
+from hed.schema.unit_plurals import unit_name_forms
 
 
 def parse_conversion_factor(text):
@@ -311,7 +307,8 @@ class UnitEntry(HedSchemaEntry):
 
         Notes:
             Unit strings are case-sensitive, so every key is built from the name exactly as listed.
-            Unit names may be pluralized; unit symbols never are. A compound SI unit (one whose name
+            A unit name takes the one plural that the specification's plurals file lists for it, if any;
+            unit symbols never take one (specification 3.1.4.4 and A.8). A compound SI unit (one whose name
             contains ``-per-`` or ``^``, such as ``m-per-s^2``) is expanded component-wise: each
             component may carry one SI modifier, so ``cm-per-us`` and ``mm^3`` are accepted while
             ``kmm-per-s`` is not. Every other unit accepts one modifier in front of the whole name.
@@ -327,7 +324,7 @@ class UnitEntry(HedSchemaEntry):
         if self.has_attribute(HedKey.UnitSymbol):
             base_plural_units = {self.name}
         else:
-            base_plural_units = {self.name, pluralize.plural(self.name)}
+            base_plural_units = unit_name_forms(self.name)
 
         base_factor = self._parse_factor(self.attributes)
         for derived_unit in base_plural_units:

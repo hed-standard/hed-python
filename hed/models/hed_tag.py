@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from hed.models.model_constants import DefTagNames
 from hed.schema.hed_schema_constants import ANY_UNITS_CLASS, HedKey
-from hed.schema.hed_schema_entry import pluralize
+from hed.schema.unit_plurals import unit_name_forms
 
 if TYPE_CHECKING:
     from hed.models.hed_group import HedGroup
@@ -439,7 +439,7 @@ class HedTag:
         """Return the spellings of a unit with no SI modifier: its name, and its plural unless it is a symbol."""
         if unit_entry.has_attribute(HedKey.UnitSymbol):
             return {unit_entry.name}
-        return {unit_entry.name, pluralize.plural(unit_entry.name)}
+        return unit_name_forms(unit_entry.name)
 
     @property
     def unit_classes(self) -> dict:

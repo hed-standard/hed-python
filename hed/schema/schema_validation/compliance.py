@@ -236,7 +236,7 @@ class SchemaValidator:
         self.summary.add_sub_check("prologue character validation")
         self.summary.add_sub_check("epilogue character validation")
         issues = []
-        char_set = get_allowed_characters_by_name(["text", "newline"])
+        char_set = get_allowed_characters_by_name(["text", "comma", "newline"])
         for label, text in [("Prologue", self.hed_schema.prologue), ("Epilogue", self.hed_schema.epilogue)]:
             for _, index in get_problem_indexes(text, char_set):
                 issues += ErrorHandler.format_error(
@@ -418,6 +418,7 @@ class SchemaValidator:
             unmerged = self.hed_schema.unmerged_libraries
             if unmerged:
                 issues += self._check_unmerged_library_rules(unmerged)
+                issues += self._check_unmerged_extras_keys(with_standard)
             else:
                 issues += self._compare_properties_with_partner(library, with_standard)
                 issues += self._check_library_reserved_attribute(library)
@@ -588,6 +589,38 @@ class SchemaValidator:
                     SchemaErrors.SCHEMA_RESERVED_HAS_CHILD, parent.short_tag_name, child=entry.short_tag_name
                 )
         self.summary.record_issues(len(issues))
+        return issues
+
+    _EXTRAS_SECTION_NAMES = {
+        df_constants.SOURCES_KEY: "Sources",
+        df_constants.PREFIXES_KEY: "Prefixes",
+        df_constants.EXTERNAL_ANNOTATION_KEY: "External annotations",
+    }
+
+    def _check_unmerged_extras_keys(self, with_standard):
+        """Return the reason-h issues: an unmerged library's extras row with the key of a row of its partner.
+
+        A row is identified by its key (specification 3.1.2.2): ``source`` in Sources, ``prefix`` in Prefixes,
+        and ``prefix`` with ``id`` in External annotations; the other columns do not matter. Both sides were
+        recorded on loading: the rows of each unmerged file before they were combined with any other rows, and
+        the rows of the partner that load used. When the partner cannot be loaded the check is skipped, since
+        compliance never raises.
+        """
+        partner_keys = self.hed_schema._get_partner_extras_keys()
+        if not partner_keys:
+            return []
+        issues = []
+        for library, sections in self.hed_schema._unmerged_extras_keys.items():
+            for section_key, keys in sections.items():
+                for key in keys:
+                    if key in partner_keys.get(section_key, ()):
+                        issues += self.error_handler.format_error_with_context(
+                            SchemaErrors.SCHEMA_LIBRARY_EXTRAS_DUPLICATE,
+                            ", ".join(key),
+                            library=library,
+                            with_standard=with_standard,
+                            section=self._EXTRAS_SECTION_NAMES[section_key],
+                        )
         return issues
 
     def _compare_properties_with_partner(self, library, with_standard):

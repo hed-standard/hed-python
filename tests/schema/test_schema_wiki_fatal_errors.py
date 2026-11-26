@@ -115,4 +115,5 @@ class TestHedSchema(unittest.TestCase):
         schema = load_schema(path)
         # The fixture is a fragment that defines no reserved tags (SCHEMA_RESERVED_INVALID a), not the point here.
         issues = [i for i in schema.check_compliance() if i["code"] != "SCHEMA_RESERVED_INVALID"]
-        self.assertEqual(len(issues), 8)
+        # Seven unknown attributes; the comma in the epilogue is allowed from specification 4.0.0 (issue #1505).
+        self.assertEqual(len(issues), 7)

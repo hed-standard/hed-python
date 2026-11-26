@@ -22,6 +22,7 @@ Package-internal: nothing here is part of the public ``hed.schema`` API.
 from __future__ import annotations
 
 import copy
+import functools
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
@@ -147,6 +148,16 @@ def merge_group(spec: GroupSpec, load_partner: Callable[[str], HedSchema]) -> He
             section._attribute_cache = {}
     if not spec.members:
         return result
+    # Keep the partner this load used for the duplicate-row rule and the unmerged save (issue #1504): a copied
+    # partner gives its rows now, before any library's are added; a merged base is not paired with a loaded
+    # partner, so the function that finds one is kept and called only if the rows are needed.
+    if spec.partner:
+        if spec.base is None:
+            result._partner_extras_keys = {
+                key: frozenset(rows) for key, rows in df_util.extras_row_keys(result.extras).items()
+            }
+        else:
+            result._partner_source = functools.partial(load_partner, spec.partner)
 
     loaded = [result if member is spec.base else member._load() for member in spec.members]
     issues = []
@@ -163,9 +174,9 @@ def merge_group(spec: GroupSpec, load_partner: Callable[[str], HedSchema]) -> He
 
     first = loaded[0]
     result.header_attributes = _merged_header(spec, loaded)
-    result._unmerged_libraries = frozenset(
-        schema.library for schema in loaded if schema is not result and schema.library and not schema.merged
-    )
+    unmerged = [schema for schema in loaded if schema is not result and schema.library and not schema.merged]
+    result._unmerged_libraries = frozenset(schema.library for schema in unmerged)
+    result._unmerged_extras_keys = {schema.library: df_util.extras_row_keys(schema.extras) for schema in unmerged}
     result.filename = first.filename
     result.name = first._name
     result.source_format = first.source_format

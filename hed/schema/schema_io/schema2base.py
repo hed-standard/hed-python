@@ -280,9 +280,10 @@ class Schema2Base:
                     filtered = lib_extras[lib_extras[df_constants.in_library] == library_name]
                 else:
                     filtered = lib_extras
-                out = filtered.drop(columns=[df_constants.in_library]).reset_index(drop=True)
-                return out if not out.empty else None
-            return lib_extras
+                lib_extras = filtered.drop(columns=[df_constants.in_library]).reset_index(drop=True)
+            if self._schema.with_standard and not self._save_merged:
+                lib_extras = self._drop_partner_rows(extras_key, lib_extras)
+            return lib_extras if not lib_extras.empty else None
 
         # Merged save: combine library extras + base schema extras with in_library tracking
         base_extras = self._base_schema.get_extras(extras_key)
@@ -306,6 +307,32 @@ class Schema2Base:
 
         merged = df_util.merge_extras_dataframes(lib_extras, base_extras)
         return merged if not merged.empty else None
+
+    def _drop_partner_rows(self, extras_key, extras):
+        """Remove the rows whose key is also the key of a row of the standard schema partner.
+
+        An unmerged partnered library lists only rows of its own (specification 3.1.2.2, Appendix B
+        SCHEMA_LIBRARY_INVALID h, issue #1504). A merged load cannot always tell the library's rows from the
+        partner's: a section with no row of the library's own carries no ``in_library`` marker, and a library
+        file may repeat partner rows. A row is identified by its key (``source``; ``prefix``; ``prefix`` and
+        ``id``). The partner is the one the schema was loaded with (``HedSchema._get_partner_extras_keys``);
+        if it cannot be loaded the rows are kept as they are.
+
+        Parameters:
+            extras_key (str): The key for the extras type (e.g., df_constants.SOURCES_KEY).
+            extras (pd.DataFrame): The library's rows of that section.
+
+        Returns:
+            pd.DataFrame: The rows whose key is not a key of a partner row.
+        """
+        key_columns = df_constants.UNIQUE_EXTRAS_KEYS.get(extras_key)
+        if not key_columns or not set(key_columns) <= set(extras.columns):
+            return extras
+        partner_keys = (self._schema._get_partner_extras_keys() or {}).get(extras_key)
+        if not partner_keys:
+            return extras
+        own = [tuple(row) not in partner_keys for row in extras[key_columns].itertuples(index=False)]
+        return extras[own].reset_index(drop=True)
 
     def _format_tag_attributes(self, attributes):
         """Takes a dictionary of tag attributes and returns a string with the .mediawiki representation.

@@ -149,6 +149,9 @@ class SchemaErrors:
     SCHEMA_LIBRARY_PROPERTIES_DECLARED = "SCHEMA_LIBRARY_PROPERTIES_DECLARED"
     SCHEMA_LIBRARY_PROPERTIES_MISMATCH = "SCHEMA_LIBRARY_PROPERTIES_MISMATCH"
     SCHEMA_LIBRARY_RESERVED = "SCHEMA_LIBRARY_RESERVED"
+    # Reported as SCHEMA_LIBRARY_INVALID (reason h): an unmerged partnered library has a Sources, Prefixes or
+    # External annotations row with the same key as a row of its partner.
+    SCHEMA_LIBRARY_EXTRAS_DUPLICATE = "SCHEMA_LIBRARY_EXTRAS_DUPLICATE"
     # Reported as SCHEMA_LIBRARY_INVALID (reasons m and n): a library tag with a reserved name, and a library node
     # placed under a reserved tag.
     SCHEMA_LIBRARY_RESERVED_NAME = "SCHEMA_LIBRARY_RESERVED_NAME"

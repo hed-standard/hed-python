@@ -57,6 +57,14 @@ class HedSchema(HedSchemaBase):
         # file is combined with its partner, and its header then reads as merged; the rules that depend on the
         # file form (specification Appendix B SCHEMA_LIBRARY_INVALID j and l) read this instead.
         self._unmerged_libraries = frozenset()
+        # Set by loading (schema_merge.merge_group), for the duplicate-row rule (Appendix B SCHEMA_LIBRARY_INVALID
+        # h, issue #1504) and the unmerged save. The rows of each unmerged library file, recorded before they are
+        # combined with other rows, since combining keeps one copy of a row and may drop the library's marker.
+        self._unmerged_extras_keys = {}
+        # The partner's row keys, or a function returning the partner this load used (through xml_folder when
+        # given); the keys are worked out from it on first use, so a merged file still loads without its partner.
+        self._partner_extras_keys = None
+        self._partner_source = None
 
     # ===============================================
     # Basic schema properties
@@ -132,6 +140,33 @@ class HedSchema(HedSchemaBase):
             frozenset: Empty for a standard schema, an unpartnered library, or a library loaded from a merged file.
         """
         return self._unmerged_libraries
+
+    def _get_partner_extras_keys(self) -> dict | None:
+        """Return the keys of the standard partner's Sources, Prefixes and External annotations rows.
+
+        The partner is the one this schema was loaded with, so a partner found through ``xml_folder`` is used
+        rather than a cached file of the same version. A schema not built by loading falls back to the cache.
+
+        Returns:
+            dict or None: Section key -> frozenset of key tuples; None for an unpartnered schema or when the
+            partner cannot be loaded.
+        """
+        if self._partner_extras_keys is None and self.with_standard:
+            source = self._partner_source
+            if source is None:
+                from hed.schema.hed_schema_io import _load_schema_version  # noqa: PLC0415 (avoids an import cycle)
+
+                def source():
+                    return _load_schema_version(xml_version=self.with_standard)
+
+            try:
+                partner = source()
+            except HedFileError:
+                return None
+            self._partner_extras_keys = {
+                key: frozenset(rows) for key, rows in df_util.extras_row_keys(partner.extras).items()
+            }
+        return self._partner_extras_keys
 
     @property
     def merged(self) -> bool:
@@ -791,11 +826,17 @@ class HedSchema(HedSchemaBase):
         """
         element_prop_key = HedKey.ElementDomain if self.schema_83_props else HedKeyOld.ElementProperty
 
-        # Common logic for Attributes and Properties
-        if key_class in [HedSectionKey.Attributes, HedSectionKey.Properties]:
-            prop_added_dict = {}
-            if key_class == HedSectionKey.Attributes:
-                prop_added_dict = dict(self._sections[HedSectionKey.Properties].items())
+        # A schema property carries no schema attribute other than hedId (specification 3.1.4.8), so any other
+        # attribute on a property is unknown and reported as SCHEMA_ATTRIBUTE_INVALID. inLibrary is the mark a
+        # merged file, or the loader of an unmerged one, puts on a library's own rows; a library property is
+        # reported by the library rules (SCHEMA_LIBRARY_INVALID j and k), not a second time here.
+        if key_class == HedSectionKey.Properties:
+            attributes = self._sections[HedSectionKey.Attributes]
+            allowed = {name: attributes.get(name) for name in (HedKey.HedID, HedKey.InLibrary)}
+            return {name: entry for name, entry in allowed.items() if entry is not None}
+
+        if key_class == HedSectionKey.Attributes:
+            prop_added_dict = dict(self._sections[HedSectionKey.Properties].items())
             self._add_element_property_attributes(prop_added_dict, element_prop_key)
             return prop_added_dict
 

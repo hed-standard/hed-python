@@ -2,7 +2,7 @@
 
 Specification Appendix A.6.1: each file carries a specification version and a file version. A validator MUST NOT
 apply a file whose file version major number it does not support, and it accepts any minor and patch number under
-a major number it supports. The two files spell the key differently, each in the style of its other keys.
+a major number it supports. The files spell the key differently, each in the style of its other keys.
 """
 
 import re
@@ -13,6 +13,7 @@ from hed.errors.exceptions import HedExceptions, HedFileError
 SUPPORTED_FILE_MAJOR = {
     "reserved_tags.json": ("fileVersion", 1),
     "character_sets.json": ("file_version", 1),
+    "unit_plurals.json": ("file_version", 1),
 }
 
 # ASCII digits only, matched against the whole string (fullmatch, so a trailing newline does not pass).

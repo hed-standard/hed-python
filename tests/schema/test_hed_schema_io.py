@@ -12,7 +12,7 @@ from semantic_version import Version
 from hed import schema
 from hed.errors import HedExceptions, HedFileError
 from hed.errors.error_types import SchemaErrors
-from hed.schema import HedKey, HedSchema, HedSchemaGroup, hed_cache, load_schema, load_schema_version
+from hed.schema import HedKey, HedSchema, HedSchemaGroup, HedSectionKey, hed_cache, load_schema, load_schema_version
 from hed.schema.hed_schema_io import _load_schema_version, from_string, parse_version_list
 from tests.schema.schema_test_helpers import get_temp_filename, make_xml_folder, with_temp_file
 from tests.schema.util_test_schemas import TEST_SCHEMAS_DIR, load_test_schema, test_schemas_available
@@ -920,17 +920,26 @@ class TestHedSchemaMerging(unittest.TestCase):
         self.assertEqual(prop_entry.attributes["inLibrary"], "score")
         self.assertTrue(prop_entry.attributes["customElementAttribute"])
 
-        for section in schema._sections.values():
-            self.assertTrue("customElementAttribute" in section.valid_attributes)
+        # A schema property carries only hedId (specification 3.1.4.8, issue #1511), so customElementAttribute is
+        # valid on every other section and kept on customProperty, but reported there.
+        for section_key, section in schema._sections.items():
+            if section_key == HedSectionKey.Properties:
+                self.assertNotIn("customElementAttribute", section.valid_attributes)
+            else:
+                self.assertTrue("customElementAttribute" in section.valid_attributes)
 
-        # Only check for non-character-invalid issues (SCORE prologue/epilogue has commas/brackets).
+        # Only check for non-character-invalid issues (SCORE prologue/epilogue has brackets).
         # The fixture declares customProperty, which a partnered library may not: in the unmerged form it is
         # specification Appendix B SCHEMA_LIBRARY_INVALID (j), and once saved merged and reloaded it is (k), an
-        # extra property. That one issue is expected and shows the property round-trips.
+        # extra property. customProperty also carries customElementAttribute, which a schema property may not
+        # (SCHEMA_ATTRIBUTE_INVALID). These two issues are expected and show the property round-trips.
         issues = schema.check_compliance()
         non_char_issues = [i for i in issues if i["code"] != "SCHEMA_CHARACTER_INVALID"]
-        self.assertEqual([i["code"] for i in non_char_issues], ["SCHEMA_LIBRARY_INVALID"])
-        self.assertIn("Property 'customProperty'", non_char_issues[0]["message"])
+        self.assertEqual(
+            sorted(i["code"] for i in non_char_issues), ["SCHEMA_ATTRIBUTE_INVALID", "SCHEMA_LIBRARY_INVALID"]
+        )
+        for issue in non_char_issues:
+            self.assertIn("customProperty", issue["message"])
 
     def test_saving_merged2(self):
         s1 = load_schema(os.path.join(self.full_base_folder, "add_all_types.mediawiki"))

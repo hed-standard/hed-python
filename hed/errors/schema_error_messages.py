@@ -49,6 +49,15 @@ def schema_error_library_properties_mismatch(tag, library, with_standard, differ
     )
 
 
+@hed_error(SchemaErrors.SCHEMA_LIBRARY_EXTRAS_DUPLICATE, actual_code=SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY)
+def schema_error_library_extras_duplicate(tag, library, with_standard, section):
+    return (
+        f"The {section} row '{tag}' of library '{library}', which is partnered with HED {with_standard} and "
+        f"unmerged, has the same key as a row of its partner; an unmerged library lists only rows of its own "
+        f"(specification 3.1.2.2, Appendix B SCHEMA_LIBRARY_INVALID h)."
+    )
+
+
 @hed_error(SchemaErrors.SCHEMA_LIBRARY_RESERVED, actual_code=SchemaErrors.SCHEMA_DUPLICATE_FROM_LIBRARY)
 def schema_error_library_reserved(tag, library, section):
     return (
@@ -120,7 +129,7 @@ def schema_error_SCHEMA_INVALID_CHILD(tag, child_tag_list):
 def schema_error_unknown_attribute(attribute_name, source_tag):
     return (
         f"Attribute '{attribute_name}' used by '{source_tag}' "
-        + "was not defined in the schema, or was used outside of it's defined class."
+        + "is not defined in the schema or is not allowed on this kind of entry."
     )
 
 
@@ -134,7 +143,7 @@ def schema_error_SCHEMA_PRERELEASE_VERSION_USED(current_version, known_versions)
 
 @hed_error(
     SchemaWarnings.SCHEMA_PROLOGUE_CHARACTER_INVALID,
-    default_severity=ErrorSeverity.WARNING,
+    default_severity=ErrorSeverity.ERROR,
     actual_code=SchemaWarnings.SCHEMA_CHARACTER_INVALID,
 )
 def schema_error_invalid_character_prologue(char_index, source_string, section_name):
@@ -147,7 +156,7 @@ def schema_error_invalid_character_prologue(char_index, source_string, section_n
 
 @hed_error(
     SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_DESC,
-    default_severity=ErrorSeverity.WARNING,
+    default_severity=ErrorSeverity.ERROR,
     actual_code=SchemaWarnings.SCHEMA_CHARACTER_INVALID,
 )
 def schema_warning_invalid_chars_desc(desc_string, tag_name, problem_char, char_index):
@@ -156,7 +165,7 @@ def schema_warning_invalid_chars_desc(desc_string, tag_name, problem_char, char_
 
 @hed_error(
     SchemaWarnings.SCHEMA_INVALID_CHARACTERS_IN_TAG,
-    default_severity=ErrorSeverity.WARNING,
+    default_severity=ErrorSeverity.ERROR,
     actual_code=SchemaWarnings.SCHEMA_CHARACTER_INVALID,
 )
 def schema_warning_invalid_chars_tag(tag_name, problem_char, char_index):
@@ -173,7 +182,7 @@ def schema_warning_SCHEMA_INVALID_CAPITALIZATION(tag_name, problem_char, char_in
 
 @hed_error(
     SchemaWarnings.SCHEMA_NON_PLACEHOLDER_HAS_CLASS,
-    default_severity=ErrorSeverity.WARNING,
+    default_severity=ErrorSeverity.ERROR,
     actual_code=SchemaAttributeErrors.SCHEMA_ATTRIBUTE_VALUE_INVALID,
 )
 def schema_warning_non_placeholder_class(tag_name, invalid_attribute_name):

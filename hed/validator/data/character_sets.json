@@ -116,10 +116,6 @@
       "regex": "#",
       "description": "ASCII code 35"
     },
-    "numeric": {
-      "regex": "[0-9.\\-+^Ee]",
-      "description": "digits, period, hyphen, plus, caret, E, e"
-    },
     "percent-sign": {
       "regex": "%",
       "description": "ASCII code 37"
