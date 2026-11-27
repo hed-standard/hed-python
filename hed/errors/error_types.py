@@ -163,6 +163,11 @@ class SchemaErrors:
     SCHEMA_RESERVED_TAG_MISSING = "SCHEMA_RESERVED_TAG_MISSING"
     SCHEMA_RESERVED_ATTRIBUTE_MISSING = "SCHEMA_RESERVED_ATTRIBUTE_MISSING"
     SCHEMA_RESERVED_HAS_CHILD = "SCHEMA_RESERVED_HAS_CHILD"
+    # Compliance issues for a schema that loaded: an unrecognized header attribute (Appendix B
+    # SCHEMA_HEADER_INVALID b, issue #1510) and a required section absent from the file (SCHEMA_SECTION_MISSING a,
+    # issue #1466). The same codes are also raised as HedFileError for a header or section a loader cannot read.
+    SCHEMA_HEADER_INVALID = "SCHEMA_HEADER_INVALID"
+    SCHEMA_SECTION_MISSING = "SCHEMA_SECTION_MISSING"
 
 
 class SchemaWarnings:

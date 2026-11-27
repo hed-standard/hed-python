@@ -39,8 +39,8 @@ class Schema2JSON(Schema2Base):
         Parameters:
             prologue (str): Prologue text
         """
-        if prologue:
-            self.output[json_constants.PROLOGUE_KEY] = prologue
+        # Always present, possibly empty (specification Appendix A.4.3).
+        self.output[json_constants.PROLOGUE_KEY] = prologue or ""
 
     def _output_annotations(self, hed_schema):
         """Output annotations (not implemented for JSON base format)."""
@@ -131,8 +131,8 @@ class Schema2JSON(Schema2Base):
         Parameters:
             epilogue (str): Epilogue text
         """
-        if epilogue:
-            self.output[json_constants.EPILOGUE_KEY] = epilogue
+        # Always present, possibly empty (specification Appendix A.4.3).
+        self.output[json_constants.EPILOGUE_KEY] = epilogue or ""
 
     def _output_footer(self):
         """Finalize output (nothing needed for JSON)."""

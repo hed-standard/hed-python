@@ -182,6 +182,7 @@ def merge_group(spec: GroupSpec, load_partner: Callable[[str], HedSchema]) -> He
     result.source_format = first.source_format
     result.prologue = first.prologue
     result.epilogue = first.epilogue
+    result.missing_sections = list(dict.fromkeys(section for schema in loaded for section in schema.missing_sections))
     # A partnered library may use everything its partner defines, the extras rows included (spec
     # Appendix A: a library's rows "are merged with those of the standard schema"). Every member of the
     # group contributes its rows; the base (partner copy or merged file) already holds its own.

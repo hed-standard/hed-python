@@ -742,8 +742,9 @@ class TestSchemaComparerEmptyExtras(unittest.TestCase):
     def test_regenerated_library_file_shows_no_extras_differences(self):
         """The mouse file without the sections and its regenerated form with empty sections compare equal."""
         base = os.path.normpath(os.path.join(os.path.dirname(__file__), "../data/schema_tests/empty_extras"))
-        for ext in (".mediawiki", ".xml", ".json", ""):
-            with self.subTest(format=ext or "tsv"):
+        # Not TSV: a TSV folder without the three files does not load (issue #1513).
+        for ext in (".mediawiki", ".xml", ".json"):
+            with self.subTest(format=ext):
                 old = load_schema(os.path.join(base, "no_sections", "HED_mouse_1.0.0" + ext))
                 new = load_schema(os.path.join(base, "empty_sections", "HED_mouse_1.0.0" + ext))
                 comp = SchemaComparer(old, new)

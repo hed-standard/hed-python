@@ -83,6 +83,22 @@ def schema_error_library_under_reserved(tag, library, reserved_tag):
     )
 
 
+@hed_error(SchemaErrors.SCHEMA_HEADER_INVALID)
+def schema_error_header_invalid(attribute_name, attribute_value):
+    return (
+        f'The schema header has the unrecognized attribute {attribute_name}="{attribute_value}" '
+        f"(specification 3.1.4.1, Appendix B SCHEMA_HEADER_INVALID b)."
+    )
+
+
+@hed_error(SchemaErrors.SCHEMA_SECTION_MISSING)
+def schema_error_section_missing(section):
+    return (
+        f"The required '{section}' section is missing from the schema file; it was loaded as empty "
+        f"(specification 3.1.4.10, Appendix B SCHEMA_SECTION_MISSING a)."
+    )
+
+
 @hed_error(SchemaErrors.SCHEMA_RESERVED_TAG_MISSING, actual_code=SchemaErrors.SCHEMA_RESERVED_INVALID)
 def schema_error_reserved_tag_missing(tag, version):
     return (

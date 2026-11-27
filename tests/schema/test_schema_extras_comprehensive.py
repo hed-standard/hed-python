@@ -16,6 +16,7 @@ import unittest
 
 import pandas as pd
 
+from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.schema import from_string, load_schema, load_schema_version
 from hed.schema.schema_io import df_constants
 
@@ -513,9 +514,17 @@ class TestEmptyExtrasSections(unittest.TestCase):
             return fp.read().replace("\r\n", "\n")
 
     def test_readers_accept_files_without_the_sections(self):
-        """A file without the three sections loads and the library adds no extras rows (R1)."""
+        """A file without the three sections loads and the library adds no extras rows (R1).
+
+        Not TSV: a TSV schema without one of the files of its layout fails to load (issue #1513).
+        """
         for format_name, path in self._fixture_paths(self.no_sections_dir).items():
             with self.subTest(format=format_name):
+                if format_name == "TSV":
+                    with self.assertRaises(HedFileError) as context:
+                        load_schema(path)
+                    self.assertEqual(context.exception.code, HedExceptions.SCHEMA_LOAD_FAILED)
+                    continue
                 schema = load_schema(path)
                 self.assertEqual(schema.library, self.library_name)
                 for key in self.EXTRAS_KEYS:
@@ -529,6 +538,8 @@ class TestEmptyExtrasSections(unittest.TestCase):
         """The regenerated file (sections present and empty) loads to the same schema as the old one (R1)."""
         without = self._fixture_paths(self.no_sections_dir)
         with_empty = self._fixture_paths(self.empty_sections_dir)
+        # A TSV folder without the files does not load (issue #1513; see the test above).
+        del without["TSV"]
         for format_name in without:
             with self.subTest(format=format_name):
                 schema_without = load_schema(without[format_name])

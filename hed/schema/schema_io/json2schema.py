@@ -120,6 +120,10 @@ class SchemaLoaderJSON(SchemaLoader):
     def _parse_data(self):
         """Loads the schema data from the JSON dictionary."""
         self._json_data = self.input_data
+        # An absent section loads as empty and is reported by check_compliance (issue #1466).
+        self._schema.missing_sections = [
+            section for key, section in json_constants.REQUIRED_SECTION_KEYS.items() if key not in self._json_data
+        ]
 
         # Initialize unit entries dictionary for use by unit classes
         self._unit_entries = {}
