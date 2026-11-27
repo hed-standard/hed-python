@@ -3,6 +3,7 @@
 from hed.errors.error_reporter import ErrorHandler
 from hed.errors.error_types import ValidationErrors
 from hed.models.hed_tag import HedTag
+from hed.models.model_constants import DefTagNames
 
 
 class DuplicateChecker:
@@ -61,16 +62,28 @@ class DuplicateChecker:
         group_hashes = set()
         for child in group.children:
             if isinstance(child, HedTag):
-                this_hash = hash(child)
+                # A value keeps its case: Label/abc and Label/ABC are different (specification 3.2.3).
+                this_hash = hash(child._comparison_key())
             else:
                 this_hash = self._get_recursive_hash(child)
             if len(self.issues) > 0 or this_hash is None:
                 return None
             if this_hash in group_hashes:
+                # Identical definitions of one name are allowed and are one definition (specification 3.2.8.1,
+                # DEFINITION_INVALID i); definitions that differ are reported by DefinitionDict.
+                if self._is_definition_group(child):
+                    continue
                 self.issues += self._get_duplication_error(child)
                 return None
             group_hashes.add(this_hash)
         return hash(frozenset(group_hashes))
+
+    @staticmethod
+    def _is_definition_group(child) -> bool:
+        """Return True if child is a group whose own tags include a Definition tag."""
+        if isinstance(child, HedTag):
+            return False
+        return any(tag.short_base_tag.casefold() == DefTagNames.DEFINITION_KEY.casefold() for tag in child.tags())
 
     @staticmethod
     def _get_duplication_error(child) -> list[dict]:

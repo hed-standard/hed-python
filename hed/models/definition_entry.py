@@ -94,6 +94,11 @@ class DefinitionEntry:
     def __eq__(self, other):
         """Check equality based on name, contents, and takes_value.
 
+        Two definitions are identical when they have the same name and placeholder form and the same contents in
+        any order, compared as tag expressions: names without regard to case, values exactly as written
+        (specification 3.2.3 and 3.2.8.1, DEFINITION_INVALID i). ``(Definition/X, (Label/abc))`` and
+        ``(Definition/X, (Label/ABC))`` are different definitions.
+
         Parameters:
             other (DefinitionEntry): Another DefinitionEntry to compare with.
 
@@ -103,4 +108,11 @@ class DefinitionEntry:
         if not isinstance(other, DefinitionEntry):
             return False
 
-        return self.name == other.name and self.contents == other.contents and self.takes_value == other.takes_value
+        return (
+            self.name.casefold() == other.name.casefold()
+            and self.takes_value == other.takes_value
+            and self._contents_key() == other._contents_key()
+        )
+
+    def _contents_key(self):
+        return None if self.contents is None else self.contents._comparison_key()
