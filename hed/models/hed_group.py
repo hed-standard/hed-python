@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import copy
-from collections import deque
+from collections import Counter, deque
 from collections.abc import Iterable
 
 from hed.models.hed_tag import HedTag
@@ -415,6 +415,18 @@ class HedGroup:
 
     def __bool__(self):
         return bool(self.children)
+
+    def _comparison_key(self) -> tuple:
+        """Return the key by which validation compares two groups as the same group, in any order.
+
+        The children are compared by ``HedTag._comparison_key`` (a value keeps its case, specification 3.2.3)
+        without regard to their order, counting repeats. ``__eq__`` is order-sensitive and is left as it is.
+
+        Returns:
+            tuple: Equal for two groups with the same children in any order.
+        """
+        children = Counter(child._comparison_key() for child in self.children)
+        return ("group" if self.is_group else "string", frozenset(children.items()))
 
     def __eq__(self, other):
         """Test whether other is equal to this object.

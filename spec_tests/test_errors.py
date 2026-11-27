@@ -14,9 +14,6 @@ skip_tests = {
     # "tag-extension-invalid-bad-node-name": "Part of character invalid checking/didn't get to it yet",
     # "curly-braces-has-no-hed": "Need to fix issue #1006",
     # "character-invalid-non-printing appears": "Need to recheck how this is verified for textClass",
-    "definition-invalid-identical-in-one-string": "Identical definitions in one HED string; issue #1520",
-    "definition-invalid-value-case": "Definitions compare values with case; issues #1520 and #1514",
-    "tag-expression-repeated-value-case": "Values compare with case; issue #1507",
 }
 
 

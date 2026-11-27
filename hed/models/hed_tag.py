@@ -12,6 +12,11 @@ from hed.schema.unit_plurals import unit_name_forms
 if TYPE_CHECKING:
     from hed.models.hed_group import HedGroup
 
+# The tags whose value starts with a definition name, which compares without regard to case.
+_DEFINITION_TAG_NAMES = frozenset(
+    name.casefold() for name in (DefTagNames.DEF_KEY, DefTagNames.DEF_EXPAND_KEY, DefTagNames.DEFINITION_KEY)
+)
+
 
 class HedTag:
     """A single HED tag.
@@ -714,6 +719,25 @@ class HedTag:
             return self._namespace + self._schema_entry.short_tag_name.casefold() + self._extension_value.casefold()
         else:
             return self.casefold()
+
+    def _comparison_key(self) -> tuple:
+        """Return the key by which validation compares two tags as the same tag expression.
+
+        Node names, a tag extension and a definition name compare without regard to case; the value that
+        replaces ``#`` compares exactly as written, units included, also after a definition name
+        (``Def/MyDef/abc``) (specification 3.2.3). ``__eq__`` and ``__hash__`` casefold the value as well and
+        are left as they are, since search and analysis rely on them.
+
+        Returns:
+            tuple: Equal for two tags that are the same tag expression.
+        """
+        if not self._schema_entry or not self.is_takes_value_tag():
+            return ("tag", self.get_normalized_str())
+        value = self._extension_value.removeprefix("/")
+        if self.short_base_tag.casefold() in _DEFINITION_TAG_NAMES:
+            name, slash, rest = value.partition("/")
+            value = name.casefold() + slash + rest
+        return ("tag", self._namespace.casefold() + self._schema_entry.short_tag_name.casefold(), value)
 
     def __hash__(self):
         return hash(self.get_normalized_str())
