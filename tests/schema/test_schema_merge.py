@@ -7,6 +7,7 @@ import unittest
 
 from hed import schema
 from hed.errors import HedExceptions, HedFileError
+from hed.errors.error_types import SchemaErrors
 from hed.schema import HedKey, from_string, hed_cache, load_schema, load_schema_version
 from hed.schema.hed_schema_io import _load_schema_version
 from hed.schema.schema_io.schema_merge import resolve_group
@@ -282,6 +283,26 @@ class TestMergeGroups(unittest.TestCase):
         self.assertEqual(
             set(grandchildren.get_tag_entry("Event/Rooted-tag/Rooted-one").children), {"Deep-one", "Deep-two"}
         )
+
+    def test_unknown_header_attribute_of_later_member_kept(self):
+        # Specification 3.1.4.1: an unrecognized header attribute is SCHEMA_HEADER_INVALID from compliance, so the
+        # merged header must keep it from every member, not only the first (issue #1510).
+        folder = tempfile.mkdtemp()
+        try:
+            shutil.copy(bundled_standard_path("8.5.0"), folder)
+            shutil.copy(os.path.join(FIXTURE_DIR, "HED_testclash_8.0.0.xml"), folder)
+            with open(os.path.join(FIXTURE_DIR, "HED_testconflict_2.0.0.xml"), encoding="utf-8") as f:
+                text = f.read()
+            with open(os.path.join(folder, "HED_testconflict_2.0.0.xml"), "w", encoding="utf-8") as f:
+                f.write(text.replace('unmerged="True">', 'unmerged="True" unknownAttribute="other">', 1))
+            _load_schema_version.cache_clear()
+            loaded = load_schema_version(["testclash_8.0.0", "testconflict_2.0.0"], xml_folder=folder)
+            self.assertEqual(loaded.header_attributes.get("unknownAttribute"), "other")
+            codes = [issue["code"] for issue in loaded.check_compliance()]
+            self.assertIn(SchemaErrors.SCHEMA_HEADER_INVALID, codes)
+        finally:
+            _load_schema_version.cache_clear()
+            shutil.rmtree(folder, ignore_errors=True)
 
     # Load order
     def test_merged_member_is_the_base(self):
