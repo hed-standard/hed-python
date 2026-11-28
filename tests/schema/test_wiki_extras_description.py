@@ -33,7 +33,7 @@ E.
 """
 
 LIBRARY_WIKI = STANDARD_WIKI.replace(
-    'HED version="8.9.0"', 'HED version="1.0.0" library="testlib" withStandard="8.5.0" unmerged="true"'
+    'HED version="8.9.0"', 'HED version="1.0.0" library="mylib" withStandard="8.5.0" unmerged="true"'
 )
 
 
@@ -98,7 +98,7 @@ class TestWikiExtrasDescriptionLoad(unittest.TestCase):
                 rows = _mine(schema)
                 self.assertEqual(len(rows), 1)
                 self.assertEqual(rows[0]["description"], description)
-                self.assertEqual(rows[0][df_constants.in_library], "testlib")
+                self.assertEqual(rows[0][df_constants.in_library], "mylib")
                 self.assertEqual(
                     list(schema.get_extras(df_constants.SOURCES_KEY).columns),
                     [*df_constants.source_columns, df_constants.in_library],
