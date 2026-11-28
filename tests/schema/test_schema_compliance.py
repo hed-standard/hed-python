@@ -67,6 +67,8 @@ class TestComplianceSummary(unittest.TestCase):
             "duplicate_hed_ids",
             "extras_columns",
             "annotation_attributes",
+            "header_attributes",
+            "required_sections",
         ]
         self.assertEqual(check_names, expected)
 

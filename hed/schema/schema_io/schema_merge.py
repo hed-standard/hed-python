@@ -35,6 +35,7 @@ from hed.schema.hed_schema_constants import (
     WITH_STANDARD_ATTRIBUTE,
     HedKey,
     HedSectionKey,
+    valid_header_attributes,
 )
 from hed.schema.hed_schema_entry import HedSchemaEntry
 from hed.schema.schema_io import df_constants, df_util
@@ -182,6 +183,7 @@ def merge_group(spec: GroupSpec, load_partner: Callable[[str], HedSchema]) -> He
     result.source_format = first.source_format
     result.prologue = first.prologue
     result.epilogue = first.epilogue
+    result.missing_sections = list(dict.fromkeys(section for schema in loaded for section in schema.missing_sections))
     # A partnered library may use everything its partner defines, the extras rows included (spec
     # Appendix A: a library's rows "are merged with those of the standard schema"). Every member of the
     # group contributes its rows; the base (partner copy or merged file) already holds its own.
@@ -463,6 +465,12 @@ def _conflict_issue(library, existing, entry, key, differences):
 
 def _merged_header(spec, loaded):
     header = dict(loaded[0].header_attributes)
+    # An unrecognized attribute of any member is kept, so check_compliance reports it as SCHEMA_HEADER_INVALID
+    # (specification 3.1.4.1, issue #1510); the first member's value wins when two members have one.
+    for schema in loaded[1:]:
+        for name, value in schema.header_attributes.items():
+            if name not in valid_header_attributes:
+                header.setdefault(name, value)
     header.pop(UNMERGED_ATTRIBUTE, None)
     header[VERSION_ATTRIBUTE] = ",".join(schema.version_number for schema in loaded)
     header[LIBRARY_ATTRIBUTE] = ",".join(schema.library for schema in loaded)

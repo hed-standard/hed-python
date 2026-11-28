@@ -31,7 +31,7 @@ from hed.errors.error_types import (
 from hed.errors.exceptions import HedFileError
 from hed.schema import hed_cache
 from hed.schema.hed_schema import HedKey, HedSchema, HedSectionKey
-from hed.schema.hed_schema_constants import ANY_UNITS_CLASS
+from hed.schema.hed_schema_constants import ANY_UNITS_CLASS, valid_header_attributes
 from hed.schema.schema_io import df_constants
 from hed.schema.schema_validation import attribute_validators
 from hed.schema.schema_validation.compliance_summary import ComplianceSummary
@@ -92,6 +92,8 @@ def check_compliance(hed_schema, check_for_warnings=True, name=None, error_handl
     issues += validator.check_duplicate_hed_ids()
     issues += validator.check_extras_columns()
     issues += validator.check_annotation_attribute_values()
+    issues += validator.check_header_attributes()
+    issues += validator.check_required_sections()
 
     error_handler.pop_error_context()
     issues = sort_issues(issues)
@@ -223,6 +225,33 @@ class SchemaValidator:
                     self.hed_schema.with_standard,
                     all_known,
                 )
+        self.error_handler.add_context_and_filter(issues)
+        self.summary.record_issues(len(issues))
+        return issues
+
+    def check_header_attributes(self):
+        """Report header attributes the specification does not define (Appendix B SCHEMA_HEADER_INVALID b)."""
+        self.summary.start_check(
+            "header_attributes",
+            "Check that the schema header has only recognized attributes.",
+        )
+        issues = []
+        for attribute_name, attribute_value in self.hed_schema.header_attributes.items():
+            if attribute_name not in valid_header_attributes:
+                issues += ErrorHandler.format_error(SchemaErrors.SCHEMA_HEADER_INVALID, attribute_name, attribute_value)
+        self.error_handler.add_context_and_filter(issues)
+        self.summary.record_issues(len(issues))
+        return issues
+
+    def check_required_sections(self):
+        """Report required sections absent from the schema file (Appendix B SCHEMA_SECTION_MISSING a)."""
+        self.summary.start_check(
+            "required_sections",
+            "Check that the schema file has every required section.",
+        )
+        issues = []
+        for section in self.hed_schema.missing_sections:
+            issues += ErrorHandler.format_error(SchemaErrors.SCHEMA_SECTION_MISSING, section)
         self.error_handler.add_context_and_filter(issues)
         self.summary.record_issues(len(issues))
         return issues

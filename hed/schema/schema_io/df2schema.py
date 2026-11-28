@@ -3,8 +3,10 @@ This module is used to create a HedSchema object from a set of .tsv files.
 """
 
 import io
+import os
 
 import pandas as pd
+from semantic_version import Version
 
 import hed.schema.schema_io.df_constants as constants
 from hed.errors import error_reporter
@@ -51,6 +53,9 @@ class SchemaLoaderDF(SchemaLoader):
 
     def _open_file(self):
         if self.filenames:
+            self._missing_files = self._find_missing_files(self.filenames)
+            if constants.STRUCT_KEY in self._missing_files:
+                self._raise_missing_files([constants.STRUCT_KEY])
             dataframes = load_dataframes(self.filenames)
         else:
             dataframes = load_dataframes_from_strings(self.schema_as_strings_or_df)
@@ -68,7 +73,47 @@ class SchemaLoaderDF(SchemaLoader):
 
         return header_attributes
 
+    @staticmethod
+    def _find_missing_files(filenames):
+        """Return the suffixes of the TSV layout whose file is not given or does not exist, sorted."""
+        return sorted(
+            suffix
+            for suffix in constants.DF_SUFFIXES
+            if suffix not in filenames or not os.path.isfile(filenames[suffix])
+        )
+
+    def _raise_missing_files(self, suffixes):
+        """Raise SCHEMA_LOAD_FAILED naming the missing files of the TSV layout."""
+        names = [self.filenames.get(suffix, f"the {suffix} file") for suffix in suffixes]
+        raise HedFileError(
+            HedExceptions.SCHEMA_LOAD_FAILED,
+            f"TSV schema is missing {len(names)} file(s) of its layout: {names}. Every file of the layout is "
+            f"written for every schema (specification Appendix A.5.1).",
+            self.name,
+        )
+
+    def _check_missing_files(self):
+        """Raise if a file of the TSV layout is missing (issue #1513).
+
+        The TSV files of standard schema 8.3.0 and its partnered libraries have no Sources, Prefixes, or
+        AnnotationPropertyExternal files (specification Appendix B.3), so those three are optional before 8.4.0.
+        """
+        missing = getattr(self, "_missing_files", [])
+        if missing and self._extras_files_optional():
+            missing = [suffix for suffix in missing if suffix not in constants.DF_EXTRAS]
+        if missing:
+            self._raise_missing_files(missing)
+
+    def _extras_files_optional(self):
+        """Return True if the schema's standard version (its own or its partner's) is earlier than 8.4.0."""
+        standard = self._schema.with_standard if self._schema.library else self._schema.version_number
+        try:
+            return Version(standard) < Version("8.4.0")
+        except ValueError:
+            return False
+
     def _parse_data(self):
+        self._check_missing_files()
         self._schema.prologue, self._schema.epilogue = self._get_prologue_epilogue(self.input_data)
         self._schema._initialize_attributes(HedSectionKey.Properties)
         self._read_attribute_section(

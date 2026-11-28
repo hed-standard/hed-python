@@ -23,6 +23,23 @@ PREFIXES_KEY = "prefixes"
 EXTERNAL_ANNOTATIONS_KEY = "external_annotations"
 IN_LIBRARY_KEY = "inLibrary"
 
+# Every one of these keys is present in every JSON schema file (specification Appendix A.4.1), in this order;
+# the value is the name of the section reported when the key is absent.
+REQUIRED_SECTION_KEYS = {
+    PROLOGUE_KEY: "prologue",
+    TAGS_KEY: "schema",
+    UNITS_KEY: "units",
+    UNIT_CLASSES_KEY: "unit classes",
+    UNIT_MODIFIERS_KEY: "unit modifiers",
+    VALUE_CLASSES_KEY: "value classes",
+    SCHEMA_ATTRIBUTES_KEY: "schema attributes",
+    PROPERTIES_KEY: "properties",
+    EPILOGUE_KEY: "epilogue",
+    SOURCES_KEY: "sources",
+    PREFIXES_KEY: "prefixes",
+    EXTERNAL_ANNOTATIONS_KEY: "external annotations",
+}
+
 # Tag entry keys
 SHORT_FORM_KEY = "short_form"
 LONG_FORM_KEY = "long_form"

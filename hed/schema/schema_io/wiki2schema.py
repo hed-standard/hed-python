@@ -20,6 +20,8 @@ tag_name_re = re.compile(tag_name_expression)
 no_wiki_tag = "</?nowiki>"
 no_wiki_start_tag = "<nowiki>"
 no_wiki_end_tag = "</nowiki>"
+# The description pair of an extras row: at the start of the row or after a comma (Appendix A.2.5.7).
+_description_pair_pattern = re.compile(r"(?:^|,)\s*description\s*=")
 
 required_sections = [
     HedWikiSection.Prologue,
@@ -128,9 +130,19 @@ class SchemaLoaderWiki(SchemaLoader):
         for extra_key in extra_keys:
             lines_for_section = wiki_lines_by_section[extra_key]
             data = []
-            for _line_number, line in lines_for_section:
-                parsed_data = self.parse_star_string(line.strip())
-                data.append(parsed_data)
+            for line_number, line in lines_for_section:
+                bad_pieces = self.find_unpaired_pieces(line.strip())
+                if bad_pieces:
+                    # WIKI_DELIMITERS_INVALID e: a piece before the description pair that is not name=value,
+                    # as a comma inside a non-description value produces (Appendix A.2.5.7).
+                    self._add_fatal_error(
+                        line_number,
+                        line,
+                        f"Pieces {bad_pieces} before the description pair are not name=value pairs; only the "
+                        f"description value may contain a comma",
+                    )
+                    continue
+                data.append(self.parse_star_string(line.strip()))
             if not data:
                 continue
             df = pd.DataFrame(data).fillna("").astype(str)
@@ -178,13 +190,56 @@ class SchemaLoaderWiki(SchemaLoader):
                     elif attr:
                         result[attr] = True
 
-        # Parse the remaining comma-separated key=value data pairs
-        pairs = s.split(",") if s else []
-        for pair in pairs:
+        # Parse the remaining comma-separated key=value data pairs; the description pair runs to the end of the row
+        pieces, description = SchemaLoaderWiki._split_extras_pairs(s)
+        for pair in pieces:
             if "=" in pair:
                 key, value = pair.strip().split("=", 1)
                 result[key.strip()] = value.strip()
+        if description is not None:
+            result[df_constants.description] = description
         return result
+
+    @staticmethod
+    def _split_extras_pairs(s):
+        """Split the data part of an extras row into its pieces before ``description=`` and the description value.
+
+        The value of ``description`` is everything after ``description=`` to the end of the row and may contain
+        commas, so the row is split at commas only before the description pair (Appendix A.2.5.7 of the HED
+        specification).
+
+        Parameters:
+            s (str): The data part of an extras row, after any leading ``{...}`` attribute block.
+
+        Returns:
+            tuple: (list of str, str or None) - the comma-separated pieces before the description pair, and the
+            stripped description value (None when the row has no description pair).
+        """
+        match = _description_pair_pattern.search(s)
+        if match:
+            before, description = s[: match.start()], s[match.end() :].strip()
+        else:
+            before, description = s, None
+        pieces = before.split(",") if before.strip() else []
+        return pieces, description
+
+    @staticmethod
+    def find_unpaired_pieces(s):
+        """Return the pieces of an extras row before the description pair that are not ``name=value`` pairs.
+
+        Parameters:
+            s (str): Raw star-prefixed extras line from the MediaWiki source.
+
+        Returns:
+            list: The stripped pieces without ``=`` (an empty list when the row is well formed).
+        """
+        s = s.lstrip("* ").strip()
+        if s.startswith("{"):
+            end_brace = s.find("}")
+            if end_brace >= 0:
+                s = s[end_brace + 1 :].strip()
+        pieces, _ = SchemaLoaderWiki._split_extras_pairs(s)
+        return [piece.strip() for piece in pieces if "=" not in piece]
 
     def _read_header_section(self, lines):
         """Ensure the header has no content other than the initial line.

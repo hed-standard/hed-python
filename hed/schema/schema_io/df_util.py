@@ -276,6 +276,32 @@ def create_empty_dataframes():
     return base_dfs
 
 
+def _check_last_row(filename):
+    """Raise SCHEMA_LOAD_FAILED if the last row of a TSV file has fewer columns than its header (issue #1513).
+
+    A file cut short inside a row ends with such a row; a file cut at a row boundary cannot be detected. Only the
+    last row is checked: released files have earlier rows with trailing empty columns left off (the HedHeader row of
+    HED8.3.0_Structure.tsv).
+
+    Parameters:
+        filename (str): The path of the TSV file.
+
+    Raises:
+        HedFileError: If the last non-blank row has fewer tab-separated columns than the header row.
+    """
+    with open(filename, encoding="utf-8") as fp:
+        rows = [line.rstrip("\r\n") for line in fp if line.strip()]
+    if len(rows) < 2:
+        return
+    expected, found = rows[0].count("\t") + 1, rows[-1].count("\t") + 1
+    if found < expected:
+        raise HedFileError(
+            HedExceptions.SCHEMA_LOAD_FAILED,
+            f"The last row of '{filename}' has {found} of {expected} columns; the file appears to be cut short.",
+            filename,
+        )
+
+
 def load_dataframes(filenames):
     """Load the dataframes from the source folder or series of files.
 
@@ -292,6 +318,7 @@ def load_dataframes(filenames):
     for key, filename in dict_filenames.items():
         try:
             if key in dataframes:
+                _check_last_row(filename)
                 loaded_dataframe = pd.read_csv(filename, sep="\t", dtype=str, na_filter=False)
                 loaded_dataframe = loaded_dataframe.rename(columns=constants.EXTRAS_CONVERSIONS)
 
@@ -304,9 +331,10 @@ def load_dataframes(filenames):
                 dataframes[key] = loaded_dataframe
             elif os.path.exists(filename):
                 # Handle the extra files if they are present.
+                _check_last_row(filename)
                 dataframes[key] = pd.read_csv(filename, sep="\t", dtype=str, na_filter=False)
         except FileNotFoundError:
-            pass  # Missing section files are valid for partial/library schemas; caller gets an empty DataFrame
+            pass  # The caller gets an empty DataFrame; SchemaLoaderDF raises for a missing file of the layout
         except OSError as e:
             raise HedFileError(
                 HedExceptions.INVALID_FILE_FORMAT, f"Could not load schema file '{filename}': {e}", filename

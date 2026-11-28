@@ -65,6 +65,12 @@ class HedSchema(HedSchemaBase):
         # given); the keys are worked out from it on first use, so a merged file still loads without its partner.
         self._partner_extras_keys = None
         self._partner_source = None
+        # The required sections absent from the source file, in file order (``"epilogue"``, ``"units"``, ...).
+        # A loader records an absent section here and loads it as empty; check_compliance reports each one as
+        # SCHEMA_SECTION_MISSING (specification 3.1.4.10, Appendix B SCHEMA_SECTION_MISSING a, issue #1466).
+        # Not saved and not compared by __eq__. Only the JSON loader records absences; the MediaWiki and XML
+        # loaders raise for a missing core section.
+        self.missing_sections = []
 
     # ===============================================
     # Basic schema properties

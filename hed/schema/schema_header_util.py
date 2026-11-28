@@ -4,7 +4,6 @@ from semantic_version import Version
 
 from hed.errors.exceptions import HedExceptions, HedFileError
 from hed.schema import hed_schema_constants as constants
-from hed.schema.hed_schema_constants import valid_header_attributes
 
 
 def validate_library_name(library_name):
@@ -84,6 +83,9 @@ def validate_attributes(attrib_dict, name):
         - Invalid library name
         - Version not present
         - Invalid combinations of attributes in header
+
+    An attribute the specification does not define is kept, not raised: check_compliance reports it as
+    SCHEMA_HEADER_INVALID (specification 3.1.4.1, Appendix B SCHEMA_HEADER_INVALID b, issue #1510).
     """
     validate_present_attributes(attrib_dict, name)
 
@@ -93,12 +95,6 @@ def validate_attributes(attrib_dict, name):
             had_error = validator(attribute_value)
             if had_error:
                 raise HedFileError(error_code, had_error, name)
-        if attribute_name not in valid_header_attributes:
-            raise HedFileError(
-                HedExceptions.SCHEMA_HEADER_INVALID,
-                f"Unknown attribute {attribute_name} found in header line",
-                filename=name,
-            )
 
     if constants.VERSION_ATTRIBUTE not in attrib_dict:
         raise HedFileError(HedExceptions.SCHEMA_VERSION_INVALID, "No version attribute found in header", filename=name)
